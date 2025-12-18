@@ -24,5 +24,18 @@
             "模板"
         ],
         "contentFile": "blogs/algorism.md"
+    },
+    {
+        "id": 3142748677,
+        "title": "行香子·初雪",
+        "excerpt": "北京初雪有感",
+        "date": "2025-12-12",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "文学",
+            "词",
+            "行香子"
+        ],
+        "contentFile": "blogs/行香子·初雪.md"
     }
 ]
