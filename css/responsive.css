@@ -1,0 +1,78 @@
+/* 响应式设计 */
+
+@media (max-width: 992px) {
+    .content-wrapper {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .profile-card {
+        position: static;
+    }
+
+    .welcome-text {
+        font-size: 2.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-menu {
+        position: fixed;
+        top: 60px;
+        left: -100%;
+        width: 100%;
+        height: calc(100vh - 60px);
+        background: white;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding-top: 40px;
+        transition: var(--transition);
+        z-index: 999;
+    }
+
+    .nav-menu.active {
+        left: 0;
+    }
+
+    .nav-toggle {
+        display: block;
+    }
+
+    .welcome-text {
+        font-size: 2.2rem;
+    }
+
+    .subtitle {
+        font-size: 1.2rem;
+    }
+
+    .stats {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding: 20px 15px;
+    }
+
+    .blog-grid {
+        gap: 20px;
+    }
+
+    .blog-content {
+        padding: 20px;
+    }
+
+    .blog-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .welcome-text {
+        font-size: 1.8rem;
+    }
+}

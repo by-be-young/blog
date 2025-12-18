@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人博客 | 首页</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/butterfly.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- KaTeX CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <!-- KaTeX JS -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+</head>
+
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">Be Young's Blog</div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="active"><i class="fas fa-home"></i> 首页 Home</a></li>
+                <li><a href="archive.html"><i class="fas fa-archive"></i> 归档 Archive</a></li>
+                <li><a href="categories.html"><i class="fas fa-tags"></i> 分类 Categories</a></li>
+            </ul>
+            <div class="nav-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主页面 -->
+    <main>
+        <!-- 首页顶部轮播 -->
+        <section class="hero-section">
+            <div class="slideshow">
+                <div class="slide active" style="background-image: url('assets/images/bg1.png');"></div>
+                <div class="slide" style="background-image: url('assets/images/bg2.png');"></div>
+                <div class="slide" style="background-image: url('assets/images/bg3.png');"></div>
+            </div>
+            <div class="hero-content">
+                <h1 class="welcome-text">向北航行 一路华章</h1>
+                <p class="subtitle">❤️ China ❤️ Beihang ❤️</p>
+            </div>
+            <div class="scroll-down">
+                <i class="fas fa-chevron-down bounce"></i>
+            </div>
+        </section>
+
+        <!-- 博客内容区 -->
+        <section class="content-section">
+            <div class="container">
+                <div class="content-wrapper">
+                    <!-- 左侧个人信息卡片 -->
+                    <aside class="sidebar" id="sidebar">
+                        <div class="profile-card">
+                            <div class="avatar">
+                                <img src="assets/avatar.png" alt="头像">
+                            </div>
+                            <h2 class="name">Be Young</h2>
+                            <p class="bio">Undergraduate in Beihang University</p>
+                            <div class="stats">
+                                <div class="stat">
+                                    <span class="count" id="article-count">0</span>
+                                    <span class="label">文章</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="count" id="tag-count">0</span>
+                                    <span class="label">标签</span>
+                                </div>
+                            </div>
+                            <div class="social-links">
+                                <a href="#" id="github-link"><i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- 右侧博客列表 -->
+                    <div class="main-content">
+                        <div class="blog-grid" id="blogGrid">
+                            <!-- 博客卡片将通过JS动态生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>

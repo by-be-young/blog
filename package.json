@@ -1,0 +1,11 @@
+{
+    "name": "blog",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "generate": "node tools/generate-blogs.js"
+    },
+    "dependencies": {
+        "gray-matter": "^4.0.3"
+    }
+}

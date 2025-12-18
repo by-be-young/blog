@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>博客详情</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/butterfly.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- KaTeX CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">Be Young's Blog</div>
+            <ul class="nav-menu">
+                <li><a href="index.html"><i class="fas fa-home"></i> 首页 Home</a></li>
+                <li><a href="archive.html"><i class="fas fa-archive"></i> 归档 Archive</a></li>
+                <li><a href="categories.html"><i class="fas fa-tags"></i> 分类 Categories</a></li>
+            </ul>
+            <div class="nav-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <main class="blog-detail">
+        <div class="container" style="display: flex; gap: 32px;">
+            <!-- 固定目录 -->
+            <nav class="blog-toc" id="blog-toc">
+                <div class="toc-title">目录</div>
+                <ul class="toc-list" id="toc-list">
+                    <!-- JS自动生成目录 -->
+                </ul>
+            </nav>
+            <article class="blog-article" style="flex:1;">
+                <header class="article-header">
+                    <h1 class="article-title" id="article-title"></h1>
+                    <div class="article-meta">
+                        <span class="date" id="article-date"><i class="far fa-calendar"></i></span>
+                        <div class="tags" id="article-tags"></div>
+                    </div>
+                </header>
+
+                <div class="article-content" id="markdown-content">
+                    <!-- Markdown内容将通过JS渲染 -->
+                </div>
+
+                <footer class="article-footer">
+                    <!-- 分享按钮已移除 -->
+                </footer>
+            </article>
+        </div>
+        <!-- 返回顶部按钮 -->
+        <button id="back-to-top" title="返回顶部"><i class="fas fa-arrow-up"></i></button>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="js/markdown.js"></script>
+    <!-- KaTeX JS -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        // 目录生成
+        // 生成可折叠嵌套目录
+        function generateTOC() {
+            let activeH1Id = null;
+            let lastUrlH1Id = null;
+
+            function openH1ById(h1Id) {
+                if (!h1Id || !h1Map.has(h1Id)) return;
+                if (activeH1Id === h1Id) return;
+
+                // 收起所有h1
+                document.querySelectorAll('.toc-h1 > .toc-sub-list').forEach(ul => {
+                    ul.style.display = 'none';
+                    const t = ul.parentElement.querySelector('.toc-toggle');
+                    if (t) t.textContent = '▶';
+                });
+
+                const h1Li = h1Map.get(h1Id);
+                const ul = h1Li.querySelector('ul');
+                if (ul) {
+                    ul.style.display = 'block';
+                    const toggle = h1Li.querySelector('.toc-toggle');
+                    if (toggle) toggle.textContent = '▼';
+                }
+
+                activeH1Id = h1Id;
+            }
+
+            // 目录点击平滑滚动并自动展开
+            function scrollToHeaderAndExpand(e, headerId) {
+                e.preventDefault();
+                const header = document.getElementById(headerId);
+                if (header) {
+                    // 展开对应h1（不再滚动到h1，只展开）
+                    let h1Id = null;
+                    if (header.tagName.toLowerCase() === 'h1') {
+                        h1Id = header.id;
+                    } else if (header.tagName.toLowerCase() === 'h2' || header.tagName.toLowerCase() === 'h3') {
+                        // 找到最近的上一个h1
+                        let prev = header.previousElementSibling;
+                        while (prev) {
+                            if (prev.tagName && prev.tagName.toLowerCase() === 'h1') {
+                                h1Id = prev.id;
+                                break;
+                            }
+                            prev = prev.previousElementSibling;
+                        }
+                    }
+                    openH1ById(h1Id);
+                    // 平滑滚动到header本身，考虑顶部导航栏高度，避免锚点跳转副作用
+                    const nav = document.querySelector('.navbar');
+                    const navHeight = nav ? nav.offsetHeight : 0;
+                    // 先取消锚点跳转
+                    if (window.__scrollingToTOC) return; // 防止递归
+                    window.__scrollingToTOC = true;
+                    // 取消hash跳转副作用
+                    const y = header.getBoundingClientRect().top + window.scrollY - navHeight - 10;
+                    window.scrollTo({ top: y, behavior: 'smooth' });
+                    setTimeout(() => { window.__scrollingToTOC = false; }, 400);
+
+                    // 更新URL hash但不触发浏览器锚点跳转
+                    try {
+                        history.replaceState(null, '', '#' + headerId);
+                    } catch (e) {
+                        // ignore
+                    }
+                }
+            }
+            const content = document.getElementById('markdown-content');
+            const tocList = document.getElementById('toc-list');
+            if (!content || !tocList) return;
+            tocList.innerHTML = '';
+            const headers = Array.from(content.querySelectorAll('h1, h2'));
+            let lastH1 = null, lastH2 = null;
+            const h1Map = new Map();
+            headers.forEach((header, idx) => {
+                if (!header.id) header.id = 'toc-h-' + idx;
+                const tag = header.tagName.toLowerCase();
+                if (tag === 'h1') {
+                    lastH1 = document.createElement('li');
+                    lastH1.className = 'toc-h1';
+                    lastH1.innerHTML = `<span class=\"toc-toggle\" title=\"展开/收起\">▶</span><a href=\"#${header.id}\">${header.textContent}</a>`;
+                    tocList.appendChild(lastH1);
+                    h1Map.set(header.id, lastH1);
+                    lastH2 = null;
+                    // h1目录点击
+                    lastH1.querySelector('a').addEventListener('click', function (e) {
+                        scrollToHeaderAndExpand(e, header.id);
+                    });
+                } else if (tag === 'h2') {
+                    if (!lastH1) return;
+                    let ul = lastH1.querySelector('ul');
+                    if (!ul) {
+                        ul = document.createElement('ul');
+                        ul.className = 'toc-sub-list';
+                        lastH1.appendChild(ul);
+                    }
+                    lastH2 = document.createElement('li');
+                    lastH2.className = 'toc-h2';
+                    lastH2.innerHTML = `<a href=\"#${header.id}\">${header.textContent}</a>`;
+                    ul.appendChild(lastH2);
+                    // h2目录点击
+                    lastH2.querySelector('a').addEventListener('click', function (e) {
+                        scrollToHeaderAndExpand(e, header.id);
+                    });
+                }
+            });
+            // 默认收起所有h1下的ul
+            document.querySelectorAll('.toc-h1 > .toc-sub-list').forEach(ul => {
+                ul.style.display = 'none';
+            });
+            // h1折叠/展开事件
+            document.querySelectorAll('.toc-h1 > .toc-toggle').forEach(toggle => {
+                toggle.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const ul = this.parentElement.querySelector('ul');
+                    if (!ul) return;
+                    const isOpen = ul.style.display === 'block';
+                    // 收起所有h1
+                    document.querySelectorAll('.toc-h1 > .toc-sub-list').forEach(otherUl => {
+                        otherUl.style.display = 'none';
+                        const t = otherUl.parentElement.querySelector('.toc-toggle');
+                        if (t) t.textContent = '▶';
+                    });
+                    if (!isOpen) {
+                        ul.style.display = 'block';
+                        this.textContent = '▼';
+                    } else {
+                        ul.style.display = 'none';
+                        this.textContent = '▶';
+                    }
+                });
+            });
+            // 自动展开当前锚点所在h1，其他收起
+            function openCurrentH1ByHash() {
+                if (location.hash) {
+                    let target = document.querySelector(location.hash);
+                    if (target) {
+                        let h1Id = null;
+                        if (target.tagName.toLowerCase() === 'h1') {
+                            h1Id = target.id;
+                        } else if (target.tagName.toLowerCase() === 'h2' || target.tagName.toLowerCase() === 'h3') {
+                            // 找到最近的上一个h1
+                            let prev = target.previousElementSibling;
+                            while (prev) {
+                                if (prev.tagName && prev.tagName.toLowerCase() === 'h1') {
+                                    h1Id = prev.id;
+                                    break;
+                                }
+                                prev = prev.previousElementSibling;
+                            }
+                        }
+                        openH1ById(h1Id);
+                    }
+                }
+            }
+            // 页面滚动时自动展开当前h1
+            window.addEventListener('scroll', function () {
+                if (window.__scrollingToTOC) return;
+
+                // 找到当前可视区域的h1
+                const h1s = Array.from(content.querySelectorAll('h1'));
+                let current = null;
+
+                const nav = document.querySelector('.navbar');
+                const offset = (nav ? nav.offsetHeight : 0) + 20;
+                for (let i = 0; i < h1s.length; i++) {
+                    const rect = h1s[i].getBoundingClientRect();
+                    if (rect.top <= offset) {
+                        current = h1s[i];
+                    } else {
+                        break;
+                    }
+                }
+
+                if (!current || !current.id) return;
+
+                // 仅更新目录展开状态，不触发浏览器锚点跳转
+                openH1ById(current.id);
+
+                // 可选：同步URL，且不会导致页面跳动
+                if (lastUrlH1Id !== current.id) {
+                    lastUrlH1Id = current.id;
+                    try {
+                        history.replaceState(null, '', '#' + current.id);
+                    } catch (e) {
+                        // ignore
+                    }
+                }
+            });
+            // hash变化时自动展开
+            window.addEventListener('hashchange', openCurrentH1ByHash);
+            // 初始展开
+            openCurrentH1ByHash();
+        }
+
+        // 返回顶部按钮
+        function initBackToTop() {
+            const btn = document.getElementById('back-to-top');
+            if (!btn) return;
+            btn.style.display = 'none';
+            window.addEventListener('scroll', function () {
+                if (window.scrollY > 300) {
+                    btn.style.display = 'block';
+                } else {
+                    btn.style.display = 'none';
+                }
+            });
+            btn.addEventListener('click', function () {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+        // 动态加载 markdown 文件内容
+        function getQueryParam(name) {
+            const url = new URL(window.location.href);
+            return url.searchParams.get(name);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const id = getQueryParam('id');
+            // 博客数据与 blogs.json 保持一致
+
+            fetch('data/blogs.json')
+                .then(res => res.json())
+                .then(blogs => {
+                    let blog = blogs.find(b => String(b.id) === id);
+                    // 若无参数，默认显示第一个
+                    if (!blog) blog = blogs[0];
+                    if (!blog) return;
+
+                    // 设置标题
+                    const titleEl = document.getElementById('article-title');
+                    if (titleEl) titleEl.textContent = blog.title || '';
+
+                    // 设置日期
+                    const dateEl = document.getElementById('article-date');
+                    if (dateEl) {
+                        dateEl.innerHTML = '<i class="far fa-calendar"></i> ' + (blog.date ? formatDate(blog.date) : '');
+                    }
+
+                    // 设置标签
+                    const tagsEl = document.getElementById('article-tags');
+                    if (tagsEl && Array.isArray(blog.tags)) {
+                        tagsEl.innerHTML = blog.tags.map(tag => `<span class=\"tag\">${tag}</span>`).join('');
+                    }
+
+                    fetch(blog.contentFile)
+                        .then(res => res.text())
+                        .then(md => {
+                            const contentElement = document.getElementById('markdown-content');
+                            if (contentElement) {
+                                contentElement.textContent = md;
+                                if (window.renderMarkdownContent) {
+                                    window.renderMarkdownContent();
+                                }
+                                // 渲染后生成目录
+                                setTimeout(generateTOC, 0);
+                            }
+                        });
+                });
+
+            initBackToTop();
+
+            // 日期格式化函数
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('zh-CN', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

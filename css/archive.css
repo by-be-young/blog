@@ -1,0 +1,376 @@
+/* 归档页面时间轴样式 */
+.archive-section {
+    padding-top: 80px;
+    padding-bottom: 40px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.archive-layout {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    gap: 22px;
+    align-items: flex-start;
+}
+
+.archive-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.archive-sidebar {
+    width: 340px;
+    flex: 0 0 340px;
+    position: sticky;
+    top: 88px;
+}
+
+.archive-section .page-title {
+    text-align: center;
+    margin: 0 0 24px 0;
+    color: var(--dark-color);
+}
+
+.archive-timeline {
+    position: relative;
+    margin: 0;
+    padding: 22px 0 22px 42px;
+    max-width: none;
+    border-left: 4px solid var(--primary-color);
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(10px);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.archive-timeline .timeline-item {
+    position: relative;
+    margin-bottom: 40px;
+}
+
+.archive-timeline .timeline-dot {
+    position: absolute;
+    left: -14px;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border: 4px solid var(--primary-color);
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.12);
+    z-index: 2;
+}
+
+.archive-timeline .timeline-content {
+    margin-left: 24px;
+    padding: 16px 24px;
+    background: rgba(236, 240, 241, 0.86);
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    transition: var(--transition);
+}
+
+.archive-timeline .timeline-content:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+}
+
+.archive-timeline .timeline-title a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.archive-timeline .timeline-title a:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+.archive-timeline .timeline-date {
+    font-size: 0.95em;
+    color: var(--primary-color);
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.archive-timeline .timeline-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #222;
+    margin-bottom: 4px;
+}
+
+.archive-timeline .timeline-excerpt {
+    color: #666;
+    font-size: 1em;
+}
+
+/* 侧边日历 */
+.calendar-card {
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: blur(14px);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+}
+
+.calendar-top {
+    padding: 16px 16px 10px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.calendar-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.calendar-today-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.75);
+    color: var(--dark-color);
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 700;
+    font-size: 0.92rem;
+    white-space: nowrap;
+}
+
+.calendar-today-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+.calendar-view-toggle {
+    display: inline-flex;
+    gap: 8px;
+    padding: 6px;
+    border-radius: 999px;
+    background: rgba(236, 240, 241, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.calendar-toggle-btn {
+    border: none;
+    background: transparent;
+    padding: 8px 12px;
+    border-radius: 999px;
+    color: var(--dark-color);
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.calendar-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.calendar-toggle-btn.active {
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    color: #fff;
+}
+
+.calendar-nav {
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.calendar-nav-label {
+    flex: 1;
+    text-align: center;
+    font-weight: 800;
+    color: var(--dark-color);
+    letter-spacing: 0.5px;
+}
+
+.calendar-nav-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dark-color);
+}
+
+.calendar-nav-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+.calendar-body {
+    padding: 8px 12px 14px 12px;
+}
+
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.cal-weekday {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--gray-color);
+    padding: 6px 0;
+    font-weight: 700;
+}
+
+.cal-cell {
+    position: relative;
+    z-index: 0;
+    height: 38px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--dark-color);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: rgba(255, 255, 255, 0.55);
+    overflow: visible;
+}
+
+.cal-cell.has-posts,
+.cal-month.has-posts {
+    cursor: pointer;
+}
+
+.cal-cell.has-posts:hover,
+.cal-month.has-posts:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+/* hover 提示：显示该日/该月博客数量 */
+.cal-cell[data-tip]::after,
+.cal-month[data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: 50%;
+    top: -10px;
+    transform: translate(-50%, -100%);
+    padding: 8px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: #fff;
+    color: var(--dark-color);
+    font-size: 0.88rem;
+    font-weight: 700;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    z-index: 20;
+}
+
+.cal-cell[data-tip]:hover::after,
+.cal-month[data-tip]:hover::after {
+    opacity: 1;
+}
+
+.cal-cell.muted {
+    border-color: transparent;
+    background: transparent;
+}
+
+.cal-cell.has-posts::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--secondary-color);
+    opacity: var(--heat, 0.25);
+    border-radius: inherit;
+}
+
+.cal-cell>span {
+    position: relative;
+    z-index: 2;
+}
+
+.cal-year-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.cal-month {
+    position: relative;
+    z-index: 0;
+    height: 46px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: var(--dark-color);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: rgba(255, 255, 255, 0.55);
+    overflow: visible;
+}
+
+/* 时间轴跳转高亮 */
+.timeline-item.flash .timeline-content {
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25), 0 10px 22px rgba(0, 0, 0, 0.12);
+}
+
+.cal-month.has-posts::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--secondary-color);
+    opacity: var(--heat, 0.25);
+    border-radius: inherit;
+}
+
+.cal-month>span {
+    position: relative;
+    z-index: 2;
+}
+
+@media (max-width: 600px) {
+    .archive-layout {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .archive-sidebar {
+        width: 100%;
+        flex: 0 0 auto;
+        position: static;
+    }
+
+    .archive-timeline {
+        padding-left: 18px;
+        border-left-width: 3px;
+    }
+
+    .archive-timeline .timeline-dot {
+        left: -12px;
+        width: 18px;
+        height: 18px;
+    }
+
+    .archive-timeline .timeline-content {
+        margin-left: 16px;
+        padding: 12px 12px;
+    }
+}

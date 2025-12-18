@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>归档 | Be Young's Blog</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/archive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="slideshow" aria-hidden="true">
+        <div class="slide active" style="background-image: url('assets/images/bg1.png');"></div>
+        <div class="slide" style="background-image: url('assets/images/bg2.png');"></div>
+        <div class="slide" style="background-image: url('assets/images/bg3.png');"></div>
+    </div>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">Be Young's Blog</div>
+            <ul class="nav-menu">
+                <li><a href="index.html"><i class="fas fa-home"></i> 首页 Home</a></li>
+                <li><a href="archive.html" class="active"><i class="fas fa-archive"></i> 归档 Archive</a></li>
+                <li><a href="categories.html"><i class="fas fa-tags"></i> 分类 Categories</a></li>
+            </ul>
+            <div class="nav-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+    <main>
+        <section class="archive-section">
+            <div class="archive-layout">
+                <div class="archive-main">
+                    <div class="archive-timeline" id="archiveTimeline">
+                        <!-- 时间轴内容由JS动态生成 -->
+                    </div>
+                </div>
+
+                <aside class="archive-sidebar" aria-label="归档日历">
+                    <div class="calendar-card" id="calendarCard">
+                        <div class="calendar-top">
+                            <div class="calendar-top-row">
+                                <div class="calendar-view-toggle" role="tablist" aria-label="日历视图">
+                                    <button class="calendar-toggle-btn active" type="button" data-view="month"
+                                        role="tab" aria-selected="true">按月</button>
+                                    <button class="calendar-toggle-btn" type="button" data-view="year" role="tab"
+                                        aria-selected="false">按年</button>
+                                </div>
+                                <button class="calendar-today-btn" type="button" id="calToday" aria-label="定位到今天">
+                                    <i class="fas fa-location-crosshairs"></i>
+                                    定位到今天
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="calendar-nav">
+                            <button class="calendar-nav-btn" type="button" id="calPrev" aria-label="上一段">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div class="calendar-nav-label" id="calLabel"></div>
+                            <button class="calendar-nav-btn" type="button" id="calNext" aria-label="下一段">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+
+                        <div class="calendar-body" id="calendarBody"></div>
+                    </div>
+                </aside>
+            </div>
+        </section>
+    </main>
+    <script src="js/slideshow.js"></script>
+    <script src="js/archive.js"></script>
+</body>
+
+</html>

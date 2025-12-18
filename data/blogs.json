@@ -1,0 +1,28 @@
+[
+    {
+        "id": 238031024,
+        "title": "Cache理论轻松学",
+        "excerpt": "Cache的基本概念、工作原理及映射机制...",
+        "date": "2025-12-18",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "学习",
+            "计组",
+            "Cache理论"
+        ],
+        "contentFile": "blogs/Cache理论部分.md"
+    },
+    {
+        "id": 2807178879,
+        "title": "算法板子",
+        "excerpt": "常用算法C++模板代码集合，包含头文件、STL、常用模板等...",
+        "date": "2025-12-17",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "学习",
+            "算法",
+            "模板"
+        ],
+        "contentFile": "blogs/算法板子.md"
+    }
+]
