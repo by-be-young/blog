@@ -315,7 +315,12 @@
                     }
 
                     fetch(blog.contentFile)
-                        .then(res => res.text())
+                        .then(res => {
+                            if (!res.ok) {
+                                throw new Error(`Failed to load: ${blog.contentFile} (${res.status})`);
+                            }
+                            return res.text();
+                        })
                         .then(md => {
                             const contentElement = document.getElementById('markdown-content');
                             if (contentElement) {
@@ -325,6 +330,13 @@
                                 }
                                 // 渲染后生成目录
                                 setTimeout(generateTOC, 0);
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            const contentElement = document.getElementById('markdown-content');
+                            if (contentElement) {
+                                contentElement.innerHTML = '<p>文章加载失败，请稍后重试。</p>';
                             }
                         });
                 });
