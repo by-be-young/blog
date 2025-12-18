@@ -22,6 +22,49 @@ function stripFrontMatter(markdown) {
     return text;
 }
 
+function getSiteBasePath() {
+    // e.g. '/blog/blog-detail.html' -> '/blog/'
+    const pathname = window.location && window.location.pathname ? window.location.pathname : '/';
+    const idx = pathname.lastIndexOf('/');
+    return idx >= 0 ? pathname.slice(0, idx + 1) : '/';
+}
+
+function rewriteMarkdownAssetUrls(rootEl) {
+    if (!rootEl) return;
+
+    const sourcePath = (window.__mdSourcePath && String(window.__mdSourcePath)) || '';
+    const sourceDir = sourcePath.includes('/') ? sourcePath.slice(0, sourcePath.lastIndexOf('/') + 1) : '';
+
+    const siteBasePath = getSiteBasePath();
+    const origin = window.location && window.location.origin ? window.location.origin : '';
+
+    const mdBase = origin + siteBasePath + sourceDir.replace(/^\/+/, '');
+    const siteBaseNoSlash = siteBasePath.endsWith('/') ? siteBasePath.slice(0, -1) : siteBasePath;
+
+    rootEl.querySelectorAll('img').forEach(img => {
+        const src = img.getAttribute('src');
+        if (!src) return;
+
+        // Keep absolute/external/data URLs intact
+        if (/^(https?:|data:|blob:)/i.test(src)) return;
+        if (src.startsWith('#')) return;
+
+        try {
+            // If src is root-absolute, prefix with repo base path (e.g. '/blog')
+            if (src.startsWith('/')) {
+                const prefixed = (siteBaseNoSlash || '') + src;
+                img.setAttribute('src', new URL(prefixed, origin).href);
+                return;
+            }
+
+            // Otherwise resolve relative to the markdown file directory
+            img.setAttribute('src', new URL(src, mdBase).href);
+        } catch (e) {
+            // ignore malformed URLs
+        }
+    });
+}
+
 function renderMarkdownContent() {
     const contentElement = document.getElementById('markdown-content');
     if (!contentElement) return;
@@ -31,6 +74,9 @@ function renderMarkdownContent() {
     const html = window.marked ? window.marked.parse(markdown) : markdown;
 
     contentElement.innerHTML = html;
+
+    // Ensure asset URLs (especially images) resolve correctly on GitHub Pages
+    rewriteMarkdownAssetUrls(contentElement);
 
     // 渲染数学公式（KaTeX）
     if (window.renderMathInElement) {

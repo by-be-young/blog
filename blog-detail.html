@@ -325,6 +325,7 @@
                             const contentElement = document.getElementById('markdown-content');
                             if (contentElement) {
                                 contentElement.textContent = md;
+                                window.__mdSourcePath = blog.contentFile;
                                 if (window.renderMarkdownContent) {
                                     window.renderMarkdownContent();
                                 }
