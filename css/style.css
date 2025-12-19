@@ -268,6 +268,7 @@
     display: block;
     box-sizing: border-box;
     max-width: min(100%, 820px);
+    max-height: 400px;
     height: auto;
     margin: 18px auto;
     padding: 0;
@@ -304,6 +305,41 @@
     border-radius: 4px;
     background: #42054c;
     padding: 2px 5px;
+}
+
+/* Markdown 表格样式：避免挤压/溢出导致“看不见” */
+.blog-detail .article-content table {
+    width: 100%;
+    max-width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    background: transparent;
+    border-radius: 0;
+}
+
+.blog-detail .article-content th,
+.blog-detail .article-content td {
+    border: 1px solid rgba(52, 152, 219, 0.22);
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: top;
+    white-space: nowrap;
+    color: #222;
+    font-size: 1.02rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.blog-detail .article-content thead th {
+    background: rgba(52, 152, 219, 0.12);
+    color: var(--dark-color);
+    font-weight: 700;
+}
+
+.blog-detail .article-content tbody tr:nth-child(even) {
+    background: rgba(52, 152, 219, 0.06);
 }
 
 /* 基础样式 */

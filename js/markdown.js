@@ -70,7 +70,12 @@ function renderMarkdownContent() {
     if (!contentElement) return;
 
     const markdown = stripFrontMatter(contentElement.textContent || '');
-    // 使用 marked 解析
+    // 使用 marked 解析（显式开启 GFM，确保表格等语法可用）
+    if (window.marked && typeof window.marked.setOptions === 'function') {
+        window.marked.setOptions({
+            gfm: true
+        });
+    }
     const html = window.marked ? window.marked.parse(markdown) : markdown;
 
     contentElement.innerHTML = html;
