@@ -46,6 +46,74 @@ function renderTimeline(blogs) {
   });
 }
 
+function initTimelineDrum() {
+  const timeline = document.getElementById('archiveTimeline');
+  if (!timeline) return;
+
+  timeline.classList.add('drum');
+  if (!timeline.hasAttribute('tabindex')) timeline.setAttribute('tabindex', '0');
+
+  function getItems() {
+    return Array.from(timeline.querySelectorAll('.timeline-item'));
+  }
+
+  let ticking = false;
+
+  function computeDrumPadding() {
+    const rect = timeline.getBoundingClientRect();
+    const h = rect.height;
+    if (!h) return;
+
+    const contents = Array.from(timeline.querySelectorAll('.timeline-item .timeline-content'));
+    if (contents.length === 0) return;
+
+    let maxItemH = 0;
+    contents.forEach(el => {
+      const r = el.getBoundingClientRect();
+      if (r.height > maxItemH) maxItemH = r.height;
+    });
+
+    const pad = Math.max(0, h / 2 - maxItemH / 2);
+    timeline.style.setProperty('--drum-pad', `${Math.round(pad)}px`);
+  }
+
+  function update() {
+    computeDrumPadding();
+    const rect = timeline.getBoundingClientRect();
+    const centerY = rect.top + rect.height / 2;
+    const denom = Math.max(1, rect.height / 2);
+
+    getItems().forEach(item => {
+      const content = item.querySelector('.timeline-content');
+      if (!content) return;
+      const r = content.getBoundingClientRect();
+      const itemCenter = r.top + r.height / 2;
+      let d = (itemCenter - centerY) / denom;
+      d = Math.max(-1.25, Math.min(1.25, d));
+      const ad = Math.abs(d);
+      content.style.setProperty('--d', d.toFixed(3));
+      content.style.setProperty('--ad', ad.toFixed(3));
+    });
+  }
+
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(() => {
+      update();
+      ticking = false;
+    });
+  }
+
+  timeline.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', update);
+
+  // 供其它逻辑（比如日历跳转）触发一次滚筒刷新
+  timeline.__drumUpdate = update;
+
+  update();
+}
+
 function initArchiveCalendar(blogs) {
   const calendarBody = document.getElementById('calendarBody');
   const calLabel = document.getElementById('calLabel');
@@ -203,9 +271,18 @@ function initArchiveCalendar(blogs) {
     if (!timeline) return;
     const el = timeline.querySelector(`.timeline-item[data-date="${targetYmd}"]`);
     if (!el) return;
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const block = timeline.classList.contains('drum') ? 'center' : 'start';
+    el.scrollIntoView({ behavior: 'smooth', block });
     el.classList.add('flash');
     window.setTimeout(() => el.classList.remove('flash'), 900);
+
+    if (timeline.classList.contains('drum')) {
+      const update = timeline.__drumUpdate;
+      if (typeof update === 'function') {
+        window.requestAnimationFrame(update);
+        window.setTimeout(update, 220);
+      }
+    }
   }
 
   calendarBody.addEventListener('click', (e) => {
@@ -232,5 +309,6 @@ fetch('data/blogs.json')
   .then(blogs => {
     blogs.sort((a, b) => new Date(b.date) - new Date(a.date));
     renderTimeline(blogs);
+    initTimelineDrum();
     initArchiveCalendar(blogs);
   });

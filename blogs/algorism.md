@@ -179,6 +179,88 @@ unordered_map<Key,           // 键类型
 
 见P48
 
+```
+
+## 多数问题
+
+寻找数组中出现次数超过一半的元素
+
+```cpp
+const int N = 2000000; // 定义数组的最大长度
+int a[N];
+
+/**
+ * 分治法求解多数问题
+ * @param a[] 待查找的数组
+ * @param start 查找区间的起始下标
+ * @param end 查找区间的结束下标
+ * @param result 用于返回找到的多数元素
+ * @return 1表示找到多数元素，0表示未找到
+ */
+int majorityDC(int a[], int start, int end, int *result) {
+    if (start == end) {
+        *result = a[end];
+        return 1;
+    } else {
+        int m1, m2;
+        int mid = (start + end) / 2;
+        
+        // 递归查找前半区间的多数元素
+        majorityDC(a, start, mid, &m1);
+        
+        // 递归查找后半区间的多数元素
+        majorityDC(a, mid + 1, end, &m2);
+        
+        // 统计m1和m2在整个区间中出现的次数
+        int count1 = 0, count2 = 0;
+        for (int i = start; i <= end; i++) {
+            if (a[i] == m1) {
+                count1++;
+            }
+            if (a[i] == m2) {
+                count2++;
+            }
+        }
+        
+        // 检查m1是否为多数元素
+        if (count1 > ((end - start + 1) / 2)) {
+            *result = m1;
+            return 1;
+        }
+        // 检查m2是否为多数元素
+        else if (count2 > ((end - start + 1) / 2)) {
+            *result = m2;
+            return 1;
+        }
+        // 两者都不是多数元素
+        else {
+            return 0;
+        }
+    }
+}
+
+int main() {
+    int n, resultDC;
+    
+    // 读取数组长度
+    scanf("%d", &n);
+    
+    // 读取数组元素
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &a[i]);
+    }
+    
+    // 查找多数元素
+    if (majorityDC(a, 0, n - 1, &resultDC)) {
+        printf("%d", resultDC);
+    } else {
+        printf("Can not find the majority!");
+    }
+    
+    return 0;
+} 
+```
+
 # 贪心
 
 ## 哈夫曼编码
@@ -435,6 +517,215 @@ int main()
 
 ```
 
+## 钢条切割问题
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <climits>
+using namespace std;
+
+/**
+ * 自底向上动态规划求解钢条切割问题
+ * @param n 钢条长度
+ * @param price 价格表，price[i]表示长度为i的钢条价格（i从1开始）
+ * @param maxRevenue 存储最大收益的数组
+ * @param cutPoint 存储切割点的数组
+ */
+void bottomUpCutRod(int n, const vector<int>& price, vector<int>& maxRevenue, vector<int>& cutPoint) {
+    // 初始化
+    maxRevenue.resize(n + 1, 0);
+    cutPoint.resize(n + 1, 0);
+    
+    // 基础情况：长度为0的钢条收益为0
+    maxRevenue[0] = 0;
+    
+    // 递推计算每个长度的最优解
+    for (int j = 1; j <= n; j++) {
+        int currentMax = INT_MIN;  // 当前长度的最大收益
+        
+        for (int i = 1; i <= j; i++) {
+            // 如果当前切割方案更好
+            if (currentMax < price[i] + maxRevenue[j - i]) {
+                currentMax = price[i] + maxRevenue[j - i];
+                cutPoint[j] = i;  // 记录第一段切割长度
+            }
+        }
+        
+        maxRevenue[j] = currentMax;
+    }
+}
+
+/**
+ * 根据切割点数组获取切割方案
+ * @param n 钢条长度
+ * @param cutPoint 切割点数组
+ * @return 切割方案的长度序列
+ */
+vector<int> getCuttingSolution(int n, const vector<int>& cutPoint) {
+    vector<int> solution;
+    int remaining = n;
+    
+    // 从后向前追踪切割方案
+    while (remaining > 0) {
+        solution.push_back(cutPoint[remaining]);
+        remaining -= cutPoint[remaining];
+    }
+    
+    return solution;
+}
+
+int main() {
+    int n;
+    cin >> n;
+    
+    // 读取价格表，注意价格表下标从1开始
+    vector<int> price(n + 1, 0);
+    for (int i = 1; i <= n; i++) {
+        cin >> price[i];
+    }
+    
+    // 存储最大收益和切割点的数组
+    vector<int> maxRevenue;
+    vector<int> cutPoint;
+    
+    // 计算最优解
+    bottomUpCutRod(n, price, maxRevenue, cutPoint);
+    
+    // 获取切割方案
+    vector<int> solution = getCuttingSolution(n, cutPoint);
+    
+    // 输出结果
+    // 第一行：最大总销售价格
+    cout << maxRevenue[n] << endl;
+    
+    // 第二行：钢管被分割成的段数
+    cout << solution.size() << endl;
+    
+    // 第三行：分割方式
+    for (size_t i = 0; i < solution.size(); i++) {
+        if (i > 0) cout << " ";
+        cout << solution[i];
+    }
+    cout << endl;
+    
+    return 0;
+}
+```
+
+## 矩阵链乘法问题
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+/*
+ * 矩阵链乘法动态规划算法
+ *
+ * 输入：
+ *   n: 矩阵链中矩阵的个数
+ *   p: 数组，p[i] 表示矩阵 A_i 的列数，p[i-1] 表示矩阵 A_i 的行数
+ *       矩阵 A_i 的维度为 p[i-1] × p[i]
+ *
+ * 输出：
+ *   m[1][n]: 计算 A1...An 所需的最少标量乘法次数
+ *   最优括号化方案
+ */
+
+#define MAX 100 // 最大矩阵数量
+
+long long p[MAX];      // 矩阵维度数组
+long long m[MAX][MAX]; // m[i][j]：计算 A_i...A_j 所需的最少乘法次数
+long long s[MAX][MAX]; // s[i][j]：A_i...A_j 最优括号化的分割点位置
+
+/**
+ * 计算矩阵链乘法的最优括号化方案
+ * @param n 矩阵链中矩阵的个数
+ */
+void MATRIX_CHAIN_ORDER(int n)
+{
+    // 初始化：单个矩阵不需要乘法
+    for (int i = 1; i <= n; i++)
+    {
+        m[i][i] = 0;
+    }
+
+    // l 表示矩阵链的长度（包含的矩阵个数）
+    for (int l = 2; l <= n; l++)
+    {
+        // i 表示矩阵链的起始位置
+        for (int i = 1; i <= n - l + 1; i++)
+        {
+            int j = i + l - 1;   // 矩阵链的结束位置
+            m[i][j] = LLONG_MAX; // 初始化为最大值
+
+            // 尝试所有可能的分割点 k
+            for (int k = i; k <= j - 1; k++)
+            {
+                // 计算将矩阵链在 k 处分隔的代价
+                long long q = m[i][k] + m[k + 1][j] + p[i - 1] * p[k] * p[j];
+
+                // 如果当前分割方式更优，则更新
+                if (q < m[i][j])
+                {
+                    m[i][j] = q;
+                    s[i][j] = k; // 记录最优分割点
+                }
+            }
+        }
+    }
+}
+
+/**
+ * 递归打印最优括号化方案
+ * @param i 矩阵链起始索引
+ * @param j 矩阵链结束索引
+ */
+void PRINT_OPTIMAL_PARENS(long long i, long long j)
+{
+    if (i == j)
+    {
+        printf("A%d", i); // 单个矩阵
+    }
+    else
+    {
+        printf("(");
+        // 递归打印左半部分
+        PRINT_OPTIMAL_PARENS(i, s[i][j]);
+        // 递归打印右半部分
+        PRINT_OPTIMAL_PARENS(s[i][j] + 1, j);
+        printf(")");
+    }
+}
+
+int main()
+{
+    int n;
+
+    // 输入矩阵数量
+    scanf("%d", &n);
+
+    // 输入矩阵维度
+    for (int i = 0; i <= n; i++)
+    {
+        scanf("%lld", &p[i]);
+    }
+
+    // 计算最优括号化方案
+    MATRIX_CHAIN_ORDER(n);
+
+    // 输出最少乘法次数
+    printf("%lld\n", m[1][n]);
+
+    // 输出最优括号化方案
+    PRINT_OPTIMAL_PARENS(1, n);
+    printf("\n");
+
+    return 0;
+}
+```
+
 ## 背包问题
 
 有多个物品可选，但总价值有限。
@@ -494,6 +785,8 @@ ll group_bag(int cap, int max_group) {
 
 ## 最大子列和
 
+连续子数组的元素和最大
+
 ```cpp
 #include <iostream>
 #include <algorithm>
@@ -533,7 +826,7 @@ int main() {
 
 ## 最长公共子串
 
-注意，dp[i][j]指的是以第i、第j个字符结尾的最长子串长度，和公共子序列的含义不相同，因此需要专门用max来记录最长子串长度。
+注意，dp\[i]\[j]指的是以第i、第j个字符结尾的最长子串长度，和公共子序列的含义不相同，因此需要专门用max来记录最长子串长度。
 多组数据记得清空数组！
 
 ```cpp
@@ -564,6 +857,293 @@ int PRINT_LCS2(char *s1, char *s2)
 ## LIS（最长单调子序列）
 
 见P254
+
+# 图算法
+
+## Dijkstra算法
+
+单源最短路径
+
+```cpp
+#include <iostream>
+#include <algorithm>
+#include <queue>
+#include <vector>
+
+#define V_MAX 100005           // 最大顶点数
+#define INF 0x3f3f3f3f3f3f3f3f // 表示无穷大的值
+
+using namespace std;
+typedef long long ll;
+
+// 边结构体
+struct Edge
+{
+    int to; // 目标顶点
+    ll w;   // 边权重
+};
+
+// 用于优先队列的节点结构体
+struct Node
+{
+    ll dis; // 当前到起点的距离
+    int u;  // 顶点编号
+    // 重载大于运算符，用于最小堆
+    bool operator>(const Node &b) const { return dis > b.dis; }
+};
+
+// 邻接表存储图
+vector<Edge> e[V_MAX];
+
+// 添加有向边
+void addEdge(int u, int v, ll w)
+{
+    e[u].push_back({v, w});
+}
+
+// Dijkstra算法求单源最短路径
+vector<ll> dijkstra(int s)
+{
+    // 最小堆（优先队列），每次取出距离起点最近的点
+    priority_queue<Node, vector<Node>, greater<Node>> q;
+    vector<ll> dis(V_MAX);             // 存储起点到各点的最短距离
+    fill(dis.begin(), dis.end(), INF); // 初始化为无穷大
+    vector<bool> vis(V_MAX);           // 标记顶点是否已确定最短路径
+
+    // 初始化起点
+    dis[s] = 0;
+    q.push({0, s});
+
+    while (!q.empty())
+    {
+        int u = q.top().u;
+        q.pop();
+
+        // 如果该点已经处理过，跳过（优先队列中可能有重复顶点）
+        if (vis[u])
+            continue;
+        vis[u] = true;
+
+        // 遍历u的所有邻接边
+        for (auto ed : e[u])
+        {
+            int v = ed.to;
+            ll w = ed.w;
+            // 松弛操作：如果通过u到v比当前记录更短，则更新
+            if (dis[v] > dis[u] + w)
+            {
+                dis[v] = dis[u] + w;
+                q.push({dis[v], v}); // 将更新后的顶点加入队列
+            }
+        }
+    }
+    return dis; // 返回所有最短距离结果
+}
+
+int main()
+{
+    int n, m; // n:顶点数，m:边数
+    int s;    // 起点编号
+    cin >> n >> m >> s;
+
+    int x, y, w;
+    for (int i = 0; i < m; i++)
+    {
+        cin >> x >> y >> w;
+        addEdge(x, y, w); // 添加有向边
+    }
+
+    // 执行Dijkstra算法
+    vector<ll> dis = dijkstra(s);
+
+    // 输出结果：起点到每个顶点的最短距离
+    for (int i = 1; i <= n; i++)
+    {
+        cout << dis[i] << " ";
+    }
+    return 0;
+}
+```
+
+## Floyd 算法
+
+全源最短路径，可以计算任意点对间的最短路
+
+```cpp
+#include <algorithm>
+#include <cstring>
+#include <iostream>
+
+#define V_MAX 510 // 结点数
+#define INF 0x3f3f3f3f3f3f3f3f
+
+using namespace std;
+typedef long long ll;
+
+ll f[V_MAX][V_MAX]; // 邻接矩阵存图
+
+int main()
+{
+    int n, m, p;
+    ll x, y, w;
+    cin >> n >> m >> p;
+    for (x = 1; x <= n; x++)
+        for (y = 1; y <= n; y++)
+            f[x][y] = INF;
+    for (int i = 1; i <= n; i++)
+        f[i][i] = 0;
+
+    /*-----初始化部分-----*/
+
+    for (int i = 0; i < m; i++)
+    {
+        cin >> x >> y >> w;
+        if (w < f[x][y]) // 考虑重边的情况
+            f[x][y] = w;
+    }
+
+    /*-----读入-----*/
+
+    for (int k = 1; k <= n; k++)
+        for (x = 1; x <= n; x++)
+            for (y = 1; y <= n; y++)
+                f[x][y] = min(f[x][y], f[x][k] + f[k][y]);
+
+    /*----- Floyd -----*/
+
+    for (int i = 0; i < p; i++)
+    {
+        cin >> x >> y;
+        if (f[x][y] != INF)
+            cout << f[x][y] << endl;
+        else
+            cout << "-1" << endl;
+    }
+
+    /*-----输出-----*/
+    return 0;
+}
+```
+
+## 经过固定点的最短路
+
+将问题分为起点到固定点最短路+终点到固定点最短路即可。
+
+即两次分别 Floyd。
+
+## 拓扑排序
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+#define MAX_VERTICES 10010  // 最大顶点数
+
+// 链式前向星结构
+struct Edge {
+    int from;   // 边的起点
+    int to;     // 边的终点
+    int next;   // 同起点的下一条边的索引
+} e[MAX_VERTICES];
+
+int cnt;                    // 边计数
+int head[MAX_VERTICES];     // 每个顶点作为起点的第一条边的索引
+int indegree[MAX_VERTICES]; // 每个顶点的入度
+unordered_map<int, vector<int>> graph;  // 邻接表表示（备用）
+
+// 拓扑排序函数（输出字典序最大的拓扑排序）
+vector<int> topologicalSort(int n) {
+    // 优先队列（最大堆）：先输出序号大的点，再输出序号小的点
+    // 这样得到的是字典序最大的拓扑排序
+    priority_queue<int> pq;
+    
+    // 将所有入度为0的顶点加入优先队列
+    for (int i = 1; i <= n; i++) {
+        if (indegree[i] == 0) {
+            pq.push(i);
+        }
+    }
+    
+    vector<int> result;  // 存储拓扑排序结果
+    
+    while (!pq.empty()) {
+        int u = pq.top();    // 取出当前编号最大的入度为0的顶点
+        pq.pop();
+        result.push_back(u);
+        
+        // 遍历从u出发的所有边（链式前向星遍历）
+        int edge = head[u];
+        while (edge != -1) {
+            int v = e[edge].to;
+            indegree[v]--;          // 删除边u->v
+            
+            // 如果删除后v的入度为0，加入队列
+            if (indegree[v] == 0) {
+                pq.push(v);
+            }
+            
+            edge = e[edge].next;    // 移动到下一条边
+        }
+    }
+    
+    return result;
+}
+
+int main() {
+    int t;  // 测试用例数量
+    scanf("%d", &t);
+    
+    while (t--) {
+        int n, m;  // n:顶点数, m:边数
+        scanf("%d%d", &n, &m);
+        
+        // 初始化
+        cnt = 1;  // 边索引从1开始
+        memset(head, -1, sizeof(head));      // 所有表头初始化为-1
+        memset(indegree, 0, sizeof(indegree)); // 入度清零
+        graph.clear();
+        
+        // 读入所有边
+        for (int i = 1; i <= m; i++) {
+            int from, to;
+            scanf("%d%d", &from, &to);
+            
+            // 使用链式前向星存储边
+            e[cnt].from = from;
+            e[cnt].to = to;
+            e[cnt].next = head[from];  // 插入到表头
+            head[from] = cnt;          // 更新表头
+            indegree[to]++;            // 终点入度+1
+            cnt++;                     // 边计数增加
+            
+            // 同时用邻接表存储（可能用于其他操作）
+            graph[from].push_back(to);
+        }
+        
+        // 执行拓扑排序
+        vector<int> ans = topologicalSort(n);
+        
+        // 输出结果
+        for (int vertex : ans) {
+            printf("%d ", vertex);
+        }
+        printf("\n");
+    }
+    
+    return 0;
+}
+```
+
+## Dinic 算法求最大流
+
+时间复杂度 $O (VE^2)$
+
+
+
+
+
+
+
 
 # 数学
 

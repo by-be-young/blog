@@ -1,28 +1,6 @@
 /* Butterfly 美化样式 */
 
-/* 卡片悬停效果 */
-.blog-card {
-    position: relative;
-    z-index: 1;
-}
-
-.blog-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.3s ease;
-    z-index: 2;
-}
-
-.blog-card:hover::before {
-    transform: scaleX(1);
-}
+/* 卡片悬停效果：已取消顶部“加载线”效果 */
 
 /* 按钮样式 */
 .btn {

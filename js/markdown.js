@@ -99,6 +99,199 @@ function renderMarkdownContent() {
             window.hljs.highlightElement(block);
         });
     }
+
+    enhanceCodeBlocks(contentElement);
+}
+
+function normalizeLangLabel(raw) {
+    const s = (raw || '').toString().trim().toLowerCase();
+    if (!s) return 'CODE';
+
+    const map = {
+        'c++': 'CPP',
+        'cpp': 'CPP',
+        'cxx': 'CPP',
+        'cc': 'CPP',
+        'c': 'C',
+        'python': 'PY',
+        'py': 'PY',
+        'javascript': 'JS',
+        'js': 'JS',
+        'typescript': 'TS',
+        'ts': 'TS',
+        'java': 'JAVA',
+        'go': 'GO',
+        'rust': 'RUST',
+        'bash': 'BASH',
+        'sh': 'BASH',
+        'shell': 'BASH',
+        'json': 'JSON',
+        'html': 'HTML',
+        'xml': 'XML',
+        'css': 'CSS',
+        'markdown': 'MD',
+        'md': 'MD',
+        'sql': 'SQL',
+        'yaml': 'YAML',
+        'yml': 'YAML'
+    };
+    return map[s] || s.toUpperCase();
+}
+
+function detectLanguageFromCodeEl(codeEl) {
+    if (!codeEl) return '';
+    const className = (codeEl.getAttribute('class') || '').trim();
+    if (!className) return '';
+    const classes = className.split(/\s+/).filter(Boolean);
+
+    for (const c of classes) {
+        if (c.startsWith('language-')) return c.slice('language-'.length);
+        if (c.startsWith('lang-')) return c.slice('lang-'.length);
+    }
+    return '';
+}
+
+async function copyTextToClipboard(text) {
+    const t = (text || '').toString();
+    if (!t) return false;
+
+    try {
+        if (navigator && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+            await navigator.clipboard.writeText(t);
+            return true;
+        }
+    } catch (e) {
+        // fallback below
+    }
+
+    try {
+        const ta = document.createElement('textarea');
+        ta.value = t;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        ta.style.top = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return !!ok;
+    } catch (e) {
+        return false;
+    }
+}
+
+function enhanceCodeBlocks(rootEl) {
+    if (!rootEl) return;
+
+    const pres = Array.from(rootEl.querySelectorAll('pre'));
+    pres.forEach(pre => {
+        const code = pre.querySelector('code');
+        if (!code) return;
+        if (pre.closest('.codeblock')) return;
+
+        const langRaw = detectLanguageFromCodeEl(code);
+        const langLabel = normalizeLangLabel(langRaw);
+
+        const container = document.createElement('div');
+        container.className = 'codeblock';
+
+        const header = document.createElement('div');
+        header.className = 'codeblock__header';
+
+        const langEl = document.createElement('div');
+        langEl.className = 'codeblock__lang';
+        langEl.textContent = langLabel;
+
+        const actions = document.createElement('div');
+        actions.className = 'codeblock__actions';
+
+        const btnCopy = document.createElement('button');
+        btnCopy.type = 'button';
+        btnCopy.className = 'codeblock__btn';
+        btnCopy.title = '复制代码';
+        btnCopy.innerHTML = '<i class="far fa-copy"></i><span>复制</span>';
+
+        const btnToggle = document.createElement('button');
+        btnToggle.type = 'button';
+        btnToggle.className = 'codeblock__btn';
+        btnToggle.title = '收起/展开';
+        btnToggle.innerHTML = '<i class="fas fa-chevron-up"></i><span>收起</span>';
+
+        actions.appendChild(btnCopy);
+        actions.appendChild(btnToggle);
+
+        header.appendChild(langEl);
+        header.appendChild(actions);
+
+        const body = document.createElement('div');
+        body.className = 'codeblock__body';
+
+        // Move existing <pre> into container body
+        const preParent = pre.parentNode;
+        if (!preParent) return;
+        preParent.insertBefore(container, pre);
+        body.appendChild(pre);
+        container.appendChild(header);
+        container.appendChild(body);
+
+        addCodeBlockLineNumbers(body, pre, code);
+
+        btnCopy.addEventListener('click', async () => {
+            const text = code.innerText || code.textContent || '';
+            const ok = await copyTextToClipboard(text);
+            if (!ok) return;
+
+            btnCopy.classList.add('is-copied');
+            const span = btnCopy.querySelector('span');
+            if (span) span.textContent = '已复制';
+            window.setTimeout(() => {
+                btnCopy.classList.remove('is-copied');
+                const s = btnCopy.querySelector('span');
+                if (s) s.textContent = '复制';
+            }, 900);
+        });
+
+        btnToggle.addEventListener('click', () => {
+            const collapsed = container.classList.toggle('is-collapsed');
+            const icon = btnToggle.querySelector('i');
+            const label = btnToggle.querySelector('span');
+            if (collapsed) {
+                if (icon) icon.className = 'fas fa-chevron-down';
+                if (label) label.textContent = '展开';
+            } else {
+                if (icon) icon.className = 'fas fa-chevron-up';
+                if (label) label.textContent = '收起';
+            }
+        });
+    });
+}
+
+function addCodeBlockLineNumbers(bodyEl, preEl, codeEl) {
+    if (!bodyEl || !preEl || !codeEl) return;
+    if (bodyEl.querySelector('.codeblock__content')) return;
+
+    const raw = (codeEl.textContent || '').replace(/\n$/, '');
+    const lineCount = raw ? raw.split('\n').length : 1;
+    const numbersText = Array.from({ length: lineCount }, (_, i) => String(i + 1)).join('\n');
+
+    const content = document.createElement('div');
+    content.className = 'codeblock__content';
+
+    const gutter = document.createElement('pre');
+    gutter.className = 'codeblock__gutter';
+    gutter.setAttribute('aria-hidden', 'true');
+    gutter.textContent = numbersText;
+
+    preEl.classList.add('codeblock__pre');
+
+    // Move pre into content container alongside gutter
+    if (preEl.parentNode === bodyEl) {
+        bodyEl.removeChild(preEl);
+    }
+    content.appendChild(gutter);
+    content.appendChild(preEl);
+    bodyEl.appendChild(content);
 }
 
 if (document.getElementById('markdown-content')) {

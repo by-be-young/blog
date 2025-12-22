@@ -289,22 +289,148 @@
 
 /* 代码块样式美化：只改边框和字体大小，不改字体颜色 */
 .blog-detail .article-content pre {
-    background: linear-gradient(135deg, #ff80ca 0%, #15ffd4 100%);
-    color: #f8f8f2;
-    border: 1.5px solid #b5c6d6;
-    border-radius: 8px;
+    background: #0d1117;
+    background-image:
+        radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0)),
+        linear-gradient(120deg, rgba(93, 208, 255, 0.10), rgba(167, 139, 250, 0.08), rgba(255, 127, 209, 0.08));
+    color: #e6edf3;
+    border: 1px solid #263040;
+    border-image: linear-gradient(115deg, rgba(93, 208, 255, 0.55), rgba(167, 139, 250, 0.55), rgba(255, 127, 209, 0.50)) 1;
+    border-radius: 10px;
     padding: 18px 16px;
     margin: 18px 0;
     overflow-x: auto;
     font-size: 1.02rem;
-    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.06);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03),
+        0 12px 26px rgba(0, 0, 0, 0.28);
+}
+
+/* 博客详情页：带标题栏的代码块容器（白色边框，上边更粗） */
+.blog-detail .article-content .codeblock {
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 18px 0;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 12px 26px rgba(0, 0, 0, 0.24);
+}
+
+.blog-detail .article-content .codeblock__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #befff3fa;
+    color: rgba(20, 25, 35, 0.92);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.10);
+}
+
+.blog-detail .article-content .codeblock__lang {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.88rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.95;
+}
+
+.blog-detail .article-content .codeblock__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.blog-detail .article-content .codeblock__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 30px;
+    padding: 0 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.18);
+    background: rgba(255, 255, 255, 0.85);
+    color: rgba(20, 25, 35, 0.92);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.blog-detail .article-content .codeblock__btn:hover {
+    background: rgba(0, 0, 0, 0.06);
+    border-color: rgba(0, 0, 0, 0.28);
+}
+
+.blog-detail .article-content .codeblock__btn:active {
+    transform: translateY(1px);
+}
+
+.blog-detail .article-content .codeblock__btn.is-copied {
+    border-color: rgba(46, 204, 113, 0.85);
+    background: rgba(46, 204, 113, 0.18);
+}
+
+.blog-detail .article-content .codeblock__body {
+    padding: 0;
+}
+
+.blog-detail .article-content .codeblock__content {
+    display: flex;
+    align-items: stretch;
+    background: #0d1117;
+    background-image:
+        radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0)),
+        linear-gradient(120deg, rgba(93, 208, 255, 0.10), rgba(167, 139, 250, 0.08), rgba(255, 127, 209, 0.08));
+}
+
+.blog-detail .article-content .codeblock__gutter {
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 18px 10px 18px 12px;
+    color: rgba(230, 237, 243, 0.55);
+    text-align: right;
+    user-select: none;
+    background: transparent;
+    border-right: 1px solid rgba(230, 237, 243, 0.12);
+    font-size: 1.02rem;
+    line-height: 1.7;
+}
+
+.blog-detail .article-content .codeblock__body pre {
+    margin: 0;
+    border: none;
+    border-image: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    background-image: none;
+    line-height: 1.7;
+}
+
+.blog-detail .article-content .codeblock__pre {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.blog-detail .article-content .codeblock.is-collapsed .codeblock__body {
+    display: none;
 }
 
 .blog-detail .article-content code {
     font-size: 1.02rem;
-    border-radius: 4px;
-    background: #42054c;
-    padding: 2px 5px;
+    border-radius: 5px;
+    background: #161b22;
+    color: #f0f6fc;
+    border: 1px solid #2b3342;
+    padding: 2px 6px;
+}
+
+.blog-detail .article-content pre code {
+    background: transparent;
+    color: inherit;
+    border: none;
+    padding: 0;
 }
 
 /* Markdown 表格样式：避免挤压/溢出导致“看不见” */
@@ -340,6 +466,157 @@
 
 .blog-detail .article-content tbody tr:nth-child(even) {
     background: rgba(52, 152, 219, 0.06);
+}
+
+/* =============================
+   详情页马卡龙主题（仅 blog-detail.html 生效）
+   注意：不覆盖任何代码块 pre/code 背景色
+   ============================= */
+
+.blog-detail-page {
+    --primary-color: #55c8ff;
+    --secondary-color: #a7f3d0;
+    --detail-pink: #ffb6c9;
+    --detail-peach: #ffd2a6;
+    --detail-mint: #a7f3d0;
+    --detail-sky: #9ad7ff;
+    --detail-text: #2b3440;
+    --detail-muted: #5f6b7a;
+    --detail-shadow: 0 16px 34px rgba(44, 62, 80, 0.14);
+    --detail-border: linear-gradient(135deg, rgba(255, 182, 201, 0.95), rgba(154, 215, 255, 0.92), rgba(167, 243, 208, 0.92));
+}
+
+/* 导航栏：与首页/归档/分类一致 */
+.blog-detail-page .navbar {
+    background: rgba(255, 255, 255, 0.72);
+    background-image: linear-gradient(90deg,
+            rgba(255, 182, 201, 0.16) 0%,
+            rgba(167, 243, 208, 0.12) 45%,
+            rgba(199, 182, 255, 0.14) 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 10px 24px rgba(44, 62, 80, 0.10);
+}
+
+.blog-detail-page .nav-menu a {
+    color: var(--detail-text);
+    background: rgba(255, 255, 255, 0.42);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.blog-detail-page .nav-menu a:hover,
+.blog-detail-page .nav-menu a.active {
+    color: var(--detail-text);
+    background: linear-gradient(135deg, rgba(255, 182, 201, 0.30), rgba(154, 215, 255, 0.22), rgba(167, 243, 208, 0.24));
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+.blog-detail-page .nav-toggle {
+    color: var(--detail-text);
+}
+
+.blog-detail-page .nav-brand {
+    color: #55c8ff;
+    text-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.6),
+        0 6px 14px rgba(85, 200, 255, 0.22);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+
+    /* 详情页导航栏标题：渐变字体（加深一档，显眼但克制） */
+    .blog-detail-page .nav-brand {
+        display: inline-block;
+        background: linear-gradient(90deg,
+                rgba(0, 172, 255, 1) 0%,
+                rgba(72, 219, 187, 0.98) 45%,
+                rgba(255, 110, 155, 0.98) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+        text-shadow: none;
+        filter:
+            drop-shadow(0 1px 0 rgba(255, 255, 255, 0.60)) drop-shadow(0 10px 18px rgba(0, 172, 255, 0.16));
+    }
+}
+
+/* 详情页背景遮罩：更偏马卡龙（不影响代码块） */
+.blog-detail-page .blog-detail::before {
+    background: linear-gradient(135deg,
+            rgba(255, 182, 201, 0.18) 0%,
+            rgba(167, 243, 208, 0.18) 45%,
+            rgba(199, 182, 255, 0.16) 100%);
+}
+
+/* TOC 与文章卡片：渐变描边卡片 */
+.blog-detail-page .blog-toc {
+    border: 4px solid transparent;
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.80), rgba(255, 255, 255, 0.80)) padding-box,
+        var(--detail-border) border-box;
+    box-shadow: var(--detail-shadow);
+}
+
+.blog-detail-page .toc-title {
+    color: var(--detail-text);
+}
+
+.blog-detail-page .toc-h1>a {
+    color: rgba(0, 172, 255, 0.95);
+}
+
+.blog-detail-page .toc-h2>a {
+    color: rgba(72, 219, 187, 0.92);
+}
+
+.blog-detail-page .blog-article {
+    border: 5px solid transparent;
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.78)) padding-box,
+        var(--detail-border) border-box;
+    box-shadow: var(--detail-shadow);
+}
+
+.blog-detail-page .article-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.blog-detail-page .article-title {
+    color: #ff5f8a;
+}
+
+.blog-detail-page .article-meta {
+    color: var(--detail-muted);
+}
+
+.blog-detail-page .blog-detail .tag {
+    background: rgba(255, 255, 255, 0.70);
+    color: var(--detail-text);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.blog-detail-page .blog-detail .tag:nth-child(1) {
+    background: rgba(255, 182, 201, 0.42);
+}
+
+.blog-detail-page .blog-detail .tag:nth-child(2) {
+    background: rgba(154, 215, 255, 0.40);
+}
+
+.blog-detail-page .blog-detail .tag:nth-child(3) {
+    background: rgba(255, 210, 166, 0.42);
+}
+
+.blog-detail-page .blog-detail .article-content p,
+.blog-detail-page .blog-detail .article-content li,
+.blog-detail-page .blog-detail .article-content blockquote {
+    color: var(--detail-text);
+}
+
+/* 返回顶部按钮：更贴合马卡龙 */
+.blog-detail-page #back-to-top {
+    background: linear-gradient(135deg, rgba(0, 172, 255, 1), rgba(72, 219, 187, 0.98), rgba(255, 110, 155, 0.98));
+    box-shadow: 0 10px 22px rgba(44, 62, 80, 0.18);
 }
 
 /* 基础样式 */
@@ -637,6 +914,8 @@ body {
 
 .blog-card {
     background: white;
+    --card-merge-bg: rgba(255, 255, 255, 0.96);
+    position: relative;
     border-radius: 15px;
     overflow: hidden;
     box-shadow: var(--shadow);
@@ -644,14 +923,62 @@ body {
     cursor: pointer;
 }
 
+/* 博客卡片悬浮：斜向流光线条向右滑动 */
+.blog-card::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    bottom: -40%;
+    width: 120px;
+    left: -160px;
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.00) 35%,
+            rgba(255, 255, 255, 0.42) 50%,
+            rgba(255, 255, 255, 0.00) 65%,
+            rgba(255, 255, 255, 0) 100%);
+    transform: translateX(0) rotate(18deg);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 4;
+    filter: blur(0.2px);
+}
+
+.blog-card:hover::before {
+    opacity: 1;
+    animation: blogCardShine 0.95s ease-out;
+}
+
 .blog-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    transform: translateY(-6px);
+}
+
+@keyframes blogCardShine {
+    0% {
+        transform: translateX(0) rotate(18deg);
+    }
+
+    100% {
+        transform: translateX(calc(100vw + 360px)) rotate(18deg);
+    }
 }
 
 .blog-image {
+    position: relative;
+    z-index: 1;
     height: 200px;
     overflow: hidden;
+}
+
+.blog-image::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 78px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, var(--card-merge-bg) 100%);
+    pointer-events: none;
 }
 
 .blog-image img {
@@ -662,10 +989,12 @@ body {
 }
 
 .blog-card:hover .blog-image img {
-    transform: scale(1.1);
+    transform: none;
 }
 
 .blog-content {
+    position: relative;
+    z-index: 3;
     padding: 25px;
 }
 
@@ -692,6 +1021,220 @@ body {
     border-top: 1px solid #eee;
 }
 
+/* 首页（马卡龙配色 + 卡片渐变描边）：仅对 index.html 生效 */
+.home {
+    --primary-color: #7bc7ff;
+    --secondary-color: #7ee0c2;
+    --dark-color: #2c3e50;
+    --light-color: #f7f9fc;
+    --gray-color: #7b8794;
+
+    --macaron-pink: #ffb6c9;
+    --macaron-peach: #ffd2a6;
+    --macaron-mint: #a7f3d0;
+    --macaron-lavender: #c7b6ff;
+    --macaron-sky: #9ad7ff;
+    --card-fill-profile: linear-gradient(135deg,
+            rgba(255, 182, 201, 0.22) 0%,
+            rgba(255, 210, 166, 0.18) 35%,
+            rgba(167, 243, 208, 0.20) 100%);
+    --card-fill-blog: linear-gradient(135deg,
+            rgba(154, 215, 255, 0.22) 0%,
+            rgba(199, 182, 255, 0.20) 55%,
+            rgba(255, 182, 201, 0.16) 100%);
+    --card-border-w: 5px;
+
+    /* 首页文本与组件用色（马卡龙体系内的中性色） */
+    --home-text: #2b3440;
+    --home-muted: #5f6b7a;
+    --home-border: rgba(0, 0, 0, 0.08);
+    --home-nav-bg: rgba(255, 255, 255, 0.74);
+    --home-nav-chip: rgba(255, 255, 255, 0.44);
+}
+
+/* 首页导航栏：马卡龙浅色玻璃质感 */
+.home .navbar {
+    background: var(--home-nav-bg);
+    background-image: linear-gradient(90deg,
+            rgba(255, 182, 201, 0.18) 0%,
+            rgba(167, 243, 208, 0.14) 45%,
+            rgba(199, 182, 255, 0.16) 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 10px 24px rgba(44, 62, 80, 0.10);
+}
+
+.home .nav-brand {
+    color: #ff86aa;
+}
+
+.home .nav-menu a {
+    color: var(--home-text);
+    background: var(--home-nav-chip);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.home .nav-menu a:hover,
+.home .nav-menu a.active {
+    color: var(--home-text);
+    background: linear-gradient(135deg, rgba(255, 182, 201, 0.30), rgba(154, 215, 255, 0.24), rgba(167, 243, 208, 0.26));
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+.home .nav-toggle {
+    color: var(--home-text);
+}
+
+/* 首页博客卡片与侧边栏文字颜色：更柔和但保持对比度 */
+/* 重要文字（标题等）使用马卡龙配色 */
+.home .name,
+.home .blog-title {
+    color: #ff5f8a;
+}
+
+/* 重要文字：使用单一马卡龙色（不使用渐变文字） */
+.home .welcome-text,
+.home .nav-brand,
+.home .name,
+.home .blog-title {
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    -webkit-text-fill-color: currentColor;
+}
+
+/* 首页导航栏标题：独特马卡龙“天空蓝” */
+.home .nav-brand {
+    color: #55c8ff;
+    text-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.6),
+        0 6px 14px rgba(85, 200, 255, 0.25);
+}
+
+/* 首页欢迎语：独特马卡龙“草莓粉” */
+.home .welcome-text {
+    color: #ff5f8a;
+    text-shadow:
+        0 2px 0 rgba(255, 255, 255, 0.35),
+        0 10px 22px rgba(255, 95, 138, 0.22);
+}
+
+/* 首页欢迎语：允许渐变（马卡龙色调） */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .home .welcome-text {
+        display: inline-block;
+        background: linear-gradient(90deg,
+                #ff5f8a 0%,
+                #ffd2a6 35%,
+                #a7f3d0 68%,
+                #55c8ff 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+        text-shadow: none;
+        filter:
+            drop-shadow(0 2px 0 rgba(255, 255, 255, 0.32)) drop-shadow(0 10px 22px rgba(255, 95, 138, 0.18));
+    }
+
+    /* 首页导航栏标题：渐变字体（显眼但不喧宾夺主） */
+    .home .nav-brand {
+        display: inline-block;
+        background: linear-gradient(90deg,
+                rgba(0, 172, 255, 1) 0%,
+                rgba(72, 219, 187, 0.98) 45%,
+                rgba(255, 110, 155, 0.98) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+        text-shadow: none;
+        filter:
+            drop-shadow(0 1px 0 rgba(255, 255, 255, 0.60)) drop-shadow(0 10px 18px rgba(0, 172, 255, 0.18));
+    }
+}
+
+.home .bio,
+.home .label,
+.home .blog-excerpt,
+.home .blog-meta {
+    color: var(--home-muted);
+}
+
+/* 卡片副标题：使用另一种马卡龙色（与标题色区分） */
+.home .blog-excerpt,
+.home .bio {
+    color: rgba(13, 110, 87, 0.86);
+}
+
+.home .stats {
+    border-top-color: rgba(0, 0, 0, 0.06);
+    border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+
+.home .blog-meta {
+    border-top-color: rgba(0, 0, 0, 0.06);
+}
+
+.home .content-section {
+    background: linear-gradient(135deg,
+            rgba(255, 182, 201, 0.18) 0%,
+            rgba(167, 243, 208, 0.18) 45%,
+            rgba(199, 182, 255, 0.18) 100%);
+}
+
+.home .profile-card {
+    border: var(--card-border-w) solid transparent;
+    background:
+        var(--card-fill-profile) padding-box,
+        linear-gradient(135deg, var(--macaron-pink), var(--macaron-mint), var(--macaron-lavender)) border-box;
+}
+
+.home .blog-card {
+    border: var(--card-border-w) solid transparent;
+    background:
+        var(--card-fill-blog) padding-box,
+        linear-gradient(135deg, var(--macaron-pink), var(--macaron-mint), var(--macaron-lavender)) border-box;
+    --card-merge-bg: rgba(244, 250, 255, 0.92);
+}
+
+/* 首页：让图片与马卡龙渐变背景“完美过渡”（使用同一背景 + mask 淡入） */
+.home .blog-card .blog-image::after {
+    display: none;
+}
+
+.home .blog-card::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(200px - 78px);
+    height: 78px;
+    z-index: 2;
+    pointer-events: none;
+    background:
+        var(--card-fill-blog) padding-box,
+        linear-gradient(135deg, var(--macaron-pink), var(--macaron-mint), var(--macaron-lavender)) border-box;
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 100%);
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 100%);
+}
+
+.home .profile-card:hover {
+    box-shadow: 0 16px 34px rgba(44, 62, 80, 0.16);
+}
+
+.home .avatar {
+    border-color: var(--macaron-lavender);
+}
+
+.home .count {
+    color: #ff86aa;
+}
+
+.home .social-links a:hover {
+    background: linear-gradient(135deg, var(--macaron-sky), var(--macaron-mint));
+    color: #ffffff;
+}
+
 .tags {
     display: flex;
     gap: 8px;
@@ -704,4 +1247,36 @@ body {
     color: var(--primary-color);
     border-radius: 15px;
     font-size: 0.8rem;
+}
+
+/* 首页博客卡片：Tag 马卡龙配色（前三个不同色，底色不透明） */
+.home .blog-card .tags {
+    gap: 10px;
+}
+
+.home .blog-card .tag {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    background: #ffffff;
+    color: rgba(44, 62, 80, 0.88);
+}
+
+.home .blog-card .tag:nth-child(1) {
+    background: #ffb6c9;
+    border-color: rgba(255, 182, 201, 0.85);
+    color: rgba(168, 54, 91, 0.92);
+}
+
+.home .blog-card .tag:nth-child(2) {
+    background: #a7f3d0;
+    border-color: rgba(167, 243, 208, 0.85);
+    color: rgba(13, 110, 87, 0.92);
+}
+
+.home .blog-card .tag:nth-child(3) {
+    background: #ffd2a6;
+    border-color: rgba(255, 210, 166, 0.88);
+    color: rgba(126, 69, 0, 0.92);
 }

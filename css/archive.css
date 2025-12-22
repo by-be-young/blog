@@ -374,3 +374,221 @@
         padding: 12px 12px;
     }
 }
+
+/* =============================
+   归档页马卡龙主题（仅 archive.html 生效）
+   通过 body.archive-page 作用域覆盖全局样式
+   ============================= */
+
+.archive-page {
+    --primary-color: #55c8ff;
+    --secondary-color: #a7f3d0;
+    --archive-pink: #ffb6c9;
+    --archive-peach: #ffd2a6;
+    --archive-mint: #a7f3d0;
+    --archive-sky: #9ad7ff;
+    --archive-text: #2b3440;
+    --archive-muted: #5f6b7a;
+    --archive-card-shadow: 0 16px 34px rgba(44, 62, 80, 0.14);
+    --archive-border: linear-gradient(135deg, var(--archive-pink), var(--archive-mint), rgba(199, 182, 255, 0.9));
+}
+
+/* 导航栏：马卡龙玻璃质感 */
+.archive-page .navbar {
+    background: rgba(255, 255, 255, 0.72);
+    background-image: linear-gradient(90deg,
+            rgba(255, 182, 201, 0.16) 0%,
+            rgba(167, 243, 208, 0.12) 45%,
+            rgba(199, 182, 255, 0.14) 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 10px 24px rgba(44, 62, 80, 0.10);
+}
+
+.archive-page .nav-brand {
+    color: #55c8ff;
+    text-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.6),
+        0 6px 14px rgba(85, 200, 255, 0.22);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+
+    /* 归档页导航栏标题：渐变字体（显眼但不喧宾夺主） */
+    .archive-page .nav-brand {
+        display: inline-block;
+        background: linear-gradient(90deg,
+                rgba(0, 172, 255, 1) 0%,
+                rgba(72, 219, 187, 0.98) 45%,
+                rgba(255, 110, 155, 0.98) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+        text-shadow: none;
+        filter:
+            drop-shadow(0 1px 0 rgba(255, 255, 255, 0.60)) drop-shadow(0 10px 18px rgba(0, 172, 255, 0.16));
+    }
+}
+
+.archive-page .nav-menu a {
+    color: var(--archive-text);
+    background: rgba(255, 255, 255, 0.42);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.archive-page .nav-menu a:hover,
+.archive-page .nav-menu a.active {
+    color: var(--archive-text);
+    background: linear-gradient(135deg, rgba(255, 182, 201, 0.30), rgba(154, 215, 255, 0.22), rgba(167, 243, 208, 0.24));
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+/* 时间轴容器：渐变描边卡片风格 */
+.archive-page .archive-timeline {
+    /* 删除时间轴外层背景框（仅保留竖线） */
+    border: none;
+    border-left: none;
+    background: transparent;
+    backdrop-filter: none;
+    box-shadow: none;
+}
+
+.archive-page .archive-timeline .timeline-dot {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(255, 182, 201, 0.95);
+    box-shadow: 0 8px 18px rgba(44, 62, 80, 0.14);
+}
+
+.archive-page .archive-timeline .timeline-content {
+    border: 3px solid transparent;
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.70), rgba(255, 255, 255, 0.70)) padding-box,
+        linear-gradient(135deg, rgba(255, 182, 201, 0.80), rgba(167, 243, 208, 0.78), rgba(154, 215, 255, 0.78)) border-box;
+    backdrop-filter: blur(10px);
+    border-radius: 14px;
+}
+
+.archive-page .archive-timeline .timeline-content:hover {
+    box-shadow: 0 14px 28px rgba(44, 62, 80, 0.16);
+}
+
+.archive-page .archive-timeline .timeline-date {
+    color: rgba(85, 200, 255, 0.95);
+}
+
+.archive-page .archive-timeline .timeline-title {
+    color: #ff5f8a;
+}
+
+.archive-page .archive-timeline .timeline-excerpt {
+    color: var(--archive-muted);
+}
+
+/* 侧边日历卡片：渐变描边 */
+.archive-page .calendar-card {
+    border: 4px solid transparent;
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.78)) padding-box,
+        var(--archive-border) border-box;
+    box-shadow: var(--archive-card-shadow);
+}
+
+.archive-page .calendar-toggle-btn.active {
+    background: linear-gradient(135deg, rgba(255, 182, 201, 0.95), rgba(154, 215, 255, 0.90), rgba(167, 243, 208, 0.92));
+}
+
+.archive-page .cal-cell.has-posts::before,
+.archive-page .cal-month.has-posts::before {
+    background: linear-gradient(135deg, rgba(255, 182, 201, 0.95), rgba(167, 243, 208, 0.95));
+}
+
+.archive-page .timeline-item.flash .timeline-content {
+    box-shadow: 0 0 0 3px rgba(255, 182, 201, 0.30), 0 14px 28px rgba(44, 62, 80, 0.16);
+}
+
+/* =============================
+   时间轴“滚筒式”布局
+   - 容器可滚动 + scroll-snap 居中吸附
+   - JS 写入 --d/--ad 变量实现 3D 轮盘效果
+   ============================= */
+
+.archive-page .archive-timeline.drum {
+    padding-top: var(--drum-pad, 38vh);
+    padding-bottom: var(--drum-pad, 38vh);
+    max-height: calc(100vh - 170px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-snap-type: y mandatory;
+    scroll-padding-top: var(--drum-pad, 38vh);
+    scroll-padding-bottom: var(--drum-pad, 38vh);
+    perspective: 900px;
+    -webkit-overflow-scrolling: touch;
+    mask-image: linear-gradient(to bottom, transparent 0%, #000 12%, #000 88%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 12%, #000 88%, transparent 100%);
+}
+
+.archive-page .archive-timeline.drum:focus {
+    outline: none;
+}
+
+.archive-page .archive-timeline.drum .timeline-item {
+    margin: 0;
+    padding: 16px 0;
+    scroll-snap-align: center;
+    display: flex;
+    justify-content: center;
+}
+
+.archive-page .archive-timeline.drum .timeline-dot {
+    display: none;
+}
+
+.archive-page .archive-timeline.drum .timeline-content {
+    margin-left: 0;
+    width: min(760px, 100%);
+    transform-style: preserve-3d;
+    transform:
+        translateZ(calc((1 - var(--ad, 0)) * 40px)) rotateX(calc(var(--d, 0) * -24deg)) scale(clamp(0.86, calc(1 - var(--ad, 0) * 0.14), 1));
+    opacity: clamp(0.35, calc(1 - var(--ad, 0) * 0.55), 1);
+    filter: saturate(clamp(0.72, calc(1 - var(--ad, 0) * 0.25), 1));
+    will-change: transform, opacity;
+}
+
+/* 滚筒时间轴滚动条（马卡龙色系，局部作用域） */
+.archive-page .archive-timeline.drum {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 182, 201, 0.85) rgba(255, 255, 255, 0.35);
+}
+
+.archive-page .archive-timeline.drum::-webkit-scrollbar {
+    width: 10px;
+}
+
+.archive-page .archive-timeline.drum::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.archive-page .archive-timeline.drum::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    border: 2px solid rgba(255, 255, 255, 0.55);
+    background-image: linear-gradient(135deg,
+            rgba(255, 182, 201, 0.95),
+            rgba(154, 215, 255, 0.90),
+            rgba(167, 243, 208, 0.92));
+    box-shadow: 0 10px 18px rgba(44, 62, 80, 0.14);
+}
+
+.archive-page .archive-timeline.drum::-webkit-scrollbar-thumb:hover {
+    background-image: linear-gradient(135deg,
+            rgba(255, 182, 201, 1),
+            rgba(154, 215, 255, 0.98),
+            rgba(167, 243, 208, 1));
+}
+
+@media (max-width: 900px) {
+    .archive-page .archive-timeline.drum {
+        max-height: calc(100vh - 160px);
+    }
+}

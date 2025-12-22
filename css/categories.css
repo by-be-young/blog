@@ -248,3 +248,137 @@
 .categories-container.is-collapsed .categories-collapsed {
     display: block;
 }
+
+/* =============================
+   分类页马卡龙主题（仅 categories.html 生效）
+   通过 body.categories-page 作用域覆盖全局样式
+   ============================= */
+
+.categories-page {
+    --primary-color: #55c8ff;
+    --secondary-color: #a7f3d0;
+    --cat-pink: #ffb6c9;
+    --cat-peach: #ffd2a6;
+    --cat-mint: #a7f3d0;
+    --cat-sky: #9ad7ff;
+    --cat-text: #2b3440;
+    --cat-muted: #5f6b7a;
+    --cat-shadow: 0 16px 34px rgba(44, 62, 80, 0.14);
+    --cat-border: linear-gradient(135deg, rgba(255, 182, 201, 0.95), rgba(154, 215, 255, 0.92), rgba(167, 243, 208, 0.92));
+}
+
+/* 导航栏：与首页/归档一致的马卡龙玻璃质感 */
+.categories-page .navbar {
+    background: rgba(255, 255, 255, 0.72);
+    background-image: linear-gradient(90deg,
+            rgba(255, 182, 201, 0.16) 0%,
+            rgba(167, 243, 208, 0.12) 45%,
+            rgba(199, 182, 255, 0.14) 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 10px 24px rgba(44, 62, 80, 0.10);
+}
+
+.categories-page .nav-menu a {
+    color: var(--cat-text);
+    background: rgba(255, 255, 255, 0.42);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.categories-page .nav-menu a:hover,
+.categories-page .nav-menu a.active {
+    color: var(--cat-text);
+    background: linear-gradient(135deg, rgba(255, 182, 201, 0.30), rgba(154, 215, 255, 0.22), rgba(167, 243, 208, 0.24));
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+.categories-page .nav-toggle {
+    color: var(--cat-text);
+}
+
+.categories-page .nav-brand {
+    color: #55c8ff;
+    text-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.6),
+        0 6px 14px rgba(85, 200, 255, 0.22);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+
+    /* 分类页导航栏标题：渐变字体（加深一档，显眼但克制） */
+    .categories-page .nav-brand {
+        display: inline-block;
+        background: linear-gradient(90deg,
+                rgba(0, 172, 255, 1) 0%,
+                rgba(72, 219, 187, 0.98) 45%,
+                rgba(255, 110, 155, 0.98) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+        text-shadow: none;
+        filter:
+            drop-shadow(0 1px 0 rgba(255, 255, 255, 0.60)) drop-shadow(0 10px 18px rgba(0, 172, 255, 0.16));
+    }
+}
+
+/* 顶部筛选面板：去左右色条，改为渐变描边卡片 */
+.categories-page .categories-container {
+    border-left: none;
+    border-right: none;
+    border: 4px solid transparent;
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.78)) padding-box,
+        var(--cat-border) border-box;
+    box-shadow: var(--cat-shadow);
+}
+
+.categories-page .categories-panel-title,
+.categories-page .category-level,
+.categories-page .categories-collapsed {
+    background: rgba(255, 255, 255, 0.55);
+    border-color: rgba(0, 0, 0, 0.04);
+    color: var(--cat-text);
+}
+
+.categories-page .categories-panel-title::before,
+.categories-page .category-title::before {
+    background: linear-gradient(135deg, rgba(255, 182, 201, 0.95), rgba(154, 215, 255, 0.92), rgba(167, 243, 208, 0.92));
+}
+
+/* 标签：选中态使用马卡龙渐变 */
+.categories-page .category-tag {
+    background: rgba(255, 255, 255, 0.70);
+    color: var(--cat-text);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+.categories-page .category-tag.selected,
+.categories-page .category-tag:hover {
+    background: linear-gradient(135deg, rgba(255, 182, 201, 0.95), rgba(154, 215, 255, 0.90), rgba(167, 243, 208, 0.92));
+    color: #fff;
+}
+
+.categories-page .categories-collapsed-tag {
+    background: linear-gradient(135deg, rgba(255, 182, 201, 0.95), rgba(154, 215, 255, 0.90), rgba(167, 243, 208, 0.92));
+}
+
+/* 博客列表卡片：渐变描边 + 柔和文本 */
+.categories-page .blog-item {
+    border: 3px solid transparent;
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0.76)) padding-box,
+        var(--cat-border) border-box;
+    box-shadow: 0 10px 22px rgba(44, 62, 80, 0.10);
+}
+
+.categories-page .blog-item::before {
+    display: none;
+}
+
+.categories-page .blog-title {
+    color: #ff5f8a;
+}
+
+.categories-page .blog-excerpt {
+    color: rgba(13, 110, 87, 0.86);
+}
