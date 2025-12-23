@@ -1,5 +1,18 @@
 [
     {
+        "id": 216542656,
+        "title": "卜算子·元旦晚会",
+        "excerpt": "记25-26年元旦晚会全天经历",
+        "date": "2025-12-21",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "文学",
+            "词",
+            "卜算子"
+        ],
+        "contentFile": "blogs/卜算子·元旦晚会.md"
+    },
+    {
         "id": 667318263,
         "title": "Cache实验轻松学——part1",
         "excerpt": "C语言模拟Cache存储操作",
