@@ -24,6 +24,11 @@
                     "title": "Connor大佬的博客",
                     "url": "https://connorz.site/",
                     "image": "assets/blog_bg.png"
+                },
+                {
+                    "title": "Rainel学长的博客",
+                    "url": "https://rainel.site/",
+                    "image": "assets/images/bg2.png"
                 }
             ]
         },
@@ -61,6 +66,11 @@
                     "title": "Pat Pat (Java)",
                     "url": "http://10.251.255.164/login",
                     "image": "assets/images/bg1.png"
+                },
+                {
+                    "title": "洛谷",
+                    "url": "https://www.luogu.com.cn/",
+                    "image": "assets/images/bg2.png"
                 }
             ]
         },
