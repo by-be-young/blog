@@ -1,0 +1,84 @@
+{
+    "categories": [
+        {
+            "key": "personal",
+            "label": "个人",
+            "items": [
+                {
+                    "title": "GitHub",
+                    "url": "https://github.com/by-be-young",
+                    "image": "assets/images/bg1.png"
+                },
+                {
+                    "title": "明日方舟答题网站",
+                    "url": "https://by-be-young.github.io/arknights_test/",
+                    "image": "assets/images/bg2.png"
+                }
+            ]
+        },
+        {
+            "key": "friends",
+            "label": "友链",
+            "items": [
+                {
+                    "title": "Connor大佬的博客",
+                    "url": "https://connorz.site/",
+                    "image": "assets/blog_bg.png"
+                }
+            ]
+        },
+        {
+            "key": "Beihang",
+            "label": "北航",
+            "items": [
+                {
+                    "title": "智学北航",
+                    "url": "https://spoc.buaa.edu.cn/spocnew/common/zycskzy?initData_props=1711526076221d6fc6f5279ef3c22778fd9524c64c918ff",
+                    "image": "assets/blog_bg.png"
+                },
+                {
+                    "title": "本研教务系统",
+                    "url": "https://byxt.buaa.edu.cn/jwapp/sys/jwsybuaa/login/index.html",
+                    "image": "assets/images/bg2.png"
+                },
+                {
+                    "title": "校园网",
+                    "url": "https://gw.buaa.edu.cn/srun_portal_success?ac_id=1&theme=buaa",
+                    "image": "assets/images/bg2.png"
+                }
+            ]
+        },
+        {
+            "key": "Study",
+            "label": "学习",
+            "items": [
+                {
+                    "title": "ACCoding",
+                    "url": "https://accoding.buaa.edu.cn/index",
+                    "image": "assets/images/bg2.png"
+                },
+                {
+                    "title": "Pat Pat (Java)",
+                    "url": "http://10.251.255.164/login",
+                    "image": "assets/images/bg1.png"
+                }
+            ]
+        },
+        {
+            "key": "fun",
+            "label": "娱乐",
+            "items": [
+                {
+                    "title": "哔哩哔哩",
+                    "url": "https://www.bilibili.com/",
+                    "image": "assets/images/bg2.png"
+                },
+                {
+                    "title": "PRTS wiki",
+                    "url": "https://prts.wiki/",
+                    "image": "assets/images/bg1.png"
+                }
+            ]
+        }
+    ]
+}

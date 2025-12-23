@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>快速链接 | Be Young's Blog</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/quick-links.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="quick-links-page">
+    <div class="slideshow" aria-hidden="true">
+        <div class="slide active" style="background-image: url('assets/images/bg1.png');"></div>
+        <div class="slide" style="background-image: url('assets/images/bg2.png');"></div>
+        <div class="slide" style="background-image: url('assets/images/bg3.png');"></div>
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">Be Young's Blog</div>
+            <ul class="nav-menu">
+                <li><a href="index.html"><i class="fas fa-home"></i> 首页 Home</a></li>
+                <li><a href="archive.html"><i class="fas fa-archive"></i> 归档 Archive</a></li>
+                <li><a href="categories.html"><i class="fas fa-tags"></i> 分类 Categories</a></li>
+                <li><a href="quick-links.html" class="active"><i class="fas fa-link"></i> 快速链接 Links</a></li>
+            </ul>
+            <div class="nav-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="quick-links-section">
+            <div class="quick-links-layout">
+                <aside class="quick-links-sidebar" aria-label="快速链接分类">
+                    <div class="quick-links-panel">
+                        <div class="quick-links-wheel-wrap" aria-label="分类选择">
+                            <div class="quick-links-wheel" id="quickLinksWheel" role="listbox" tabindex="0"
+                                aria-label="分类选择（上下滚动或方向键切换）">
+                                <!-- 由 JS 渲染：个人/友链/娱乐 -->
+                            </div>
+                            <div class="quick-links-wheel-highlight" aria-hidden="true"></div>
+                        </div>
+                    </div>
+                </aside>
+
+                <div class="quick-links-main">
+                    <div class="quick-links-grid" id="quickLinksGrid" aria-label="链接列表">
+                        <!-- 由 JS 渲染：卡片（图片/标题/地址） -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/slideshow.js"></script>
+    <script src="js/quick-links.js"></script>
+</body>
+
+</html>

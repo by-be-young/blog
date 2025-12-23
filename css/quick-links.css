@@ -1,0 +1,341 @@
+/* =============================
+   快速链接页：布局 + 马卡龙主题（仅 quick-links.html 生效）
+   ============================= */
+
+.quick-links-page {
+    --primary-color: #55c8ff;
+    --secondary-color: #a7f3d0;
+
+    --ql-pink: #ffb6c9;
+    --ql-peach: #ffd2a6;
+    --ql-mint: #a7f3d0;
+    --ql-sky: #9ad7ff;
+    --ql-lavender: #c7b6ff;
+
+    --ql-text: #2b3440;
+    --ql-muted: #5f6b7a;
+    --ql-shadow: 0 16px 34px rgba(44, 62, 80, 0.14);
+    --ql-border: linear-gradient(135deg,
+            rgba(255, 182, 201, 0.95),
+            rgba(154, 215, 255, 0.92),
+            rgba(167, 243, 208, 0.92));
+}
+
+/* 导航栏：与分类页一致的玻璃质感 */
+.quick-links-page .navbar {
+    background: rgba(255, 255, 255, 0.72);
+    background-image: linear-gradient(90deg,
+            rgba(255, 182, 201, 0.16) 0%,
+            rgba(167, 243, 208, 0.12) 45%,
+            rgba(199, 182, 255, 0.14) 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 10px 24px rgba(44, 62, 80, 0.10);
+}
+
+.quick-links-page .nav-menu a {
+    color: var(--ql-text);
+    background: rgba(255, 255, 255, 0.42);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.quick-links-page .nav-menu a:hover,
+.quick-links-page .nav-menu a.active {
+    color: var(--ql-text);
+    background: linear-gradient(135deg, rgba(255, 182, 201, 0.30), rgba(154, 215, 255, 0.22), rgba(167, 243, 208, 0.24));
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+.quick-links-page .nav-toggle {
+    color: var(--ql-text);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .quick-links-page .nav-brand {
+        display: inline-block;
+        background: linear-gradient(90deg,
+                rgba(0, 172, 255, 1) 0%,
+                rgba(72, 219, 187, 0.98) 45%,
+                rgba(255, 110, 155, 0.98) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+        text-shadow: none;
+        filter:
+            drop-shadow(0 1px 0 rgba(255, 255, 255, 0.60)) drop-shadow(0 10px 18px rgba(0, 172, 255, 0.16));
+    }
+}
+
+.quick-links-section {
+    padding-top: 80px;
+    padding-bottom: 40px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.quick-links-layout {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    gap: 22px;
+    align-items: flex-start;
+}
+
+.quick-links-sidebar {
+    width: 300px;
+    flex: 0 0 300px;
+    position: sticky;
+    top: 50vh;
+    transform: translateY(-8%);
+}
+
+.quick-links-panel {
+    position: relative;
+    backdrop-filter: blur(14px);
+    border-radius: 18px;
+    border: 4px solid transparent;
+    background:
+        /* 背景框：中部更不透明、上下两端完全透明 */
+        linear-gradient(to bottom,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.86) 50%,
+            rgba(255, 255, 255, 0) 100%) padding-box,
+        var(--ql-border) border-box;
+    box-shadow: var(--ql-shadow);
+    overflow: hidden;
+    padding: 18px;
+}
+
+.quick-links-panel::before {
+    /* 取消叠加层：否则会把上下端染白，破坏“完全透明” */
+    content: none;
+}
+
+/* =============================
+   左侧分类：隐形转盘滚轮选择器
+   - 无标题
+   - 上下滚动/方向键切换
+   - 中心项高亮
+   ============================= */
+
+.quick-links-wheel-wrap {
+    position: relative;
+    z-index: 1;
+}
+
+/* 上下渐隐（让滚轮更“隐形”） */
+.quick-links-wheel-wrap::before,
+.quick-links-wheel-wrap::after {
+    /* 两端需要“完全透明”，因此不再叠加顶部/底部发白遮罩 */
+    content: none;
+}
+
+.quick-links-wheel {
+    --wheel-item-height: 58px;
+    height: 600px;
+    padding: 136px 12px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    border-radius: 16px;
+    /* 中部更不透明、上下两端完全透明 */
+    background: linear-gradient(to bottom,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.82) 50%,
+            rgba(255, 255, 255, 0) 100%);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(10px);
+
+    position: relative;
+    z-index: 2;
+
+    /* 隐藏滚动条 */
+    scrollbar-width: none;
+
+    /* 3D 透视放在容器上，避免每个 item 单独透视导致不稳定 */
+    perspective: 560px;
+    transform-style: preserve-3d;
+}
+
+.quick-links-wheel::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.quick-links-wheel:focus-visible {
+    outline: 2px solid rgba(85, 200, 255, 0.65);
+    outline-offset: 3px;
+}
+
+.quick-links-wheel-item {
+    height: var(--wheel-item-height);
+    scroll-snap-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 16px;
+    padding: 0 14px;
+    margin: 6px 0;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: rgba(255, 255, 255, 0.55);
+    color: var(--ql-text);
+    font-weight: 900;
+    letter-spacing: 0.6px;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 120ms ease, opacity 120ms ease, filter 120ms ease, background 180ms ease, color 180ms ease;
+    will-change: transform, opacity;
+
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+}
+
+.quick-links-wheel-item.is-selected {
+    background: linear-gradient(135deg, rgba(255, 182, 201, 0.95), rgba(154, 215, 255, 0.90), rgba(167, 243, 208, 0.92));
+    color: #fff;
+    border-color: rgba(0, 0, 0, 0.06);
+    transform: scale(1.06);
+    filter: none;
+    opacity: 1;
+}
+
+/* 中心高亮带（更像“转盘选中框”） */
+.quick-links-wheel-highlight {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 66px;
+    border-radius: 16px;
+    border: 3px solid transparent;
+    background:
+        linear-gradient(transparent, transparent) padding-box,
+        var(--ql-border) border-box;
+    box-shadow: none;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.quick-links-main {
+    flex: 1;
+    min-width: 0;
+    /* 预留高度，避免切换到卡片很少的分类时页面高度骤降引发“跳顶” */
+    min-height: calc(100vh - 140px);
+}
+
+.quick-links-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    align-content: start;
+    min-height: calc(100vh - 140px);
+}
+
+@media (max-width: 980px) {
+    .quick-links-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* 卡片：图片 + 标题 + 地址 */
+.link-card {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+
+    position: relative;
+    border-radius: 18px;
+    overflow: hidden;
+
+    border: 3px solid transparent;
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.82)) padding-box,
+        var(--ql-border) border-box;
+
+    box-shadow: 0 10px 22px rgba(44, 62, 80, 0.10);
+    transition: var(--transition);
+}
+
+.link-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 36px rgba(44, 62, 80, 0.16);
+}
+
+.link-card-media {
+    height: 170px;
+    overflow: hidden;
+    position: relative;
+}
+
+.link-card-media::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 78px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.92) 100%);
+    pointer-events: none;
+}
+
+.link-card-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.link-card-body {
+    padding: 16px 18px 18px 18px;
+}
+
+.link-card-title {
+    font-size: 1.12rem;
+    font-weight: 900;
+    color: #ff5f8a;
+    margin-bottom: 8px;
+}
+
+.link-card-url {
+    font-size: 0.95rem;
+    color: rgba(13, 110, 87, 0.86);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: normal;
+}
+
+.link-empty {
+    background: rgba(255, 255, 255, 0.82);
+    border-radius: 18px;
+    padding: 18px;
+    border: 3px solid transparent;
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.78)) padding-box,
+        var(--ql-border) border-box;
+    box-shadow: 0 10px 22px rgba(44, 62, 80, 0.10);
+    color: var(--ql-muted);
+    font-weight: 700;
+}
+
+@media (max-width: 860px) {
+    .quick-links-layout {
+        flex-direction: column;
+    }
+
+    .quick-links-sidebar {
+        width: 100%;
+        flex: 0 0 auto;
+        position: static;
+        top: auto;
+        transform: none;
+    }
+
+    .quick-links-wheel {
+        height: 340px;
+        padding: 122px 12px;
+    }
+}
