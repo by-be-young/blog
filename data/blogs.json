@@ -13,19 +13,6 @@
         "contentFile": "blogs/卜算子·元旦晚会.md"
     },
     {
-        "id": 667318263,
-        "title": "Cache实验轻松学——part1",
-        "excerpt": "C语言模拟Cache存储操作",
-        "date": "2025-12-18",
-        "image": "assets/images/blog_bg.png",
-        "tags": [
-            "学习",
-            "计组",
-            "Cache实验"
-        ],
-        "contentFile": "blogs/Cache_lab_part1.md"
-    },
-    {
         "id": 238031024,
         "title": "Cache理论轻松学",
         "excerpt": "Cache的基本概念、工作原理及映射机制",
