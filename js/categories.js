@@ -2,52 +2,256 @@
 let blogsData = [];
 let selectedTags = [];
 
-let isCollapsed = false;
-let scrollTicking = false;
+const MAX_LEVELS = 3;
+const wheelTimers = new Map();
+const programmaticUntil = new Map();
 
-function getLowestSelectedTag() {
-    return selectedTags.length ? selectedTags[selectedTags.length - 1] : null;
+function clamp(n, min, max) {
+    return Math.max(min, Math.min(max, n));
 }
 
-function updateCollapsedState() {
-    const container = document.getElementById('categoriesContainer');
-    if (!container) return;
-
-    // 没有任何选择时不收起（避免只剩空面板）
-    const hasSelection = selectedTags.length > 0;
-    const shouldCollapse = hasSelection && window.scrollY > 140;
-    isCollapsed = shouldCollapse;
-    container.classList.toggle('is-collapsed', isCollapsed);
-
-    const summaryTag = document.getElementById('categoriesCollapsedTag');
-    if (summaryTag) {
-        const lowest = getLowestSelectedTag();
-        summaryTag.textContent = lowest ?? '';
-    }
-}
-
-window.addEventListener('scroll', () => {
-    if (scrollTicking) return;
-    scrollTicking = true;
-    window.requestAnimationFrame(() => {
-        updateCollapsedState();
-        scrollTicking = false;
-    });
-});
-
-function renderCategories() {
-    // 统计所有tag的多级结构
+function buildTagTree() {
     const tagTree = {};
     blogsData.forEach(blog => {
+        const tags = Array.isArray(blog.tags) ? blog.tags.slice(0, MAX_LEVELS) : [];
+        if (!tags.length) return;
+
         let node = tagTree;
-        blog.tags.forEach((tag, i) => {
-            if (!node[tag]) node[tag] = (i === blog.tags.length - 1) ? [] : {};
-            if (i === blog.tags.length - 1) node[tag].push(blog);
+        tags.forEach((tag, i) => {
+            const isLeaf = i === tags.length - 1;
+            if (!node[tag]) node[tag] = isLeaf ? [] : {};
+            if (isLeaf) node[tag].push(blog);
             else node = node[tag];
         });
     });
-    // 渲染多级tag选择
+    return tagTree;
+}
+
+function getTagsAtLevel(tagTree, level) {
+    let node = tagTree;
+    for (let i = 0; i < level; i++) {
+        const key = selectedTags[i];
+        if (!key) return [];
+        node = node && typeof node === 'object' ? node[key] : null;
+        if (!node || Array.isArray(node)) return [];
+    }
+    if (!node || Array.isArray(node)) return [];
+    return Object.keys(node);
+}
+
+function getSelectedIndex(tags, level) {
+    if (!tags.length) return -1;
+    const sel = selectedTags[level];
+    if (!sel) return 0;
+    const idx = tags.indexOf(sel);
+    return idx >= 0 ? idx : 0;
+}
+
+function adjustWheelPadding(wheelEl) {
+    const first = wheelEl.querySelector('.wheel-item');
+    if (!first) return;
+    const itemH = first.getBoundingClientRect().height || 54;
+    const wheelH = wheelEl.getBoundingClientRect().height;
+    const pad = Math.max(0, Math.round(wheelH / 2 - itemH / 2));
+    wheelEl.style.paddingTop = `${pad}px`;
+    wheelEl.style.paddingBottom = `${pad}px`;
+}
+
+function getWheelCenterY(wheelEl) {
+    return wheelEl.scrollTop + wheelEl.clientHeight / 2;
+}
+
+function findClosestWheelIndex(wheelEl) {
+    const items = Array.from(wheelEl.querySelectorAll('.wheel-item'));
+    if (!items.length) return -1;
+    const centerY = getWheelCenterY(wheelEl);
+    let bestIdx = 0;
+    let bestDist = Infinity;
+    for (let i = 0; i < items.length; i++) {
+        const it = items[i];
+        const itemCenter = it.offsetTop + it.offsetHeight / 2;
+        const dist = Math.abs(itemCenter - centerY);
+        if (dist < bestDist) {
+            bestDist = dist;
+            bestIdx = i;
+        }
+    }
+    return bestIdx;
+}
+
+function applyWheelVisuals(wheelEl) {
+    const items = Array.from(wheelEl.querySelectorAll('.wheel-item'));
+    if (!items.length) return;
+    const centerY = getWheelCenterY(wheelEl);
+    const itemH = items[0].offsetHeight || 54;
+
+    for (const it of items) {
+        const itemCenter = it.offsetTop + it.offsetHeight / 2;
+        const d = itemCenter - centerY;
+        const steps = d / itemH;
+        const abs = Math.abs(steps);
+
+        const opacity = clamp(1 - abs * 0.28, 0, 1);
+        const scale = clamp(1 - abs * 0.08, 0.78, 1);
+        const rotateX = clamp(steps * 10, -50, 50);
+        const blur = clamp(abs * 0.6, 0, 2.2);
+
+        it.style.opacity = `${opacity}`;
+        it.style.transform = `rotateX(${rotateX}deg) translateZ(${(1 - abs) * 10}px) scale(${scale})`;
+        it.style.filter = `blur(${blur}px)`;
+    }
+
+    const idx = findClosestWheelIndex(wheelEl);
+    items.forEach((it, i) => it.classList.toggle('is-center', i === idx));
+
+    // 更新覆盖三列的选中框（如果在一个 .categories-wheel-row 下，复用同一个框）
+    try {
+        const wheelRow = wheelEl.closest('.categories-wheel-row');
+        if (wheelRow) {
+            let frame = wheelRow.querySelector('.wheel-selected-frame');
+            if (!frame) {
+                frame = document.createElement('div');
+                frame.className = 'wheel-selected-frame';
+                frame.setAttribute('aria-hidden', 'true');
+                wheelRow.appendChild(frame);
+            }
+
+            // 若框为首次插入（render 时标记），在首次设置位置时禁用 transition
+            const isInitial = frame.dataset.initial === 'true';
+            if (isInitial) {
+                frame.style.transition = 'none';
+            }
+
+            const wheelRect = wheelEl.getBoundingClientRect();
+            const rowRect = wheelRow.getBoundingClientRect();
+            const centerY_in_row = (wheelRect.top - rowRect.top) + (wheelEl.clientHeight / 2);
+            // 使选中框略高一些以增强视觉（额外高度由 extraHeight 控制）
+            const extraHeight = 8; // px，可按需调整
+            const frameH = Math.round(itemH + extraHeight);
+            const topPx = Math.round(centerY_in_row - frameH / 2);
+
+            frame.style.height = `${frameH}px`;
+            frame.style.top = `${topPx}px`;
+
+            if (isInitial) {
+                // 清除标记并在下一帧恢复 CSS 中定义的过渡
+                delete frame.dataset.initial;
+                window.requestAnimationFrame(() => {
+                    frame.style.transition = '';
+                });
+            }
+        }
+    } catch (err) {
+        // 安全降级：若位置计算失败，不阻塞主流程
+        // console.warn('wheel frame update failed', err);
+    }
+}
+
+function scrollItemIntoCenter(wheelEl, index, behavior = 'smooth') {
+    const items = Array.from(wheelEl.querySelectorAll('.wheel-item'));
+    if (!items.length) return;
+    const idx = clamp(index, 0, items.length - 1);
+    const it = items[idx];
+    const target = it.offsetTop + it.offsetHeight / 2 - wheelEl.clientHeight / 2;
+    programmaticUntil.set(wheelEl, Date.now() + 220);
+    wheelEl.scrollTo({ top: target, behavior });
+}
+
+function setSelectedTag(level, tag) {
+    const current = selectedTags[level];
+    if (current === tag) return false;
+
+    selectedTags = selectedTags.slice(0, level);
+    if (tag != null) selectedTags[level] = tag;
+    return true;
+}
+
+function scheduleSnap(wheelEl, onSnap) {
+    const prev = wheelTimers.get(wheelEl);
+    if (prev) window.clearTimeout(prev);
+    wheelTimers.set(wheelEl, window.setTimeout(() => {
+        const idx = findClosestWheelIndex(wheelEl);
+        scrollItemIntoCenter(wheelEl, idx, 'smooth');
+        if (typeof onSnap === 'function') onSnap(idx);
+    }, 140));
+}
+
+function bindWheelInteractions(wheelEl, level, tags) {
+    const now = Date.now();
+
+    applyWheelVisuals(wheelEl);
+
+    wheelEl.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY;
+        wheelEl.scrollTop += delta * 0.55;
+    }, { passive: false });
+
+    wheelEl.addEventListener('scroll', () => {
+        const until = programmaticUntil.get(wheelEl) || 0;
+        applyWheelVisuals(wheelEl);
+        if (Date.now() < until) return;
+        scheduleSnap(wheelEl, (idx) => {
+            const tag = tags[idx];
+            const changed = setSelectedTag(level, tag);
+            if (changed) {
+                renderCategories();
+                renderBlogList();
+            }
+        });
+    });
+
+    wheelEl.addEventListener('click', (e) => {
+        const target = e.target.closest('.wheel-item');
+        if (!target) return;
+        const idx = Number(target.dataset.index);
+        if (Number.isNaN(idx)) return;
+        scrollItemIntoCenter(wheelEl, idx, 'smooth');
+        const changed = setSelectedTag(level, tags[idx]);
+        if (changed) {
+            renderCategories();
+            renderBlogList();
+        }
+        try {
+            wheelEl.focus({ preventScroll: true });
+        } catch (e) {
+            // 某些旧浏览器可能不支持 preventScroll 选项，退回到默认行为
+            wheelEl.focus();
+        }
+    });
+
+    wheelEl.addEventListener('keydown', (e) => {
+        if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+        e.preventDefault();
+        const idx = findClosestWheelIndex(wheelEl);
+        const next = idx + (e.key === 'ArrowDown' ? 1 : -1);
+        scrollItemIntoCenter(wheelEl, next, 'smooth');
+        const newIdx = clamp(next, 0, tags.length - 1);
+        const changed = setSelectedTag(level, tags[newIdx]);
+        if (changed) {
+            renderCategories();
+            renderBlogList();
+        }
+    });
+
+    // 初次渲染后对齐到当前选项
+    if (now) {
+        const selectedIndex = getSelectedIndex(tags, level);
+        window.requestAnimationFrame(() => {
+            adjustWheelPadding(wheelEl);
+            scrollItemIntoCenter(wheelEl, selectedIndex, 'auto');
+            applyWheelVisuals(wheelEl);
+        });
+    }
+}
+
+function renderCategories() {
+    const tagTree = buildTagTree();
+
     const container = document.getElementById('categoriesContainer');
+    // 防止清空重建时容器高度塌陷引起页面微移：先固定当前高度
+    const prevH = container.getBoundingClientRect().height || container.offsetHeight || 0;
+    if (prevH > 0) container.style.minHeight = `${prevH}px`;
     container.innerHTML = '';
 
     const panelTitle = document.createElement('div');
@@ -55,46 +259,52 @@ function renderCategories() {
     panelTitle.textContent = '筛选相关博客';
     container.appendChild(panelTitle);
 
-    const collapsedSummary = document.createElement('div');
-    collapsedSummary.className = 'categories-collapsed';
-    collapsedSummary.innerHTML = `<span class="categories-collapsed-tag" id="categoriesCollapsedTag"></span>`;
-    container.appendChild(collapsedSummary);
+    const wheelRow = document.createElement('div');
+    wheelRow.className = 'categories-wheel-row';
+    container.appendChild(wheelRow);
+    // 预创建覆盖三列的选中框，避免首次动态创建时引起布局跳动
+    const preFrame = document.createElement('div');
+    preFrame.className = 'wheel-selected-frame';
+    preFrame.setAttribute('aria-hidden', 'true');
+    // 标记首次插入，首次位置设置时禁用过渡以避免跳动
+    preFrame.dataset.initial = 'true';
+    wheelRow.appendChild(preFrame);
 
-    // 先同步一次收起状态/文案（避免首次渲染为空）
-    updateCollapsedState();
-
-    let node = tagTree;
-    for (let level = 0; level < 3; level++) {
-        const tags = node && typeof node === 'object' && !Array.isArray(node) ? Object.keys(node) : [];
+    const labels = ['领域', '科目', '主题'];
+    for (let level = 0; level < MAX_LEVELS; level++) {
+        const tags = getTagsAtLevel(tagTree, level);
         if (!tags.length) break;
-        const levelDiv = document.createElement('div');
-        levelDiv.className = 'category-level';
-        levelDiv.innerHTML = `<div class="category-title">${['选择领域', '选择科目', '选择主题'][level]}</div>`;
-        const listDiv = document.createElement('div');
-        listDiv.className = 'category-list';
-        tags.forEach(tag => {
-            const tagDiv = document.createElement('div');
-            tagDiv.className = 'category-tag' + (selectedTags[level] === tag ? ' selected' : '');
-            tagDiv.textContent = tag;
-            tagDiv.onclick = () => {
-                // 再次点击已选择的 tag：取消该层及其下级选择
-                if (selectedTags[level] === tag) {
-                    selectedTags = selectedTags.slice(0, level);
-                } else {
-                    selectedTags = selectedTags.slice(0, level);
-                    selectedTags[level] = tag;
-                }
-                renderCategories();
-                renderBlogList();
-                updateCollapsedState();
-            };
-            listDiv.appendChild(tagDiv);
+
+        const wrap = document.createElement('div');
+        wrap.className = 'categories-wheel-wrap';
+
+        const label = document.createElement('div');
+        label.className = 'categories-wheel-label';
+        label.textContent = labels[level];
+        wrap.appendChild(label);
+
+        const wheel = document.createElement('div');
+        wheel.className = 'categories-wheel';
+        wheel.setAttribute('role', 'listbox');
+        wheel.setAttribute('tabindex', '0');
+        wheel.setAttribute('aria-label', `${labels[level]}筛选`);
+
+        tags.forEach((tag, idx) => {
+            const item = document.createElement('div');
+            item.className = 'wheel-item' + (selectedTags[level] === tag ? ' is-selected' : '');
+            item.textContent = tag;
+            item.dataset.index = String(idx);
+            wheel.appendChild(item);
         });
-        levelDiv.appendChild(listDiv);
-        container.appendChild(levelDiv);
-        node = node[selectedTags[level]];
-        if (!node) break;
+
+        wrap.appendChild(wheel);
+        wheelRow.appendChild(wrap);
+
+        bindWheelInteractions(wheel, level, tags);
     }
+
+    // 重建完成后恢复高度约束
+    container.style.minHeight = '';
 }
 
 function renderBlogList() {
@@ -124,5 +334,4 @@ fetch('data/blogs.json')
         blogsData = blogs;
         renderCategories();
         renderBlogList();
-        updateCollapsedState();
     });

@@ -71,6 +71,11 @@
                     "title": "洛谷",
                     "url": "https://www.luogu.com.cn/",
                     "image": "assets/images/bg2.png"
+                },
+                {
+                    "title": "大二上学习资料仓库",
+                    "url": "https://github.com/Soft-Where-21",
+                    "image": "assets/images/bg3.png"
                 }
             ]
         },

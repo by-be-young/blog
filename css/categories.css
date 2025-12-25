@@ -6,6 +6,23 @@
     padding-right: 20px;
 }
 
+.categories-layout {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    /* 左侧分类框适当加宽以匹配更大的页面宽度 */
+    grid-template-columns: 460px 1fr;
+    gap: 28px;
+    align-items: start;
+}
+
+.categories-sidebar {
+    position: sticky;
+    top: 50vh;
+    transform: translateY(30%);
+    z-index: 20;
+}
+
 .categories-section .page-title {
     text-align: center;
     margin: 0 0 24px 0;
@@ -13,11 +30,7 @@
 }
 
 .categories-container {
-    max-width: 900px;
-    margin: 0 auto;
-    position: sticky;
-    top: 88px;
-    z-index: 20;
+    width: 100%;
     overflow: hidden;
     background: rgba(255, 255, 255, 0.82);
     backdrop-filter: blur(14px);
@@ -63,6 +76,143 @@
     box-shadow: var(--shadow);
 }
 
+/* =============================
+   三级“老虎机”滚轮筛选
+   ============================= */
+
+.categories-wheel-row {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    /* 整体大方框样式（马卡龙配色） */
+    padding: 18px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.82));
+    border: 3px solid transparent;
+    background-origin: padding-box;
+    box-shadow: 0 12px 30px rgba(44, 62, 80, 0.10);
+    /* 渐变描边 */
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.82)),
+        linear-gradient(135deg, rgba(255, 182, 201, 0.95), rgba(154, 215, 255, 0.90), rgba(167, 243, 208, 0.92));
+    background-clip: padding-box, border-box;
+    border-radius: 18px;
+}
+
+.categories-wheel-wrap {
+    position: relative;
+    border-radius: 18px;
+    background: rgba(236, 240, 241, 0.55);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    /* 减小左右内边距并略微收窄容器，使内部卡片视觉上更宽 */
+    padding: 0px 0px 0px 0px;
+    box-sizing: border-box;
+    width: calc(100% - 12px);
+    margin: 0 6px;
+    perspective: 900px;
+}
+
+.categories-wheel-label {
+    font-weight: 900;
+    color: var(--dark-color);
+    margin-bottom: 10px;
+    letter-spacing: 0.4px;
+    text-align: center;
+}
+
+.categories-wheel {
+    position: relative;
+    height: 290px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    outline: none;
+    transform-style: preserve-3d;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+.categories-wheel::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.categories-wheel::before,
+.categories-wheel::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 78px;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.categories-wheel::before {
+    top: 0;
+    background: linear-gradient(to bottom,
+            rgba(236, 240, 241, 0.90) 0%,
+            rgba(236, 240, 241, 0.0) 100%);
+}
+
+.categories-wheel::after {
+    bottom: 0;
+    background: linear-gradient(to top,
+            rgba(236, 240, 241, 0.90) 0%,
+            rgba(236, 240, 241, 0.0) 100%);
+}
+
+.wheel-item {
+    height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    /* 恢复为占据整列宽度，减小左右内边距使内容区更宽 */
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 8px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.62);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    color: var(--dark-color);
+    font-weight: 900;
+    user-select: none;
+    transform-origin: center center;
+    backface-visibility: hidden;
+    transition: transform 120ms ease, opacity 120ms ease, filter 120ms ease;
+}
+
+.wheel-item.is-center {
+    background: linear-gradient(135deg, rgba(255, 182, 201, 0.90), rgba(154, 215, 255, 0.82), rgba(167, 243, 208, 0.84));
+    color: #fff;
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+/* 三列一起的选中框：覆盖三列宽度，定位在滚轮中心项处 */
+.wheel-selected-frame {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    height: 54px;
+    /* JS 会根据实际 item 高度覆盖此值 */
+    border-radius: 14px;
+    pointer-events: none;
+    z-index: 3;
+    /* 使用 border-image 渐变描边，内部保持完全透明 */
+    background: transparent;
+    border: 4px solid transparent;
+    -webkit-border-image: linear-gradient(135deg, rgba(255, 182, 201, 0.95), rgba(154, 215, 255, 0.90), rgba(167, 243, 208, 0.92)) 1;
+    border-image: linear-gradient(135deg, rgba(255, 182, 201, 0.95), rgba(154, 215, 255, 0.90), rgba(167, 243, 208, 0.92)) 1;
+    box-shadow: 0 8px 18px rgba(44, 62, 80, 0.06);
+    /* 仅对 top/视觉效果过渡，不对 height 做过渡，避免滚动时闪烁 */
+    transition: top 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+    opacity: 0.98;
+}
+
 .category-level {
     position: relative;
     margin-bottom: 18px;
@@ -106,6 +256,7 @@
     background: rgba(255, 255, 255, 0.72);
     color: var(--dark-color);
     border-radius: 999px;
+    box-sizing: border-box;
     padding: 8px 14px;
     cursor: pointer;
     transition: var(--transition);
@@ -133,10 +284,10 @@
 }
 
 .blog-list {
-    margin-top: 32px;
-    max-width: 900px;
-    margin-left: auto;
-    margin-right: auto;
+    margin-top: 0;
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
 }
 
 .blog-item {
@@ -197,12 +348,24 @@
 }
 
 @media (max-width: 600px) {
+    .categories-layout {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .categories-sidebar {
+        position: static;
+        top: auto;
+        transform: none;
+    }
+
     .categories-container {
         padding: 16px 12px;
     }
 
-    .category-list {
-        gap: 10px;
+    .categories-wheel-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
     }
 
     .blog-item {
@@ -338,6 +501,16 @@
     background: rgba(255, 255, 255, 0.55);
     border-color: rgba(0, 0, 0, 0.04);
     color: var(--cat-text);
+}
+
+/* 在分类页作用域内，使用统一的马卡龙渐变描边包裹三列滚轮 */
+.categories-page .categories-wheel-row {
+    padding: 18px;
+    border-radius: 16px;
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.82)), var(--cat-border);
+    background-clip: padding-box, border-box;
+    box-shadow: var(--cat-shadow);
+    gap: 12px;
 }
 
 .categories-page .categories-panel-title::before,
