@@ -1137,13 +1137,110 @@ int main() {
 ## Dinic 算法求最大流
 
 时间复杂度 $O (VE^2)$
-
-
-
-
-
-
-
+- 第一行一个正整数 T（1≤T≤10），表示数据组数。
+- 对于每组数据，第一行四个正整数 n,m,s,t（1≤n≤100，1≤m≤5×10^3，1≤s,t≤n），n个点，m条边，计算从s到t的最大流。
+- 接下来 m 行，每行三个正整数 ui,vi,wi（1≤ui,vi≤n，0≤wi<2^31），表示第 i 条有向边 ui→vi 的最大容量为 wi。
+- 图中有可能存在**重边和自环**。
+```cpp
+#include <algorithm>  
+#include <cstring>  
+#include <iostream>  
+#include <queue>  
+using namespace std;  
+typedef long long ll;  
+const int V_MAX = 205; // 最大顶点数  
+const int E_MAX = 5005; // 最大边数  
+const ll LL_INF = 0x3f3f3f3f3f3f3f3f;  
+ll max_stream = 0; // 最大流  
+int cnt_E = 0;  
+int n, m, s, t;  
+  
+struct Edge {  
+    int to; // 边的目标顶点  
+    int nxt; // 下一条边的索引  
+    ll val; // 边的容量  
+} e[E_MAX * 2]; // 边数组，每条边对应一条正向边和一条反向边  
+int head[V_MAX]; // 邻接表的头指针数组  
+int depth[V_MAX]; // 每个顶点的层次  
+void addEdge(int x, int y, int w);  
+void read();  
+bool bfs();  
+ll Dinic();  
+  
+int main() {  
+    int T;  
+    cin >> T;  
+    while(T--){  
+        cin >> n >> m >> s >> t; // 顶点数 边数 源点 汇点  
+        cnt_E = 0, max_stream = 0; // 初始化边计数器和最大流  
+        fill(head + 1, head + 1 + n, -1);  
+        read();  
+        cout << Dinic() << '\n';  
+    }  
+    return 0;  
+}  
+void addEdge(int x, int y, int w) {  
+    e[cnt_E].to = y;  
+    e[cnt_E].val = w;  
+    e[cnt_E].nxt = head[x];  
+    head[x] = cnt_E++;  
+}  
+void read() {  
+    int u, v, w;  
+    for (int i = 0; i < m; i++) {  
+        cin >> u >> v >> w;  
+        addEdge(u, v, w); // 添加正向边  
+        addEdge(v, u, 0); // 添加反向边，容量为0  
+    }  
+}  
+bool bfs() {   // bfs用于获得层次（分层图）  
+    memset(depth, 0, sizeof(depth));  
+    depth[s] = 1; // 源点的层次为1  
+    queue<int> q;  
+    q.push(s); // 将源点加入队列  
+    while (!q.empty()) {  
+        int u = q.front();  
+        q.pop();  
+        for (int i = head[u]; i > -1; i = e[i].nxt) {  
+            int v = e[i].to;  
+            if (e[i].val && !depth[v]) { // 边有剩余容量且目标顶点未访问  
+                depth[v] = depth[u] + 1; // 更新目标顶点的层次  
+                q.push(v); // 将目标顶点加入队列  
+            }  
+        }  
+    }  
+    if (depth[t] != 0) // 如果汇点可达  
+        return true; // 返回true表示存在增广路径  
+    return false;  
+}  
+  
+ll dfs(int pos, ll in) { // DFS用于寻找增广路径并计算流量  
+    if (pos == t) // 如果当前顶点是汇点，则返回当前流量  
+        return in;  
+    ll out = 0; // 初始化当前顶点的流出量为0  
+    for (int u = head[pos]; u > -1 && in; u = e[u].nxt) {  
+        int v = e[u].to;  
+        // 如果边有剩余容量且目标顶点的层次恰好是当前顶点层次加1  
+        if (e[u].val && depth[v] == depth[pos] + 1) {  
+            // 递归调用dfs寻找增广路径，并计算可以流过当前边的流量  
+            ll res = dfs(v, min(e[u].val, in));  
+            e[u].val -= res; // 更新正向边的容量  
+            e[u ^ 1].val += res; // 更新反向边的容量  
+            in -= res; // 减少当前流量  
+            out += res; // 增加流出量  
+        }  
+    }  
+    if (out == 0)  
+        // 如果当前顶点没有流出量，则将其层次设为0，表示在后续的BFS中不会再访问  
+        depth[pos] = 0;  
+    return out;  
+}  
+ll Dinic() {  
+    while (bfs())   // 存在增广路径  
+        max_stream += dfs(s, LL_INF);  
+    return max_stream;  
+}
+```
 
 # 数学
 

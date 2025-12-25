@@ -3,5 +3,7 @@
   "monospaceFontFamily": "Comic Shanns Mono",
   "textFontFamily": "仓耳今楷01",
   "interfaceFontFamily": "",
-  "baseFontSize": 18
+  "baseFontSize": 18,
+  "accentColor": "#155b16",
+  "theme": "system"
 }
