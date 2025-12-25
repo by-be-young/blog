@@ -202,7 +202,13 @@
         // 动态 padding：确保首尾项也能居中到高亮框
         adjustWheelPadding(wheelEl);
 
-        let activeIndex = wheelItems.length > 0 ? 0 : -1;
+        // 默认优先选择 key 为 `personal`（个人）的分类，使页面进入时显示“个人”内容
+        const preferredKey = 'personal';
+        const found = wheelItems.findIndex(el => el.dataset.key === preferredKey);
+        let activeIndex = -1;
+        if (wheelItems.length > 0) {
+            activeIndex = found !== -1 ? found : 0;
+        }
         let snapTimer = null;
         let rafPending = false;
         let lastRenderAt = 0;

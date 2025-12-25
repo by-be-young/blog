@@ -18,9 +18,11 @@
 
 .categories-sidebar {
     position: sticky;
-    top: 50vh;
-    transform: translateY(30%);
+    /* 固定在导航栏下方，避免被顶部固定的 .navbar 覆盖（.navbar 高度为 60px） */
+    top: calc(60px + 12px);
+    transform: none;
     z-index: 20;
+    align-self: start;
 }
 
 .categories-section .page-title {
@@ -124,7 +126,8 @@
 
 .categories-wheel {
     position: relative;
-    height: 290px;
+    /* 提高滚轮高度以显示更多卡片并整体放大视觉 */
+    height: 380px;
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: none;
@@ -166,7 +169,8 @@
 }
 
 .wheel-item {
-    height: 54px;
+    /* 增大每个卡片高度，使整体更大气 */
+    height: 72px;
     display: flex;
     align-items: center;
     justify-content: center;

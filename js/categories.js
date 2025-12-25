@@ -271,9 +271,33 @@ function renderCategories() {
     wheelRow.appendChild(preFrame);
 
     const labels = ['领域', '科目', '主题'];
+
+    // 先按层级顺序计算每层可用标签并确保 selectedTags 默认指向每层第一个可用项
+    const tagsPerLevel = [];
+    let node = tagTree;
     for (let level = 0; level < MAX_LEVELS; level++) {
-        const tags = getTagsAtLevel(tagTree, level);
-        if (!tags.length) break;
+        if (!node || Array.isArray(node)) {
+            tagsPerLevel[level] = [];
+        } else {
+            tagsPerLevel[level] = Object.keys(node);
+        }
+
+        if (tagsPerLevel[level].length > 0) {
+            // 若未设置或当前值不在可选列表中，默认选中第一个
+            if (!selectedTags[level] || tagsPerLevel[level].indexOf(selectedTags[level]) === -1) {
+                selectedTags[level] = tagsPerLevel[level][0];
+            }
+            node = node[selectedTags[level]];
+        } else {
+            // 无下级可选项，清空后续
+            selectedTags[level] = undefined;
+            node = null;
+        }
+    }
+
+    // 逐列渲染（保证三列均显示，缺项时显示占位）
+    for (let level = 0; level < MAX_LEVELS; level++) {
+        const tags = tagsPerLevel[level] || [];
 
         const wrap = document.createElement('div');
         wrap.className = 'categories-wheel-wrap';
@@ -289,18 +313,27 @@ function renderCategories() {
         wheel.setAttribute('tabindex', '0');
         wheel.setAttribute('aria-label', `${labels[level]}筛选`);
 
-        tags.forEach((tag, idx) => {
+        if (tags.length === 0) {
             const item = document.createElement('div');
-            item.className = 'wheel-item' + (selectedTags[level] === tag ? ' is-selected' : '');
-            item.textContent = tag;
-            item.dataset.index = String(idx);
+            item.className = 'wheel-item empty';
+            item.textContent = '— 无选项 —';
+            item.dataset.index = '0';
             wheel.appendChild(item);
-        });
+        } else {
+            tags.forEach((tag, idx) => {
+                const item = document.createElement('div');
+                item.className = 'wheel-item' + (selectedTags[level] === tag ? ' is-selected' : '');
+                item.textContent = tag;
+                item.dataset.index = String(idx);
+                wheel.appendChild(item);
+            });
+        }
 
         wrap.appendChild(wheel);
         wheelRow.appendChild(wrap);
 
-        bindWheelInteractions(wheel, level, tags);
+        // 仅当存在真实标签时绑定交互
+        if (tags.length > 0) bindWheelInteractions(wheel, level, tags);
     }
 
     // 重建完成后恢复高度约束
@@ -312,6 +345,7 @@ function renderBlogList() {
     listDiv.innerHTML = '';
     let filtered = blogsData;
     for (let i = 0; i < selectedTags.length; i++) {
+        if (!selectedTags[i]) continue;
         filtered = filtered.filter(blog => blog.tags[i] === selectedTags[i]);
     }
     filtered.forEach(blog => {

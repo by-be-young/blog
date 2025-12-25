@@ -1,22 +1,6 @@
 {
     "categories": [
         {
-            "key": "personal",
-            "label": "个人",
-            "items": [
-                {
-                    "title": "GitHub",
-                    "url": "https://github.com/by-be-young",
-                    "image": "assets/images/bg1.png"
-                },
-                {
-                    "title": "明日方舟答题网站",
-                    "url": "https://by-be-young.github.io/arknights_test/",
-                    "image": "assets/images/bg2.png"
-                }
-            ]
-        },
-        {
             "key": "friends",
             "label": "友链",
             "items": [
@@ -49,6 +33,22 @@
                 {
                     "title": "校园网",
                     "url": "https://gw.buaa.edu.cn/srun_portal_success?ac_id=1&theme=buaa",
+                    "image": "assets/images/bg2.png"
+                }
+            ]
+        },
+        {
+            "key": "personal",
+            "label": "个人",
+            "items": [
+                {
+                    "title": "GitHub",
+                    "url": "https://github.com/by-be-young",
+                    "image": "assets/images/bg1.png"
+                },
+                {
+                    "title": "明日方舟答题网站",
+                    "url": "https://by-be-young.github.io/arknights_test/",
                     "image": "assets/images/bg2.png"
                 }
             ]
@@ -91,6 +91,27 @@
                 {
                     "title": "PRTS wiki",
                     "url": "https://prts.wiki/",
+                    "image": "assets/images/bg1.png"
+                }
+            ]
+        },
+        {
+            "key": "ai",
+            "label": "AI",
+            "items": [
+                {
+                    "title": "deepseek",
+                    "url": "https://chat.deepseek.com/",
+                    "image": "assets/images/bg3.png"
+                },
+                {
+                    "title": "Kimi",
+                    "url": "https://www.kimi.com/",
+                    "image": "assets/images/bg2.png"
+                },
+                {
+                    "title": "豆包",
+                    "url": "https://www.doubao.com/chat",
                     "image": "assets/images/bg1.png"
                 }
             ]
