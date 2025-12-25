@@ -391,6 +391,8 @@
     --archive-muted: #5f6b7a;
     --archive-card-shadow: 0 16px 34px rgba(44, 62, 80, 0.14);
     --archive-border: linear-gradient(135deg, var(--archive-pink), var(--archive-mint), rgba(199, 182, 255, 0.9));
+    /* 缩放系数：用于控制滚筒（drum）上下内边距的视觉大小，值越小标题越靠近顶部 */
+    --archive-drum-scale: 0.45;
 }
 
 /* 导航栏：马卡龙玻璃质感 */
@@ -513,6 +515,7 @@
    ============================= */
 
 .archive-page .archive-timeline.drum {
+    /* 使用 JS 设置的 --drum-pad 作为实际滚动内边距，确保最后一项也能居中 */
     padding-top: var(--drum-pad, 38vh);
     padding-bottom: var(--drum-pad, 38vh);
     max-height: calc(100vh - 170px);
@@ -537,6 +540,13 @@
     scroll-snap-align: center;
     display: flex;
     justify-content: center;
+}
+
+/* 通过基于 --drum-pad 的负 margin 将顶部标题视觉上上移（不影响滚动内边距） */
+.archive-timeline .timeline-header {
+    /* 取值范围：当 --archive-drum-scale < 1 时，该值为负，从而上移标题 */
+    margin-top: calc(var(--drum-pad, 38vh) * (var(--archive-drum-scale, 0.45) - 1));
+    z-index: 1;
 }
 
 .archive-page .archive-timeline.drum .timeline-dot {
@@ -591,4 +601,32 @@
     .archive-page .archive-timeline.drum {
         max-height: calc(100vh - 160px);
     }
+}
+
+/* 顶部标题（与每张卡片宽度对齐、无背景、标题样式） */
+.archive-timeline .timeline-header {
+    margin: 0;
+    /* 大幅增加顶部空间，使标题更高并占据更多垂直视觉 */
+    padding: 80px 0 90px 0;
+    display: flex;
+    justify-content: center;
+    scroll-snap-align: start;
+}
+
+.archive-timeline .timeline-header .timeline-header-content {
+    width: min(1100px, 100%);
+    text-align: center;
+    /* 大幅放大标题字体 */
+    font-size: 4.2rem;
+    font-weight: 900;
+    line-height: 1.02;
+    padding: 16px 0 22px 0;
+    /* 马卡龙渐变文字 */
+    background: linear-gradient(90deg, rgba(255, 182, 201, 1), rgba(154, 215, 255, 0.98), rgba(167, 243, 208, 0.98));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    /* 更强的文字阴影和投影，使标题更醒目 */
+    text-shadow: 0 18px 44px rgba(44, 62, 80, 0.22), 0 6px 16px rgba(255, 255, 255, 0.6);
+    filter: drop-shadow(0 14px 36px rgba(44, 62, 80, 0.14));
 }

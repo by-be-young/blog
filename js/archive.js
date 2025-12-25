@@ -30,6 +30,15 @@ function renderTimeline(blogs) {
   if (!timeline) return;
   timeline.innerHTML = '';
 
+  // 在时间轴顶部插入一个标题性文字节点，位于第一张卡片上方，居中对齐且无背景
+  const headerItem = document.createElement('div');
+  headerItem.className = 'timeline-item timeline-header';
+  headerItem.innerHTML = `
+    <div class="timeline-header-content">时间轴归档</div>
+  `;
+  timeline.appendChild(headerItem);
+
+  // 接着渲染每一篇博客卡片
   blogs.forEach(blog => {
     const item = document.createElement('div');
     item.className = 'timeline-item';
