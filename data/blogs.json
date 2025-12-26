@@ -1,5 +1,14 @@
 [
     {
+        "id": 818573258,
+        "title": "计组复习课",
+        "excerpt": "选择题(10 * 2分)、简答题(4题20分: 5、5、6（链接）、4（二进制加减）)、设计题(2 * 10分:组合逻辑、主存储器)、分析题(40分:MIPS汇...",
+        "date": "2025-12-26",
+        "image": "assets/images/blog_bg.png",
+        "tags": [],
+        "contentFile": "blogs/计组复习课.md"
+    },
+    {
         "id": 12587412,
         "title": "并查集轻松笔记",
         "excerpt": "并查集的详细讲解、优化思路、应用场景及实战运用",
@@ -36,7 +45,7 @@
             "计组",
             "Cache理论"
         ],
-        "contentFile": "blogs/Cache_theory.md"
+        "contentFile": "blogs/Cache理论.md"
     },
     {
         "id": 2807178879,
@@ -49,7 +58,7 @@
             "算法",
             "模板"
         ],
-        "contentFile": "blogs/algorism.md"
+        "contentFile": "blogs/算法板子.md"
     },
     {
         "id": 3142748677,
