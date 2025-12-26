@@ -352,9 +352,11 @@ function renderBlogList() {
         const item = document.createElement('div');
         item.className = 'blog-item';
         item.innerHTML = `
-      <div class="blog-title"><a href="blog-detail.html?id=${blog.id}">${blog.title}</a></div>
-      <div class="blog-excerpt">${blog.excerpt}</div>
-    `;
+            <a class="blog-link" href="blog-detail.html?id=${blog.id}">
+                <div class="blog-title">${blog.title}</div>
+                <div class="blog-excerpt">${blog.excerpt}</div>
+            </a>
+        `;
         listDiv.appendChild(item);
     });
     if (!filtered.length) {

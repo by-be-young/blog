@@ -150,12 +150,15 @@
 
 
 .blog-detail .article-content h4 {
-    color: #b620e0;
+    color: #9b0b74;
+    /* 加深颜色，提高可见性 */
     font-size: 1.08rem;
-    font-weight: 600;
+    font-weight: 700;
     margin: 1em 0 0.8em 0;
-    background: #f7e6ff;
-    border: 2px solid #b620e0;
+    background: #f3d7ff;
+    /* 略微加深背景对比 */
+    border: 2px solid #9b0b74;
+    /* 与文字颜色一致，加重边框 */
     border-radius: 8px;
     padding: 10px 12px;
 }
@@ -640,9 +643,12 @@
 }
 
 .blog-detail-page .article-content h4 {
-    color: var(--detail-pink);
-    background: rgba(255, 182, 201, 0.08);
-    border: 1px solid rgba(255, 182, 201, 0.18);
+    color: #ff7696;
+    /* 稍微加深马卡龙粉色以提高可见性 */
+    background: rgba(255, 182, 201, 0.12);
+    border: 2px solid rgba(255, 182, 201, 0.26);
+    border-radius: 8px;
+    padding: 8px 10px;
 }
 
 .blog-detail-page .article-content a {

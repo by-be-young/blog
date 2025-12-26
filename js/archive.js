@@ -44,12 +44,14 @@ function renderTimeline(blogs) {
     item.className = 'timeline-item';
     item.dataset.date = blog.date;
     item.innerHTML = `
-    <div class="timeline-dot"></div>
-    <div class="timeline-content">
-      <div class="timeline-date">${blog.date}</div>
-      <div class="timeline-title"><a href="blog-detail.html?id=${blog.id}">${blog.title}</a></div>
-      <div class="timeline-excerpt">${blog.excerpt}</div>
-    </div>
+    <a class="timeline-link" href="blog-detail.html?id=${blog.id}">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <div class="timeline-date">${blog.date}</div>
+        <div class="timeline-title">${blog.title}</div>
+        <div class="timeline-excerpt">${blog.excerpt}</div>
+      </div>
+    </a>
     `;
     timeline.appendChild(item);
   });
