@@ -77,16 +77,16 @@
 /* h3样式与h2几乎一致，仅颜色为橙色 */
 .blog-detail .article-content h3 {
     color: #ff9900;
-    font-size: 1.6rem;
-    font-weight: bold;
-    margin: 1.4em 0 0.9em 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 1.2em 0 0.8em 0;
     border-left: 4px solid #ff9900;
-    padding-left: 10px;
-    background: linear-gradient(90deg, #fffbe6 60%, transparent);
+    padding: 8px 12px;
+    background: linear-gradient(90deg, rgba(255, 251, 230, 0.9) 0%, rgba(255, 251, 230, 0.6) 60%);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: block;
-    border-radius: 0;
-    box-shadow: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
     position: static;
 }
 
@@ -127,22 +127,24 @@
 /* 博客详情页内容层级美化 */
 .blog-detail .article-content h1 {
     color: #2d8cf0;
-    font-size: 2.1rem;
-    font-weight: bold;
-    margin: 1.6em 0 1em 0;
-    border-left: 5px solid #2d8cf0;
-    padding-left: 12px;
-    background: linear-gradient(90deg, #eaf6ff 60%, transparent);
+    font-size: 2.3rem;
+    font-weight: 800;
+    margin: 1.4em 0 0.8em 0;
+    border-left: 6px solid #2d8cf0;
+    padding: 10px 14px;
+    background: linear-gradient(90deg, rgba(234, 246, 255, 0.95) 0%, rgba(234, 246, 255, 0.6) 60%);
+    border-radius: 8px;
 }
 
 .blog-detail .article-content h2 {
     color: #19be6b;
-    font-size: 1.6rem;
-    font-weight: bold;
-    margin: 1.4em 0 0.9em 0;
-    border-left: 4px solid #19be6b;
-    padding-left: 10px;
-    background: linear-gradient(90deg, #eafff3 60%, transparent);
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 1.2em 0 0.75em 0;
+    border-left: 5px solid #19be6b;
+    padding: 9px 12px;
+    background: linear-gradient(90deg, rgba(234, 255, 243, 0.95) 0%, rgba(234, 255, 243, 0.6) 60%);
+    border-radius: 6px;
 }
 
 
@@ -287,23 +289,20 @@
         0 10px 22px rgba(0, 0, 0, 0.12);
 }
 
-/* 代码块样式美化：只改边框和字体大小，不改字体颜色 */
+/* 代码块样式（浅色主题）：使用 highlight.js 的浅色高亮样式，保留可读性与轻微马卡龙风格 */
 .blog-detail .article-content pre {
-    background: #0d1117;
-    background-image:
-        radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0)),
-        linear-gradient(120deg, rgba(93, 208, 255, 0.10), rgba(167, 139, 250, 0.08), rgba(255, 127, 209, 0.08));
-    color: #e6edf3;
-    border: 1px solid #263040;
-    border-image: linear-gradient(115deg, rgba(93, 208, 255, 0.55), rgba(167, 139, 250, 0.55), rgba(255, 127, 209, 0.50)) 1;
+    /* 单一马卡龙薄荷色背景（可换为 --detail-peach / --detail-pink 等） */
+    background: rgba(167, 243, 208, 0.22);
+    /* 浅薄荷 */
+    color: inherit;
+    /* 语法颜色由 highlight.js 提供 */
+    border: 1px solid rgba(24, 49, 58, 0.06);
     border-radius: 10px;
     padding: 18px 16px;
     margin: 18px 0;
     overflow-x: auto;
     font-size: 1.02rem;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.03),
-        0 12px 26px rgba(0, 0, 0, 0.28);
+    box-shadow: 0 10px 22px rgba(44, 62, 80, 0.04);
 }
 
 /* 博客详情页：带标题栏的代码块容器（白色边框，上边更粗） */
@@ -378,21 +377,22 @@
 .blog-detail .article-content .codeblock__content {
     display: flex;
     align-items: stretch;
-    background: #0d1117;
-    background-image:
-        radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0)),
-        linear-gradient(120deg, rgba(93, 208, 255, 0.10), rgba(167, 139, 250, 0.08), rgba(255, 127, 209, 0.08));
+    /* 正文框采用单一薄荷色 */
+    background: rgba(167, 243, 208, 0.22);
+    border-radius: 10px;
+    padding: 12px 12px 14px 12px;
+    box-shadow: 0 8px 18px rgba(24, 49, 58, 0.04);
 }
 
 .blog-detail .article-content .codeblock__gutter {
     flex: 0 0 auto;
     margin: 0;
     padding: 18px 10px 18px 12px;
-    color: rgba(230, 237, 243, 0.55);
+    color: rgba(24, 49, 58, 0.4);
     text-align: right;
     user-select: none;
     background: transparent;
-    border-right: 1px solid rgba(230, 237, 243, 0.12);
+    border-right: 1px solid rgba(24, 49, 58, 0.06);
     font-size: 1.02rem;
     line-height: 1.7;
 }
@@ -406,6 +406,8 @@
     background: transparent;
     background-image: none;
     line-height: 1.7;
+    /* 使用 Comic Mono 字体显示代码内容 */
+    font-family: 'Comic Mono', 'Comic Sans MS', 'Comic Neue', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 .blog-detail .article-content .codeblock__pre {
@@ -419,11 +421,13 @@
 
 .blog-detail .article-content code {
     font-size: 1.02rem;
-    border-radius: 5px;
-    background: #161b22;
-    color: #f0f6fc;
-    border: 1px solid #2b3342;
+    border-radius: 6px;
+    background: rgba(245, 247, 250, 0.9);
+    color: #18313a;
+    border: 1px solid rgba(24, 49, 58, 0.06);
     padding: 2px 6px;
+    /* 行内代码也使用 Comic Mono 字体 */
+    font-family: 'Comic Mono', 'Comic Sans MS', 'Comic Neue', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 .blog-detail .article-content pre code {
@@ -613,13 +617,185 @@
     color: var(--detail-text);
 }
 
+/* Markdown 内容：马卡龙色系优化（不覆盖 pre/code） */
+.blog-detail-page .article-content h1 {
+    color: var(--detail-sky);
+    border-left: 5px solid var(--detail-sky);
+    background: linear-gradient(90deg, rgba(154, 217, 255, 0.18) 0%, rgba(255, 182, 201, 0.06) 60%);
+    padding-left: 12px;
+}
+
+.blog-detail-page .article-content h2 {
+    color: var(--detail-mint);
+    border-left: 4px solid var(--detail-mint);
+    background: linear-gradient(90deg, rgba(167, 243, 208, 0.14) 0%, rgba(255, 210, 166, 0.04) 60%);
+    padding-left: 10px;
+}
+
+.blog-detail-page .article-content h3 {
+    color: var(--detail-peach);
+    border-left: 4px solid var(--detail-peach);
+    background: linear-gradient(90deg, rgba(255, 210, 166, 0.12) 0%, rgba(255, 182, 201, 0.04) 60%);
+    padding-left: 10px;
+}
+
+.blog-detail-page .article-content h4 {
+    color: var(--detail-pink);
+    background: rgba(255, 182, 201, 0.08);
+    border: 1px solid rgba(255, 182, 201, 0.18);
+}
+
+.blog-detail-page .article-content a {
+    color: var(--detail-pink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.18s ease, background 0.18s ease;
+}
+
+.blog-detail-page .article-content a:hover {
+    color: var(--detail-sky);
+    background: rgba(154, 217, 255, 0.06);
+}
+
+.blog-detail-page .article-content blockquote {
+    border-left: 4px solid var(--detail-mint);
+    background: linear-gradient(90deg, rgba(167, 243, 208, 0.10), rgba(255, 255, 255, 0));
+    color: var(--detail-muted);
+}
+
+.blog-detail-page .article-content ul li,
+.blog-detail-page .article-content ol li {
+    color: var(--detail-text);
+}
+
+.blog-detail-page .article-content table th,
+.blog-detail-page .article-content table td {
+    border-color: rgba(167, 243, 208, 0.24);
+}
+
+.blog-detail-page .article-content thead th {
+    background: linear-gradient(90deg, rgba(255, 182, 201, 0.12), rgba(154, 215, 255, 0.06));
+}
+
+/* 图片周边微妙马卡龙描边 */
+.blog-detail-page .article-content img {
+    border-radius: 12px;
+    box-shadow: 0 10px 22px rgba(44, 62, 80, 0.06), 0 0 0 6px rgba(255, 255, 255, 0.6) inset;
+}
+
+/* 重要：不要改变 pre 或 pre code 的背景/配色，保留现有代码块样式 */
+
 /* 返回顶部按钮：更贴合马卡龙 */
 .blog-detail-page #back-to-top {
     background: linear-gradient(135deg, rgba(0, 172, 255, 1), rgba(72, 219, 187, 0.98), rgba(255, 110, 155, 0.98));
     box-shadow: 0 10px 22px rgba(44, 62, 80, 0.18);
 }
 
+/* 强化马卡龙配色 —— 颜色更明显（仅影响展示，不改动 pre/code 本体配色） */
+.blog-detail-page .article-title {
+    display: inline-block;
+    background: linear-gradient(90deg, #00acff 0%, #48dbbb 50%, #ff6e9b 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 6px 12px rgba(0, 172, 255, 0.12));
+}
+
+.blog-detail-page .article-content h1 {
+    color: #00acff;
+    /* 更鲜明的天蓝 */
+    border-left-color: #00acff;
+    background: linear-gradient(90deg, rgba(154, 217, 255, 0.28) 0%, rgba(255, 182, 201, 0.10) 60%);
+}
+
+.blog-detail-page .article-content h2 {
+    color: #13d18a;
+    /* 更鲜明的薄荷绿 */
+    border-left-color: #13d18a;
+    background: linear-gradient(90deg, rgba(167, 243, 208, 0.22) 0%, rgba(255, 210, 166, 0.06) 60%);
+}
+
+.blog-detail-page .article-content h3 {
+    color: #ff8f9e;
+    /* 更明显的粉橙 */
+    border-left-color: #ff8f9e;
+    background: linear-gradient(90deg, rgba(255, 210, 166, 0.16) 0%, rgba(255, 182, 201, 0.06) 60%);
+}
+
+.blog-detail-page .article-content a {
+    color: #ff6e9b;
+}
+
+.blog-detail-page .article-content a:hover {
+    color: #00acff;
+    background: rgba(154, 217, 255, 0.08);
+}
+
+.blog-detail-page .article-content blockquote {
+    border-left-color: #13d18a;
+    background: linear-gradient(90deg, rgba(167, 243, 208, 0.16), rgba(255, 255, 255, 0));
+    color: #41515f;
+}
+
+/* 代码块顶部语言展示框：仅修改顶部 header 的配色与按钮样式（不影响 pre/code 语法高亮） */
+.blog-detail-page .article-content .codeblock__header {
+    /* 浅马卡龙渐变背景，内容为深色文字以保证可读性 */
+    background: linear-gradient(90deg,
+            rgba(255, 182, 201, 0.96) 0%,
+            /* 粉 */
+            rgba(255, 210, 166, 0.94) 33%,
+            /* 桃 */
+            rgba(167, 243, 208, 0.94) 66%,
+            /* 薄荷 */
+            rgba(154, 215, 255, 0.94) 100%
+            /* 天空 */
+        );
+    color: #18313a;
+    /* 深色文字，提高对比 */
+    border-bottom: 1px solid rgba(24, 49, 58, 0.06);
+    padding: 10px 12px;
+    border-radius: 10px 10px 0 0;
+    box-shadow: 0 6px 18px rgba(24, 49, 58, 0.06) inset;
+}
+
+.blog-detail-page .article-content .codeblock__lang {
+    color: #18313a;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    /* 使用 Comic Mono 字体；若不可用回退到常见字体 */
+    font-family: 'Comic Mono', 'Comic Sans MS', 'Comic Neue', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.blog-detail-page .article-content .codeblock__actions .codeblock__btn {
+    background: rgba(255, 255, 255, 0.9);
+    color: #18313a;
+    border-color: rgba(24, 49, 58, 0.08);
+}
+
+.blog-detail-page .article-content .codeblock__btn:hover {
+    background: rgba(255, 255, 255, 1);
+}
+
+/* 使目录和标签颜色更醒目 */
+.blog-detail-page .toc-h1>a {
+    color: #00acff;
+}
+
+.blog-detail-page .toc-h2>a {
+    color: #13d18a;
+}
+
+.blog-detail-page .blog-detail .tag {
+    color: #18313a;
+    font-weight: 600;
+}
+
 /* 基础样式 */
+:root {
+    --webfont-name: '仓耳今楷01';
+}
+
 :root {
     --primary-color: #3498db;
     --secondary-color: #2ecc71;
@@ -637,10 +813,20 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* 正文字体：仓耳今楷01（若本地/网络未引入则回退到常用字体） */
+    font-family: '仓耳今楷01', 'CangErJinKai01', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
     color: #333;
     background-color: #f8f9fa;
+}
+
+/* 如果你已将字体文件放到 `assets/fonts/`，下面的 @font-face 会优先加载本地图形字体。 */
+@font-face {
+    font-family: '仓耳今楷01';
+    src: url('../assets/fonts/仓耳今楷01-W04.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
 }
 
 /* 导航栏 */
