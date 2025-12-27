@@ -1072,6 +1072,29 @@ body {
     color: var(--gray-color);
 }
 
+/* 统计项链接：整块可点击，悬停显示马卡龙色系背景 */
+.stat a.stat-link {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 10px;
+    color: inherit;
+    text-decoration: none;
+    transition: background 0.18s ease, transform 0.12s ease;
+}
+
+.stat a.stat-link:hover {
+    background: rgba(255, 219, 235, 0.6);
+    /* 马卡龙粉色系浮层 */
+    transform: translateY(-2px);
+}
+
+.stat a.stat-link:active {
+    transform: translateY(0);
+}
+
 .social-links {
     display: flex;
     justify-content: center;

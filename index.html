@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/butterfly.css">
     <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/search.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- KaTeX CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
@@ -28,6 +29,7 @@
                 <li><a href="categories.html"><i class="fas fa-tags"></i> 分类 Categories</a></li>
                 <li><a href="quick-links.html"><i class="fas fa-link"></i> 快速链接 Links</a></li>
             </ul>
+            <button class="nav-search-btn" aria-label="搜索"><i class="fas fa-search"></i> 搜索</button>
             <div class="nav-toggle">
                 <i class="fas fa-bars"></i>
             </div>
@@ -66,12 +68,16 @@
                             <p class="bio">24级 21系 本科</p>
                             <div class="stats">
                                 <div class="stat">
-                                    <span class="count" id="article-count">0</span>
-                                    <span class="label">文章</span>
+                                    <a class="stat-link" href="archive.html">
+                                        <span class="count" id="article-count">0</span>
+                                        <span class="label">文章</span>
+                                    </a>
                                 </div>
                                 <div class="stat">
-                                    <span class="count" id="tag-count">0</span>
-                                    <span class="label">标签</span>
+                                    <a class="stat-link" href="categories.html">
+                                        <span class="count" id="tag-count">0</span>
+                                        <span class="label">标签</span>
+                                    </a>
                                 </div>
                             </div>
                             <div class="social-links">
@@ -91,6 +97,7 @@
         </section>
     </main>
 
+    <script src="js/search.js"></script>
     <script src="js/main.js"></script>
 </body>
 

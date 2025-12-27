@@ -1,0 +1,389 @@
+(function () {
+    // 简单的搜索面板与逻辑（全站与详情页两种模式）
+    let blogsCache = null;
+
+    function createPanel() {
+        if (document.querySelector('.search-panel')) return;
+        const isDetail = document.body.classList.contains('blog-detail-page');
+        const panel = document.createElement('div');
+        panel.className = 'search-panel' + (isDetail ? ' right-sidebar' : '');
+        panel.innerHTML = `
+            <div class="search-wrap" role="dialog" aria-label="站内搜索">
+                <div class="search-row">
+                    <div class="search-input">
+                        <input type="search" placeholder="输入关键词：可匹配标签、标题或正文" aria-label="搜索输入" id="global-search-input">
+                    </div>
+                    <div class="search-actions">
+                        <button class="search-close-btn" id="search-close">关闭</button>
+                    </div>
+                </div>
+                <div class="search-results" id="search-results" role="list"></div>
+            </div>
+        `;
+        document.body.appendChild(panel);
+
+        // close
+        panel.querySelector('#search-close').addEventListener('click', () => { hidePanel(); });
+
+        // input events: realtime with debounce + enter to confirm
+        const input = panel.querySelector('#global-search-input');
+        const debounced = debounce((val) => {
+            const v = (val || '').trim();
+            if (v.length > 0) doSearch(v);
+            else {
+                const resultsEl = panel.querySelector('#search-results'); if (resultsEl) resultsEl.innerHTML = '';
+            }
+        }, 220);
+        input.addEventListener('input', (e) => { debounced(e.target.value); });
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') doSearch(input.value.trim());
+        });
+    }
+
+    function showPanel() {
+        createPanel();
+        const panel = document.querySelector('.search-panel');
+        const nav = document.querySelector('.navbar');
+        const top = nav ? nav.offsetHeight : 60;
+        // reset input and results when opening
+        const input = panel.querySelector('#global-search-input');
+        const resultsEl = panel.querySelector('#search-results');
+        if (input) {
+            input.value = '';
+        }
+        if (resultsEl) resultsEl.innerHTML = '';
+        // clear any existing highlights in detail page
+        try {
+            if (document.body.classList.contains('blog-detail-page')) {
+                const content = document.getElementById('markdown-content');
+                if (content) clearHighlights(content);
+            }
+        } catch (e) { }
+
+        // position differently if right-sidebar
+        if (panel.classList.contains('right-sidebar')) {
+            // align top with the left TOC top where possible, leave a small gap
+            let desiredTop = top + 12; // base gap below navbar
+            try {
+                const toc = document.querySelector('.blog-toc');
+                if (toc) {
+                    const tocTop = toc.getBoundingClientRect().top; // relative to viewport
+                    // use the larger of tocTop and base gap to avoid overlap
+                    if (typeof tocTop === 'number' && !isNaN(tocTop)) desiredTop = Math.max(desiredTop, Math.round(tocTop));
+                }
+            } catch (e) { }
+
+            panel.style.top = desiredTop + 'px';
+            panel.style.right = '18px';
+            panel.style.left = 'auto';
+            panel.style.height = `calc(100vh - ${desiredTop}px - 18px)`;
+            panel.style.width = '360px';
+            // add body class so main content can shift left to avoid overlap
+            try { document.body.classList.add('search-sidebar-open'); } catch (e) { }
+        } else {
+            panel.style.top = top + 'px';
+            // ensure popup doesn't have lingering right/height
+            panel.style.right = '';
+            panel.style.left = '';
+            panel.style.height = '';
+            panel.style.width = '';
+        }
+
+        panel.classList.add('active');
+        // focus input
+        if (input) input.focus();
+    }
+
+    function hidePanel() {
+        const panel = document.querySelector('.search-panel');
+        if (!panel) return;
+        panel.classList.remove('active');
+        // remove body class if present
+        try { document.body.classList.remove('search-sidebar-open'); } catch (e) { }
+        // 如果在文章详情页，关闭面板时清除正文中的高亮
+        try {
+            if (document.body.classList.contains('blog-detail-page')) {
+                const content = document.getElementById('markdown-content');
+                if (content) clearHighlights(content);
+            }
+        } catch (e) {
+            // ignore
+        }
+    }
+
+    function getQueryParam(name) {
+        const params = new URLSearchParams(window.location.search);
+        return params.get(name);
+    }
+
+    function doSearch(keyword) {
+        const panel = document.querySelector('.search-panel');
+        if (!panel) return;
+        const resultsEl = panel.querySelector('#search-results');
+        resultsEl.innerHTML = '';
+        if (!keyword) return;
+        // If on blog-detail page => do local article search
+        if (document.body.classList.contains('blog-detail-page')) {
+            doDetailSearch(keyword, resultsEl);
+            return;
+        }
+        // Global search across blogs.json
+        ensureBlogsLoaded().then(blogList => {
+            const q = keyword.toLowerCase();
+            const results = [];
+            blogList.forEach(b => {
+                let score = 0;
+                const t = (b.title || '').toLowerCase();
+                const ex = (b.excerpt || '').toLowerCase();
+                const tags = Array.isArray(b.tags) ? b.tags.join(' ').toLowerCase() : '';
+                if (t.includes(q)) score += 10;
+                if (ex.includes(q)) score += 6;
+                if (tags.includes(q)) score += 8;
+                if (score > 0) results.push({ blog: b, score, source: determineMatchSource(b, q) });
+            });
+            results.sort((a, b) => b.score - a.score);
+            if (results.length === 0) {
+                resultsEl.innerHTML = '<div class="search-item">未找到匹配结果</div>';
+                return;
+            }
+            results.forEach(r => {
+                const div = document.createElement('div');
+                div.className = 'search-item';
+                const title = document.createElement('div'); title.className = 'title'; title.textContent = r.blog.title;
+                const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = r.blog.date + (r.blog.tags && r.blog.tags.length ? (' • ' + r.blog.tags.join(', ')) : '');
+                const snippet = document.createElement('div'); snippet.className = 'snippet'; snippet.textContent = r.blog.excerpt || '';
+                div.appendChild(title); div.appendChild(meta); div.appendChild(snippet);
+                div.addEventListener('click', () => {
+                    // navigate to blog-detail with q param so target page can highlight
+                    const url = `blog-detail.html?id=${r.blog.id}&q=${encodeURIComponent(keyword)}`;
+                    window.location.href = url;
+                });
+                resultsEl.appendChild(div);
+            });
+        });
+    }
+
+    // simple debounce util
+    function debounce(fn, wait) {
+        let t = null;
+        return function () {
+            const args = arguments;
+            clearTimeout(t);
+            t = setTimeout(() => { fn.apply(null, args); }, wait);
+        };
+    }
+
+    function determineMatchSource(b, q) {
+        const t = (b.title || '').toLowerCase();
+        const ex = (b.excerpt || '').toLowerCase();
+        const tags = Array.isArray(b.tags) ? b.tags.join(' ').toLowerCase() : '';
+        if (t.includes(q)) return 'title';
+        if (tags.includes(q)) return 'tag';
+        if (ex.includes(q)) return 'excerpt';
+        return 'body';
+    }
+
+    function ensureBlogsLoaded() {
+        if (blogsCache) return Promise.resolve(blogsCache);
+        return fetch('data/blogs.json').then(r => r.json()).then(data => { blogsCache = data; return data; }).catch(() => []);
+    }
+
+    // Detail page search: search within rendered markdown content
+    function doDetailSearch(keyword, resultsEl) {
+        const contentEl = document.getElementById('markdown-content');
+        if (!contentEl) return;
+        // remove old highlights
+        clearHighlights(contentEl);
+        const q = keyword;
+        const matches = highlightQueryInElement(contentEl, q);
+        if (!matches || matches.length === 0) {
+            resultsEl.innerHTML = '<div class="search-item">未在本文中找到匹配</div>';
+            return;
+        }
+        // helper: escape html
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>\"]/g, function (c) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+            });
+        }
+
+        function makeSnippetForMatch(el, radius) {
+            radius = typeof radius === 'number' ? radius : 60;
+            const matchText = (el.textContent || '').trim();
+            // prefer recorded parent text and index (to disambiguate multiple matches in same block)
+            const parentText = el.dataset && el.dataset.parentText ? el.dataset.parentText : (el.parentElement ? (el.parentElement.textContent || '') : (el.textContent || ''));
+            const idxAttr = el.dataset && el.dataset.parentIndex ? parseInt(el.dataset.parentIndex, 10) : NaN;
+            const lower = parentText.toLowerCase();
+            const idx = Number.isFinite(idxAttr) && idxAttr >= 0 ? idxAttr : lower.indexOf(matchText.toLowerCase());
+            if (idx === -1 || !Number.isFinite(idx)) {
+                // fallback: use surrounding of match node text
+                const txt = (el.textContent || '').trim();
+                const start = 0;
+                const snippet = txt.slice(0, radius * 2);
+                return escapeHtml(snippet);
+            }
+            const start = Math.max(0, idx - radius);
+            const end = Math.min(parentText.length, idx + matchText.length + radius);
+            let before = parentText.slice(start, idx);
+            let match = parentText.slice(idx, idx + matchText.length);
+            let after = parentText.slice(idx + matchText.length, end);
+            let out = '';
+            if (start > 0) out += '...';
+            out += escapeHtml(before) + '<span class="match-highlight">' + escapeHtml(match) + '</span>' + escapeHtml(after);
+            if (end < parentText.length) out += '...';
+            return out;
+        }
+
+        matches.forEach((el, idx) => {
+            const div = document.createElement('div');
+            div.className = 'search-item';
+            const title = document.createElement('div'); title.className = 'title'; title.textContent = `匹配 ${idx + 1}`;
+            const snippet = document.createElement('div'); snippet.className = 'snippet';
+            snippet.innerHTML = makeSnippetForMatch(el, 80);
+            div.appendChild(title); div.appendChild(snippet);
+            div.addEventListener('click', () => {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // flash
+                el.classList.add('active-match');
+                setTimeout(() => el.classList.remove('active-match'), 800);
+            });
+            resultsEl.appendChild(div);
+        });
+    }
+
+    function clearHighlights(root) {
+        const spans = Array.from(root.querySelectorAll('span.search-match'));
+        spans.forEach(s => {
+            const parent = s.parentNode;
+            parent.replaceChild(document.createTextNode(s.textContent), s);
+            parent.normalize();
+        });
+    }
+
+    function highlightQueryInElement(root, query) {
+        if (!query) return [];
+        const q = query.replace(/[.*+?^${}()|[\]\\]/g, '');
+        const re = new RegExp(q, 'ig');
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+        const created = [];
+        const textNodes = [];
+        let node;
+        while ((node = walker.nextNode())) {
+            if (!node.nodeValue.trim()) continue;
+            textNodes.push(node);
+        }
+        // keep track of next search start index per parent node to disambiguate multiple occurrences
+        const parentSearchPos = new WeakMap();
+        textNodes.forEach(tn => {
+            const parent = tn.parentNode;
+            if (!parent) return;
+            if (parent.closest('pre') || parent.nodeName === 'CODE') return; // skip code blocks
+            const val = tn.nodeValue;
+            const parentText = parent.textContent || '';
+            let searchStart = parentSearchPos.get(parent) || 0;
+            let match;
+            let lastIndex = 0;
+            const frag = document.createDocumentFragment();
+            let found = false;
+            while ((match = re.exec(val)) !== null) {
+                found = true;
+                const before = val.slice(lastIndex, match.index);
+                if (before) frag.appendChild(document.createTextNode(before));
+                const span = document.createElement('span');
+                span.className = 'search-match match-highlight';
+                span.textContent = match[0];
+                span.setAttribute('tabindex', '-1');
+                // compute absolute index of this match within parent's full text, starting search from previous found index
+                const absIdx = parentText.toLowerCase().indexOf(match[0].toLowerCase(), searchStart);
+                if (absIdx !== -1) {
+                    span.dataset.parentIndex = String(absIdx);
+                    span.dataset.parentText = parentText;
+                    searchStart = absIdx + match[0].length;
+                    parentSearchPos.set(parent, searchStart);
+                } else {
+                    span.dataset.parentIndex = '-1';
+                    span.dataset.parentText = parentText;
+                }
+                frag.appendChild(span);
+                created.push(span);
+                lastIndex = match.index + match[0].length;
+            }
+            if (found) {
+                const after = val.slice(lastIndex);
+                if (after) frag.appendChild(document.createTextNode(after));
+                parent.replaceChild(frag, tn);
+            }
+        });
+        return created;
+    }
+
+    // Handle nav search button clicks
+    function bindNavButtons() {
+        document.querySelectorAll('.nav-search-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const panel = document.querySelector('.search-panel');
+                if (panel && panel.classList.contains('active')) {
+                    hidePanel();
+                } else {
+                    showPanel();
+                }
+            });
+        });
+    }
+
+    // On blog-detail page: if ?q=keyword present, highlight after markdown render
+    function tryApplyQueryFromUrl() {
+        const q = getQueryParam('q');
+        if (!q) return;
+        // Wait until content rendered (markdown.js triggers render on DOMContentLoaded)
+        const tryRun = () => {
+            const content = document.getElementById('markdown-content');
+            if (content && content.children.length > 0) {
+                // highlight and scroll to first match
+                const matches = highlightQueryInElement(content, q);
+                if (matches && matches.length > 0) {
+                    matches[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return true;
+            }
+            return false;
+        };
+        // Try immediately or poll a few times
+        if (!tryRun()) {
+            let attempts = 0;
+            const id = setInterval(() => {
+                attempts++;
+                if (tryRun() || attempts > 10) clearInterval(id);
+            }, 200);
+        }
+    }
+
+    // init on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+        bindNavButtons();
+        createPanel();
+        // If on detail page and q param present, apply
+        if (document.body.classList.contains('blog-detail-page')) {
+            tryApplyQueryFromUrl();
+        }
+
+        // close panel on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') hidePanel();
+        });
+
+        // click outside to close (but not when clicking inside panel)
+        document.addEventListener('click', (e) => {
+            const panel = document.querySelector('.search-panel');
+            const btn = e.target.closest('.nav-search-btn');
+            if (btn) return; // handled by button
+            if (!panel) return;
+            if (!panel.contains(e.target)) {
+                // do not close when clicking on navbar
+                if (e.target.closest('.navbar')) return;
+                hidePanel();
+            }
+        });
+    });
+})();
