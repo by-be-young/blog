@@ -10,7 +10,8 @@
             "算法",
             "模板"
         ],
-        "contentFile": "blogs/算法选择题速查.md"
+        "contentFile": "blogs/算法选择题速查.md",
+        "recommended": true
     },
     {
         "id": 818573258,
@@ -19,7 +20,8 @@
         "date": "2025-12-26",
         "image": "assets/images/blog_bg.png",
         "tags": [],
-        "contentFile": "blogs/计组复习课.md"
+        "contentFile": "blogs/计组复习课.md",
+        "recommended": false
     },
     {
         "id": 12587412,
@@ -32,7 +34,8 @@
             "算法",
             "图"
         ],
-        "contentFile": "blogs/并查集轻松笔记.md"
+        "contentFile": "blogs/并查集轻松笔记.md",
+        "recommended": false
     },
     {
         "id": 216542656,
@@ -45,7 +48,8 @@
             "词",
             "卜算子"
         ],
-        "contentFile": "blogs/卜算子·元旦晚会.md"
+        "contentFile": "blogs/卜算子·元旦晚会.md",
+        "recommended": false
     },
     {
         "id": 238031024,
@@ -58,7 +62,8 @@
             "计组",
             "Cache理论"
         ],
-        "contentFile": "blogs/Cache理论.md"
+        "contentFile": "blogs/Cache理论.md",
+        "recommended": false
     },
     {
         "id": 2807178879,
@@ -71,7 +76,8 @@
             "算法",
             "模板"
         ],
-        "contentFile": "blogs/算法板子.md"
+        "contentFile": "blogs/算法板子.md",
+        "recommended": true
     },
     {
         "id": 3142748677,
@@ -84,6 +90,7 @@
             "词",
             "行香子"
         ],
-        "contentFile": "blogs/行香子·初雪.md"
+        "contentFile": "blogs/行香子·初雪.md",
+        "recommended": false
     }
 ]

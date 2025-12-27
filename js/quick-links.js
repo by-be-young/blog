@@ -187,17 +187,31 @@
             itemsByKey.set(cat.key, Array.isArray(cat.items) ? cat.items : []);
         });
 
+        const lang = (window.siteI18n && window.siteI18n.getLang) ? window.siteI18n.getLang() : 'zh';
+        const tr = (window.siteI18n && window.siteI18n.translations) ? window.siteI18n.translations[lang] || window.siteI18n.translations['zh'] : {};
+
         const wheelItems = categories.map(cat => {
             const div = document.createElement('div');
             div.className = 'quick-links-wheel-item';
             div.dataset.key = cat.key;
             div.setAttribute('role', 'option');
             div.setAttribute('aria-selected', 'false');
-            div.textContent = cat.label || cat.key;
+            // use translation key based on category key: quick_<key>
+            const keyNorm = String(cat.key || '').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+            const transKey = `quick_${keyNorm}`;
+            // set data-i18n so siteI18n.applyTo can translate dynamically
+            div.setAttribute('data-i18n', transKey);
+            // fallback content (will be replaced by applyTo if translation exists)
+            div.textContent = cat.label || cat.key || 'link';
             return div;
         });
 
         wheelItems.forEach(el => wheelEl.appendChild(el));
+
+        // apply i18n to wheel labels immediately
+        if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') {
+            try { window.siteI18n.applyTo(wheelEl); } catch (e) { /* ignore */ }
+        }
 
         // 动态 padding：确保首尾项也能居中到高亮框
         adjustWheelPadding(wheelEl);
@@ -323,6 +337,12 @@
         window.addEventListener('resize', () => {
             adjustWheelPadding(wheelEl);
             scheduleVisuals();
+        });
+        // update wheel labels when language changes
+        document.addEventListener('site:languageChanged', function () {
+            if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') {
+                try { window.siteI18n.applyTo(wheelEl); } catch (e) { /* ignore */ }
+            }
         });
     }
 

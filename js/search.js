@@ -8,13 +8,13 @@
         const panel = document.createElement('div');
         panel.className = 'search-panel' + (isDetail ? ' right-sidebar' : '');
         panel.innerHTML = `
-            <div class="search-wrap" role="dialog" aria-label="站内搜索">
+            <div class="search-wrap" role="dialog" aria-label="site-search">
                 <div class="search-row">
                     <div class="search-input">
-                        <input type="search" placeholder="输入关键词：可匹配标签、标题或正文" aria-label="搜索输入" id="global-search-input">
+                        <input type="search" placeholder="" data-i18n="search_placeholder" aria-label="搜索输入" id="global-search-input">
                     </div>
                     <div class="search-actions">
-                        <button class="search-close-btn" id="search-close">关闭</button>
+                        <button class="search-close-btn" id="search-close" data-i18n="search_close"></button>
                     </div>
                 </div>
                 <div class="search-results" id="search-results" role="list"></div>
@@ -143,7 +143,8 @@
             });
             results.sort((a, b) => b.score - a.score);
             if (results.length === 0) {
-                resultsEl.innerHTML = '<div class="search-item">未找到匹配结果</div>';
+                const no = (window.siteI18n && window.siteI18n.translations) ? (window.siteI18n.translations[window.siteI18n.getLang()] || {}).search_no_results : '未找到匹配结果';
+                resultsEl.innerHTML = `<div class="search-item">${no}</div>`;
                 return;
             }
             results.forEach(r => {
@@ -237,7 +238,9 @@
         matches.forEach((el, idx) => {
             const div = document.createElement('div');
             div.className = 'search-item';
-            const title = document.createElement('div'); title.className = 'title'; title.textContent = `匹配 ${idx + 1}`;
+            const title = document.createElement('div'); title.className = 'title';
+            const matchLabel = (window.siteI18n && window.siteI18n.translations) ? ((window.siteI18n.translations[window.siteI18n.getLang()] || {}).match_label || `匹配 ${idx + 1}`) : `匹配 ${idx + 1}`;
+            title.textContent = matchLabel.replace('{n}', String(idx + 1));
             const snippet = document.createElement('div'); snippet.className = 'snippet';
             snippet.innerHTML = makeSnippetForMatch(el, 80);
             div.appendChild(title); div.appendChild(snippet);

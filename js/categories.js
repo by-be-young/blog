@@ -256,7 +256,7 @@ function renderCategories() {
 
     const panelTitle = document.createElement('div');
     panelTitle.className = 'categories-panel-title';
-    panelTitle.textContent = '筛选相关博客';
+    panelTitle.setAttribute('data-i18n', 'categories_filter_title');
     container.appendChild(panelTitle);
 
     const wheelRow = document.createElement('div');
@@ -270,14 +270,21 @@ function renderCategories() {
     preFrame.dataset.initial = 'true';
     wheelRow.appendChild(preFrame);
 
-    const labels = ['领域', '科目', '主题'];
+    // labels localized via i18n
+    const lang = (window.siteI18n && window.siteI18n.getLang) ? window.siteI18n.getLang() : 'zh';
+    const t = (window.siteI18n && window.siteI18n.translations) ? window.siteI18n.translations[lang] || window.siteI18n.translations['zh'] : null;
+    const labels = t ? [t.label_domain, t.label_subject, t.label_topic] : ['领域', '科目', '主题'];
 
     // 先按层级顺序计算每层可用标签并确保 selectedTags 默认指向每层第一个可用项
     const tagsPerLevel = [];
     let node = tagTree;
     for (let level = 0; level < MAX_LEVELS; level++) {
         if (!node || Array.isArray(node)) {
-            tagsPerLevel[level] = [];
+            const labels = (window.siteI18n && window.siteI18n.translations) ? [
+                (window.siteI18n.translations[window.siteI18n.getLang()] || {}).label_domain || '领域',
+                (window.siteI18n.translations[window.siteI18n.getLang()] || {}).label_subject || '科目',
+                (window.siteI18n.translations[window.siteI18n.getLang()] || {}).label_topic || '主题'
+            ] : ['领域', '科目', '主题'];
         } else {
             tagsPerLevel[level] = Object.keys(node);
         }
@@ -304,7 +311,11 @@ function renderCategories() {
 
         const label = document.createElement('div');
         label.className = 'categories-wheel-label';
-        label.textContent = labels[level];
+        const keyNames = ['label_domain', 'label_subject', 'label_topic'];
+        const keyName = keyNames[level] || 'label_domain';
+        label.setAttribute('data-i18n', keyName);
+        // provide immediate fallback text while i18n.applyTo runs
+        label.textContent = labels[level] || (window.siteI18n && window.siteI18n.translations ? (window.siteI18n.translations[window.siteI18n.getLang()] || {})[keyName] : keyName);
         wrap.appendChild(label);
 
         const wheel = document.createElement('div');
@@ -338,6 +349,10 @@ function renderCategories() {
 
     // 重建完成后恢复高度约束
     container.style.minHeight = '';
+    // apply i18n to newly created elements
+    if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') {
+        try { window.siteI18n.applyTo(container); } catch (e) { /* ignore */ }
+    }
 }
 
 function renderBlogList() {
@@ -371,3 +386,15 @@ fetch('data/blogs.json')
         renderCategories();
         renderBlogList();
     });
+
+// ensure dynamically created category labels are updated when language changes
+document.addEventListener('site:languageChanged', function () {
+    try {
+        const container = document.getElementById('categoriesContainer');
+        if (container && window.siteI18n && typeof window.siteI18n.applyTo === 'function') {
+            window.siteI18n.applyTo(container);
+        }
+    } catch (e) {
+        console.warn('categories language update failed', e);
+    }
+});

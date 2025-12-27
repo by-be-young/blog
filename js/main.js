@@ -92,11 +92,63 @@ function initBlogGrid() {
     if (!blogGrid) return;
     blogGrid.innerHTML = '';
 
-    // 渲染所有博客卡片（blogs 已在 DOMContentLoaded 中加载）
-    (Array.isArray(blogs) ? blogs : []).forEach(blog => {
+    // 仅渲染被标记为推荐的博客卡片
+    const all = Array.isArray(blogs) ? blogs : [];
+    const recommendedBlogs = all.filter(b => b.recommended === true);
+    recommendedBlogs.forEach(blog => {
         const blogCard = createBlogCard(blog);
         blogGrid.appendChild(blogCard);
     });
+
+    // 初始化“查看更多”交互（如果存在未显示的文章）
+    initViewMore(all.length, recommendedBlogs.length);
+}
+
+function initViewMore(totalCount, shownCount) {
+    const wrap = document.getElementById('viewMoreWrap');
+    const btn = document.getElementById('viewMoreBtn');
+    if (!wrap || !btn) return;
+
+    // 只有当存在未显示的文章时才启用按钮
+    const hasMore = totalCount > shownCount;
+    if (!hasMore) {
+        wrap.style.display = 'none';
+        return;
+    }
+    // 显示在卡片下方：将按钮宽度与第一个卡片对齐，并在窗口缩放时调整
+    wrap.style.display = 'flex';
+    const blogGrid = document.getElementById('blogGrid');
+
+    function alignWidthToFirstCard() {
+        const firstCard = blogGrid && blogGrid.querySelector('.blog-card');
+        if (firstCard) {
+            const w = firstCard.getBoundingClientRect().width;
+            btn.style.width = Math.floor(w) + 'px';
+        } else {
+            btn.style.width = '';
+        }
+    }
+
+    // 初始对齐（在资源加载后执行一次以避免图片加载导致的布局变更）
+    window.addEventListener('load', alignWidthToFirstCard);
+    setTimeout(alignWidthToFirstCard, 120);
+    window.addEventListener('resize', throttle(alignWidthToFirstCard, 150));
+
+    btn.addEventListener('click', () => {
+        window.location.href = 'archive.html';
+    });
+}
+
+// 简单节流函数
+function throttle(fn, wait) {
+    let last = 0;
+    return function (...args) {
+        const now = Date.now();
+        if (now - last >= wait) {
+            last = now;
+            fn.apply(this, args);
+        }
+    };
 }
 
 
@@ -113,7 +165,7 @@ function createBlogCard(blog) {
             <h3 class="blog-title">${blog.title}</h3>
             <p class="blog-excerpt">${blog.excerpt}</p>
             <div class="blog-meta">
-                <span class="date">${formatDate(blog.date)}</span>
+                <span class="date" data-date="${blog.date}">${formatDate(blog.date)}</span>
                 <div class="tags">
                     ${tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
                 </div>
@@ -131,12 +183,48 @@ function createBlogCard(blog) {
 // 格式化日期
 function formatDate(dateString) {
     const date = new Date(dateString);
-    return date.toLocaleDateString('zh-CN', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
+    // language-aware formatting
+    try {
+        const lang = window.siteI18n && typeof window.siteI18n.getLang === 'function' ? window.siteI18n.getLang() : 'zh';
+        if (lang === 'en') {
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        } else if (lang === 'ja') {
+            const y = date.getFullYear();
+            const m = date.getMonth() + 1;
+            const d = date.getDate();
+            // 令和年计算（令和元年 = 2019）
+            let era = '';
+            if (y >= 2019) {
+                const reiwa = y - 2018;
+                era = reiwa === 1 ? '（令和元年）' : `（令和${reiwa}年）`;
+            }
+            return `${y}年${m}月${d}日 ${era}`;
+        } else {
+            return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+    } catch (e) {
+        return date.toLocaleDateString();
+    }
 }
+
+// 更新页面上所有可感知的日期显示（在语言切换后调用）
+function updateDates() {
+    try {
+        document.querySelectorAll('.date[data-date]').forEach(el => {
+            const d = el.getAttribute('data-date');
+            if (d) {
+                el.textContent = formatDate(d);
+            }
+        });
+    } catch (e) {
+        console.warn('updateDates error', e);
+    }
+}
+
+// 监听语言切换事件，自动刷新页面上的日期显示
+document.addEventListener('site:languageChanged', function (e) {
+    updateDates();
+});
 
 // 已移除 initStickySidebar 相关代码
 

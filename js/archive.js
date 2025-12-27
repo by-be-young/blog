@@ -34,20 +34,26 @@ function renderTimeline(blogs) {
   const headerItem = document.createElement('div');
   headerItem.className = 'timeline-item timeline-header';
   headerItem.innerHTML = `
-    <div class="timeline-header-content">时间轴归档</div>
-  `;
+      <div class="timeline-header-content" data-i18n="archive_timeline_title"></div>
+    `;
   timeline.appendChild(headerItem);
+
+  // Ensure newly created nodes get i18n applied immediately
+  if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') {
+    try { window.siteI18n.applyTo(timeline); } catch (e) { /* ignore */ }
+  }
 
   // 接着渲染每一篇博客卡片
   blogs.forEach(blog => {
     const item = document.createElement('div');
     item.className = 'timeline-item';
     item.dataset.date = blog.date;
+    const displayDate = (typeof window !== 'undefined' && typeof window.formatDate === 'function') ? window.formatDate(blog.date) : blog.date;
     item.innerHTML = `
     <a class="timeline-link" href="blog-detail.html?id=${blog.id}">
       <div class="timeline-dot"></div>
       <div class="timeline-content">
-        <div class="timeline-date">${blog.date}</div>
+        <div class="timeline-date date" data-date="${blog.date}">${displayDate}</div>
         <div class="timeline-title">${blog.title}</div>
         <div class="timeline-excerpt">${blog.excerpt}</div>
       </div>
@@ -55,7 +61,57 @@ function renderTimeline(blogs) {
     `;
     timeline.appendChild(item);
   });
+  // After rendering all items, format dates once using current language
+  if (typeof updateArchiveDates === 'function') updateArchiveDates();
 }
+
+// Archive-specific date formatter (language-aware) and updater
+function archiveFormatDate(dateString) {
+  const date = new Date(dateString);
+  try {
+    const lang = (window.siteI18n && typeof window.siteI18n.getLang === 'function') ? window.siteI18n.getLang() : 'zh';
+    if (lang === 'en') {
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    } else if (lang === 'ja') {
+      const y = date.getFullYear();
+      const m = date.getMonth() + 1;
+      const d = date.getDate();
+      let era = '';
+      if (y >= 2019) {
+        const reiwa = y - 2018;
+        era = reiwa === 1 ? '（令和元年）' : `（令和${reiwa}年）`;
+      }
+      return `${y}年${m}月${d}日 ${era}`;
+    } else {
+      return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+  } catch (e) {
+    return date.toLocaleDateString();
+  }
+}
+
+function updateArchiveDates() {
+  try {
+    document.querySelectorAll('.timeline-date.date[data-date]').forEach(el => {
+      const d = el.getAttribute('data-date');
+      if (d) {
+        // prefer global formatter if available
+        if (typeof window !== 'undefined' && typeof window.formatDate === 'function') {
+          el.textContent = window.formatDate(d);
+        } else {
+          el.textContent = archiveFormatDate(d);
+        }
+      }
+    });
+  } catch (e) {
+    console.warn('updateArchiveDates error', e);
+  }
+}
+
+// listen for language changes
+document.addEventListener('site:languageChanged', function (e) {
+  updateArchiveDates();
+});
 
 function initTimelineDrum() {
   const timeline = document.getElementById('archiveTimeline');
@@ -163,6 +219,63 @@ function initArchiveCalendar(blogs) {
   const baseDate = blogs.length ? new Date(blogs[0].date) : new Date();
   let cursor = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
 
+  // helper to get current translations for calendar
+  function getCalTranslations() {
+    const lang = (window.siteI18n && window.siteI18n.getLang) ? window.siteI18n.getLang() : 'zh';
+    const tr = (window.siteI18n && window.siteI18n.translations) ? (window.siteI18n.translations[lang] || {}) : {};
+    return { lang, tr };
+  }
+
+  // update calendar i18n texts (weekday labels, tips, year label adjustments)
+  function updateCalendarI18n() {
+    try {
+      const { lang, tr } = getCalTranslations();
+      // weekday labels
+      const weekdaysRaw = (tr && tr.cal_weekdays) ? String(tr.cal_weekdays).split(',') : null;
+      const weekLabels = weekdaysRaw && weekdaysRaw.length === 7 ? weekdaysRaw : (lang === 'ja' ? ['月', '火', '水', '木', '金', '土', '日'] : (lang === 'en' ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] : ['一', '二', '三', '四', '五', '六', '日']));
+      const weekEls = calendarBody ? Array.from(calendarBody.querySelectorAll('.cal-weekday')) : [];
+      weekEls.forEach((el, idx) => { if (weekLabels[idx]) el.textContent = weekLabels[idx]; });
+
+      // tips and month labels in year view will be updated when calendar is re-rendered,
+      // but for safety update existing month tip texts here
+      const monthTipTemplate = (tr && tr.cal_month_tip) || (lang === 'en' ? '{n} posts' : (lang === 'ja' ? '{n} 件' : '本月共 {n} 篇'));
+      const monthEls = calendarBody ? Array.from(calendarBody.querySelectorAll('.cal-month')) : [];
+      monthEls.forEach((el) => {
+        const span = el.querySelector('span');
+        const target = el.getAttribute('data-target-month');
+        if (target && monthCount.has(target)) {
+          const c = monthCount.get(target) || 0;
+          el.setAttribute('data-tip', monthTipTemplate.replace('{n}', String(c)));
+        }
+      });
+
+      // also update calLabel for current view
+      const calLabelEl = document.getElementById('calLabel');
+      if (calLabelEl) {
+        if (view === 'month') {
+          const y = cursor.getFullYear();
+          const m = cursor.getMonth();
+          try { calLabelEl.textContent = new Intl.DateTimeFormat((lang === 'ja') ? 'ja-JP' : (lang === 'en' ? 'en-US' : 'zh-CN'), { year: 'numeric', month: 'long' }).format(new Date(y, m, 1)); }
+          catch (e) { calLabelEl.textContent = `${y}年${m + 1}月`; }
+        } else {
+          const y = cursor.getFullYear();
+          if (lang === 'ja' && y >= 2019) {
+            const reiwa = y - 2018; const era = reiwa === 1 ? '（令和元年）' : `（令和${reiwa}年）`;
+            calLabelEl.textContent = `${y}年 ${era}`;
+          } else {
+            try { calLabelEl.textContent = new Intl.DateTimeFormat((lang === 'ja') ? 'ja-JP' : (lang === 'en' ? 'en-US' : 'zh-CN'), { year: 'numeric' }).format(new Date(y, 0, 1)); }
+            catch (e) { calLabelEl.textContent = `${y}年`; }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('updateCalendarI18n failed', e);
+    }
+  }
+
+  // listen for language changes to update calendar labels/tips
+  document.addEventListener('site:languageChanged', function () { updateCalendarI18n(); });
+
   function includesDateInCurrentView(date) {
     if (view === 'year') return cursor.getFullYear() === date.getFullYear();
     return cursor.getFullYear() === date.getFullYear() && cursor.getMonth() === date.getMonth();
@@ -193,13 +306,17 @@ function initArchiveCalendar(blogs) {
   function renderMonth() {
     const y = cursor.getFullYear();
     const m = cursor.getMonth();
-    calLabel.textContent = `${y}年${m + 1}月`;
+    const { lang, tr } = getCalTranslations();
+    const locale = (lang === 'zh') ? 'zh-CN' : (lang === 'ja' ? 'ja-JP' : 'en-US');
+    try { calLabel.textContent = new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'long' }).format(new Date(y, m, 1)); }
+    catch (e) { calLabel.textContent = `${y}年${m + 1}月`; }
 
     const first = new Date(y, m, 1);
     const daysInMonth = new Date(y, m + 1, 0).getDate();
     const offset = mondayFirstIndex(first.getDay());
 
-    const weekdays = ['一', '二', '三', '四', '五', '六', '日'];
+    // weekdays: try translations first
+    const weekdays = (tr && tr.cal_weekdays) ? String(tr.cal_weekdays).split(',') : ['一', '二', '三', '四', '五', '六', '日'];
     const parts = [];
     parts.push('<div class="cal-grid">');
     weekdays.forEach(w => parts.push(`<div class="cal-weekday">${w}</div>`));
@@ -217,18 +334,32 @@ function initArchiveCalendar(blogs) {
       const h = heat(count, maxDay);
       const style = has ? ` style="--heat:${h.toFixed(3)}"` : '';
       const cls = has ? 'cal-cell has-posts' : 'cal-cell';
-      const tip = has ? ` data-tip="该日共 ${count} 篇"` : '';
+      const postsTemplate = (tr && tr.cal_posts_tip) ? tr.cal_posts_tip : ((lang === 'en') ? '{n} posts' : (lang === 'ja' ? '{n} 件' : '该日共 {n} 篇'));
+      const tip = has ? ` data-tip="${postsTemplate.replace('{n}', String(count))}"` : '';
       const target = has ? ` data-target-date="${key}"` : '';
       parts.push(`<div class="${cls}"${style}${tip}${target}><span>${dayNum}</span></div>`);
     }
 
     parts.push('</div>');
     calendarBody.innerHTML = parts.join('');
+    // apply translations and update i18n texts/tips
+    if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') try { window.siteI18n.applyTo(calendarBody); } catch (e) { }
+    updateCalendarI18n();
   }
 
   function renderYear() {
     const y = cursor.getFullYear();
-    calLabel.textContent = `${y}年`;
+    const { lang, tr } = getCalTranslations();
+    const locale = (lang === 'zh') ? 'zh-CN' : (lang === 'ja' ? 'ja-JP' : 'en-US');
+    if (lang === 'ja' && y >= 2019) {
+      const reiwa = y - 2018;
+      const era = reiwa === 1 ? '（令和元年）' : `（令和${reiwa}年）`;
+      calLabel.textContent = `${y}年 ${era}`;
+    } else {
+      try { calLabel.textContent = new Intl.DateTimeFormat(locale, { year: 'numeric' }).format(new Date(y, 0, 1)); }
+      catch (e) { calLabel.textContent = `${y}年`; }
+    }
+
 
     const parts = [];
     parts.push('<div class="cal-year-grid">');
@@ -240,17 +371,31 @@ function initArchiveCalendar(blogs) {
       const h = heat(count, maxMonth);
       const style = has ? ` style="--heat:${h.toFixed(3)}"` : '';
       const cls = has ? 'cal-month has-posts' : 'cal-month';
-      const tip = has ? ` data-tip="本月共 ${count} 篇"` : '';
+      const monthTipTemplate = (tr && tr.cal_month_tip) ? tr.cal_month_tip : (lang === 'en' ? '{n} posts' : (lang === 'ja' ? '{n} 件' : '本月共 {n} 篇'));
+      const tip = has ? ` data-tip="${monthTipTemplate.replace('{n}', String(count))}"` : '';
       const target = has ? ` data-target-month="${key}"` : '';
-      parts.push(`<div class="${cls}"${style}${tip}${target}><span>${month + 1}月</span></div>`);
+      // month label in year view
+      let monthLabel = '';
+      if (lang === 'en') {
+        try { monthLabel = new Intl.DateTimeFormat(locale, { month: 'short' }).format(new Date(y, month, 1)); }
+        catch (e) { monthLabel = String(month + 1); }
+      } else {
+        monthLabel = `${month + 1}月`;
+      }
+      parts.push(`<div class="${cls}"${style}${tip}${target}><span>${monthLabel}</span></div>`);
     }
     parts.push('</div>');
     calendarBody.innerHTML = parts.join('');
+    if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') try { window.siteI18n.applyTo(calendarBody); } catch (e) { }
+    updateCalendarI18n();
   }
 
   function render() {
     if (view === 'year') renderYear();
     else renderMonth();
+    // ensure calendar i18n applied after any render
+    if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') try { window.siteI18n.applyTo(calendarBody); } catch (e) { }
+    updateCalendarI18n();
   }
 
   btnPrev.addEventListener('click', () => {

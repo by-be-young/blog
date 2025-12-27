@@ -112,6 +112,9 @@ async function main() {
 
         const tags = normalizeTags(data.tags);
 
+        // support recommended flag in front-matter: accept either 'recommended' or Chinese '推荐'
+        const recommended = Boolean(data.recommended) || Boolean(data['推荐']);
+
         // Prefer explicit id if provided; else derive stable one from path
         let id = Number.isFinite(Number(data.id)) ? Number(data.id) : stableIdFromString(relFromRoot);
         while (seenIds.has(id)) id++;
@@ -124,7 +127,8 @@ async function main() {
             date,
             image: 'assets/images/blog_bg.png',
             tags,
-            contentFile: relFromRoot
+            contentFile: relFromRoot,
+            recommended
         });
     }
 

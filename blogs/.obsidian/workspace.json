@@ -14,13 +14,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "算法选择题速查.md",
+                "file": "算法板子.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "算法选择题速查 的大纲"
+              "title": "算法板子 的大纲"
             }
           }
         ]
@@ -36,12 +36,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "算法选择题速查.md",
+                "file": "算法板子.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "算法选择题速查"
+              "title": "算法板子"
             }
           }
         ]
@@ -97,8 +97,7 @@
               "title": "书签"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -180,10 +179,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "算法选择题速查.md"
+                "file": "算法板子.md"
               },
               "icon": "lucide-info",
-              "title": "算法选择题速查的笔记属性"
+              "title": "算法板子的笔记属性"
             }
           }
         ],
@@ -207,15 +206,15 @@
   },
   "active": "bcb4cba90b1c4b75",
   "lastOpenFiles": [
-    "行香子·初雪.md",
-    "算法选择题速查.md",
+    "并查集轻松笔记.md",
     "算法板子.md",
+    "算法选择题速查.md",
+    "行香子·初雪.md",
     "Cache理论.md",
     "卜算子·元旦晚会.md",
     "计组复习课.md",
     "计组理论.md",
     "algorism.md",
-    "并查集轻松笔记.md",
     "Cache_theory.md",
     "assets",
     "未命名.base",

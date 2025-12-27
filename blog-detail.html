@@ -15,19 +15,21 @@
     <!-- KaTeX CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="js/i18n.js" defer></script>
 </head>
 
 <body class="blog-detail-page">
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-brand">Be Young's Blog</div>
+            <div class="nav-brand" data-i18n="brand"></div>
             <ul class="nav-menu">
-                <li><a href="index.html"><i class="fas fa-home"></i> 首页 Home</a></li>
-                <li><a href="archive.html"><i class="fas fa-archive"></i> 归档 Archive</a></li>
-                <li><a href="categories.html"><i class="fas fa-tags"></i> 分类 Categories</a></li>
-                <li><a href="quick-links.html"><i class="fas fa-link"></i> 快速链接 Links</a></li>
+                <li><a href="index.html"><i class="fas fa-home"></i> <span data-i18n="home"></span></a></li>
+                <li><a href="archive.html"><i class="fas fa-archive"></i> <span data-i18n="archive"></span></a></li>
+                <li><a href="categories.html"><i class="fas fa-tags"></i> <span data-i18n="categories"></span></a></li>
+                <li><a href="quick-links.html"><i class="fas fa-link"></i> <span data-i18n="quicklinks"></span></a></li>
             </ul>
-            <button class="nav-search-btn" aria-label="搜索"><i class="fas fa-search"></i> 搜索</button>
+            <button class="nav-search-btn" aria-label="search"><i class="fas fa-search"></i> <span
+                    data-i18n="search"></span></button>
             <div class="nav-toggle">
                 <i class="fas fa-bars"></i>
             </div>
@@ -38,7 +40,7 @@
         <div class="container" style="display: flex; gap: 32px;">
             <!-- 固定目录 -->
             <nav class="blog-toc" id="blog-toc">
-                <div class="toc-title">目录</div>
+                <div class="toc-title" data-i18n="toc"></div>
                 <ul class="toc-list" id="toc-list">
                     <!-- JS自动生成目录 -->
                 </ul>
@@ -47,7 +49,7 @@
                 <header class="article-header">
                     <h1 class="article-title" id="article-title"></h1>
                     <div class="article-meta">
-                        <span class="date" id="article-date"><i class="far fa-calendar"></i></span>
+                        <span class="date" id="article-date" data-date=""><i class="far fa-calendar"></i></span>
                         <div class="tags" id="article-tags"></div>
                     </div>
                 </header>
@@ -62,7 +64,8 @@
             </article>
         </div>
         <!-- 返回顶部按钮 -->
-        <button id="back-to-top" title="返回顶部"><i class="fas fa-arrow-up"></i></button>
+        <button id="back-to-top" title="back-to-top"><i class="fas fa-arrow-up"></i> <span
+                data-i18n="back_to_top"></span></button>
     </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
@@ -307,10 +310,13 @@
                     const titleEl = document.getElementById('article-title');
                     if (titleEl) titleEl.textContent = blog.title || '';
 
-                    // 设置日期
+                    // 设置日期（保留原始 ISO 在 data-date，用全局 formatDate 优先格式化）
                     const dateEl = document.getElementById('article-date');
                     if (dateEl) {
-                        dateEl.innerHTML = '<i class="far fa-calendar"></i> ' + (blog.date ? formatDate(blog.date) : '');
+                        if (blog.date) dateEl.setAttribute('data-date', blog.date);
+                        const formatted = (typeof window.formatDate === 'function') ? window.formatDate(blog.date) : (blog.date || '');
+                        dateEl.innerHTML = '<i class="far fa-calendar"></i> ' + formatted;
+                        dateEl.classList.add('date');
                     }
 
                     // 设置标签
@@ -349,15 +355,7 @@
 
             initBackToTop();
 
-            // 日期格式化函数
-            function formatDate(dateString) {
-                const date = new Date(dateString);
-                return date.toLocaleDateString('zh-CN', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-            }
+            // 使用站点统一的 formatDate（由 main.js 提供），不再定义本地格式化函数
         });
     </script>
 </body>

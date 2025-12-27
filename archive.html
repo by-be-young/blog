@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="css/archive.css">
     <link rel="stylesheet" href="css/search.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="js/i18n.js" defer></script>
 </head>
 
 <body class="archive-page">
@@ -20,14 +21,16 @@
     </div>
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-brand">Be Young's Blog</div>
+            <div class="nav-brand" data-i18n="brand"></div>
             <ul class="nav-menu">
-                <li><a href="index.html"><i class="fas fa-home"></i> 首页 Home</a></li>
-                <li><a href="archive.html" class="active"><i class="fas fa-archive"></i> 归档 Archive</a></li>
-                <li><a href="categories.html"><i class="fas fa-tags"></i> 分类 Categories</a></li>
-                <li><a href="quick-links.html"><i class="fas fa-link"></i> 快速链接 Links</a></li>
+                <li><a href="index.html"><i class="fas fa-home"></i> <span data-i18n="home"></span></a></li>
+                <li><a href="archive.html" class="active"><i class="fas fa-archive"></i> <span
+                            data-i18n="archive"></span></a></li>
+                <li><a href="categories.html"><i class="fas fa-tags"></i> <span data-i18n="categories"></span></a></li>
+                <li><a href="quick-links.html"><i class="fas fa-link"></i> <span data-i18n="quicklinks"></span></a></li>
             </ul>
-            <button class="nav-search-btn" aria-label="搜索"><i class="fas fa-search"></i> 搜索</button>
+            <button class="nav-search-btn" aria-label="search"><i class="fas fa-search"></i> <span
+                    data-i18n="search"></span></button>
             <div class="nav-toggle">
                 <i class="fas fa-bars"></i>
             </div>
@@ -48,13 +51,14 @@
                             <div class="calendar-top-row">
                                 <div class="calendar-view-toggle" role="tablist" aria-label="日历视图">
                                     <button class="calendar-toggle-btn active" type="button" data-view="month"
-                                        role="tab" aria-selected="true">按月</button>
+                                        role="tab" aria-selected="true" data-i18n="view_month"></button>
                                     <button class="calendar-toggle-btn" type="button" data-view="year" role="tab"
-                                        aria-selected="false">按年</button>
+                                        aria-selected="false" data-i18n="view_year"></button>
                                 </div>
-                                <button class="calendar-today-btn" type="button" id="calToday" aria-label="定位到今天">
+                                <button class="calendar-today-btn" type="button" id="calToday"
+                                    aria-label="locate-today">
                                     <i class="fas fa-location-crosshairs"></i>
-                                    定位到今天
+                                    <span data-i18n="locate_today"></span>
                                 </button>
                             </div>
                         </div>

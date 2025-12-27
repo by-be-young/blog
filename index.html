@@ -16,20 +16,23 @@
     <!-- KaTeX JS -->
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="js/i18n.js" defer></script>
 </head>
 
 <body class="home">
     <!-- 导航栏 -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-brand">Be Young's Blog</div>
+            <div class="nav-brand" data-i18n="brand"></div>
             <ul class="nav-menu">
-                <li><a href="index.html" class="active"><i class="fas fa-home"></i> 首页 Home</a></li>
-                <li><a href="archive.html"><i class="fas fa-archive"></i> 归档 Archive</a></li>
-                <li><a href="categories.html"><i class="fas fa-tags"></i> 分类 Categories</a></li>
-                <li><a href="quick-links.html"><i class="fas fa-link"></i> 快速链接 Links</a></li>
+                <li><a href="index.html" class="active"><i class="fas fa-home"></i> <span data-i18n="home"></span></a>
+                </li>
+                <li><a href="archive.html"><i class="fas fa-archive"></i> <span data-i18n="archive"></span></a></li>
+                <li><a href="categories.html"><i class="fas fa-tags"></i> <span data-i18n="categories"></span></a></li>
+                <li><a href="quick-links.html"><i class="fas fa-link"></i> <span data-i18n="quicklinks"></span></a></li>
             </ul>
-            <button class="nav-search-btn" aria-label="搜索"><i class="fas fa-search"></i> 搜索</button>
+            <button class="nav-search-btn" aria-label="search"><i class="fas fa-search"></i> <span
+                    data-i18n="search"></span></button>
             <div class="nav-toggle">
                 <i class="fas fa-bars"></i>
             </div>
@@ -46,8 +49,8 @@
                 <div class="slide" style="background-image: url('assets/images/bg3.png');"></div>
             </div>
             <div class="hero-content">
-                <h1 class="welcome-text">向北航行 一路华章</h1>
-                <p class="subtitle">❤️ China ❤️ Beihang ❤️</p>
+                <h1 class="welcome-text" data-i18n="welcome_text"></h1>
+                <p class="subtitle">❤️ <span data-i18n="beihang"></span> ❤️</p>
             </div>
             <div class="scroll-down">
                 <i class="fas fa-chevron-down bounce"></i>
@@ -64,19 +67,19 @@
                             <div class="avatar">
                                 <img src="assets/avatar.png" alt="头像">
                             </div>
-                            <h2 class="name">Be Young</h2>
-                            <p class="bio">24级 21系 本科</p>
+                            <h2 class="name" data-i18n="profile_name"></h2>
+                            <p class="bio" data-i18n="profile_bio"></p>
                             <div class="stats">
                                 <div class="stat">
                                     <a class="stat-link" href="archive.html">
                                         <span class="count" id="article-count">0</span>
-                                        <span class="label">文章</span>
+                                        <span class="label" data-i18n="posts"></span>
                                     </a>
                                 </div>
                                 <div class="stat">
                                     <a class="stat-link" href="categories.html">
                                         <span class="count" id="tag-count">0</span>
-                                        <span class="label">标签</span>
+                                        <span class="label" data-i18n="tags"></span>
                                     </a>
                                 </div>
                             </div>
@@ -90,6 +93,9 @@
                     <div class="main-content">
                         <div class="blog-grid" id="blogGrid">
                             <!-- 博客卡片将通过JS动态生成 -->
+                        </div>
+                        <div class="view-more-wrap" id="viewMoreWrap" style="text-align:center; margin: 24px 0;">
+                            <button class="view-more-btn" id="viewMoreBtn" data-i18n="view_more">查看更多</button>
                         </div>
                     </div>
                 </div>
