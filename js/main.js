@@ -172,3 +172,24 @@ function initScroll() {
         });
     }
 }
+
+// 在 window.load 后延迟设置使用 data-bg 的背景图片，确保背景资源在页面关键资源加载后再请求
+window.addEventListener('load', function () {
+    try {
+        const els = document.querySelectorAll('[data-bg]');
+        els.forEach(el => {
+            const src = el.getAttribute('data-bg');
+            if (!src) return;
+            const img = new Image();
+            img.onload = function () {
+                el.style.backgroundImage = `url('${src}')`;
+                el.classList.add('bg-loaded');
+            };
+            // 触发浏览器去加载图片，但在 load 时才应用到元素上
+            img.src = src;
+        });
+    } catch (e) {
+        // 安静失败，不影响页面其它逻辑
+        console.warn('defer-bg error', e);
+    }
+});

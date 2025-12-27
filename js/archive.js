@@ -322,4 +322,18 @@ fetch('data/blogs.json')
     renderTimeline(blogs);
     initTimelineDrum();
     initArchiveCalendar(blogs);
+    // 页面进入后默认将最近一篇博文滚动到时间轴中心
+    setTimeout(() => {
+      const timeline = document.getElementById('archiveTimeline');
+      if (!timeline) return;
+      const firstItem = timeline.querySelector('.timeline-item[data-date]');
+      if (!firstItem) return;
+      firstItem.scrollIntoView({ behavior: 'auto', block: 'center' });
+      // 如果启用了 drum 效果，触发一次更新以计算居中样式
+      const update = timeline.__drumUpdate;
+      if (typeof update === 'function') {
+        window.requestAnimationFrame(update);
+        window.setTimeout(update, 220);
+      }
+    }, 60);
   });
