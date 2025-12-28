@@ -15,8 +15,9 @@ function toYM(date) {
   return `${y}-${m}`;
 }
 
-function mondayFirstIndex(jsDay /* 0=Sun */) {
-  return (jsDay + 6) % 7;
+// compute offset into calendar grid given JS day index (0=Sun) and desired weekStart (0=Sun,1=Mon)
+function computeOffset(jsDay /* 0=Sun */, weekStart) {
+  return ((jsDay - (weekStart || 0)) + 7) % 7;
 }
 
 function heat(count, max) {
@@ -230,9 +231,11 @@ function initArchiveCalendar(blogs) {
   function updateCalendarI18n() {
     try {
       const { lang, tr } = getCalTranslations();
-      // weekday labels
+      // weekday labels (support rotating start-of-week per locale)
       const weekdaysRaw = (tr && tr.cal_weekdays) ? String(tr.cal_weekdays).split(',') : null;
-      const weekLabels = weekdaysRaw && weekdaysRaw.length === 7 ? weekdaysRaw : (lang === 'ja' ? ['月', '火', '水', '木', '金', '土', '日'] : (lang === 'en' ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] : ['一', '二', '三', '四', '五', '六', '日']));
+      const baseWeek = weekdaysRaw && weekdaysRaw.length === 7 ? weekdaysRaw : (lang === 'ja' ? ['月', '火', '水', '木', '金', '土', '日'] : (lang === 'en' ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] : ['一', '二', '三', '四', '五', '六', '日']));
+      const weekStart = (tr && typeof tr.weekStart === 'number') ? tr.weekStart : (lang === 'zh' ? 1 : 0);
+      const weekLabels = (weekStart === 1) ? baseWeek : ([baseWeek[6]].concat(baseWeek.slice(0, 6)));
       const weekEls = calendarBody ? Array.from(calendarBody.querySelectorAll('.cal-weekday')) : [];
       weekEls.forEach((el, idx) => { if (weekLabels[idx]) el.textContent = weekLabels[idx]; });
 
@@ -273,8 +276,8 @@ function initArchiveCalendar(blogs) {
     }
   }
 
-  // listen for language changes to update calendar labels/tips
-  document.addEventListener('site:languageChanged', function () { updateCalendarI18n(); });
+  // listen for language changes to update calendar labels/tips AND re-render grid
+  document.addEventListener('site:languageChanged', function () { try { render(); } catch (e) { updateCalendarI18n(); } });
 
   function includesDateInCurrentView(date) {
     if (view === 'year') return cursor.getFullYear() === date.getFullYear();
@@ -313,10 +316,12 @@ function initArchiveCalendar(blogs) {
 
     const first = new Date(y, m, 1);
     const daysInMonth = new Date(y, m + 1, 0).getDate();
-    const offset = mondayFirstIndex(first.getDay());
+    const weekStart = (tr && typeof tr.weekStart === 'number') ? tr.weekStart : (lang === 'zh' ? 1 : 0);
+    const offset = computeOffset(first.getDay(), weekStart);
 
-    // weekdays: try translations first
-    const weekdays = (tr && tr.cal_weekdays) ? String(tr.cal_weekdays).split(',') : ['一', '二', '三', '四', '五', '六', '日'];
+    // weekdays: try translations first, then rotate to match weekStart
+    const weekdaysBase = (tr && tr.cal_weekdays) ? String(tr.cal_weekdays).split(',') : ['一', '二', '三', '四', '五', '六', '日'];
+    const weekdays = (weekStart === 1) ? weekdaysBase : ([weekdaysBase[6]].concat(weekdaysBase.slice(0, 6)));
     const parts = [];
     parts.push('<div class="cal-grid">');
     weekdays.forEach(w => parts.push(`<div class="cal-weekday">${w}</div>`));

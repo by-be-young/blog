@@ -63,9 +63,19 @@
                 </footer>
             </article>
         </div>
-        <!-- 返回顶部按钮 -->
-        <button id="back-to-top" title="back-to-top"><i class="fas fa-arrow-up"></i> <span
-                data-i18n="back_to_top"></span></button>
+        <!-- 设置与返回顶部容器（固定右下） -->
+        <div id="floating-controls">
+            <!-- 顺序从上到下：宽屏、导出、设置、回到顶部 -->
+            <button id="wide-read-btn" class="floating-btn sub-btn" data-i18n-title="wide_read" aria-hidden="true"
+                style="display:none;"><i class="fas fa-expand"></i></button>
+            <button id="export-md-btn" class="floating-btn sub-btn" data-i18n-title="export_markdown" aria-hidden="true"
+                style="display:none;"><i class="fas fa-download"></i></button>
+            <button id="settings-btn" class="floating-btn control-btn" data-i18n-title="settings" aria-haspopup="true"
+                aria-expanded="false"><i class="fas fa-cog"></i></button>
+            <!-- 返回顶部按钮（仅图标，文字通过 tooltip 显示） -->
+            <button id="back-to-top" class="floating-btn" data-i18n-title="back_to_top"><i
+                    class="fas fa-arrow-up"></i></button>
+        </div>
     </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
@@ -279,7 +289,7 @@
             btn.style.display = 'none';
             window.addEventListener('scroll', function () {
                 if (window.scrollY > 300) {
-                    btn.style.display = 'block';
+                    btn.style.display = 'inline-flex';
                 } else {
                     btn.style.display = 'none';
                 }
@@ -287,6 +297,7 @@
             btn.addEventListener('click', function () {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
+            // floating settings initialized after DOMContentLoaded (defined below)
         }
         // 动态加载 markdown 文件内容
         function getQueryParam(name) {
@@ -335,6 +346,8 @@
                         .then(md => {
                             const contentElement = document.getElementById('markdown-content');
                             if (contentElement) {
+                                // store raw markdown for export
+                                window.__rawMarkdown = md;
                                 contentElement.textContent = md;
                                 window.__mdSourcePath = blog.contentFile;
                                 if (window.renderMarkdownContent) {
@@ -354,6 +367,157 @@
                 });
 
             initBackToTop();
+
+            // set up floating settings behavior
+            function stripFrontMatter(md) {
+                if (!md) return md;
+                // trim leading spaces
+                const s = md.trimStart();
+                if (s.startsWith('---')) {
+                    const idx = s.indexOf('\n---', 3);
+                    if (idx !== -1) return s.slice(idx + 4).replace(/^\n+/, '');
+                }
+                return md;
+            }
+
+            function downloadMarkdown() {
+                try {
+                    const raw = window.__rawMarkdown || '';
+                    const clean = stripFrontMatter(raw);
+                    const title = (document.getElementById('article-title') || {}).textContent || 'post';
+                    const filename = title.replace(/[^a-z0-9\u4e00-\u9fa5_-]/ig, '_') + '.md';
+                    const blob = new Blob([clean], { type: 'text/markdown;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                } catch (e) {
+                    console.error('export markdown failed', e);
+                }
+            }
+
+            function initFloatingSettings() {
+                const settingsBtn = document.getElementById('settings-btn');
+                const wideBtn = document.getElementById('wide-read-btn');
+                const exportBtn = document.getElementById('export-md-btn');
+                const container = document.getElementById('floating-controls');
+                const toc = document.getElementById('blog-toc');
+                const article = document.querySelector('.blog-article');
+                if (!settingsBtn || !wideBtn || !exportBtn || !container) return;
+
+                // toggle sub buttons visibility by toggling a class on container
+                let subVisible = false;
+                function showSubs(show) {
+                    subVisible = !!show;
+                    settingsBtn.setAttribute('aria-expanded', subVisible ? 'true' : 'false');
+                    if (subVisible) {
+                        wideBtn.style.display = 'inline-flex';
+                        exportBtn.style.display = 'inline-flex';
+                        wideBtn.setAttribute('aria-hidden', 'false');
+                        exportBtn.setAttribute('aria-hidden', 'false');
+                        // animate in
+                        requestAnimationFrame(() => {
+                            wideBtn.style.opacity = '1'; wideBtn.style.transform = 'translateX(0)';
+                            exportBtn.style.opacity = '1'; exportBtn.style.transform = 'translateX(0)';
+                        });
+                    } else {
+                        // animate out then hide
+                        wideBtn.style.opacity = '0'; wideBtn.style.transform = 'translateX(8px)';
+                        exportBtn.style.opacity = '0'; exportBtn.style.transform = 'translateX(8px)';
+                        setTimeout(() => {
+                            if (!subVisible) {
+                                wideBtn.style.display = 'none';
+                                exportBtn.style.display = 'none';
+                                wideBtn.setAttribute('aria-hidden', 'true');
+                                exportBtn.setAttribute('aria-hidden', 'true');
+                            }
+                        }, 180);
+                    }
+                }
+
+                settingsBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    showSubs(!subVisible);
+                });
+
+                // close subs when clicking outside
+                document.addEventListener('click', function (e) {
+                    if (!container.contains(e.target)) {
+                        showSubs(false);
+                    }
+                });
+
+                // wide reading toggle
+                let wideMode = false;
+                function enterWideMode() {
+                    wideMode = true;
+                    if (article) article.classList.add('wide-mode');
+                    if (toc) {
+                        toc.classList.add('toc-collapsed');
+                        // fully hide the TOC element in wide mode to avoid flicker
+                        toc.style.display = 'none';
+                    }
+                    // debug indicator: mark body and log
+                    try { document.body.classList.add('wide-mode-active'); } catch (e) { }
+                    try { console.log('wide-mode: enter'); } catch (e) { }
+                }
+                function exitWideMode() {
+                    wideMode = false;
+                    if (article) article.classList.remove('wide-mode');
+                    if (toc) {
+                        toc.classList.remove('toc-collapsed');
+                        // restore TOC display
+                        toc.style.display = '';
+                        // ensure any overlay styles removed
+                        toc.style.position = '';
+                        toc.style.left = '';
+                        toc.style.top = '';
+                        toc.style.zIndex = '';
+                        toc.style.width = '';
+                        toc.style.boxShadow = '';
+                        toc.style.opacity = '';
+                    }
+                    try { document.body.classList.remove('wide-mode-active'); } catch (e) { }
+                    try { console.log('wide-mode: exit'); } catch (e) { }
+                }
+
+                function tocOverlayShow() {
+                    if (!wideMode) return;
+                    // show TOC as an overlay on the left side above the article
+                    toc.style.position = 'fixed';
+                    toc.style.left = '24px';
+                    toc.style.top = '120px';
+                    toc.style.zIndex = '1002';
+                    toc.style.width = '360px';
+                    toc.style.boxShadow = '0 20px 48px rgba(0,0,0,0.18)';
+                    toc.style.opacity = '1';
+                }
+                function tocOverlayHide() {
+                    if (!wideMode) return;
+                    // revert to collapsed (hidden)
+                    toc.style.position = '';
+                    toc.style.left = '';
+                    toc.style.top = '';
+                    toc.style.zIndex = '';
+                    toc.style.width = '';
+                    toc.style.boxShadow = '';
+                    toc.style.opacity = '';
+                }
+
+                wideBtn.addEventListener('click', function (e) {
+                    if (!wideMode) enterWideMode(); else exitWideMode();
+                });
+
+                exportBtn.addEventListener('click', function (e) {
+                    downloadMarkdown();
+                });
+            }
+            // call now to wire handlers
+            initFloatingSettings();
 
             // 使用站点统一的 formatDate（由 main.js 提供），不再定义本地格式化函数
         });

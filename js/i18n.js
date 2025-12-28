@@ -37,11 +37,16 @@
             view_more: '查看更多',
             posts: '文章',
             cal_weekdays: '一,二,三,四,五,六,日',
+            weekStart: 1,
             cal_posts_tip: '该日共 {n} 篇',
             cal_month_tip: '本月共 {n} 篇',
-            tags: '标签'
-            , profile_name: '白恙',
-            profile_bio: '24级 21系 本科'
+            tags: '标签',
+            profile_name: '白恙',
+            profile_bio: '24级 21系 本科',
+            back_to_top: '回到顶部',
+            settings: '设置',
+            wide_read: '宽屏阅读',
+            export_markdown: '导出Markdown'
         },
         en: {
             brand: "Be Young's Blog",
@@ -76,11 +81,16 @@
             view_more: 'View more',
             posts: 'Posts',
             cal_weekdays: 'Mon,Tue,Wed,Thu,Fri,Sat,Sun',
+            weekStart: 0,
             cal_posts_tip: '{n} posts',
             cal_month_tip: '{n} posts',
             tags: 'Tags',
             profile_name: 'Be Young',
-            profile_bio: 'Undergraduate, Class of 24, Dept. 21'
+            profile_bio: 'Undergraduate, Class of 24, Dept. 21',
+            back_to_top: 'Back to top',
+            settings: 'Settings',
+            wide_read: 'Wide reading',
+            export_markdown: 'Export Markdown'
         },
         ja: {
             brand: '白恙のブログ',
@@ -115,11 +125,16 @@
             view_more: 'さらに表示',
             posts: '記事',
             cal_weekdays: '月,火,水,木,金,土,日',
+            weekStart: 0,
             cal_posts_tip: '{n} 件',
             cal_month_tip: '{n} 件',
-            tags: 'タグ'
-            , profile_name: '白恙',
-            profile_bio: '学部生、24級、21系'
+            tags: 'タグ',
+            profile_name: '白恙',
+            profile_bio: '学部生、24級、21系',
+            back_to_top: 'トップへ戻る',
+            settings: '設定',
+            wide_read: '広い表示',
+            export_markdown: 'Markdownを出力'
         }
     };
 
@@ -150,18 +165,38 @@
                 }
             }
         });
+        // apply titles/tooltips from data-i18n-title and set data-tooltip for custom styling
+        document.querySelectorAll('[data-i18n-title]').forEach(el => {
+            const key = el.getAttribute('data-i18n-title');
+            if (!key) return;
+            const text = map[key];
+            if (text !== undefined) {
+                try { el.title = text; } catch (e) { }
+                try { el.setAttribute('data-tooltip', text); } catch (e) { }
+                try { if (el.getAttribute('aria-label') === null) el.setAttribute('aria-label', text); } catch (e) { }
+            }
+        });
         const btn = document.querySelector('.nav-lang-button');
         if (btn) {
             const labelMap = { zh: '语', ja: '語', en: '🌐' };
             btn.textContent = labelMap[lang] || labelMap[DEFAULT_LANG];
         }
         // dispatch a document-level event so other modules (e.g. date formatting) can react
-        try {
-            document.dispatchEvent(new CustomEvent('site:languageChanged', { detail: { lang } }));
-        } catch (e) {
-            // ignore if CustomEvent is unavailable
-            console.warn('languageChanged event dispatch failed', e);
-        }
+        (function emitLanguageChange() {
+            try {
+                document.dispatchEvent(new CustomEvent('site:languageChanged', { detail: { lang } }));
+            } catch (e) {
+                try {
+                    var evt = document.createEvent('Event');
+                    evt.initEvent('site:languageChanged', true, true);
+                    // best-effort attach detail for listeners expecting it
+                    evt.detail = { lang: lang };
+                    document.dispatchEvent(evt);
+                } catch (e2) {
+                    console.warn('languageChanged event dispatch failed', e, e2);
+                }
+            }
+        })();
     }
 
     function init() {

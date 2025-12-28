@@ -120,6 +120,12 @@
     transition: background 0.2s, box-shadow 0.2s;
 }
 
+/* 可视化调试：当宽屏模式触发时在正文加粗边框，便于确认 */
+.blog-detail-page.wide-mode-active .blog-article {
+    outline: 4px solid rgba(255, 110, 155, 0.9);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+}
+
 #back-to-top:hover {
     background: #217dbb;
     box-shadow: 0 4px 16px rgba(52, 152, 219, 0.28);
@@ -226,6 +232,12 @@
     padding: 40px 32px 32px 32px;
     margin-top: 40px;
     margin-bottom: 40px;
+}
+
+/* 固定正文区最大宽度以避免在不同内容下跳动 */
+.blog-detail .blog-article {
+    max-width: 900px;
+    width: 100%;
 }
 
 .blog-detail .article-header {
@@ -1786,4 +1798,119 @@ body::-webkit-scrollbar-thumb:hover,
         color: #fff;
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
     }
+}
+
+/* 浮动设置容器 */
+/* floating controls */
+#floating-controls {
+    position: fixed;
+    right: 32px;
+    bottom: 32px;
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    /* 增加间距，避免重合 */
+    flex-direction: column;
+    /* DOM 顺序为上->下 */
+}
+
+/* unified floating button style */
+.floating-btn {
+    border: none;
+    cursor: pointer;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 22px rgba(44, 62, 80, 0.14);
+    color: #fff;
+    background: linear-gradient(135deg, rgba(0, 172, 255, 1), rgba(72, 219, 187, 0.98), rgba(255, 110, 155, 0.98));
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.floating-btn:active {
+    transform: translateY(1px);
+}
+
+/* 子按钮与主按钮保持一致的外观（默认隐藏，显示时动画进入） */
+.sub-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    padding: 0;
+    background: linear-gradient(135deg, rgba(0, 172, 255, 1), rgba(72, 219, 187, 0.98), rgba(255, 110, 155, 0.98));
+    color: #fff;
+    box-shadow: 0 10px 22px rgba(44, 62, 80, 0.14);
+    transform: translateX(8px);
+    opacity: 0;
+    transition: transform 0.18s ease, opacity 0.18s ease;
+    display: none;
+    /* JS 控制显示 */
+}
+
+/* 文章宽屏模式 */
+.blog-article.wide-mode {
+    /* 在宽屏模式下取消居中，使用可用空间（收起 TOC 后向左扩展） */
+    max-width: 1200px;
+    width: 100%;
+    /* 不居中，靠左展开以占据收起后的目录空间 */
+    margin-left: 0;
+    margin-right: 0;
+    flex: 1 1 auto;
+}
+
+.blog-toc.toc-collapsed {
+    width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    min-width: 0 !important;
+    flex: 0 0 0 !important;
+    /* ensure flex-basis is removed so it doesn't reserve space */
+    overflow: hidden;
+    opacity: 0;
+    transition: width 0.28s ease, opacity 0.28s ease, padding 0.28s ease, flex 0.28s ease;
+}
+
+/* 自定义 tooltip（马卡龙风）基于 data-tooltip 属性 */
+[data-tooltip] {
+    position: relative;
+}
+
+[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    right: 100%;
+    bottom: 50%;
+    transform: translateY(50%);
+    background: linear-gradient(90deg, rgba(255, 182, 201, 0.98), rgba(167, 243, 208, 0.95));
+    color: #102027;
+    padding: 8px 10px;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(44, 62, 80, 0.12);
+    white-space: nowrap;
+    font-size: 0.95rem;
+    z-index: 1003;
+}
+
+/* 回到顶部内部文字永不显示（所有文案通过悬浮提示 data-tooltip 显示） */
+#back-to-top span {
+    display: none !important;
+}
+
+/* 当回到顶部被放入浮动容器时，取消其固定定位，由容器负责布局，避免重合 */
+#floating-controls #back-to-top {
+    position: static !important;
+    right: auto !important;
+    bottom: auto !important;
+    z-index: auto !important;
+}
+
+/* ensure settings button does not overlap back-to-top */
+#settings-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
