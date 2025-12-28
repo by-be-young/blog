@@ -59,6 +59,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 初始化滚动监听
     initScroll();
+    // 初始化个人联系方式交互
+    try { initProfileContacts && initProfileContacts(); } catch (e) { }
 });
 
 // 轮播图初始化
@@ -84,6 +86,56 @@ function initSlideshow() {
 
     // 初始显示第一张
     showSlide(0);
+}
+
+// 初始化个人联系方式交互（显示/隐藏微信与QQ）
+function initProfileContacts() {
+    const wechatBtn = document.getElementById('wechat-btn');
+    const qqBtn = document.getElementById('qq-btn');
+    const popup = document.getElementById('contact-popup');
+    const wechatSpan = document.getElementById('contact-wechat');
+    const qqSpan = document.getElementById('contact-qq');
+    const githubLink = document.getElementById('github-link');
+    if (githubLink) {
+        githubLink.href = 'https://github.com/by-be-young';
+        githubLink.target = '_blank';
+        githubLink.rel = 'noopener noreferrer';
+    }
+
+    function hidePopup() {
+        if (popup) popup.style.display = 'none';
+    }
+
+    document.addEventListener('click', (e) => {
+        if (!popup) return;
+        if (e.target.closest('.contact-links')) return; // click inside
+        hidePopup();
+    });
+
+    if (wechatBtn) {
+        wechatBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!popup) return;
+            // toggle
+            if (popup.style.display === 'block') { popup.style.display = 'none'; return; }
+            if (wechatSpan) {
+                // show only wechat number line
+                popup.innerHTML = `<div class="contact-item"><div class="number-line">${wechatSpan.textContent || ''}</div></div>`;
+                popup.style.display = 'block';
+            }
+        });
+    }
+    if (qqBtn) {
+        qqBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!popup) return;
+            if (popup.style.display === 'block') { popup.style.display = 'none'; return; }
+            if (qqSpan) {
+                popup.innerHTML = `<div class="contact-item"><div class="number-line">${qqSpan.textContent || ''}</div></div>`;
+                popup.style.display = 'block';
+            }
+        });
+    }
 }
 
 // 博客网格初始化

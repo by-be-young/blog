@@ -1220,6 +1220,170 @@ body {
     object-fit: cover;
 }
 
+/* Profile details: label/value rows, interests and contact popup */
+.profile-info {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.profile-row {
+    display: flex;
+    gap: 0px;
+    align-items: stretch;
+}
+
+.profile-label {
+    background: var(--detail-sky);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 8px 0 0 8px;
+    font-size: 0.85rem;
+    min-width: 86px;
+    flex: 0 0 86px;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+}
+
+.profile-value {
+    background: #fff;
+    color: var(--detail-text);
+    padding: 8px 12px;
+    border-radius: 0 8px 8px 0;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-left: 1px solid rgba(0, 0, 0, 0.06);
+    font-weight: 600;
+    box-sizing: border-box;
+    flex: 1 1 auto;
+}
+
+.profile-interests {
+    margin-top: 12px;
+}
+
+.interests-label {
+    font-weight: 700;
+    color: var(--detail-text);
+    margin-bottom: 6px;
+}
+
+.interests-list {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.interest {
+    background: var(--detail-mint);
+    color: #fff;
+    padding: 6px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+}
+
+.contact-links {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 12px;
+    position: relative;
+}
+
+.contact-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--light-color);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    color: var(--detail-text);
+    cursor: pointer;
+    transition: transform .12s ease, box-shadow .12s ease;
+}
+
+.contact-btn:hover {
+    background: var(--primary-color);
+    color: #fff;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.12);
+}
+
+.contact-popup {
+    position: absolute;
+    left: 0;
+    top: 56px;
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.08);
+    display: none;
+    z-index: 1200;
+    min-width: 160px;
+    text-align: center;
+}
+
+.contact-popup .contact-item {
+    padding: 6px 0;
+    color: var(--detail-text);
+}
+
+.contact-popup .number-line {
+    font-weight: 700;
+    color: var(--detail-text);
+    font-size: 1rem;
+}
+
+/* Distinct single-color macaron backgrounds for each label */
+.profile-label--school {
+    background: #ff6e8f;
+}
+
+.profile-label--degree {
+    background: #2fbf86;
+}
+
+.profile-label--grade {
+    background: #7f72e6;
+}
+
+.profile-label--department {
+    background: #ffb84d;
+}
+
+/* Right-side text color matches left label background */
+.profile-label--school+.profile-value {
+    color: #ff6e8f;
+}
+
+.profile-label--degree+.profile-value {
+    color: #2fbf86;
+}
+
+.profile-label--grade+.profile-value {
+    color: #7f72e6;
+}
+
+.profile-label--department+.profile-value {
+    color: #ffb84d;
+}
+
+/* 首页专用：加宽侧栏（个人信息卡）并相应收窄右侧主栏，整体容器宽度不变 */
+.home .content-wrapper {
+    grid-template-columns: 360px 1fr;
+}
+
+.home .profile-card {
+    width: 100%;
+    max-width: none;
+}
+
 .name {
     font-size: 1.8rem;
     color: var(--dark-color);

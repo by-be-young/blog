@@ -68,7 +68,37 @@
                                 <img src="assets/avatar.png" alt="头像">
                             </div>
                             <h2 class="name" data-i18n="profile_name"></h2>
-                            <p class="bio" data-i18n="profile_bio"></p>
+
+                            <div class="profile-info">
+                                <div class="profile-row">
+                                    <span class="profile-label profile-label--school" data-i18n="label_school"></span>
+                                    <span class="profile-value" data-i18n="school_name"></span>
+                                </div>
+                                <div class="profile-row">
+                                    <span class="profile-label profile-label--degree" data-i18n="label_degree"></span>
+                                    <span class="profile-value" data-i18n="degree_name"></span>
+                                </div>
+                                <div class="profile-row">
+                                    <span class="profile-label profile-label--grade" data-i18n="label_grade"></span>
+                                    <span class="profile-value" data-i18n="grade_value"></span>
+                                </div>
+                                <div class="profile-row">
+                                    <span class="profile-label profile-label--department"
+                                        data-i18n="label_department"></span>
+                                    <span class="profile-value" data-i18n="department_value"></span>
+                                </div>
+                            </div>
+
+                            <div class="profile-interests">
+                                <div class="interests-label" data-i18n="label_interests"></div>
+                                <div class="interests-list">
+                                    <span class="interest" data-i18n="interest_game"></span>
+                                    <span class="interest" data-i18n="interest_literature"></span>
+                                    <span class="interest" data-i18n="interest_jpop"></span>
+                                    <span class="interest" data-i18n="interest_language"></span>
+                                </div>
+                            </div>
+
                             <div class="stats">
                                 <div class="stat">
                                     <a class="stat-link" href="archive.html">
@@ -83,8 +113,22 @@
                                     </a>
                                 </div>
                             </div>
-                            <div class="social-links">
-                                <a href="#" id="github-link"><i class="fab fa-github"></i></a>
+
+                            <div class="social-links contact-links">
+                                <a href="#" id="github-link" class="contact-btn" aria-label="GitHub"><i
+                                        class="fab fa-github"></i><span class="sr-only"
+                                        data-i18n="contact_github"></span></a>
+                                <button class="contact-btn" id="wechat-btn" aria-label="WeChat"><i
+                                        class="fab fa-weixin"></i><span class="sr-only"
+                                        data-i18n="contact_wechat"></span></button>
+                                <button class="contact-btn" id="qq-btn" aria-label="QQ"><i class="fab fa-qq"></i><span
+                                        class="sr-only" data-i18n="contact_qq"></span></button>
+                                <div class="contact-popup" id="contact-popup">
+                                    <div class="contact-item"><strong data-i18n="contact_wechat">WeChat</strong>: <span
+                                            id="contact-wechat" style="display:none">w19979258352</span></div>
+                                    <div class="contact-item"><strong data-i18n="contact_qq">QQ</strong>: <span
+                                            id="contact-qq" style="display:none">3416637855</span></div>
+                                </div>
                             </div>
                         </div>
                     </aside>
