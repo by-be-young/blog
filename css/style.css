@@ -18,6 +18,10 @@
     font-size: 1.08rem;
     height: fit-content;
     transition: width 0.25s;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
 }
 
 .toc-title {
@@ -32,7 +36,9 @@
     list-style: none;
     padding: 0;
     margin: 0;
-    max-height: 60vh;
+    /* 让目录列表在目录容器中占满剩余高度并可滚动；高度由脚本在运行时设置 */
+    flex: 1 1 auto;
+    max-height: none;
     overflow-y: auto;
 }
 
@@ -1315,6 +1321,86 @@ body {
     box-shadow: var(--shadow);
     transition: var(--transition);
     cursor: pointer;
+}
+
+/* 左下文章导航（马卡龙纯色矩形按钮） */
+.post-nav-left {
+    /* 放置于目录容器内，跟随目录布局；靠底部对齐 */
+    position: static;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+    margin-top: auto;
+}
+
+.post-nav-btn {
+    display: none;
+    width: 100%;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 10px 12px;
+    box-shadow: 0 10px 28px rgba(33, 37, 41, 0.08);
+    text-decoration: none;
+    color: var(--detail-text, #2b3440);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    transition: transform .12s ease, box-shadow .12s ease;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.post-nav-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 40px rgba(33, 37, 41, 0.12);
+}
+
+.post-nav-label {
+    font-size: 0.78rem;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 6px;
+    display: inline-block;
+    margin-bottom: 6px;
+}
+
+.post-nav-title {
+    font-weight: 700;
+    font-size: 0.98rem;
+    color: var(--detail-text, #2b3440);
+    line-height: 1.2;
+}
+
+/* 纯色马卡龙配色（不使用渐变） */
+.post-nav-btn[data-type="prev"] .post-nav-label {
+    background: #9ad7ff;
+}
+
+/* 天蓝 */
+.post-nav-btn[data-type="next"] .post-nav-label {
+    background: #a7f3d0;
+}
+
+/* 薄荷 */
+.post-nav-btn[data-type="similar"] .post-nav-label {
+    background: #ffb6c9;
+}
+
+/* 粉色 */
+
+/* 小屏幕时稍微缩小宽度 */
+@media (max-width: 640px) {
+    .post-nav-left {
+        margin-top: 10px;
+    }
+
+    .post-nav-btn {
+        padding: 8px 10px;
+    }
+
+    .post-nav-title {
+        font-size: 0.92rem;
+    }
 }
 
 /* 博客卡片悬浮：斜向流光线条向右滑动 */

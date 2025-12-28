@@ -22,6 +22,11 @@
         `;
         document.body.appendChild(panel);
 
+        // Apply i18n to newly created panel so placeholders/titles are correct immediately
+        try { if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') window.siteI18n.applyTo(panel); } catch (e) { }
+        // Ensure any date displays or i18n-sensitive fragments inside the panel are formatted
+        try { if (typeof updateSearchPanelI18n === 'function') updateSearchPanelI18n(); } catch (e) { }
+
         // close
         panel.querySelector('#search-close').addEventListener('click', () => { hidePanel(); });
 
@@ -151,7 +156,21 @@
                 const div = document.createElement('div');
                 div.className = 'search-item';
                 const title = document.createElement('div'); title.className = 'title'; title.textContent = r.blog.title;
-                const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = r.blog.date + (r.blog.tags && r.blog.tags.length ? (' • ' + r.blog.tags.join(', ')) : '');
+                const meta = document.createElement('div'); meta.className = 'meta';
+                // date span (language-aware formatting via window.formatDate)
+                const dateSpan = document.createElement('span');
+                // 标记为 result-date（搜索面板专用）并同时保留通用的 date 类，
+                // 以便 main.js 的 updateDates() 在语言切换时也能刷新它们。
+                dateSpan.className = 'result-date date';
+                if (r.blog.date) dateSpan.setAttribute('data-date', r.blog.date);
+                try {
+                    dateSpan.textContent = (typeof window.formatDate === 'function' ? window.formatDate(r.blog.date) : (r.blog.date || ''));
+                } catch (e) { dateSpan.textContent = (r.blog.date || ''); }
+                meta.appendChild(dateSpan);
+                if (r.blog.tags && r.blog.tags.length) {
+                    const tagsDiv = document.createElement('div'); tagsDiv.className = 'meta-tags'; tagsDiv.textContent = ' • ' + r.blog.tags.join(', ');
+                    meta.appendChild(tagsDiv);
+                }
                 const snippet = document.createElement('div'); snippet.className = 'snippet'; snippet.textContent = r.blog.excerpt || '';
                 div.appendChild(title); div.appendChild(meta); div.appendChild(snippet);
                 div.addEventListener('click', () => {
@@ -172,6 +191,8 @@
             clearTimeout(t);
             t = setTimeout(() => { fn.apply(null, args); }, wait);
         };
+        // ensure any visible dates/titles respond to current language
+        try { if (document.querySelector('.search-panel')) updateSearchPanelI18n(); } catch (e) { }
     }
 
     function determineMatchSource(b, q) {
@@ -212,35 +233,56 @@
             radius = typeof radius === 'number' ? radius : 60;
             const matchText = (el.textContent || '').trim();
             // prefer recorded parent text and index (to disambiguate multiple matches in same block)
-            const parentText = el.dataset && el.dataset.parentText ? el.dataset.parentText : (el.parentElement ? (el.parentElement.textContent || '') : (el.textContent || ''));
-            const idxAttr = el.dataset && el.dataset.parentIndex ? parseInt(el.dataset.parentIndex, 10) : NaN;
-            const lower = parentText.toLowerCase();
-            const idx = Number.isFinite(idxAttr) && idxAttr >= 0 ? idxAttr : lower.indexOf(matchText.toLowerCase());
-            if (idx === -1 || !Number.isFinite(idx)) {
-                // fallback: use surrounding of match node text
-                const txt = (el.textContent || '').trim();
-                const start = 0;
-                const snippet = txt.slice(0, radius * 2);
-                return escapeHtml(snippet);
+            const parent = el.parentElement;
+            // Build a cleaned text version with math/KaTeX nodes removed so formulas are omitted in snippet
+            try {
+                if (parent) {
+                    const clone = parent.cloneNode(true);
+                    // replace common KaTeX/math nodes with a placeholder so snippets show 【公式】
+                    const mathNodes = clone.querySelectorAll('.katex, .katex-display, script[type^="math"], .math');
+                    mathNodes.forEach(n => {
+                        try {
+                            if (n.parentNode) n.parentNode.replaceChild(document.createTextNode('【公式】'), n);
+                        } catch (e) { /* ignore */ }
+                    });
+                    const cleaned = (clone.textContent || '').trim();
+                    const lowerClean = cleaned.toLowerCase();
+                    const matchLower = matchText.toLowerCase();
+                    let idx = lowerClean.indexOf(matchLower);
+                    if (idx === -1) {
+                        // fallback to using the element's own text
+                        const txt = (el.textContent || '').trim();
+                        const snippet = txt.slice(0, radius * 2);
+                        return escapeHtml(snippet);
+                    }
+                    const start = Math.max(0, idx - radius);
+                    const end = Math.min(cleaned.length, idx + matchText.length + radius);
+                    let before = cleaned.slice(start, idx);
+                    let match = cleaned.slice(idx, idx + matchText.length);
+                    let after = cleaned.slice(idx + matchText.length, end);
+                    let out = '';
+                    if (start > 0) out += '...';
+                    out += escapeHtml(before) + '<span class="match-highlight">' + escapeHtml(match) + '</span>' + escapeHtml(after);
+                    if (end < cleaned.length) out += '...';
+                    return out;
+                }
+            } catch (e) {
+                // ignore and fallback
             }
-            const start = Math.max(0, idx - radius);
-            const end = Math.min(parentText.length, idx + matchText.length + radius);
-            let before = parentText.slice(start, idx);
-            let match = parentText.slice(idx, idx + matchText.length);
-            let after = parentText.slice(idx + matchText.length, end);
-            let out = '';
-            if (start > 0) out += '...';
-            out += escapeHtml(before) + '<span class="match-highlight">' + escapeHtml(match) + '</span>' + escapeHtml(after);
-            if (end < parentText.length) out += '...';
-            return out;
+            // ultimate fallback
+            const fallbackTxt = (el.textContent || '').trim();
+            return escapeHtml(fallbackTxt.slice(0, radius * 2));
         }
 
         matches.forEach((el, idx) => {
             const div = document.createElement('div');
             div.className = 'search-item';
             const title = document.createElement('div'); title.className = 'title';
-            const matchLabel = (window.siteI18n && window.siteI18n.translations) ? ((window.siteI18n.translations[window.siteI18n.getLang()] || {}).match_label || `匹配 ${idx + 1}`) : `匹配 ${idx + 1}`;
-            title.textContent = matchLabel.replace('{n}', String(idx + 1));
+            // mark this title as a detail-match so we can update its label on language change
+            title.dataset.matchIndex = String(idx + 1);
+            const map = (window.siteI18n && window.siteI18n.translations) ? (window.siteI18n.translations[window.siteI18n.getLang()] || {}) : {};
+            const matchLabel = (map.match_label || '匹配 {n}').replace('{n}', String(idx + 1));
+            title.textContent = matchLabel;
             const snippet = document.createElement('div'); snippet.className = 'snippet';
             snippet.innerHTML = makeSnippetForMatch(el, 80);
             div.appendChild(title); div.appendChild(snippet);
@@ -252,6 +294,33 @@
             });
             resultsEl.appendChild(div);
         });
+    }
+
+    // Update search panel i18n-sensitive parts when language changes
+    function updateSearchPanelI18n() {
+        try {
+            // update result dates
+            document.querySelectorAll('.result-date[data-date]').forEach(el => {
+                const d = el.getAttribute('data-date');
+                if (!d) return;
+                try {
+                    el.textContent = (typeof window.formatDate === 'function') ? window.formatDate(d) : d;
+                } catch (e) { el.textContent = d; }
+            });
+            // update detail-match titles
+            document.querySelectorAll('.search-item .title[data-match-index]').forEach(el => {
+                const idx = el.getAttribute('data-match-index');
+                if (!idx) return;
+                const map = (window.siteI18n && window.siteI18n.translations) ? (window.siteI18n.translations[window.siteI18n.getLang()] || {}) : {};
+                el.textContent = (map.match_label || '匹配 {n}').replace('{n}', String(idx));
+            });
+        } catch (e) { }
+    }
+
+    // react to language changes
+    if (!window.__searchI18nBound) {
+        window.__searchI18nBound = true;
+        document.addEventListener('site:languageChanged', updateSearchPanelI18n);
     }
 
     function clearHighlights(root) {

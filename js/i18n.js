@@ -31,6 +31,7 @@
             search_close: '关闭',
             search_no_results: '未找到匹配结果',
             search_no_results_detail: '未在本文中找到匹配',
+            match_label: '匹配 {n}',
             locate_today: '定位到今天',
             view_month: '按月',
             view_year: '按年',
@@ -47,6 +48,14 @@
             settings: '设置',
             wide_read: '宽屏阅读',
             export_markdown: '导出Markdown'
+            , prev_post: '上一篇'
+            , next_post: '下一篇'
+            , similar_post: '相似博客'
+            , code_copy: '复制'
+            , code_copied: '已复制'
+            , code_collapse: '收起'
+            , code_expand: '展开'
+            , code_toggle: '收起/展开'
         },
         en: {
             brand: "Be Young's Blog",
@@ -75,6 +84,7 @@
             search_close: 'Close',
             search_no_results: 'No matches found',
             search_no_results_detail: 'No matches found in this article',
+            match_label: 'Match {n}',
             locate_today: 'Locate Today',
             view_month: 'By Month',
             view_year: 'By Year',
@@ -91,6 +101,14 @@
             settings: 'Settings',
             wide_read: 'Wide reading',
             export_markdown: 'Export Markdown'
+            , prev_post: 'Previous'
+            , next_post: 'Next'
+            , similar_post: 'Similar Post'
+            , code_copy: 'Copy'
+            , code_copied: 'Copied'
+            , code_collapse: 'Collapse'
+            , code_expand: 'Expand'
+            , code_toggle: 'Collapse/Expand'
         },
         ja: {
             brand: '白恙のブログ',
@@ -119,6 +137,7 @@
             search_close: '閉じる',
             search_no_results: '一致する結果は見つかりませんでした',
             search_no_results_detail: '本文内で一致が見つかりませんでした',
+            match_label: '一致 {n}',
             locate_today: '今日を表示',
             view_month: '月ごと',
             view_year: '年ごと',
@@ -135,6 +154,14 @@
             settings: '設定',
             wide_read: '広い表示',
             export_markdown: 'Markdownを出力'
+            , prev_post: '前の記事'
+            , next_post: '次の記事'
+            , similar_post: '類似の投稿'
+            , code_copy: 'コピー'
+            , code_copied: 'コピー済み'
+            , code_collapse: '折りたたむ'
+            , code_expand: '展開'
+            , code_toggle: '折りたたむ/展開'
         }
     };
 

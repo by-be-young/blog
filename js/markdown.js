@@ -101,6 +101,8 @@ function renderMarkdownContent() {
     }
 
     enhanceCodeBlocks(contentElement);
+    // Apply i18n to dynamically created elements inside markdown (e.g., codeblock labels)
+    try { if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') window.siteI18n.applyTo(contentElement); } catch (e) { }
 }
 
 function normalizeLangLabel(raw) {
@@ -209,14 +211,12 @@ function enhanceCodeBlocks(rootEl) {
         const btnCopy = document.createElement('button');
         btnCopy.type = 'button';
         btnCopy.className = 'codeblock__btn';
-        btnCopy.title = '复制代码';
-        btnCopy.innerHTML = '<i class="far fa-copy"></i><span>复制</span>';
+        btnCopy.innerHTML = '<i class="far fa-copy"></i><span class="code-copy-label"></span>';
 
         const btnToggle = document.createElement('button');
         btnToggle.type = 'button';
         btnToggle.className = 'codeblock__btn';
-        btnToggle.title = '收起/展开';
-        btnToggle.innerHTML = '<i class="fas fa-chevron-up"></i><span>收起</span>';
+        btnToggle.innerHTML = '<i class="fas fa-chevron-up"></i><span class="code-toggle-label"></span>';
 
         actions.appendChild(btnCopy);
         actions.appendChild(btnToggle);
@@ -243,12 +243,21 @@ function enhanceCodeBlocks(rootEl) {
             if (!ok) return;
 
             btnCopy.classList.add('is-copied');
-            const span = btnCopy.querySelector('span');
-            if (span) span.textContent = '已复制';
+            // localized temporary label
+            try {
+                const lang = (window.siteI18n && typeof window.siteI18n.getLang === 'function') ? window.siteI18n.getLang() : 'zh';
+                const map = (window.siteI18n && window.siteI18n.translations) ? (window.siteI18n.translations[lang] || {}) : {};
+                const span = btnCopy.querySelector('span');
+                if (span) span.textContent = (map.code_copied || '已复制');
+            } catch (e) { }
             window.setTimeout(() => {
                 btnCopy.classList.remove('is-copied');
-                const s = btnCopy.querySelector('span');
-                if (s) s.textContent = '复制';
+                try {
+                    const lang = (window.siteI18n && typeof window.siteI18n.getLang === 'function') ? window.siteI18n.getLang() : 'zh';
+                    const map = (window.siteI18n && window.siteI18n.translations) ? (window.siteI18n.translations[lang] || {}) : {};
+                    const s = btnCopy.querySelector('.code-copy-label');
+                    if (s) s.textContent = (map.code_copy || '复制');
+                } catch (e) { }
             }, 900);
         });
 
@@ -256,15 +265,60 @@ function enhanceCodeBlocks(rootEl) {
             const collapsed = container.classList.toggle('is-collapsed');
             const icon = btnToggle.querySelector('i');
             const label = btnToggle.querySelector('span');
-            if (collapsed) {
-                if (icon) icon.className = 'fas fa-chevron-down';
-                if (label) label.textContent = '展开';
-            } else {
-                if (icon) icon.className = 'fas fa-chevron-up';
-                if (label) label.textContent = '收起';
+            try {
+                const lang = (window.siteI18n && typeof window.siteI18n.getLang === 'function') ? window.siteI18n.getLang() : 'zh';
+                const map = (window.siteI18n && window.siteI18n.translations) ? (window.siteI18n.translations[lang] || {}) : {};
+                if (collapsed) {
+                    if (icon) icon.className = 'fas fa-chevron-down';
+                    if (label) label.textContent = (map.code_expand || '展开');
+                } else {
+                    if (icon) icon.className = 'fas fa-chevron-up';
+                    if (label) label.textContent = (map.code_collapse || '收起');
+                }
+            } catch (e) {
+                if (collapsed) {
+                    if (icon) icon.className = 'fas fa-chevron-down';
+                    if (label) label.textContent = '展开';
+                } else {
+                    if (icon) icon.className = 'fas fa-chevron-up';
+                    if (label) label.textContent = '收起';
+                }
             }
         });
     });
+
+    // Update codeblock labels according to current language and collapsed state
+    function updateCodeBlockI18n() {
+        try {
+            const lang = (window.siteI18n && typeof window.siteI18n.getLang === 'function') ? window.siteI18n.getLang() : 'zh';
+            const map = (window.siteI18n && window.siteI18n.translations) ? (window.siteI18n.translations[lang] || {}) : {};
+            document.querySelectorAll('.codeblock').forEach(container => {
+                const btns = container.querySelectorAll('.codeblock__btn');
+                const btnCopyEl = btns[0];
+                const btnToggleEl = btns[1];
+                if (btnCopyEl) {
+                    const span = btnCopyEl.querySelector('.code-copy-label');
+                    if (span) span.textContent = (map.code_copy || '复制');
+                }
+                if (btnToggleEl) {
+                    const span = btnToggleEl.querySelector('.code-toggle-label');
+                    const icon = btnToggleEl.querySelector('i');
+                    const collapsed = container.classList.contains('is-collapsed');
+                    if (span) span.textContent = collapsed ? (map.code_expand || '展开') : (map.code_collapse || '收起');
+                    if (icon) icon.className = collapsed ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+                }
+            });
+        } catch (e) { }
+    }
+
+    // Bind language-change update once
+    if (!window.__codeblockI18nBound) {
+        window.__codeblockI18nBound = true;
+        document.addEventListener('site:languageChanged', updateCodeBlockI18n);
+    }
+
+    // Initial update after enhancing
+    updateCodeBlockI18n();
 }
 
 function addCodeBlockLineNumbers(bodyEl, preEl, codeEl) {

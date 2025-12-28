@@ -198,6 +198,20 @@
     font-size: 0.9rem;
     color: #6b6b6b
 }
+.search-item .meta{
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.search-item .meta .result-date,
+.search-item .meta .date{
+    white-space: nowrap;
+}
+.search-item .meta .meta-tags{
+    color: #6b6b6b;
+    margin-left: 0;
+}
 
 .search-item .snippet {
     font-size: 0.95rem;

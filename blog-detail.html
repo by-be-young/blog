@@ -34,6 +34,7 @@
                 <i class="fas fa-bars"></i>
             </div>
         </div>
+        <!-- 文章导航位置已移动至目录下方 -->
     </nav>
 
     <main class="blog-detail">
@@ -44,6 +45,24 @@
                 <ul class="toc-list" id="toc-list">
                     <!-- JS自动生成目录 -->
                 </ul>
+                <!-- 插入文章导航（上一篇/下一篇/相似博客），显示在目录下方 -->
+                <div id="post-nav-left" class="post-nav-left" aria-hidden="false">
+                    <a id="post-prev" class="post-nav-btn" data-type="prev" href="#" style="display:none;"
+                        role="button">
+                        <div class="post-nav-label" data-i18n="prev_post"></div>
+                        <div class="post-nav-title"></div>
+                    </a>
+                    <a id="post-next" class="post-nav-btn" data-type="next" href="#" style="display:none;"
+                        role="button">
+                        <div class="post-nav-label" data-i18n="next_post"></div>
+                        <div class="post-nav-title"></div>
+                    </a>
+                    <a id="post-similar" class="post-nav-btn" data-type="similar" href="#" style="display:none;"
+                        role="button">
+                        <div class="post-nav-label" data-i18n="similar_post"></div>
+                        <div class="post-nav-title"></div>
+                    </a>
+                </div>
             </nav>
             <article class="blog-article" style="flex:1;">
                 <header class="article-header">
@@ -336,6 +355,67 @@
                         tagsEl.innerHTML = blog.tags.map(tag => `<span class=\"tag\">${tag}</span>`).join('');
                     }
 
+                    // 左下文章导航：上一篇/下一篇/相似博客（按时间顺序）
+                    (function renderPostNav() {
+                        try {
+                            const prevEl = document.getElementById('post-prev');
+                            const nextEl = document.getElementById('post-next');
+                            const simEl = document.getElementById('post-similar');
+                            if (!prevEl || !nextEl || !simEl) return;
+
+                            // 按日期升序排序（旧 -> 新）
+                            const sorted = Array.isArray(blogs) ? blogs.slice().sort((a, b) => new Date(a.date) - new Date(b.date)) : [];
+                            const curIdx = sorted.findIndex(b => String(b.id) === String(blog.id));
+                            if (curIdx === -1) {
+                                prevEl.style.display = 'none'; nextEl.style.display = 'none'; simEl.style.display = 'none';
+                                return;
+                            }
+
+                            const prev = sorted[curIdx - 1];
+                            const next = sorted[curIdx + 1];
+
+                            if (prev) {
+                                prevEl.href = 'blog-detail.html?id=' + prev.id;
+                                prevEl.querySelector('.post-nav-title').textContent = prev.title || '';
+                                prevEl.style.display = 'flex';
+                            } else prevEl.style.display = 'none';
+
+                            if (next) {
+                                nextEl.href = 'blog-detail.html?id=' + next.id;
+                                nextEl.querySelector('.post-nav-title').textContent = next.title || '';
+                                nextEl.style.display = 'flex';
+                            } else nextEl.style.display = 'none';
+
+                            // 相似博客优先级：同(领域,科目,主题) -> 同科目不同主题 -> 同领域不同科目
+                            function tag(b, i) { return (b.tags && b.tags[i] !== undefined) ? b.tags[i] : null; }
+                            const cur0 = tag(blog, 0), cur1 = tag(blog, 1), cur2 = tag(blog, 2);
+                            let similar = null;
+
+                            if (cur0 !== null && cur1 !== null && cur2 !== null) {
+                                similar = blogs.find(b => String(b.id) !== String(blog.id) && tag(b, 0) === cur0 && tag(b, 1) === cur1 && tag(b, 2) === cur2);
+                            }
+                            if (!similar && cur1 !== null) {
+                                similar = blogs.find(b => String(b.id) !== String(blog.id) && tag(b, 1) === cur1 && tag(b, 2) !== cur2);
+                            }
+                            if (!similar && cur0 !== null) {
+                                similar = blogs.find(b => String(b.id) !== String(blog.id) && tag(b, 0) === cur0 && tag(b, 1) !== cur1);
+                            }
+
+                            if (similar) {
+                                simEl.href = 'blog-detail.html?id=' + similar.id;
+                                simEl.querySelector('.post-nav-title').textContent = similar.title || '';
+                                simEl.style.display = 'flex';
+                            } else {
+                                simEl.style.display = 'none';
+                            }
+
+                            // 应用语言资源到导航标签
+                            try { if (window.siteI18n && typeof siteI18n.applyTo === 'function') siteI18n.applyTo(document.getElementById('post-nav-left')); } catch (e) { }
+                        } catch (e) {
+                            console.error('post nav render error', e);
+                        }
+                    })();
+
                     fetch(blog.contentFile)
                         .then(res => {
                             if (!res.ok) {
@@ -518,6 +598,34 @@
             }
             // call now to wire handlers
             initFloatingSettings();
+
+            // 将目录高度设置为与详情页右侧搜索面板一致的高度，
+            // 计算方式与 `js/search.js` 中的 right-sidebar 逻辑保持一致。
+            function adjustTocHeight() {
+                try {
+                    const nav = document.querySelector('.navbar');
+                    const toc = document.getElementById('blog-toc');
+                    if (!toc) return;
+                    const top = nav ? nav.offsetHeight : 60;
+                    let desiredTop = top + 12; // 与 search.js 保持一致的基准偏移
+                    const tocRect = toc.getBoundingClientRect();
+                    if (tocRect && typeof tocRect.top === 'number' && !isNaN(tocRect.top)) {
+                        desiredTop = Math.max(desiredTop, Math.round(tocRect.top));
+                    }
+                    const heightPx = Math.max(120, window.innerHeight - desiredTop - 18);
+                    toc.style.height = heightPx + 'px';
+                    // 确保 toc-list 使用滚动填充
+                    const tocList = document.getElementById('toc-list');
+                    if (tocList) {
+                        tocList.style.maxHeight = 'none';
+                    }
+                } catch (e) { console.warn('adjustTocHeight failed', e); }
+            }
+
+            // 初始调整并在窗口尺寸/滚动变化时更新
+            adjustTocHeight();
+            window.addEventListener('resize', adjustTocHeight);
+            window.addEventListener('scroll', adjustTocHeight, { passive: true });
 
             // 使用站点统一的 formatDate（由 main.js 提供），不再定义本地格式化函数
         });
