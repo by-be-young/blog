@@ -232,9 +232,7 @@
         function makeSnippetForMatch(el, radius) {
             radius = typeof radius === 'number' ? radius : 60;
             const matchText = (el.textContent || '').trim();
-            // prefer recorded parent text and index (to disambiguate multiple matches in same block)
             const parent = el.parentElement;
-            // Build a cleaned text version with math/KaTeX nodes removed so formulas are omitted in snippet
             try {
                 if (parent) {
                     const clone = parent.cloneNode(true);
@@ -245,16 +243,51 @@
                             if (n.parentNode) n.parentNode.replaceChild(document.createTextNode('【公式】'), n);
                         } catch (e) { /* ignore */ }
                     });
-                    const cleaned = (clone.textContent || '').trim();
+                    // Prefer using recorded parent text/index when available to pinpoint the exact occurrence.
+                    const recordedParentText = (el.dataset.parentText || (parent.textContent || '')).trim();
+                    const cleaned = recordedParentText;
                     const lowerClean = cleaned.toLowerCase();
                     const matchLower = matchText.toLowerCase();
-                    let idx = lowerClean.indexOf(matchLower);
+
+                    let idx = -1;
+                    const dataIdx = parseInt(el.dataset.parentIndex || '-1', 10);
+                    // collect all occurrence positions of matchLower in lowerClean
+                    const positions = [];
+                    if (matchLower.length > 0) {
+                        let p = lowerClean.indexOf(matchLower, 0);
+                        while (p !== -1) {
+                            positions.push(p);
+                            p = lowerClean.indexOf(matchLower, p + 1);
+                        }
+                    }
+                    if (positions.length === 0) {
+                        idx = -1;
+                    } else {
+                        // prefer using recorded occurrence index when available
+                        const occ = parseInt(el.dataset.occurrence || '-1', 10);
+                        if (!isNaN(occ) && occ >= 0 && occ < positions.length) {
+                            idx = positions[occ];
+                        } else if (!isNaN(dataIdx) && dataIdx >= 0) {
+                            // choose the occurrence whose index is closest to recorded dataIdx
+                            let best = positions[0];
+                            let bestDist = Math.abs(best - dataIdx);
+                            for (let i = 1; i < positions.length; i++) {
+                                const d = Math.abs(positions[i] - dataIdx);
+                                if (d < bestDist) { bestDist = d; best = positions[i]; }
+                            }
+                            idx = best;
+                        } else {
+                            idx = positions[0];
+                        }
+                    }
+
                     if (idx === -1) {
                         // fallback to using the element's own text
                         const txt = (el.textContent || '').trim();
                         const snippet = txt.slice(0, radius * 2);
                         return escapeHtml(snippet);
                     }
+
                     const start = Math.max(0, idx - radius);
                     const end = Math.min(cleaned.length, idx + matchText.length + radius);
                     let before = cleaned.slice(start, idx);
@@ -344,15 +377,17 @@
             if (!node.nodeValue.trim()) continue;
             textNodes.push(node);
         }
-        // keep track of next search start index per parent node to disambiguate multiple occurrences
-        const parentSearchPos = new WeakMap();
+        // keep track of cumulative character offset of processed text nodes per code-block root
+        const blockOffsets = new WeakMap();
         textNodes.forEach(tn => {
             const parent = tn.parentNode;
             if (!parent) return;
-            if (parent.closest('pre') || parent.nodeName === 'CODE') return; // skip code blocks
+            // Determine the block root (prefer nearest <pre>, otherwise nearest <code>, otherwise the immediate parent)
+            const blockRoot = parent.closest && (parent.closest('pre') || parent.closest('code')) || parent;
+            // Allow matching inside code blocks and inline code so code content is searchable
             const val = tn.nodeValue;
-            const parentText = parent.textContent || '';
-            let searchStart = parentSearchPos.get(parent) || 0;
+            const blockText = (blockRoot && blockRoot.textContent) ? blockRoot.textContent : (parent.textContent || '');
+            const offset = blockOffsets.get(blockRoot) || 0; // number of chars before this text node in blockRoot
             let match;
             let lastIndex = 0;
             const frag = document.createDocumentFragment();
@@ -365,17 +400,10 @@
                 span.className = 'search-match match-highlight';
                 span.textContent = match[0];
                 span.setAttribute('tabindex', '-1');
-                // compute absolute index of this match within parent's full text, starting search from previous found index
-                const absIdx = parentText.toLowerCase().indexOf(match[0].toLowerCase(), searchStart);
-                if (absIdx !== -1) {
-                    span.dataset.parentIndex = String(absIdx);
-                    span.dataset.parentText = parentText;
-                    searchStart = absIdx + match[0].length;
-                    parentSearchPos.set(parent, searchStart);
-                } else {
-                    span.dataset.parentIndex = '-1';
-                    span.dataset.parentText = parentText;
-                }
+                // compute absolute index of this match within blockRoot's full text using node offset + local index
+                const absIdx = offset + match.index;
+                span.dataset.parentIndex = String(absIdx);
+                span.dataset.parentText = blockText;
                 frag.appendChild(span);
                 created.push(span);
                 lastIndex = match.index + match[0].length;
@@ -385,6 +413,8 @@
                 if (after) frag.appendChild(document.createTextNode(after));
                 parent.replaceChild(frag, tn);
             }
+            // update offset: this text node contributes its length to subsequent nodes in same blockRoot
+            blockOffsets.set(blockRoot, offset + val.length);
         });
         return created;
     }
