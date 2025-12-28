@@ -374,7 +374,7 @@
         const textNodes = [];
         let node;
         while ((node = walker.nextNode())) {
-            if (!node.nodeValue.trim()) continue;
+            // include all text nodes (including whitespace-only) to keep accurate offsets
             textNodes.push(node);
         }
         // keep track of cumulative character offset of processed text nodes per code-block root
@@ -388,6 +388,8 @@
             const val = tn.nodeValue;
             const blockText = (blockRoot && blockRoot.textContent) ? blockRoot.textContent : (parent.textContent || '');
             const offset = blockOffsets.get(blockRoot) || 0; // number of chars before this text node in blockRoot
+            // ensure regex starts from beginning for each text node
+            re.lastIndex = 0;
             let match;
             let lastIndex = 0;
             const frag = document.createDocumentFragment();
