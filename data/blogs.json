@@ -1,5 +1,19 @@
 [
     {
+        "id": 784512695,
+        "title": "Java串讲（待完善）",
+        "excerpt": "Java串讲ppt大纲",
+        "date": "2025-12-28",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "学习",
+            "Java",
+            "总复习"
+        ],
+        "contentFile": "blogs/Java串讲（待完善）.md",
+        "recommended": false
+    },
+    {
         "id": 1485412677,
         "title": "算法选择题速查",
         "excerpt": "算法选择题的开卷资料",
@@ -14,13 +28,17 @@
         "recommended": true
     },
     {
-        "id": 818573258,
-        "title": "计组复习课",
-        "excerpt": "选择题(10 * 2分)、简答题(4题20分: 5、5、6（链接）、4（二进制加减）)、设计题(2 * 10分:组合逻辑、主存储器)、分析题(40分:MIPS汇...",
+        "id": 1582417845,
+        "title": "计组复习课（待完善）",
+        "excerpt": "计组复习大纲",
         "date": "2025-12-26",
         "image": "assets/images/blog_bg.png",
-        "tags": [],
-        "contentFile": "blogs/计组复习课.md",
+        "tags": [
+            "学习",
+            "计组",
+            "总复习"
+        ],
+        "contentFile": "blogs/计组复习课（待完善）.md",
         "recommended": false
     },
     {
@@ -67,7 +85,7 @@
     },
     {
         "id": 2807178879,
-        "title": "算法板子（未完待续）",
+        "title": "算法板子",
         "excerpt": "常用算法C++模板代码集合，包含头文件、STL、常用模板等",
         "date": "2025-12-17",
         "image": "assets/images/blog_bg.png",

@@ -1062,6 +1062,11 @@ body {
     z-index: 1200;
 }
 
+/* Ensure search panel can appear above language dropdown on all pages */
+.search-panel {
+    z-index: 1305;
+}
+
 .nav-lang-item {
     padding: 8px 12px;
     border-radius: 8px;

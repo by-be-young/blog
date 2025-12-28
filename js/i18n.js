@@ -31,6 +31,10 @@
             search_close: '关闭',
             search_no_results: '未找到匹配结果',
             search_no_results_detail: '未在本文中找到匹配',
+            quick_no_links: '该分类下暂无链接。',
+            link_unnamed: '未命名链接',
+            quick_links_load_failed: '加载失败：请检查 data/quick-links.json',
+            categories_no_blogs: '暂无该分类下的博客',
             match_label: '匹配 {n}',
             locate_today: '定位到今天',
             view_month: '按月',
@@ -101,6 +105,10 @@
             search_close: 'Close',
             search_no_results: 'No matches found',
             search_no_results_detail: 'No matches found in this article',
+            quick_no_links: 'No links in this category.',
+            link_unnamed: 'Unnamed link',
+            quick_links_load_failed: 'Load failed: check data/quick-links.json',
+            categories_no_blogs: 'No posts in this category',
             match_label: 'Match {n}',
             locate_today: 'Locate Today',
             view_month: 'By Month',
@@ -171,6 +179,10 @@
             search_close: '閉じる',
             search_no_results: '一致する結果は見つかりませんでした',
             search_no_results_detail: '本文内で一致が見つかりませんでした',
+            quick_no_links: 'このカテゴリにリンクはありません。',
+            link_unnamed: '名前のないリンク',
+            quick_links_load_failed: '読み込みに失敗しました：data/quick-links.json を確認してください',
+            categories_no_blogs: 'このカテゴリに記事はありません',
             match_label: '一致 {n}',
             locate_today: '今日を表示',
             view_month: '月ごと',
@@ -300,6 +312,30 @@
             const btn = wrap.querySelector('.nav-lang-button');
             const list = wrap.querySelector('.nav-lang-list');
 
+            // bring element to front helper
+            if (!window.__bringToFront) {
+                window.__bringToFront = function (el) {
+                    try {
+                        if (!el || !(el.style)) return;
+                        // compute current maximum z-index in the document
+                        let max = 0;
+                        try {
+                            const all = document.querySelectorAll('body *');
+                            for (let i = 0; i < all.length; i++) {
+                                const z = window.getComputedStyle(all[i]).zIndex;
+                                if (z && z !== 'auto') {
+                                    const n = parseInt(z, 10);
+                                    if (!Number.isNaN(n) && n > max) max = n;
+                                }
+                            }
+                        } catch (e) { max = (window.__uiZIndexCounter || 1200); }
+                        const next = Math.max(max + 1, (window.__uiZIndexCounter || 1201));
+                        window.__uiZIndexCounter = next;
+                        el.style.zIndex = String(next);
+                    } catch (e) { /* ignore */ }
+                };
+            }
+
             function closeList() {
                 btn.setAttribute('aria-expanded', 'false');
                 list.setAttribute('aria-hidden', 'true');
@@ -315,6 +351,8 @@
             btn.addEventListener('click', e => {
                 const expanded = btn.getAttribute('aria-expanded') === 'true';
                 if (expanded) closeList(); else openList();
+                // ensure language menu appears above other UI
+                try { if (typeof window.__bringToFront === 'function') window.__bringToFront(wrap); } catch (e) { }
             });
 
             wrap.querySelectorAll('.nav-lang-item').forEach(item => {
@@ -359,6 +397,17 @@
 
     // Expose some API
     window.siteI18n = { getLang, setLang, translations, applyTo };
+
+    // Ensure dynamic elements get translations applied when language changes.
+    // Some UI (search panel, dynamic results, etc.) may be created after initial render;
+    // re-run applyTo() on language change to pick them up.
+    try {
+        document.addEventListener('site:languageChanged', function () {
+            try {
+                if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') window.siteI18n.applyTo();
+            } catch (e) { }
+        });
+    } catch (e) { }
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);

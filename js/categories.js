@@ -375,7 +375,13 @@ function renderBlogList() {
         listDiv.appendChild(item);
     });
     if (!filtered.length) {
-        listDiv.innerHTML = '<div style="color:#aaa;text-align:center;">暂无该分类下的博客</div>';
+        try {
+            const lang = (window.siteI18n && typeof window.siteI18n.getLang === 'function') ? window.siteI18n.getLang() : 'zh';
+            const tr = (window.siteI18n && window.siteI18n.translations) ? (window.siteI18n.translations[lang] || {}) : {};
+            listDiv.innerHTML = '<div style="color:#aaa;text-align:center;">' + (tr.categories_no_blogs || '暂无该分类下的博客') + '</div>';
+        } catch (e) {
+            listDiv.innerHTML = '<div style="color:#aaa;text-align:center;">暂无该分类下的博客</div>';
+        }
     }
 }
 

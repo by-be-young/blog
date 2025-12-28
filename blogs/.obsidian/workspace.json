@@ -14,13 +14,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "算法板子.md",
+                "file": "Java串讲（待完善）.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "算法板子 的大纲"
+              "title": "Java串讲（待完善） 的大纲"
             }
           }
         ]
@@ -32,6 +32,20 @@
         "children": [
           {
             "id": "bcb4cba90b1c4b75",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Java串讲（待完善）.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Java串讲（待完善）"
+            }
+          },
+          {
+            "id": "c46f326ee6e1a2df",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -76,7 +90,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "tag:复习",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -179,10 +193,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "算法板子.md"
+                "file": "Java串讲（待完善）.md"
               },
               "icon": "lucide-info",
-              "title": "算法板子的笔记属性"
+              "title": "Java串讲（待完善）的笔记属性"
             }
           }
         ],
@@ -190,8 +204,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 374.5,
-    "collapsed": true
+    "width": 374.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -206,13 +219,14 @@
   },
   "active": "bcb4cba90b1c4b75",
   "lastOpenFiles": [
-    "算法选择题速查.md",
     "算法板子.md",
+    "Java串讲（待完善）.md",
+    "计组复习课（待完善）.md",
+    "Cache理论.md",
+    "算法选择题速查.md",
     "并查集轻松笔记.md",
     "行香子·初雪.md",
-    "Cache理论.md",
     "卜算子·元旦晚会.md",
-    "计组复习课.md",
     "计组理论.md",
     "algorism.md",
     "Cache_theory.md",

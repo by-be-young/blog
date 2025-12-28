@@ -95,6 +95,8 @@
         }
 
         panel.classList.add('active');
+        // bring panel to front when shown
+        try { if (typeof window.__bringToFront === 'function') window.__bringToFront(panel); } catch (e) { }
         // focus input
         if (input) input.focus();
     }
@@ -219,7 +221,9 @@
         const q = keyword;
         const matches = highlightQueryInElement(contentEl, q);
         if (!matches || matches.length === 0) {
-            resultsEl.innerHTML = '<div class="search-item">未在本文中找到匹配</div>';
+            const map = (window.siteI18n && window.siteI18n.translations) ? (window.siteI18n.translations[window.siteI18n.getLang()] || {}) : {};
+            const noDetail = map.search_no_results_detail || '未在本文中找到匹配';
+            resultsEl.innerHTML = '<div class="search-item">' + noDetail + '</div>';
             return;
         }
         // helper: escape html
@@ -347,6 +351,24 @@
                 const map = (window.siteI18n && window.siteI18n.translations) ? (window.siteI18n.translations[window.siteI18n.getLang()] || {}) : {};
                 el.textContent = (map.match_label || '匹配 {n}').replace('{n}', String(idx));
             });
+            // also apply translations to any elements inside the search panel (placeholders, buttons)
+            try {
+                const panel = document.querySelector('.search-panel');
+                if (panel && window.siteI18n && typeof window.siteI18n.applyTo === 'function') {
+                    window.siteI18n.applyTo(panel);
+                }
+                // If the results area currently shows the no-results message, update its text as well
+                const resultsEl = document.getElementById('search-results');
+                if (resultsEl && resultsEl.children.length === 1) {
+                    const first = resultsEl.children[0];
+                    // if it's a plain no-result item (no .title inside), update text
+                    if (!first.querySelector('.title')) {
+                        const map = (window.siteI18n && window.siteI18n.translations) ? (window.siteI18n.translations[window.siteI18n.getLang()] || {}) : {};
+                        const noDetail = map.search_no_results_detail || '未在本文中找到匹配';
+                        first.textContent = noDetail;
+                    }
+                }
+            } catch (e) { }
         } catch (e) { }
     }
 
@@ -431,10 +453,21 @@
                     hidePanel();
                 } else {
                     showPanel();
+                    // ensure search panel appears above language dropdown, etc.
+                    try { if (typeof window.__bringToFront === 'function') window.__bringToFront(panel); } catch (e) { }
                 }
             });
         });
     }
+
+    // bring panel to front when user interacts with it
+    document.addEventListener('mousedown', (e) => {
+        const panel = document.querySelector('.search-panel');
+        if (!panel) return;
+        if (panel.contains(e.target)) {
+            try { if (typeof window.__bringToFront === 'function') window.__bringToFront(panel); } catch (err) { }
+        }
+    });
 
     // On blog-detail page: if ?q=keyword present, highlight after markdown render
     function tryApplyQueryFromUrl() {

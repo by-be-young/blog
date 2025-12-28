@@ -33,7 +33,11 @@
         if (!Array.isArray(items) || items.length === 0) {
             const empty = document.createElement('div');
             empty.className = 'link-empty';
-            empty.textContent = '该分类下暂无链接。';
+            try {
+                const lang = (window.siteI18n && typeof window.siteI18n.getLang === 'function') ? window.siteI18n.getLang() : 'zh';
+                const tr = (window.siteI18n && window.siteI18n.translations) ? (window.siteI18n.translations[lang] || {}) : {};
+                empty.textContent = tr.quick_no_links || '该分类下暂无链接。';
+            } catch (e) { empty.textContent = '该分类下暂无链接。'; }
             gridEl.appendChild(empty);
 
             if (lastGridMinHeight > 0) {
@@ -43,7 +47,7 @@
         }
 
         items.forEach(item => {
-            const title = (item && item.title) ? String(item.title) : '未命名链接';
+            const title = (item && item.title) ? String(item.title) : ((window.siteI18n && window.siteI18n.translations && window.siteI18n.translations[(window.siteI18n.getLang && window.siteI18n.getLang()) || 'zh'] && window.siteI18n.translations[window.siteI18n.getLang()].link_unnamed) || '未命名链接');
             const url = (item && item.url) ? String(item.url) : '#';
             const image = (item && item.image) ? String(item.image) : 'assets/blog_bg.png';
 
@@ -354,7 +358,13 @@
         } catch (e) {
             const gridEl = document.getElementById('quickLinksGrid');
             if (gridEl) {
-                gridEl.innerHTML = '<div class="link-empty">加载失败：请检查 data/quick-links.json</div>';
+                try {
+                    const lang = (window.siteI18n && typeof window.siteI18n.getLang === 'function') ? window.siteI18n.getLang() : 'zh';
+                    const tr = (window.siteI18n && window.siteI18n.translations) ? (window.siteI18n.translations[lang] || {}) : {};
+                    gridEl.innerHTML = '<div class="link-empty">' + (tr.quick_links_load_failed || '加载失败：请检查 data/quick-links.json') + '</div>';
+                } catch (e) {
+                    gridEl.innerHTML = '<div class="link-empty">加载失败：请检查 data/quick-links.json</div>';
+                }
             }
         }
     }
