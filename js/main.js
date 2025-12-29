@@ -333,3 +333,41 @@ window.addEventListener('load', function () {
         console.warn('defer-bg error', e);
     }
 });
+
+// Busuanzi 控制台打印（每次页面加载时在控制台输出站点总访问量、访客数、以及当前页面的阅读数）
+(function () {
+    try {
+        // 在页面中创建用于 busuanzi 填充的隐藏元素
+        var _bv_site_pv = document.createElement('span'); _bv_site_pv.className = 'busuanzi_value_site_pv'; _bv_site_pv.style.display = 'none';
+        var _bv_site_uv = document.createElement('span'); _bv_site_uv.className = 'busuanzi_value_site_uv'; _bv_site_uv.style.display = 'none';
+        var _bv_page_pv = document.createElement('span'); _bv_page_pv.className = 'busuanzi_value_page_pv'; _bv_page_pv.style.display = 'none';
+        document.body.appendChild(_bv_site_pv);
+        document.body.appendChild(_bv_site_uv);
+        document.body.appendChild(_bv_page_pv);
+
+        // 加载 Busuanzi 脚本（官方 CDN，协议相对）
+        var bs = document.createElement('script');
+        bs.src = '//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js';
+        bs.async = true;
+        bs.onload = function () { pollAndLog(); };
+        bs.onerror = function () { console.warn('Busuanzi 脚本加载失败'); pollAndLog(); };
+        document.head.appendChild(bs);
+
+        // 轮询直到 busuanzi 填充了数字或超时，然后打印到控制台
+        function pollAndLog() {
+            var attempts = 0, maxAttempts = 50; // 最多等待约 5 秒
+            var tid = setInterval(function () {
+                attempts++;
+                var sitePv = _bv_site_pv.textContent.trim();
+                var siteUv = _bv_site_uv.textContent.trim();
+                var pagePv = _bv_page_pv.textContent.trim();
+                if (sitePv || siteUv || pagePv || attempts >= maxAttempts) {
+                    clearInterval(tid);
+                    console.log('站点统计 — 总访问量(site_pv):', sitePv || 'n/a', ', 访客数(site_uv):', siteUv || 'n/a', ', 本页阅读(page_pv):', pagePv || 'n/a');
+                }
+            }, 100);
+        }
+    } catch (e) {
+        console.warn('Busuanzi 控制台打印错误', e);
+    }
+})();
