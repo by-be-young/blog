@@ -337,6 +337,49 @@ window.addEventListener('load', function () {
 // Busuanzi 控制台打印（每次页面加载时在控制台输出站点总访问量、访客数、以及当前页面的阅读数）
 (function () {
     try {
+        var ids = ['busuanzi_today_pv', 'busuanzi_today_uv', 'busuanzi_site_pv', 'busuanzi_site_uv', 'busuanzi_page_pv', 'busuanzi_page_uv'];
+        // 确保页面存在这些元素（隐藏），以便 Busuanzi 填充
+        ids.forEach(function (id) {
+            if (!document.getElementById(id)) {
+                var sp = document.createElement('span');
+                sp.id = id;
+                sp.style.display = 'none';
+                sp.textContent = '加载中...';
+                document.body.appendChild(sp);
+            }
+        });
+
+        // 加载官方 Busuanzi 脚本（使用官方 CDN）
+        var s = document.createElement('script');
+        s.src = '//cdn.busuanzi.cc/busuanzi/3.6.9/busuanzi.min.js';
+        s.defer = true;
+        s.onload = pollAndLog;
+        s.onerror = function () { console.warn('Busuanzi 脚本加载失败'); pollAndLog(); };
+        document.head.appendChild(s);
+
+        function pollAndLog() {
+            var attempts = 0, maxAttempts = 50; // 大约等待 5 秒
+            var tid = setInterval(function () {
+                attempts++;
+                var vals = ids.map(function (id) {
+                    var el = document.getElementById(id);
+                    return el ? el.textContent.trim() : '';
+                });
+                var ready = vals.some(function (v) { return v && v !== '加载中...' && v !== 'n/a'; });
+                if (ready || attempts >= maxAttempts) {
+                    clearInterval(tid);
+                    var map = {};
+                    ids.forEach(function (id, i) { map[id] = vals[i] || 'n/a'; });
+                    console.log('站点统计 — 今日访问(today_pv):', map['busuanzi_today_pv'], ', 今日访客(today_uv):', map['busuanzi_today_uv'], ', 总访问(site_pv):', map['busuanzi_site_pv'], ', 总访客(site_uv):', map['busuanzi_site_uv'], ', 本页阅读(page_pv):', map['busuanzi_page_pv'], ', 本页访客(page_uv):', map['busuanzi_page_uv']);
+                }
+            }, 100);
+        }
+    } catch (e) {
+        console.warn('Busuanzi 控制台打印错误', e);
+    }
+})();
+(function () {
+    try {
         // 在页面中创建用于 busuanzi 填充的隐藏元素
         var _bv_site_pv = document.createElement('span'); _bv_site_pv.className = 'busuanzi_value_site_pv'; _bv_site_pv.style.display = 'none';
         var _bv_site_uv = document.createElement('span'); _bv_site_uv.className = 'busuanzi_value_site_uv'; _bv_site_uv.style.display = 'none';
