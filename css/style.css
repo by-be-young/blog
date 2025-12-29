@@ -893,7 +893,8 @@ body {
 /* 如果你已将字体文件放到 `assets/fonts/`，下面的 @font-face 会优先加载本地图形字体。 */
 @font-face {
     font-family: '仓耳今楷01';
-    src: url('../assets/fonts/仓耳今楷01-W04.ttf') format('truetype');
+    /* 原引用的本地字体文件仓耳今楷01-W04.ttf 在服务器上 404，已移除此单条引用。若你有有效的字体文件，请放置在 assets/fonts/ 并在此处恢复 src 路径。 */
+    /* src: url('../assets/fonts/仓耳今楷01-W04.ttf') format('truetype'); */
     font-weight: normal;
     font-style: normal;
     font-display: swap;
