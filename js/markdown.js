@@ -70,15 +70,110 @@ function renderMarkdownContent() {
     if (!contentElement) return;
 
     const markdown = stripFrontMatter(contentElement.textContent || '');
+
+    // 提取显示公式（$$...$$）与内联公式 ($...$)，防止 marked 对其中的反斜杠或行尾 \\ 做错误处理。
+    // 处理流程：先抽取所有 $$...$$ 为占位符，再抽取所有未转义的 $...$ 为占位符，解析 Markdown 后再还原并用 KaTeX 渲染。
+    const displayMathBlocks = [];
+    const inlineMathBlocks = [];
+
+    // 抽取所有 $$$$ 显示数学块（非贪婪）
+    let tmp = markdown.replace(/\$\$[\s\S]*?\$\$/g, match => {
+        // 保留原始主体（不去除内侧空行），但去掉外层 $$ 标记
+        const inner = match.slice(2, -2);
+        const idx = displayMathBlocks.length;
+        displayMathBlocks.push(inner);
+        return `@@MATHD_${idx}@@`;
+    });
+
+    // 抽取内联数学 $...$（简单状态机，支持转义 \$）
+    let protectedMarkdown = '';
+    for (let i = 0; i < tmp.length;) {
+        const ch = tmp[i];
+        if (ch === '$' && tmp[i + 1] !== '$' && tmp[i - 1] !== '\\') {
+            // 开始内联数学
+            let j = i + 1;
+            let closed = false;
+            while (j < tmp.length) {
+                if (tmp[j] === '$' && tmp[j - 1] !== '\\') { closed = true; break; }
+                j++;
+            }
+            if (closed) {
+                const inner = tmp.slice(i + 1, j);
+                const idx = inlineMathBlocks.length;
+                inlineMathBlocks.push(inner);
+                protectedMarkdown += `@@MATHI_${idx}@@`;
+                i = j + 1;
+                continue;
+            }
+        }
+        protectedMarkdown += ch;
+        i++;
+    }
     // 使用 marked 解析（显式开启 GFM，确保表格等语法可用）
     if (window.marked && typeof window.marked.setOptions === 'function') {
         window.marked.setOptions({
             gfm: true
         });
     }
-    const html = window.marked ? window.marked.parse(markdown) : markdown;
+    const htmlParsed = window.marked ? window.marked.parse(protectedMarkdown) : protectedMarkdown;
+
+    // 还原占位符为占位 DOM 元素，用于后续用 KaTeX 渲染（避免 marked 对公式源做任何转义）
+    let html = htmlParsed
+        // 还原显示数学占位符为可识别节点
+        .replace(/@@MATHD_(\d+)@@/g, (_, num) => {
+            const i = parseInt(num, 10);
+            const src = displayMathBlocks[i] || '';
+            // 使用 data 属性保存原始 LaTeX，避免直接注入导致 HTML 解析问题
+            return `<span class="math-display-placeholder" data-math="${encodeURIComponent(src)}"></span>`;
+        })
+        // 还原内联数学占位符
+        .replace(/@@MATHI_(\d+)@@/g, (_, num) => {
+            const i = parseInt(num, 10);
+            const src = inlineMathBlocks[i] || '';
+            return `<span class="math-inline-placeholder" data-math="${encodeURIComponent(src)}"></span>`;
+        });
 
     contentElement.innerHTML = html;
+
+    // 使用 KaTeX API 对占位元素逐个渲染（若 KaTeX 可用）
+    try {
+        if (window.katex && typeof window.katex.render === 'function') {
+            // 渲染显示公式
+            Array.from(contentElement.querySelectorAll('.math-display-placeholder')).forEach(el => {
+                const src = decodeURIComponent(el.getAttribute('data-math') || '');
+                const span = document.createElement('span');
+                try {
+                    window.katex.render(src, span, { displayMode: true, throwOnError: false });
+                    el.parentNode.replaceChild(span, el);
+                } catch (e) {
+                    // 渲染失败则恢复原始文本
+                    el.textContent = `$$${src}$$`;
+                }
+            });
+
+            // 渲染内联公式
+            Array.from(contentElement.querySelectorAll('.math-inline-placeholder')).forEach(el => {
+                const src = decodeURIComponent(el.getAttribute('data-math') || '');
+                const span = document.createElement('span');
+                try {
+                    window.katex.render(src, span, { displayMode: false, throwOnError: false });
+                    el.parentNode.replaceChild(span, el);
+                } catch (e) {
+                    el.textContent = `$${src}$`;
+                }
+            });
+        } else if (window.renderMathInElement) {
+            // 回退到 auto-render（如果 KaTeX auto-render 可用）
+            renderMathInElement(contentElement, {
+                delimiters: [
+                    { left: '$$', right: '$$', display: true },
+                    { left: '$', right: '$', display: false }
+                ]
+            });
+        }
+    } catch (e) {
+        console.warn('math render error', e);
+    }
 
     // Ensure asset URLs (especially images) resolve correctly on GitHub Pages
     rewriteMarkdownAssetUrls(contentElement);

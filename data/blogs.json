@@ -1,7 +1,69 @@
 [
     {
+        "id": 975590534,
+        "title": "穿程问题（待完善）",
+        "excerpt": "欧拉图、哈密顿图",
+        "date": "2025-12-30",
+        "image": "assets/images/blog_bg.png",
+        "tags": [],
+        "contentFile": "blogs/穿程问题.md",
+        "recommended": false
+    },
+    {
+        "id": 3929566018,
+        "title": "二分图的匹配问题（待完善）",
+        "excerpt": "二分图的最大匹配",
+        "date": "2025-12-30",
+        "image": "assets/images/blog_bg.png",
+        "tags": [],
+        "contentFile": "blogs/二分图的匹配问题.md",
+        "recommended": false
+    },
+    {
+        "id": 690091049,
+        "title": "树|概要笔记（待完善）",
+        "excerpt": "树、二元树、生成树、割集",
+        "date": "2025-12-30",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "学习",
+            "离散二",
+            "图论"
+        ],
+        "contentFile": "blogs/树.md",
+        "recommended": false
+    },
+    {
+        "id": 4182711262,
+        "title": "通路问题|轻松笔记",
+        "excerpt": "最短通路、关键通路",
+        "date": "2025-12-30",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "学习",
+            "离散二",
+            "图论"
+        ],
+        "contentFile": "blogs/通路问题.md",
+        "recommended": false
+    },
+    {
+        "id": 2584486000,
+        "title": "图的矩阵表示|概要笔记",
+        "excerpt": "邻接矩阵、可达性矩阵、关联矩阵",
+        "date": "2025-12-30",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "学习",
+            "离散二",
+            "图论"
+        ],
+        "contentFile": "blogs/图的矩阵表示.md",
+        "recommended": false
+    },
+    {
         "id": 1458696030,
-        "title": "图论基本概念轻松笔记",
+        "title": "图论基本概念|轻松笔记",
         "excerpt": "图、图的同构、子图、连通性、强分图",
         "date": "2025-12-29",
         "image": "assets/images/blog_bg.png",
@@ -10,7 +72,7 @@
             "离散二",
             "图论"
         ],
-        "contentFile": "blogs/图论基本概念轻松笔记.md",
+        "contentFile": "blogs/图论基本概念.md",
         "recommended": false
     },
     {
@@ -57,7 +119,7 @@
     },
     {
         "id": 12587412,
-        "title": "并查集轻松笔记",
+        "title": "并查集|轻松笔记",
         "excerpt": "并查集的详细讲解、优化思路、应用场景及实战运用",
         "date": "2025-12-25",
         "image": "assets/images/blog_bg.png",
@@ -66,7 +128,7 @@
             "算法",
             "图"
         ],
-        "contentFile": "blogs/并查集轻松笔记.md",
+        "contentFile": "blogs/并查集.md",
         "recommended": false
     },
     {
@@ -85,14 +147,14 @@
     },
     {
         "id": 238031024,
-        "title": "Cache理论轻松笔记",
+        "title": "Cache理论|轻松笔记",
         "excerpt": "Cache的基本概念、工作原理及映射机制",
         "date": "2025-12-18",
         "image": "assets/images/blog_bg.png",
         "tags": [
             "学习",
             "计组",
-            "Cache理论"
+            "Cache"
         ],
         "contentFile": "blogs/Cache理论.md",
         "recommended": false
