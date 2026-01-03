@@ -109,7 +109,7 @@
             "模板"
         ],
         "contentFile": "blogs/算法选择题速查.md",
-        "recommended": true
+        "recommended": false
     },
     {
         "id": 1582417845,
@@ -199,7 +199,7 @@
         "id": 3233081084,
         "title": "离散数学题型总复习（未完待续）",
         "excerpt": "离散总复习",
-        "date": "2025-01-03",
+        "date": "2026-01-03",
         "image": "assets/images/blog_bg.png",
         "tags": [
             "学习",
