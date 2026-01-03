@@ -54,9 +54,14 @@ function renderTimeline(blogs) {
     <a class="timeline-link" href="blog-detail.html?id=${blog.id}">
       <div class="timeline-dot"></div>
       <div class="timeline-content">
-        <div class="timeline-date date" data-date="${blog.date}">${displayDate}</div>
-        <div class="timeline-title">${blog.title}</div>
-        <div class="timeline-excerpt">${blog.excerpt}</div>
+        <div class="timeline-badge" aria-hidden="true"><i class="fas fa-book"></i></div>
+        <div class="timeline-left">
+          <div class="timeline-title">${blog.title}</div>
+          <div class="timeline-excerpt">${blog.excerpt || ''}</div>
+        </div>
+        <div class="timeline-right">
+          <div class="timeline-date date" data-date="${blog.date}">${displayDate}</div>
+        </div>
       </div>
     </a>
     `;
@@ -82,7 +87,10 @@ function archiveFormatDate(dateString) {
         const reiwa = y - 2018;
         era = reiwa === 1 ? '（令和元年）' : `（令和${reiwa}年）`;
       }
-      return `${y}年${m}月${d}日 ${era}`;
+      // 将年号单独包裹为可换行并使用较小字号，由 CSS 控制显示效果
+      const main = `${y}年${m}月${d}日`;
+      const eraHtml = era ? `<span class="timeline-era">${era}</span>` : '';
+      return `${main} ${eraHtml}`;
     } else {
       return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
     }
@@ -98,9 +106,11 @@ function updateArchiveDates() {
       if (d) {
         // prefer global formatter if available
         if (typeof window !== 'undefined' && typeof window.formatDate === 'function') {
+          // global formatter likely returns plain text
           el.textContent = window.formatDate(d);
         } else {
-          el.textContent = archiveFormatDate(d);
+          // archiveFormatDate may return HTML (for Japanese era span)
+          el.innerHTML = archiveFormatDate(d);
         }
       }
     });
@@ -462,6 +472,23 @@ function initArchiveCalendar(blogs) {
   });
 
   render();
+
+  // 页面初始化后，确保日历默认聚焦到“今天”的月份（避免刷新时停留在最新文章的月份），
+  // 并在当天有文章时自动跳转时间轴到今天。
+  try {
+    const today = new Date();
+    const todayYmd = toYMD(today);
+    // 若当前视图不包含今天，则定位并重新渲染
+    if (!includesDateInCurrentView(today)) {
+      locateToDate(today);
+      render();
+    }
+    // 若当天有文章，则跳到时间轴对应条目
+    if (dateCount.has(todayYmd)) {
+      // 小延迟以确保时间轴已渲染
+      window.setTimeout(() => jumpTimelineToDate(todayYmd), 80);
+    }
+  } catch (e) { /* ignore */ }
 }
 
 // 归档页面：时间轴 + 侧边日历

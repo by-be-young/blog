@@ -28,15 +28,24 @@ function buildTagTree() {
 }
 
 function getTagsAtLevel(tagTree, level) {
+    // 返回指定层级的候选标签列表。
+    // 新逻辑：若任何上一级未选（为 null/undefined），则不展示下一级具体选项（只显示占位）。
+    if (!tagTree) return [];
+    if (level === 0) return Object.keys(tagTree);
+
+    // 如果上层中存在未选项，则返回空数组（表示只有占位）
+    for (let i = 0; i < level; i++) {
+        if (selectedTags[i] == null) return [];
+    }
+
+    // 沿选中路径查找对应子项并返回键名
     let node = tagTree;
     for (let i = 0; i < level; i++) {
         const key = selectedTags[i];
-        if (!key) return [];
         node = node && typeof node === 'object' ? node[key] : null;
         if (!node || Array.isArray(node)) return [];
     }
-    if (!node || Array.isArray(node)) return [];
-    return Object.keys(node);
+    return Object.keys(node || {});
 }
 
 function getSelectedIndex(tags, level) {
@@ -52,7 +61,18 @@ function adjustWheelPadding(wheelEl) {
     if (!first) return;
     const itemH = first.getBoundingClientRect().height || 54;
     const wheelH = wheelEl.getBoundingClientRect().height;
-    const pad = Math.max(0, Math.round(wheelH / 2 - itemH / 2));
+    // 考虑顶部/底部渐变遮罩高度，确保居中项不会被遮罩覆盖
+    let overlayH = 78;
+    try {
+        const cs = window.getComputedStyle(wheelEl);
+        const val = cs.getPropertyValue('--wheel-overlay-height');
+        if (val) {
+            const px = parseInt(val.trim(), 10);
+            if (!Number.isNaN(px)) overlayH = px;
+        }
+    } catch (e) { /* ignore */ }
+    const basePad = Math.round(wheelH / 2 - itemH / 2);
+    const pad = Math.max(0, Math.max(basePad, overlayH));
     wheelEl.style.paddingTop = `${pad}px`;
     wheelEl.style.paddingBottom = `${pad}px`;
 }
@@ -275,32 +295,15 @@ function renderCategories() {
     const t = (window.siteI18n && window.siteI18n.translations) ? window.siteI18n.translations[lang] || window.siteI18n.translations['zh'] : null;
     const labels = t ? [t.label_domain, t.label_subject, t.label_topic] : ['领域', '科目', '主题'];
 
-    // 先按层级顺序计算每层可用标签并确保 selectedTags 默认指向每层第一个可用项
+    // 先按层级顺序计算每层可用标签（未选择时为并集），并保留 selectedTags 原有状态。
     const tagsPerLevel = [];
-    let node = tagTree;
     for (let level = 0; level < MAX_LEVELS; level++) {
-        if (!node || Array.isArray(node)) {
-            const labels = (window.siteI18n && window.siteI18n.translations) ? [
-                (window.siteI18n.translations[window.siteI18n.getLang()] || {}).label_domain || '领域',
-                (window.siteI18n.translations[window.siteI18n.getLang()] || {}).label_subject || '科目',
-                (window.siteI18n.translations[window.siteI18n.getLang()] || {}).label_topic || '主题'
-            ] : ['领域', '科目', '主题'];
-        } else {
-            tagsPerLevel[level] = Object.keys(node);
-        }
-
-        if (tagsPerLevel[level].length > 0) {
-            // 若未设置或当前值不在可选列表中，默认选中第一个
-            if (!selectedTags[level] || tagsPerLevel[level].indexOf(selectedTags[level]) === -1) {
-                selectedTags[level] = tagsPerLevel[level][0];
-            }
-            node = node[selectedTags[level]];
-        } else {
-            // 无下级可选项，清空后续
-            selectedTags[level] = undefined;
-            node = null;
-        }
+        tagsPerLevel[level] = getTagsAtLevel(tagTree, level) || [];
     }
+
+    // 本地化“全部”占位文本，优先使用已解析的 t
+    const placeholderBase = (t && t.filter_all) ? t.filter_all : (window.siteI18n && window.siteI18n.translations && window.siteI18n.translations[lang] && window.siteI18n.translations[lang].filter_all) || '全部';
+    const placeholderLabel = `${placeholderBase}`;
 
     // 逐列渲染（保证三列均显示，缺项时显示占位）
     for (let level = 0; level < MAX_LEVELS; level++) {
@@ -324,27 +327,21 @@ function renderCategories() {
         wheel.setAttribute('tabindex', '0');
         wheel.setAttribute('aria-label', `${labels[level]}筛选`);
 
-        if (tags.length === 0) {
+        // 在每列前插入一个占位项（表示未选择 / 全部），以 index 0 呈现
+        const displayTags = [null].concat(tags);
+        displayTags.forEach((tag, idx) => {
             const item = document.createElement('div');
-            item.className = 'wheel-item empty';
-            item.textContent = '— 无选项 —';
-            item.dataset.index = '0';
+            item.className = 'wheel-item' + ((selectedTags[level] == null && idx === 0) || (selectedTags[level] === tag) ? ' is-selected' : '');
+            item.textContent = tag == null ? placeholderLabel : tag;
+            item.dataset.index = String(idx);
             wheel.appendChild(item);
-        } else {
-            tags.forEach((tag, idx) => {
-                const item = document.createElement('div');
-                item.className = 'wheel-item' + (selectedTags[level] === tag ? ' is-selected' : '');
-                item.textContent = tag;
-                item.dataset.index = String(idx);
-                wheel.appendChild(item);
-            });
-        }
+        });
 
         wrap.appendChild(wheel);
         wheelRow.appendChild(wrap);
 
-        // 仅当存在真实标签时绑定交互
-        if (tags.length > 0) bindWheelInteractions(wheel, level, tags);
+        // 绑定交互：传入 displayTags（含占位 null）以便 index 对应正确
+        bindWheelInteractions(wheel, level, displayTags);
     }
 
     // 重建完成后恢复高度约束
@@ -366,13 +363,39 @@ function renderBlogList() {
     filtered.forEach(blog => {
         const item = document.createElement('div');
         item.className = 'blog-item';
+        // render left (title/excerpt) and right (tags)
+        const tagsHtml = Array.isArray(blog.tags) ? blog.tags.map((t, i) => `<span class="blog-tag" data-level="${i}" data-path="${encodeURIComponent(JSON.stringify(blog.tags))}">${t}</span>`).join('') : '';
         item.innerHTML = `
             <a class="blog-link" href="blog-detail.html?id=${blog.id}">
-                <div class="blog-title">${blog.title}</div>
-                <div class="blog-excerpt">${blog.excerpt}</div>
+                <div class="blog-left">
+                    <div class="blog-title">${blog.title}</div>
+                    <div class="blog-excerpt">${blog.excerpt || ''}</div>
+                </div>
+                <div class="blog-right">
+                    <div class="blog-tags">${tagsHtml}</div>
+                </div>
             </a>
         `;
         listDiv.appendChild(item);
+        // 点击 blog-card 上的 tag：让对应层的滚轮滚到该 tag 并触发一次筛选
+        const tagEls = item.querySelectorAll('.blog-tag');
+        tagEls.forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const level = Number(el.dataset.level || 0);
+                const path = el.dataset.path ? JSON.parse(decodeURIComponent(el.dataset.path)) : null;
+                if (!path) return;
+
+                // 设置上级为 path 中对应的值，下级设为占位（null / undefined）
+                for (let i = 0; i <= level; i++) selectedTags[i] = path[i] || null;
+                for (let i = level + 1; i < MAX_LEVELS; i++) selectedTags[i] = null;
+
+                // 重新渲染后，renderCategories 会根据 selectedTags 将每列滚动到正确位置
+                renderCategories();
+                renderBlogList();
+            });
+        });
     });
     if (!filtered.length) {
         try {

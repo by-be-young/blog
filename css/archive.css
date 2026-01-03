@@ -64,6 +64,7 @@
 }
 
 .archive-timeline .timeline-content {
+    position: relative;
     margin-left: 24px;
     padding: 16px 24px;
     background: rgba(236, 240, 241, 0.86);
@@ -71,6 +72,10 @@
     border-radius: 12px;
     border: 1px solid rgba(0, 0, 0, 0.06);
     transition: var(--transition);
+    /* 固定卡片高度（可使用 CSS 变量覆盖） */
+    --timeline-card-height: 140px;
+    height: var(--timeline-card-height);
+    overflow: hidden;
 }
 
 .archive-timeline .timeline-content:hover {
@@ -139,16 +144,119 @@
     margin-bottom: 6px;
 }
 
+/* 新的左右两栏布局：左侧标题+简介，右侧为大字号时间 */
+.archive-timeline .timeline-content {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.archive-timeline .timeline-left {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.archive-timeline .timeline-right {
+    flex: 0 0 140px;
+    text-align: right;
+}
+
 .archive-timeline .timeline-title {
-    font-size: 1.2em;
-    font-weight: bold;
+    font-size: 1.45rem;
+    font-weight: 800;
     color: #222;
-    margin-bottom: 4px;
+    margin: 0 0 6px 0;
+    line-height: 1.15;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .archive-timeline .timeline-excerpt {
     color: #666;
-    font-size: 1em;
+    font-size: 1rem;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.archive-timeline .timeline-right .timeline-date {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+/* 日语年号样式：单独换行并使用较小字号 */
+.archive-timeline .timeline-era {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.6);
+    margin-top: 4px;
+}
+
+/* 角标（覆盖在卡片左上角） */
+.archive-timeline .timeline-content .timeline-badge {
+    position: absolute;
+    top: -12px;
+    left: -12px;
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(255, 110, 155, 0.98), rgba(72, 219, 187, 0.95));
+    color: #fff;
+    font-size: 18px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+    z-index: 6;
+    border: 2px solid rgba(255, 255, 255, 0.85);
+}
+
+.archive-timeline .timeline-content .timeline-badge i {
+    line-height: 1;
+}
+
+/* 当卡片高度被固定时，确保左侧文本不会超出 */
+.archive-timeline .timeline-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    /* 右移标题与简介：稍微增加左内边距 */
+    padding-left: 12px;
+}
+
+/* 兼容滚筒模式：保持高度不变并让 transform 生效 */
+.archive-page .archive-timeline.drum .timeline-content {
+    height: var(--timeline-card-height);
+}
+
+/* 小屏幕时改为纵向堆叠，时间放到上/右区域之上 */
+@media (max-width: 900px) {
+    .archive-timeline .timeline-content {
+        display: block;
+    }
+
+    .archive-timeline .timeline-right {
+        text-align: left;
+        margin-top: 8px;
+        flex: none;
+    }
+
+    .archive-timeline .timeline-title {
+        white-space: normal;
+        overflow: visible;
+    }
+
+    /* 小屏幕取消左内边距以避免过多缩进 */
+    .archive-timeline .timeline-left {
+        padding-left: 0;
+    }
 }
 
 /* 侧边日历 */

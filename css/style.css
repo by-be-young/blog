@@ -24,6 +24,12 @@
     align-items: stretch;
 }
 
+/* 关于页专用：覆盖目录/侧栏的固定宽度，让关于页左侧变宽 */
+.about-page .blog-toc {
+    width: 360px;
+    flex: 0 0 360px;
+}
+
 .toc-title {
     font-weight: bold;
     color: var(--primary-color);
@@ -1233,6 +1239,12 @@ body {
     gap: 40px;
 }
 
+/* About 页面专有：让左侧栏更宽，右侧相应变窄（不影响其它页面） */
+.about-page .content-wrapper {
+    grid-template-columns: 360px 1fr;
+    /* 左侧变宽为360px，可按需调整 */
+}
+
 /* 侧边栏 */
 .sidebar {
     position: relative;
@@ -2212,4 +2224,47 @@ body::-webkit-scrollbar-thumb:hover,
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+/* Remove underline inside profile card links and make card-link fill block */
+.profile-card-link,
+.profile-card-link:link,
+.profile-card-link:visited {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.profile-card a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Hide visible scrollbars on selected pages while keeping content scrollable */
+body.home,
+body.categories-page,
+body.quick-links-page {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+body.home::-webkit-scrollbar,
+body.categories-page::-webkit-scrollbar,
+body.quick-links-page::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Opera */
+}
+
+/* Also support toggling via a class on the root element (added by JS) */
+html.hide-scrollbar,
+body.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+html.hide-scrollbar::-webkit-scrollbar,
+body.hide-scrollbar::-webkit-scrollbar {
+    display: none;
 }

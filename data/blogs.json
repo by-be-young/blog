@@ -1,11 +1,25 @@
 [
     {
+        "id": 3233081084,
+        "title": "离散数学总复习",
+        "excerpt": "检查是否所有形如<a, a>的都在关系中",
+        "date": "2026-01-03",
+        "image": "assets/images/blog_bg.png",
+        "tags": [],
+        "contentFile": "blogs/离散数学总复习.md",
+        "recommended": false
+    },
+    {
         "id": 975590534,
         "title": "穿程问题（待完善）",
         "excerpt": "欧拉图、哈密顿图",
         "date": "2025-12-30",
         "image": "assets/images/blog_bg.png",
-        "tags": [],
+        "tags": [
+            "学习",
+            "离散二",
+            "图论"
+        ],
         "contentFile": "blogs/穿程问题.md",
         "recommended": false
     },
@@ -15,7 +29,11 @@
         "excerpt": "二分图的最大匹配",
         "date": "2025-12-30",
         "image": "assets/images/blog_bg.png",
-        "tags": [],
+        "tags": [
+            "学习",
+            "离散二",
+            "图论"
+        ],
         "contentFile": "blogs/二分图的匹配问题.md",
         "recommended": false
     },

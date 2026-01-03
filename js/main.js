@@ -34,6 +34,14 @@ function loadBlogs(callback) {
 
 // DOM加载完成后执行
 document.addEventListener('DOMContentLoaded', function () {
+    // Hide scrollbars on selected pages while keeping content scrollable
+    try {
+        var b = document.body;
+        if (b && (b.classList.contains('home') || b.classList.contains('categories-page') || b.classList.contains('quick-links-page'))) {
+            document.documentElement.classList.add('hide-scrollbar');
+            document.body.classList.add('hide-scrollbar');
+        }
+    } catch (e) { }
     // 设置github链接
     var githubLink = document.getElementById('github-link');
     if (githubLink) {
@@ -61,6 +69,21 @@ document.addEventListener('DOMContentLoaded', function () {
     initScroll();
     // 初始化个人联系方式交互
     try { initProfileContacts && initProfileContacts(); } catch (e) { }
+
+    // make the entire profile card clickable (navigate to about), but
+    // ignore clicks on internal interactive elements (links, buttons)
+    try {
+        const profileCard = document.getElementById('home-profile-card');
+        if (profileCard) {
+            profileCard.style.cursor = 'pointer';
+            profileCard.addEventListener('click', function (e) {
+                // if clicked element or its ancestor is an anchor, button, input, or has .contact-btn, do nothing
+                if (e.target.closest('a, button, input, .contact-btn')) return;
+                // otherwise navigate
+                window.location.href = 'about.html';
+            });
+        }
+    } catch (e) { }
 });
 
 // 轮播图初始化

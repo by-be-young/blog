@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关于 | 个人资料</title>
+    <link rel="icon" href="assets/avatar.png" type="image/png">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/butterfly.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/search.css">
+    <link rel="stylesheet" href="css/archive.css">
+    <link rel="stylesheet" href="css/categories.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="js/i18n.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="js/markdown.js" defer></script>
+    <script src="js/about.js" defer></script>
+</head>
+
+<body class="blog-detail-page about-page">
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand" data-i18n="brand"></div>
+            <ul class="nav-menu">
+                <li><a href="index.html"><i class="fas fa-home"></i> <span data-i18n="home"></span></a></li>
+                <li><a href="archive.html"><i class="fas fa-archive"></i> <span data-i18n="archive"></span></a></li>
+                <li><a href="categories.html"><i class="fas fa-tags"></i> <span data-i18n="categories"></span></a></li>
+                <li><a href="quick-links.html"><i class="fas fa-link"></i> <span data-i18n="quicklinks"></span></a></li>
+            </ul>
+            <button class="nav-search-btn" aria-label="search"><i class="fas fa-search"></i> <span
+                    data-i18n="search"></span></button>
+            <div class="nav-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <main class="blog-detail">
+        <div class="container">
+            <div class="content-wrapper">
+                <!-- 左侧资料卡（与首页一致） -->
+                <aside class="blog-toc" id="profile-card-aside">
+                    <div class="profile-card" id="about-profile-card">
+                        <div class="avatar"><img src="assets/avatar.png" alt="头像"></div>
+                        <h2 class="name" data-i18n="profile_name"></h2>
+                        <div class="profile-info">
+                            <div class="profile-row">
+                                <span class="profile-label profile-label--school" data-i18n="label_school"></span>
+                                <span class="profile-value" data-i18n="school_name"></span>
+                            </div>
+                            <div class="profile-row">
+                                <span class="profile-label profile-label--degree" data-i18n="label_degree"></span>
+                                <span class="profile-value" data-i18n="degree_name"></span>
+                            </div>
+                            <div class="profile-row">
+                                <span class="profile-label profile-label--grade" data-i18n="label_grade"></span>
+                                <span class="profile-value" data-i18n="grade_value"></span>
+                            </div>
+                            <div class="profile-row">
+                                <span class="profile-label profile-label--department"
+                                    data-i18n="label_department"></span>
+                                <span class="profile-value" data-i18n="department_value"></span>
+                            </div>
+                        </div>
+
+                        <div class="profile-interests">
+                            <div class="interests-label" data-i18n="label_interests"></div>
+                            <div class="interests-list">
+                                <span class="interest" data-i18n="interest_game"></span>
+                                <span class="interest" data-i18n="interest_literature"></span>
+                                <span class="interest" data-i18n="interest_jpop"></span>
+                                <span class="interest" data-i18n="interest_language"></span>
+                            </div>
+                        </div>
+
+                        <div class="stats">
+                            <div class="stat">
+                                <a class="stat-link" href="archive.html">
+                                    <span class="count" id="article-count--about">0</span>
+                                    <span class="label" data-i18n="posts"></span>
+                                </a>
+                            </div>
+                            <div class="stat">
+                                <a class="stat-link" href="categories.html">
+                                    <span class="count" id="tag-count--about">0</span>
+                                    <span class="label" data-i18n="tags"></span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="social-links contact-links">
+                            <a href="#" id="github-link--about" class="contact-btn" aria-label="GitHub"><i
+                                    class="fab fa-github"></i><span class="sr-only"
+                                    data-i18n="contact_github"></span></a>
+                        </div>
+                    </div>
+                </aside>
+
+                <article class="blog-article">
+                    <header class="article-header">
+                        <h1 class="article-title" data-i18n-title="about_title">About</h1>
+                    </header>
+
+                    <div class="article-content" id="markdown-content">
+                        <!-- Markdown 内容将由 js/about.js 按语言加载并渲染 -->
+                        Loading...
+                    </div>
+                </article>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/search.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

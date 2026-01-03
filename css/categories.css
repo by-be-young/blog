@@ -136,6 +136,8 @@
     transform-style: preserve-3d;
     padding-left: 6px;
     padding-right: 6px;
+    /* 顶部/底部渐变遮罩高度，可被 JS 读取以调整内边距，避免遮挡中心项 */
+    --wheel-overlay-height: 78px;
 }
 
 .categories-wheel::-webkit-scrollbar {
@@ -149,7 +151,7 @@
     position: absolute;
     left: 0;
     right: 0;
-    height: 78px;
+    height: var(--wheel-overlay-height, 78px);
     pointer-events: none;
     z-index: 2;
 }
@@ -194,6 +196,9 @@
     background: linear-gradient(135deg, rgba(255, 182, 201, 0.90), rgba(154, 215, 255, 0.82), rgba(167, 243, 208, 0.84));
     color: #fff;
     border-color: rgba(0, 0, 0, 0.06);
+    /* 保证被顶部/底部渐变遮罩覆盖时，居中项仍然可见 */
+    position: relative;
+    z-index: 5;
 }
 
 /* 三列一起的选中框：覆盖三列宽度，定位在滚轮中心项处 */
@@ -304,6 +309,12 @@
     border: 1px solid rgba(0, 0, 0, 0.06);
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
     transition: var(--transition);
+    /* 固定并加高卡片 */
+    --blog-card-height: 160px;
+    height: var(--blog-card-height);
+    display: flex;
+    align-items: stretch;
+    overflow: hidden;
 }
 
 .blog-item::before {
@@ -330,10 +341,10 @@
 }
 
 .blog-title {
-    font-size: 1.1em;
-    font-weight: bold;
+    font-size: 1.3rem;
+    font-weight: 800;
     color: var(--dark-color);
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 .blog-title a {
@@ -348,6 +359,119 @@
     text-decoration: none;
 }
 
+/* 两栏布局：左侧为标题/简介，右侧为标签列表 */
+.blog-item .blog-link {
+    display: flex;
+    gap: 18px;
+    align-items: stretch;
+    width: 100%;
+}
+
+.blog-item .blog-left {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* 右移标题与简介，减小为 18px 以腾出更多右侧空间 */
+    padding-left: 18px;
+}
+
+.blog-item .blog-right {
+    /* 增加右侧宽度以容纳固定大小的三个 tag */
+    flex: 0 0 480px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 18px;
+}
+
+.blog-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.blog-tag {
+    /* 马卡龙风格渐变底色，配合页面色系 */
+    background: linear-gradient(135deg, rgba(255, 182, 201, 0.28), rgba(154, 215, 255, 0.28));
+    color: #2b3440;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.86rem;
+    border: 1px solid rgba(255, 182, 201, 0.32);
+    box-shadow: 0 6px 12px rgba(167, 243, 208, 0.06);
+}
+
+/* ====== 五边形领带样式（覆盖默认圆角标签） ====== */
+.blog-item .blog-right {
+    position: relative;
+}
+
+/* 将标签水平排列并从卡片顶部垂下，最上边与卡片顶部重合（使用负 top 值抵消卡片内边距） */
+.blog-item .blog-tags {
+    position: absolute;
+    top: -18px;
+    /* 与 .blog-item 的 padding-top 保持一致，移动到卡片顶端 */
+    right: 18px;
+    /* 与 .blog-right 的内边距对应 */
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    justify-content: flex-end;
+    pointer-events: none;
+    /* 让点击落回卡片（可根据需要移除） */
+}
+
+.blog-item .blog-tags .blog-tag {
+    pointer-events: auto;
+    /* 恢复标签可点击性 */
+    padding: 8px 16px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.86rem;
+    color: #2b3440;
+    background: linear-gradient(135deg, rgba(255, 182, 201, 0.28), rgba(154, 215, 255, 0.28));
+    border: 1px solid rgba(255, 182, 201, 0.32);
+    box-shadow: 0 6px 12px rgba(167, 243, 208, 0.06);
+    border-radius: 0;
+    /* 去掉圆角以匹配多边形 */
+    /* 五边形：上边水平，两侧略直，底部成钩形 */
+    -webkit-clip-path: polygon(0 0, 100% 0, 100% 65%, 50% 100%, 0 65%);
+    clip-path: polygon(0 0, 100% 0, 100% 65%, 50% 100%, 0 65%);
+}
+
+.blog-item .blog-tags .blog-tag:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* 小屏幕调整：.blog-item 在小屏下 padding 变小，修正偏移量并让标签换行到上方 */
+@media (max-width: 600px) {
+    .blog-item .blog-tags {
+        /* 取消绝对定位，小屏走普通布局并允许换行 */
+        position: static;
+        top: auto;
+        left: auto;
+        right: auto;
+        display: flex;
+        gap: 8px;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .blog-item .blog-tags .blog-tag {
+        height: 64px;
+        padding: 6px 12px;
+        font-size: 0.82rem;
+        flex: 0 0 auto;
+        min-width: 80px;
+    }
+}
+
 .blog-item .blog-link .blog-title {
     margin-bottom: 4px;
 }
@@ -357,36 +481,56 @@
     text-decoration: underline;
 }
 
-.blog-excerpt {
-    color: var(--gray-color);
-    font-size: 0.98em;
+
+.blog-item .blog-tags {
+    position: absolute;
+    top: -26px;
+    /* 与 .blog-item 的 padding-top 保持一致，移动到卡片顶端 */
+    right: 18px;
+    /* 锚定到卡片右侧 */
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    justify-content: flex-end;
+    pointer-events: none;
+    /* 容器不捕获事件，子元素可交互 */
+    white-space: nowrap;
+    flex-wrap: nowrap;
 }
 
-@media (max-width: 600px) {
-    .categories-layout {
-        grid-template-columns: 1fr;
-        gap: 18px;
-    }
-
-    .categories-sidebar {
-        position: static;
-        top: auto;
-        transform: none;
-    }
-
-    .categories-container {
-        padding: 16px 12px;
-    }
-
-    .categories-wheel-row {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-
-    .blog-item {
-        padding: 14px 12px;
-    }
+.blog-item .blog-tags .blog-tag {
+    pointer-events: auto;
+    /* 恢复标签可点击性 */
+    /* 固定大小：宽高固定，便于一行放置三个 */
+    width: 90px;
+    flex: 0 0 90px;
+    max-width: 90px;
+    height: 100px;
+    /* 更高，垂到卡片中下部 */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.90rem;
+    color: #2b3440;
+    background: linear-gradient(135deg, rgba(255, 182, 201, 0.28), rgba(154, 215, 255, 0.28));
+    border: 1px solid rgba(255, 182, 201, 0.32);
+    box-shadow: 0 6px 12px rgba(167, 243, 208, 0.06);
+    border-radius: 0;
+    /* 去掉圆角以匹配多边形 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 8px 10px;
+    /* 五边形：上边水平，两侧略直，底部更深的对钩形 */
+    -webkit-clip-path: polygon(0 0, 100% 0, 100% 72%, 50% 100%, 0 72%);
+    clip-path: polygon(0 0, 100% 0, 100% 72%, 50% 100%, 0 72%);
 }
+
+.blog-item .blog-right {
+    padding-right: 12px;
+    margin-top: 8px;
+}
+
 
 .categories-collapsed {
     position: relative;
@@ -443,6 +587,61 @@
     --cat-muted: #5f6b7a;
     --cat-shadow: 0 16px 34px rgba(44, 62, 80, 0.14);
     --cat-border: linear-gradient(135deg, rgba(255, 182, 201, 0.95), rgba(154, 215, 255, 0.92), rgba(167, 243, 208, 0.92));
+}
+
+/* 在分类页禁止整页滚动，只允许右侧博客列表滚动 */
+.categories-page,
+html,
+body {
+    height: 100%;
+}
+
+body.categories-page {
+    overflow: hidden;
+    /* 禁止页面滚动 */
+}
+
+/* 将分类区绝对定位在 navbar 底部到视口底部，确保左右侧区域高度一致并占满 */
+.categories-page .categories-section {
+    position: absolute;
+    top: 60px;
+    /* navbar 高度 */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding-top: 12px;
+    /* 内部间距 */
+    overflow: hidden;
+}
+
+.categories-page .categories-layout {
+    height: 100%;
+    align-items: stretch;
+}
+
+/* 左侧筛选区保持内部滚动（滚轮组件内部），但不让整个页面滚动 */
+.categories-page .categories-sidebar {
+    overflow: hidden;
+}
+
+/* 使右侧博客列表成为唯一的可滚动区域 */
+.categories-page .blog-list {
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 18px;
+    box-sizing: border-box;
+}
+
+/* 确保滚轮内的视觉效果仍按需工作 */
+.categories-page .categories-wheel {
+    /* 保持原有高度样式，但允许其内部滚动而不触发页面滚动 */
+    overscroll-behavior: contain;
+}
+
+.categories-page .blog-list {
+    overscroll-behavior: contain;
+    /* 防止滚动链向父元素 */
 }
 
 /* 导航栏：与首页/归档一致的马卡龙玻璃质感 */
