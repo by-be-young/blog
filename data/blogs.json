@@ -5,9 +5,13 @@
         "excerpt": "Java题型总复习",
         "date": "2026-01-04",
         "image": "assets/images/blog_bg.png",
-        "tags": [],
+        "tags": [
+            "学习",
+            "Java",
+            "总复习"
+        ],
         "contentFile": "blogs/Java总复习（待完善）.md",
-        "recommended": false
+        "recommended": true
     },
     {
         "id": 3233081084,
