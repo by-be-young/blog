@@ -1,5 +1,29 @@
 [
     {
+        "id": 1997227528,
+        "title": "Java总复习（待完善）",
+        "excerpt": "Java题型总复习",
+        "date": "2026-01-04",
+        "image": "assets/images/blog_bg.png",
+        "tags": [],
+        "contentFile": "blogs/Java总复习（待完善）.md",
+        "recommended": false
+    },
+    {
+        "id": 3233081084,
+        "title": "离散数学题型总复习（未完待续）",
+        "excerpt": "离散总复习",
+        "date": "2026-01-03",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "学习",
+            "离散二",
+            "图论"
+        ],
+        "contentFile": "blogs/离散数学题型总复习.md",
+        "recommended": true
+    },
+    {
         "id": 975590534,
         "title": "穿程问题（待完善）",
         "excerpt": "欧拉图、哈密顿图",
@@ -194,19 +218,5 @@
         ],
         "contentFile": "blogs/行香子·初雪.md",
         "recommended": false
-    },
-    {
-        "id": 3233081084,
-        "title": "离散数学题型总复习（未完待续）",
-        "excerpt": "离散总复习",
-        "date": "2026-01-03",
-        "image": "assets/images/blog_bg.png",
-        "tags": [
-            "学习",
-            "离散二",
-            "图论"
-        ],
-        "contentFile": "blogs/离散数学题型总复习.md",
-        "recommended": true
     }
 ]
