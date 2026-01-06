@@ -1,0 +1,341 @@
+/* 公告页：居中时间轴（马卡龙色系） */
+
+.announcements-section {
+    padding: 44px 0 80px;
+}
+
+.announcements-title {
+    text-align: center;
+    /* 与归档时间轴顶部大标题完全一致：大字号、渐变文字、强阴影 */
+    width: min(1100px, 100%);
+    margin: 0 auto;
+    font-size: 4.2rem;
+    font-weight: 900;
+    line-height: 1.02;
+    padding: 80px 0 90px 0;
+    letter-spacing: 0.5px;
+    /* 马卡龙渐变文字（与归档一致） */
+    background: linear-gradient(90deg, rgba(255, 182, 201, 1), rgba(154, 215, 255, 0.98), rgba(167, 243, 208, 0.98));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 18px 44px rgba(44, 62, 80, 0.22), 0 6px 16px rgba(255, 255, 255, 0.6);
+    filter: drop-shadow(0 14px 36px rgba(44, 62, 80, 0.14));
+}
+
+@media (max-width: 900px) {
+    .announcements-title {
+        font-size: 2.2rem;
+        padding: 40px 0 44px 0;
+    }
+}
+
+.announcements-empty {
+    text-align: center;
+    color: rgba(0, 0, 0, 0.55);
+    padding: 30px 0;
+}
+
+.announcements-timeline {
+    position: relative;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 10px 0 20px;
+}
+
+/* 中轴线 */
+.announcements-timeline::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    transform: translateX(-50%);
+    background: var(--macaron-lavender, #f3e9ff);
+    border-radius: 999px;
+}
+
+.ann-item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 140px 1fr;
+    align-items: center;
+    gap: 10px;
+    margin: 26px 0;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.ann-item.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 中间轴（点 + 时间） */
+.ann-mid {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 56px;
+}
+
+.ann-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--macaron-accent, #ffd6e8);
+    border: 3px solid rgba(107, 43, 74, 0.35);
+    box-shadow: 0 10px 22px rgba(107, 43, 74, 0.12);
+}
+
+.ann-time {
+    font-weight: 800;
+    color: #6b2b4a;
+    text-align: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: var(--macaron-mint, #e8fff4);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    line-height: 1.2;
+    max-width: 140px;
+}
+
+/* 卡片 (styles consolidated later) */
+
+/* 将时间轴项的标题样式与归档时间轴中的 `.timeline-title` 完全对齐 */
+.announcements-page .ann-card .ann-message {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.6;
+    color: #ff5f8a;
+}
+
+/* 最新公告：顶部居中，字号更大 */
+.ann-item.ann-item--top {
+    grid-template-columns: 1fr;
+    margin: 8px 0 34px;
+}
+
+.ann-item.ann-item--top .ann-mid {
+    margin: 0 auto 12px;
+}
+
+.ann-item.ann-item--top .ann-card {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 18px 20px;
+}
+
+.ann-item.ann-item--top .ann-card .ann-message {
+    font-size: 1.1rem;
+    font-weight: 800;
+    line-height: 1.6;
+}
+
+/* 左右交错 */
+.ann-item.ann-item--left .ann-card {
+    grid-column: 1;
+    /* 左侧卡片左对齐（避免右对齐） */
+    justify-self: start;
+    text-align: left;
+}
+
+.ann-item.ann-item--left .ann-mid {
+    grid-column: 2;
+}
+
+.ann-item.ann-item--left .ann-spacer {
+    grid-column: 3;
+}
+
+.ann-item.ann-item--right .ann-spacer {
+    grid-column: 1;
+}
+
+.ann-item.ann-item--right .ann-mid {
+    grid-column: 2;
+}
+
+.ann-item.ann-item--right .ann-card {
+    grid-column: 3;
+    justify-self: start;
+    text-align: left;
+}
+
+@media (max-width: 880px) {
+    .ann-item {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .announcements-timeline::before {
+        left: 22px;
+        transform: none;
+    }
+
+    .ann-mid {
+        align-items: flex-start;
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 10px;
+        padding-left: 8px;
+    }
+
+    .ann-item.ann-item--left .ann-card,
+    .ann-item.ann-item--right .ann-card {
+        grid-column: 1;
+        justify-self: stretch;
+        text-align: left;
+        margin-left: 46px;
+    }
+
+    .ann-item.ann-item--top .ann-card {
+        margin-left: 46px;
+        max-width: none;
+    }
+
+    .ann-time {
+        max-width: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ann-item {
+        transition: none;
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* 保证公告页的导航样式与站点其它页面（如归档）一致 */
+.announcements-page {
+    /* 复用归档页的马卡龙变量，使视觉主题一致 */
+    --primary-color: #55c8ff;
+    --secondary-color: #a7f3d0;
+    --archive-pink: #ffb6c9;
+    --archive-peach: #ffd2a6;
+    --archive-mint: #a7f3d0;
+    --archive-sky: #9ad7ff;
+    --archive-text: #2b3440;
+    --archive-muted: #5f6b7a;
+    --archive-card-shadow: 0 16px 34px rgba(44, 62, 80, 0.14);
+    --archive-border: linear-gradient(135deg, var(--archive-pink), var(--archive-mint), rgba(199, 182, 255, 0.9));
+}
+
+.announcements-page .nav-menu a {
+    color: var(--archive-text);
+    background: rgba(255, 255, 255, 0.42);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.announcements-page .nav-menu a:hover,
+.announcements-page .nav-menu a.active {
+    color: var(--archive-text);
+    background: linear-gradient(135deg, rgba(255, 182, 201, 0.30), rgba(154, 215, 255, 0.22), rgba(167, 243, 208, 0.24));
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+/* 归档页风格：导航玻璃质感 + 品牌渐变 */
+.announcements-page .navbar {
+    background: rgba(255, 255, 255, 0.72);
+    background-image: linear-gradient(90deg,
+            rgba(255, 182, 201, 0.16) 0%,
+            rgba(167, 243, 208, 0.12) 45%,
+            rgba(199, 182, 255, 0.14) 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 10px 24px rgba(44, 62, 80, 0.10);
+}
+
+.announcements-page .nav-brand {
+    color: #55c8ff;
+    text-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.6),
+        0 6px 14px rgba(85, 200, 255, 0.22);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .announcements-page .nav-brand {
+        display: inline-block;
+        background: linear-gradient(90deg,
+                rgba(0, 172, 255, 1) 0%,
+                rgba(72, 219, 187, 0.98) 45%,
+                rgba(255, 110, 155, 0.98) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+        text-shadow: none;
+        filter:
+            drop-shadow(0 1px 0 rgba(255, 255, 255, 0.60)) drop-shadow(0 10px 18px rgba(0, 172, 255, 0.16));
+    }
+}
+
+/* 让公告卡片采用归档页的模糊玻璃样式 */
+/* 将高度限制及消息滚动合并到主卡片样式，防止重复/覆盖 */
+.ann-card {
+    border: 3px solid transparent;
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.70), rgba(255, 255, 255, 0.70)) padding-box,
+        linear-gradient(135deg, rgba(255, 182, 201, 0.80), rgba(167, 243, 208, 0.78), rgba(154, 215, 255, 0.78)) border-box;
+    backdrop-filter: blur(10px);
+    border-radius: 14px;
+    max-height: 340px !important;
+    /* 默认最大高度 */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* 增加卡片内间距（文字与边框间隔） */
+    padding: 18px 20px;
+}
+
+.ann-card .ann-message {
+    white-space: pre-wrap;
+    word-break: break-word;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    font-size: 1rem;
+    line-height: 1.6;
+    font-weight: 700;
+}
+
+/* 更大的顶部最新公告卡 */
+.ann-item.ann-item--top .ann-card {
+    max-height: 480px !important;
+}
+
+/* 响应式：窄屏时适当降低高度 */
+@media (max-width: 880px) {
+
+    .announcements-page .ann-card,
+    .announcements-section .ann-card {
+        max-height: 260px !important;
+        padding: 14px 16px;
+    }
+
+    .announcements-page .ann-item.ann-item--top .ann-card {
+        max-height: 380px !important;
+        padding: 16px 18px;
+    }
+}
+
+/* 隐藏滚动条（WebKit / Blink） */
+.announcements-page .ann-card .ann-message::-webkit-scrollbar,
+.announcements-section .ann-card .ann-message::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+/* 隐藏滚动条（Firefox / IE/Edge） */
+.announcements-page .ann-card .ann-message,
+.announcements-section .ann-card .ann-message {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    /* IE/Edge */
+}

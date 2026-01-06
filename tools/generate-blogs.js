@@ -5,6 +5,7 @@ import matter from 'gray-matter';
 const ROOT = path.resolve(process.cwd());
 const BLOGS_DIR = path.join(ROOT, 'blogs');
 const OUTPUT_JSON = path.join(ROOT, 'data', 'blogs.json');
+const ANNOUNCEMENTS_JSON = path.join(ROOT, 'data', 'announcements.json');
 
 function toPosix(p) {
     return p.split(path.sep).join('/');
@@ -38,6 +39,37 @@ function formatDateYYYYMMDD(date) {
     const m = String(date.getMonth() + 1).padStart(2, '0');
     const d = String(date.getDate()).padStart(2, '0');
     return `${y}-${m}-${d}`;
+}
+
+async function appendAnnouncementIfProvided() {
+    const args = process.argv.slice(2).map(a => String(a)).filter(Boolean);
+    const message = args.join(' ').trim();
+    if (!message) return false;
+
+    const now = new Date();
+    const date = formatDateYYYYMMDD(now);
+    const item = {
+        id: Date.now(),
+        date,
+        message
+    };
+
+    let existing = [];
+    try {
+        const raw = await fs.readFile(ANNOUNCEMENTS_JSON, 'utf8');
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) existing = parsed;
+    } catch (e) {
+        // if file doesn't exist or invalid, start fresh
+        existing = [];
+    }
+
+    existing.unshift(item);
+    await fs.mkdir(path.dirname(ANNOUNCEMENTS_JSON), { recursive: true });
+    await fs.writeFile(ANNOUNCEMENTS_JSON, JSON.stringify(existing, null, 4) + '\n', 'utf8');
+
+    console.log(`[generate] Added announcement (${date}): ${message}`);
+    return true;
 }
 
 function extractExcerpt(markdown, maxLen = 80) {
@@ -82,6 +114,8 @@ async function listMarkdownFiles(dir) {
 }
 
 async function main() {
+    await appendAnnouncementIfProvided();
+
     const mdFiles = await listMarkdownFiles(BLOGS_DIR);
     mdFiles.sort((a, b) => a.localeCompare(b, 'zh-CN'));
 

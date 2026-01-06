@@ -216,6 +216,141 @@ body {
     opacity: 1;
 }
 
+/* 首页公告栏（位于博客卡片区上方） */
+
+.announcement-banner {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    /* 增加高度与内距，让横幅更醒目 */
+    padding: 16px 18px;
+    margin: 16px 0 32px;
+    border-radius: 12px;
+    /* 使用双层背景：内层为黄色填充（padding-box），外层为渐变描边（border-box），实现向内过渡到黄色以自然衔接背景 */
+    background:
+        linear-gradient(180deg, rgba(255, 250, 220, 0.98) 0%, rgba(255, 250, 220, 0.98) 100%) padding-box,
+        rgba(255, 216, 120, 0.95) border-box;
+    /* 保持与博客卡片相同的边框宽度，但使用透明边框以展示 border-box 渐变 */
+    border: var(--card-border-w) solid transparent;
+    box-shadow: 0 10px 30px rgba(255, 200, 60, 0.06);
+}
+
+.announcement-banner.is-visible {
+    display: flex;
+}
+
+.announcement-banner .announcement-left {
+    display: flex;
+    /* 使用横向布局以便靠中对齐图标与文本容器 */
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    min-width: 0;
+    height: 100%;
+    align-items: center;
+}
+
+/* 内部文本容器：垂直居中标题与消息 */
+.announcement-banner .announcement-left>div>div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.announcement-banner .announcement-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    color: var(--macaron-yellow-strong, #b57b00);
+}
+
+.announcement-banner .announcement-date {
+    font-size: 0.92rem;
+    color: rgba(0, 0, 0, 0.55);
+}
+
+.announcement-banner .announcement-message {
+    color: rgba(0, 0, 0, 0.72);
+    line-height: 1.7;
+    max-width: 100%;
+    /* 改为可滚动的多行显示，超出时可纵向滚动并隐藏滚动条 */
+    max-height: 120px;
+    overflow-y: auto;
+    white-space: normal;
+}
+
+/* 提高横幅最小高度以便卡片更高视觉更醒目 */
+.announcement-banner {
+    min-height: 92px;
+}
+
+.announcement-banner .announcement-message {
+    white-space: normal;
+    min-height: 70px;
+}
+
+.announcement-banner .announcement-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background: linear-gradient(180deg, rgba(255, 230, 150, 0.14), rgba(255, 245, 200, 0.08));
+    color: var(--macaron-yellow-strong, #b57b00);
+    font-size: 22px;
+    box-shadow: 0 8px 22px rgba(181, 138, 0, 0.08);
+}
+
+.announcement-banner .announcement-btn {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: var(--macaron-accent, #ffd6e8);
+    color: #6b2b4a;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+}
+
+.announcement-banner .announcement-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(107, 43, 74, 0.12);
+}
+
+.announcement-banner .announcement-btn:active {
+    transform: translateY(0);
+    opacity: 0.9;
+}
+
+@media (max-width: 720px) {
+    .announcement-banner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .announcement-banner .announcement-message {
+        white-space: normal;
+    }
+}
+
+/* 隐藏首页横幅内部滚动条 */
+.announcement-banner .announcement-message::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.announcement-banner .announcement-message {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
 .hero-content {
     position: absolute;
     top: 50%;

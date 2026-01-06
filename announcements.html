@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公告 | Be Young's Blog</title>
+    <link rel="icon" href="assets/avatar.png" type="image/png">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/butterfly.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/search.css">
+    <link rel="stylesheet" href="css/announcements.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="js/i18n.js" defer></script>
+    <script src="js/formatDate.js" defer></script>
+</head>
+
+<body class="announcements-page">
+    <div class="slideshow" aria-hidden="true">
+        <div class="slide active" style="background-image: url('assets/images/bg2.png');"></div>
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand" data-i18n="brand"></div>
+            <ul class="nav-menu">
+                <li><a href="index.html"><i class="fas fa-home"></i> <span data-i18n="home"></span></a></li>
+                <li><a href="archive.html"><i class="fas fa-archive"></i> <span data-i18n="archive"></span></a></li>
+                <li><a href="categories.html"><i class="fas fa-tags"></i> <span data-i18n="categories"></span></a></li>
+                <li><a href="quick-links.html"><i class="fas fa-link"></i> <span data-i18n="quicklinks"></span></a></li>
+            </ul>
+            <button class="nav-search-btn" aria-label="search"><i class="fas fa-search"></i> <span
+                    data-i18n="search"></span></button>
+            <div class="nav-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="announcements-section">
+            <div class="container">
+                <h1 class="announcements-title" data-i18n="announcements_title"></h1>
+                <div class="announcements-timeline" id="announcementsTimeline" aria-label="announcements-timeline">
+                </div>
+                <div class="announcements-empty" id="announcementsEmpty" data-i18n="announcements_empty"
+                    style="display:none;"></div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/search.js"></script>
+    <script src="js/announcements.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

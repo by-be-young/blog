@@ -78,6 +78,10 @@
             , code_collapse: '收起'
             , code_expand: '展开'
             , code_toggle: '收起/展开'
+            , announcement_banner_title: '公告'
+            , announcement_view_all: '查看公告'
+            , announcements_title: '公告'
+            , announcements_empty: '暂无公告'
         },
         en: {
             brand: "Be Young's Blog",
@@ -153,6 +157,10 @@
             , code_collapse: 'Collapse'
             , code_expand: 'Expand'
             , code_toggle: 'Collapse/Expand'
+            , announcement_banner_title: 'Announcement'
+            , announcement_view_all: 'View announcements'
+            , announcements_title: 'Announcements'
+            , announcements_empty: 'No announcements yet'
         },
         ja: {
             brand: '白恙のブログ',
@@ -228,6 +236,10 @@
             , code_collapse: '折りたたむ'
             , code_expand: '展開'
             , code_toggle: '折りたたむ/展開'
+            , announcement_banner_title: 'お知らせ'
+            , announcement_view_all: 'お知らせ一覧'
+            , announcements_title: 'お知らせ'
+            , announcements_empty: 'お知らせはありません'
         }
     };
 

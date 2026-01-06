@@ -57,6 +57,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // 首页公告栏（显示最新公告）
+    try {
+        if (document.body && document.body.classList.contains('home')) {
+            renderAnnouncementBanner();
+        }
+    } catch (e) { }
+
     // 轮播图已移除，背景固定为静态图片（原第二张）
 
     // initStickySidebar 已移除，不再固定侧边栏
@@ -84,6 +91,50 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     } catch (e) { }
 });
+
+function renderAnnouncementBanner() {
+    const host = document.getElementById('announcementBanner');
+    if (!host) return;
+
+    fetch('data/announcements.json')
+        .then(r => r.json())
+        .then(list => {
+            const arr = Array.isArray(list) ? list : [];
+            const latest = arr[0];
+            if (!latest || !latest.message) return;
+
+            const dateText = (typeof window.formatDate === 'function') ? window.formatDate(latest.date) : (latest.date || '');
+
+            host.innerHTML = `
+                <div class="announcement-left">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div class="announcement-icon" aria-hidden="true"><i class="fas fa-bullhorn"></i></div>
+                        <div>
+                            <div class="announcement-kicker">
+                                <span data-i18n="announcement_banner_title"></span>
+                                <span class="announcement-date date" data-date="${latest.date || ''}">${dateText}</span>
+                            </div>
+                                            <div class="announcement-message">${escapeHtml(latest.message).replace(/\n/g, '<br/>')}</div>
+                        </div>
+                    </div>
+                </div>
+                <a class="announcement-btn" href="announcements.html">
+                    <span data-i18n="announcement_view_all"></span>
+                    <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </a>
+            `;
+
+            host.classList.add('is-visible');
+            try { if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') window.siteI18n.applyTo(host); } catch (e) { }
+        })
+        .catch(() => {
+            // no banner on errors
+        });
+
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+}
 
 // （已删除轮播实现）
 
