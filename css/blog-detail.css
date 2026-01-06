@@ -138,6 +138,26 @@
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
 }
 
+/* 宽屏阅读模式：让容器居中，正文扩展到更大的最大宽度 */
+.blog-detail-page.wide-mode-active .blog-detail .container {
+    justify-content: center;
+}
+
+.blog-detail-page .blog-article.wide-mode,
+.blog-detail-page.wide-mode-active .blog-article.wide-mode {
+    /* 解除固定的 900px 限制，使正文在宽屏时可扩展并居中 */
+    max-width: 1200px;
+    width: calc(100% - 96px);
+    margin-left: auto;
+    margin-right: auto;
+    transition: max-width 0.28s ease, width 0.28s ease, box-shadow 0.28s ease;
+}
+
+/* 兼容性：当 TOC 被 JS 隐藏（display:none）时，确保正文在 flex 容器中水平居中 */
+.blog-detail .container>.blog-article {
+    flex: 0 1 auto;
+}
+
 #back-to-top:hover {
     background: #217dbb;
     box-shadow: 0 4px 16px rgba(52, 152, 219, 0.28);
