@@ -57,8 +57,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // 初始化轮播图
-    initSlideshow();
+    // 轮播图已移除，背景固定为静态图片（原第二张）
 
     // initStickySidebar 已移除，不再固定侧边栏
 
@@ -86,30 +85,7 @@ document.addEventListener('DOMContentLoaded', function () {
     } catch (e) { }
 });
 
-// 轮播图初始化
-function initSlideshow() {
-    const slides = document.querySelectorAll('.slide');
-    if (!slides || slides.length === 0) return;
-    let currentSlide = 0;
-
-    function showSlide(index) {
-        slides.forEach(slide => slide.classList.remove('active'));
-        if (slides[index]) {
-            slides[index].classList.add('active');
-        }
-    }
-
-    function nextSlide() {
-        currentSlide = (currentSlide + 1) % slides.length;
-        showSlide(currentSlide);
-    }
-
-    // 每5秒切换一次
-    setInterval(nextSlide, 5000);
-
-    // 初始显示第一张
-    showSlide(0);
-}
+// （已删除轮播实现）
 
 // 初始化个人联系方式交互（显示/隐藏微信与QQ）
 function initProfileContacts() {
@@ -249,7 +225,9 @@ function createBlogCard(blog) {
     `;
 
     card.addEventListener('click', () => {
-        window.location.href = `blog-detail.html?id=${blog.id}`;
+        const url = `blog-detail.html?id=${blog.id}`;
+        const w = window.open(url, '_blank', 'noopener,noreferrer');
+        try { if (w) w.opener = null; } catch (e) { /* ignore */ }
     });
 
     return card;

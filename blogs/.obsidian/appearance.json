@@ -5,5 +5,8 @@
   "interfaceFontFamily": "",
   "baseFontSize": 16,
   "accentColor": "#497949",
-  "theme": "system"
+  "theme": "system",
+  "enabledCssSnippets": [
+    "my-styles"
+  ]
 }

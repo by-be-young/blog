@@ -51,7 +51,7 @@ function renderTimeline(blogs) {
     item.dataset.date = blog.date;
     const displayDate = (typeof window !== 'undefined' && typeof window.formatDate === 'function') ? window.formatDate(blog.date) : blog.date;
     item.innerHTML = `
-    <a class="timeline-link" href="blog-detail.html?id=${blog.id}">
+    <a class="timeline-link" href="blog-detail.html?id=${blog.id}" target="_blank" rel="noopener noreferrer">
       <div class="timeline-dot"></div>
       <div class="timeline-content">
         <div class="timeline-badge" aria-hidden="true"><i class="fas fa-book"></i></div>

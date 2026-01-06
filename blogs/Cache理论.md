@@ -3,7 +3,7 @@ id: 238031024
 title: Cache理论|轻松笔记
 date: 2025-12-18
 tags:
-  - 学习
+  - 二上
   - 计组
   - Cache
 excerpt: Cache的基本概念、工作原理及映射机制

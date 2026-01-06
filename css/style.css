@@ -1,3 +1,1206 @@
+/* 基础样式 */
+:root {
+    --webfont-name: '仓耳今楷01';
+}
+
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #2ecc71;
+    --dark-color: #2c3e50;
+    --light-color: #ecf0f1;
+    --gray-color: #95a5a6;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    /* 正文字体：仓耳今楷01（若本地/网络未引入则回退到常用字体） */
+    font-family: '仓耳今楷01', 'CangErJinKai01', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f8f9fa;
+}
+
+/* 如果你已将字体文件放到 `assets/fonts/`，下面的 @font-face 会优先加载本地图形字体。 */
+@font-face {
+    font-family: '仓耳今楷01';
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow);
+    z-index: 1000;
+}
+
+.nav-container {
+    max-width: 1200px;
+    /* 恢复原始最大宽度，避免变宽 */
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px;
+}
+
+.nav-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--dark-color);
+    margin-right: 150px;
+}
+
+.nav-menu {
+    display: flex;
+    list-style: none;
+    gap: 30px;
+    margin-left: 0;
+}
+
+/* 恢复基础导航链接样式 */
+.nav-menu a {
+    text-decoration: none;
+    color: var(--dark-color);
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: var(--transition);
+}
+
+.nav-menu a:hover,
+.nav-menu a.active {
+    color: var(--primary-color);
+    background: rgba(52, 152, 219, 0.1);
+}
+
+.nav-toggle {
+    display: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+/* 语言选择器：与搜索按钮风格一致的马卡龙胶囊 */
+.nav-lang-wrap {
+    display: inline-flex;
+    align-items: center;
+    margin-left: auto;
+    /* 推到右侧，使其与搜索按钮靠拢，避免被 space-between 拉开 */
+    margin-right: 6px;
+    /* 与搜索按钮的间距 */
+}
+
+
+/* duplicate view-more block removed (kept earlier definition) */
+
+.nav-lang-select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: linear-gradient(180deg, var(--macaron-accent, #ffd6e8), var(--macaron-bg, #fff7fb));
+    color: #6b2b4a;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform .12s ease, box-shadow .12s ease;
+    box-shadow: 0 6px 18px rgba(107, 43, 74, 0.04);
+}
+
+.nav-lang-select:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(107, 43, 74, 0.06);
+}
+
+.nav-search-btn {
+    margin-left: 0;
+    /* 与语言选择器靠近 */
+}
+
+/* 自定义语言下拉样式 */
+.nav-lang {
+    position: relative;
+}
+
+.nav-lang-button {
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: linear-gradient(180deg, var(--macaron-accent, #ffd6e8), var(--macaron-bg, #fff7fb));
+    color: #6b2b4a;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(107, 43, 74, 0.04);
+}
+
+.nav-lang-button:focus {
+    outline: none;
+    box-shadow: 0 8px 20px rgba(52, 152, 219, 0.15);
+}
+
+.nav-lang-list {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    min-width: 160px;
+    border-radius: 12px;
+    padding: 6px;
+    background: linear-gradient(180deg, #fff, #fff);
+    box-shadow: 0 12px 30px rgba(10, 10, 10, 0.08);
+    list-style: none;
+    z-index: 1200;
+}
+
+/* Ensure search panel can appear above language dropdown on all pages */
+.search-panel {
+    z-index: 1305;
+}
+
+.nav-lang-item {
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--dark-color);
+    font-weight: 600;
+}
+
+.nav-lang-item:hover {
+    background: linear-gradient(90deg, rgba(255, 182, 201, 0.15), rgba(167, 243, 208, 0.12));
+}
+
+/* 英雄区域 */
+.hero-section {
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.slideshow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+.slide.active {
+    opacity: 1;
+}
+
+.hero-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    z-index: 2;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.welcome-text {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    animation: fadeInUp 1s ease;
+}
+
+.subtitle {
+    font-size: 1.5rem;
+    opacity: 0.9;
+    animation: fadeInUp 1s ease 0.3s both;
+}
+
+.scroll-down {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 2rem;
+    animation: fadeIn 1s ease 1s both;
+}
+
+.bounce {
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        transform: translateY(0);
+    }
+
+    40% {
+        transform: translateY(-20px);
+    }
+
+    60% {
+        transform: translateY(-10px);
+    }
+}
+
+/* 内容区域 */
+.content-section {
+    position: relative;
+    background: transparent;
+    min-height: 100vh;
+    z-index: 1;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.content-wrapper {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 40px;
+}
+
+/* About 页面专有：让左侧栏更宽，右侧相应变窄（不影响其它页面） */
+.about-page .content-wrapper {
+    grid-template-columns: 360px 1fr;
+    /* 左侧变宽为360px，可按需调整 */
+}
+
+/* 侧边栏 */
+.sidebar {
+    position: relative;
+}
+
+.profile-card {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    position: sticky;
+    top: 80px;
+    transition: var(--transition);
+}
+
+.profile-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin: 0 auto 20px;
+    border: 3px solid var(--primary-color);
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Profile details: label/value rows, interests and contact popup */
+.profile-info {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.profile-row {
+    display: flex;
+    gap: 0px;
+    align-items: stretch;
+}
+
+.profile-label {
+    background: var(--detail-sky);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 8px 0 0 8px;
+    font-size: 0.85rem;
+    min-width: 86px;
+    flex: 0 0 86px;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+}
+
+.profile-value {
+    background: #fff;
+    color: var(--detail-text);
+    padding: 8px 12px;
+    border-radius: 0 8px 8px 0;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-left: 1px solid rgba(0, 0, 0, 0.06);
+    font-weight: 600;
+    box-sizing: border-box;
+    flex: 1 1 auto;
+}
+
+.profile-interests {
+    margin-top: 12px;
+}
+
+.interests-label {
+    font-weight: 700;
+    color: var(--detail-text);
+    margin-bottom: 6px;
+}
+
+.interests-list {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.interest {
+    background: var(--detail-mint);
+    color: #fff;
+    padding: 6px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+}
+
+.contact-links {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 12px;
+    position: relative;
+}
+
+.contact-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--light-color);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    color: var(--detail-text);
+    cursor: pointer;
+    transition: transform .12s ease, box-shadow .12s ease;
+}
+
+.contact-btn:hover {
+    background: var(--primary-color);
+    color: #fff;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.12);
+}
+
+.contact-popup {
+    position: absolute;
+    left: 0;
+    top: 56px;
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.08);
+    display: none;
+    z-index: 1200;
+    min-width: 160px;
+    text-align: center;
+}
+
+.contact-popup .contact-item {
+    padding: 6px 0;
+    color: var(--detail-text);
+}
+
+.contact-popup .number-line {
+    font-weight: 700;
+    color: var(--detail-text);
+    font-size: 1rem;
+}
+
+/* Distinct single-color macaron backgrounds for each label */
+.profile-label--school {
+    background: #ff6e8f;
+}
+
+.profile-label--degree {
+    background: #2fbf86;
+}
+
+.profile-label--grade {
+    background: #7f72e6;
+}
+
+.profile-label--department {
+    background: #ffb84d;
+}
+
+/* Right-side text color matches left label background */
+.profile-label--school+.profile-value {
+    color: #ff6e8f;
+}
+
+.profile-label--degree+.profile-value {
+    color: #2fbf86;
+}
+
+.profile-label--grade+.profile-value {
+    color: #7f72e6;
+}
+
+.profile-label--department+.profile-value {
+    color: #ffb84d;
+}
+
+/* 首页专用：加宽侧栏（个人信息卡）并相应收窄右侧主栏，整体容器宽度不变 */
+.home .content-wrapper {
+    grid-template-columns: 360px 1fr;
+}
+
+.home .profile-card {
+    width: 100%;
+    max-width: none;
+}
+
+.name {
+    font-size: 1.8rem;
+    color: var(--dark-color);
+    margin-bottom: 10px;
+}
+
+.bio {
+    color: var(--gray-color);
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+}
+
+.stats {
+    display: flex;
+    justify-content: space-around;
+    margin: 25px 0;
+    padding: 20px 0;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+}
+
+.stat {
+    text-align: center;
+}
+
+.count {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.label {
+    font-size: 0.9rem;
+    color: var(--gray-color);
+}
+
+/* 统计项链接：整块可点击，悬停显示马卡龙色系背景 */
+.stat a.stat-link {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 10px;
+    color: inherit;
+    text-decoration: none;
+    transition: background 0.18s ease, transform 0.12s ease;
+}
+
+.stat a.stat-link:hover {
+    background: rgba(255, 219, 235, 0.6);
+    /* 马卡龙粉色系浮层 */
+    transform: translateY(-2px);
+}
+
+.stat a.stat-link:active {
+    transform: translateY(0);
+}
+
+.social-links {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.social-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: var(--light-color);
+    border-radius: 50%;
+    color: var(--dark-color);
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.social-links a:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-3px);
+}
+
+/* 博客网格 */
+.blog-grid {
+    display: grid;
+    gap: 30px;
+}
+
+.blog-card {
+    background: white;
+    --card-merge-bg: rgba(255, 255, 255, 0.96);
+    position: relative;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+
+
+.post-nav-title {
+    font-weight: 700;
+    font-size: 0.98rem;
+    color: var(--detail-text, #2b3440);
+    line-height: 1.2;
+}
+
+/* 纯色马卡龙配色（不使用渐变） */
+.post-nav-btn[data-type="prev"] .post-nav-label {
+    background: #9ad7ff;
+}
+
+/* 天蓝 */
+.post-nav-btn[data-type="next"] .post-nav-label {
+    background: #a7f3d0;
+}
+
+/* 薄荷 */
+.post-nav-btn[data-type="similar"] .post-nav-label {
+    background: #ffb6c9;
+}
+
+/* 粉色 */
+
+/* 小屏幕时稍微缩小宽度 */
+@media (max-width: 640px) {
+    .post-nav-left {
+        margin-top: 10px;
+    }
+
+    .post-nav-btn {
+        padding: 8px 10px;
+    }
+
+    .post-nav-title {
+        font-size: 0.92rem;
+    }
+}
+
+/* 博客卡片悬浮：斜向流光线条向右滑动 */
+.blog-card::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    bottom: -40%;
+    width: 120px;
+    left: -160px;
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.00) 35%,
+            rgba(255, 255, 255, 0.42) 50%,
+            rgba(255, 255, 255, 0.00) 65%,
+            rgba(255, 255, 255, 0) 100%);
+    transform: translateX(0) rotate(18deg);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 4;
+    filter: blur(0.2px);
+}
+
+.blog-card:hover::before {
+    opacity: 1;
+    animation: blogCardShine 0.95s ease-out;
+}
+
+.blog-card:hover {
+    transform: translateY(-6px);
+}
+
+@keyframes blogCardShine {
+    0% {
+        transform: translateX(0) rotate(18deg);
+    }
+
+    100% {
+        transform: translateX(calc(100vw + 360px)) rotate(18deg);
+    }
+}
+
+.blog-image {
+    position: relative;
+    z-index: 1;
+    height: 200px;
+    overflow: hidden;
+}
+
+.blog-image::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 78px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, var(--card-merge-bg) 100%);
+    pointer-events: none;
+}
+
+.blog-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.blog-card:hover .blog-image img {
+    transform: none;
+}
+
+.blog-content {
+    position: relative;
+    z-index: 3;
+    padding: 25px;
+}
+
+.blog-title {
+    font-size: 1.4rem;
+    color: var(--dark-color);
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+.blog-excerpt {
+    color: var(--gray-color);
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.blog-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: var(--gray-color);
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+/* 首页（马卡龙配色 + 卡片渐变描边）：仅对 index.html 生效 */
+.home {
+    --primary-color: #7bc7ff;
+    --secondary-color: #7ee0c2;
+    --dark-color: #2c3e50;
+    --light-color: #f7f9fc;
+    --gray-color: #7b8794;
+
+    --macaron-pink: #ffb6c9;
+    --macaron-peach: #ffd2a6;
+    --macaron-mint: #a7f3d0;
+    --macaron-lavender: #c7b6ff;
+    --macaron-sky: #9ad7ff;
+    --card-fill-profile: linear-gradient(135deg,
+            rgba(255, 182, 201, 0.22) 0%,
+            rgba(255, 210, 166, 0.18) 35%,
+            rgba(167, 243, 208, 0.20) 100%);
+    --card-fill-blog: linear-gradient(135deg,
+            rgba(154, 215, 255, 0.22) 0%,
+            rgba(199, 182, 255, 0.20) 55%,
+            rgba(255, 182, 201, 0.16) 100%);
+    --card-border-w: 5px;
+
+    /* 首页文本与组件用色（马卡龙体系内的中性色） */
+    --home-text: #2b3440;
+    --home-muted: #5f6b7a;
+    --home-border: rgba(0, 0, 0, 0.08);
+    --home-nav-bg: rgba(255, 255, 255, 0.74);
+    --home-nav-chip: rgba(255, 255, 255, 0.44);
+}
+
+/* 首页导航栏：马卡龙浅色玻璃质感 */
+.home .navbar {
+    background: var(--home-nav-bg);
+    background-image: linear-gradient(90deg,
+            rgba(255, 182, 201, 0.18) 0%,
+            rgba(167, 243, 208, 0.14) 45%,
+            rgba(199, 182, 255, 0.16) 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 10px 24px rgba(44, 62, 80, 0.10);
+}
+
+.home .nav-brand {
+    color: #ff86aa;
+}
+
+.home .nav-menu a {
+    color: var(--home-text);
+    background: var(--home-nav-chip);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.home .nav-menu a:hover,
+.home .nav-menu a.active {
+    color: var(--home-text);
+    background: linear-gradient(135deg, rgba(255, 182, 201, 0.30), rgba(154, 215, 255, 0.24), rgba(167, 243, 208, 0.26));
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+.home .nav-toggle {
+    color: var(--home-text);
+}
+
+/* 首页博客卡片与侧边栏文字颜色：更柔和但保持对比度 */
+/* 重要文字（标题等）使用马卡龙配色 */
+.home .name,
+.home .blog-title {
+    color: #ff5f8a;
+}
+
+/* 重要文字：使用单一马卡龙色（不使用渐变文字） */
+.home .welcome-text,
+.home .nav-brand,
+.home .name,
+.home .blog-title {
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    -webkit-text-fill-color: currentColor;
+}
+
+/* 首页导航栏标题：独特马卡龙“天空蓝” */
+.home .nav-brand {
+    color: #55c8ff;
+    text-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.6),
+        0 6px 14px rgba(85, 200, 255, 0.25);
+}
+
+/* 首页欢迎语：独特马卡龙“草莓粉” */
+.home .welcome-text {
+    color: #ff5f8a;
+    text-shadow:
+        0 2px 0 rgba(255, 255, 255, 0.35),
+        0 10px 22px rgba(255, 95, 138, 0.22);
+    /* 增大单词间距，使空格看起来更宽 */
+    word-spacing: 0.6em;
+    /* 细微字母间距，提高可读性（可按需调整或删除） */
+    letter-spacing: 0.01em;
+}
+
+/* 首页欢迎语：允许渐变（马卡龙色调） */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .home .welcome-text {
+        display: inline-block;
+        background: linear-gradient(90deg,
+                #ff5f8a 0%,
+                #ffd2a6 35%,
+                #a7f3d0 68%,
+                #55c8ff 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+        text-shadow: none;
+        filter:
+            drop-shadow(0 2px 0 rgba(255, 255, 255, 0.32)) drop-shadow(0 10px 22px rgba(255, 95, 138, 0.18));
+    }
+
+    /* 首页导航栏标题：渐变字体（显眼但不喧宾夺主） */
+    .home .nav-brand {
+        display: inline-block;
+        background: linear-gradient(90deg,
+                rgba(0, 172, 255, 1) 0%,
+                rgba(72, 219, 187, 0.98) 45%,
+                rgba(255, 110, 155, 0.98) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+        text-shadow: none;
+        filter:
+            drop-shadow(0 1px 0 rgba(255, 255, 255, 0.60)) drop-shadow(0 10px 18px rgba(0, 172, 255, 0.18));
+    }
+}
+
+.home .bio,
+.home .label,
+.home .blog-excerpt,
+.home .blog-meta {
+    color: var(--home-muted);
+}
+
+/* 卡片副标题：使用另一种马卡龙色（与标题色区分） */
+.home .blog-excerpt,
+.home .bio {
+    color: rgba(13, 110, 87, 0.86);
+}
+
+.home .stats {
+    border-top-color: rgba(0, 0, 0, 0.06);
+    border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+
+.home .blog-meta {
+    border-top-color: rgba(0, 0, 0, 0.06);
+}
+
+.home .content-section {
+    background: linear-gradient(135deg,
+            rgba(255, 182, 201, 0.18) 0%,
+            rgba(167, 243, 208, 0.18) 45%,
+            rgba(199, 182, 255, 0.18) 100%);
+}
+
+.home .profile-card {
+    border: var(--card-border-w) solid transparent;
+    background:
+        var(--card-fill-profile) padding-box,
+        linear-gradient(135deg, var(--macaron-pink), var(--macaron-mint), var(--macaron-lavender)) border-box;
+}
+
+.home .blog-card {
+    border: var(--card-border-w) solid transparent;
+    background:
+        var(--card-fill-blog) padding-box,
+        linear-gradient(135deg, var(--macaron-pink), var(--macaron-mint), var(--macaron-lavender)) border-box;
+    --card-merge-bg: rgba(244, 250, 255, 0.92);
+}
+
+/* 首页：让图片与马卡龙渐变背景“完美过渡”（使用同一背景 + mask 淡入） */
+.home .blog-card .blog-image::after {
+    display: none;
+}
+
+.home .blog-card::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(200px - 78px);
+    height: 78px;
+    z-index: 2;
+    pointer-events: none;
+    background:
+        var(--card-fill-blog) padding-box,
+        linear-gradient(135deg, var(--macaron-pink), var(--macaron-mint), var(--macaron-lavender)) border-box;
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 100%);
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 100%);
+}
+
+.home .profile-card:hover {
+    box-shadow: 0 16px 34px rgba(44, 62, 80, 0.16);
+}
+
+.home .avatar {
+    border-color: var(--macaron-lavender);
+}
+
+.home .count {
+    color: #ff86aa;
+}
+
+.home .social-links a:hover {
+    background: linear-gradient(135deg, var(--macaron-sky), var(--macaron-mint));
+    color: #ffffff;
+}
+
+.tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tag {
+    padding: 4px 10px;
+    background: rgba(52, 152, 219, 0.1);
+    color: var(--primary-color);
+    border-radius: 15px;
+    font-size: 0.8rem;
+}
+
+/* 首页博客卡片：Tag 马卡龙配色（前三个不同色，底色不透明） */
+.home .blog-card .tags {
+    gap: 10px;
+}
+
+.home .blog-card .tag {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    background: #ffffff;
+    color: rgba(44, 62, 80, 0.88);
+}
+
+.home .blog-card .tag:nth-child(1) {
+    background: #ffb6c9;
+    border-color: rgba(255, 182, 201, 0.85);
+    color: rgba(168, 54, 91, 0.92);
+}
+
+.home .blog-card .tag:nth-child(2) {
+    background: #a7f3d0;
+    border-color: rgba(167, 243, 208, 0.85);
+    color: rgba(13, 110, 87, 0.92);
+}
+
+.home .blog-card .tag:nth-child(3) {
+    background: #ffd2a6;
+    border-color: rgba(255, 210, 166, 0.88);
+    color: rgba(126, 69, 0, 0.92);
+}
+
+/* 全局马卡龙滚动条样式 —— 与归档页一致 */
+:root {
+    --macaron-scroll-thumb-start: rgba(255, 182, 201, 0.95);
+    --macaron-scroll-thumb-mid: rgba(154, 215, 255, 0.90);
+    --macaron-scroll-thumb-end: rgba(167, 243, 208, 0.92);
+    --macaron-scroll-track: rgba(255, 255, 255, 0.35);
+    --macaron-scroll-thumb-border: rgba(255, 255, 255, 0.55);
+    --macaron-scroll-track-border: rgba(0, 0, 0, 0.06);
+}
+
+html,
+body,
+.toc-list,
+.toc-sub-list,
+.archive-timeline,
+.post-content,
+.home,
+.container,
+.main,
+.sidebar,
+.quick-links-wheel,
+.categories-wheel {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 182, 201, 0.85) var(--macaron-scroll-track);
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.toc-list::-webkit-scrollbar,
+.toc-sub-list::-webkit-scrollbar,
+.archive-timeline::-webkit-scrollbar,
+.post-content::-webkit-scrollbar,
+.container::-webkit-scrollbar,
+.main::-webkit-scrollbar,
+.sidebar::-webkit-scrollbar,
+.quick-links-wheel::-webkit-scrollbar,
+.categories-wheel::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
+.toc-list::-webkit-scrollbar-track,
+.toc-sub-list::-webkit-scrollbar-track,
+.archive-timeline::-webkit-scrollbar-track,
+.post-content::-webkit-scrollbar-track,
+.container::-webkit-scrollbar-track,
+.main::-webkit-scrollbar-track,
+.sidebar::-webkit-scrollbar-track,
+.quick-links-wheel::-webkit-scrollbar-track,
+.categories-wheel::-webkit-scrollbar-track {
+    background: var(--macaron-scroll-track);
+    border-radius: 999px;
+    border: 1px solid var(--macaron-scroll-track-border);
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
+.toc-list::-webkit-scrollbar-thumb,
+.toc-sub-list::-webkit-scrollbar-thumb,
+.archive-timeline::-webkit-scrollbar-thumb,
+.post-content::-webkit-scrollbar-thumb,
+.container::-webkit-scrollbar-thumb,
+.main::-webkit-scrollbar-thumb,
+.sidebar::-webkit-scrollbar-thumb,
+.quick-links-wheel::-webkit-scrollbar-thumb,
+.categories-wheel::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    border: 2px solid var(--macaron-scroll-thumb-border);
+    background-image: linear-gradient(135deg, var(--macaron-scroll-thumb-start), var(--macaron-scroll-thumb-mid), var(--macaron-scroll-thumb-end));
+    box-shadow: 0 10px 18px rgba(44, 62, 80, 0.14);
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover,
+.toc-list::-webkit-scrollbar-thumb:hover,
+.toc-sub-list::-webkit-scrollbar-thumb:hover,
+.archive-timeline::-webkit-scrollbar-thumb:hover,
+.post-content::-webkit-scrollbar-thumb:hover,
+.container::-webkit-scrollbar-thumb:hover,
+.main::-webkit-scrollbar-thumb:hover,
+.sidebar::-webkit-scrollbar-thumb:hover,
+.quick-links-wheel::-webkit-scrollbar-thumb:hover,
+.categories-wheel::-webkit-scrollbar-thumb:hover {
+    background-image: linear-gradient(135deg, rgba(255, 182, 201, 1), rgba(154, 215, 255, 0.98), rgba(167, 243, 208, 1));
+}
+
+/* View more button: kept earlier definition; duplicate removed */
+
+/* 文章宽屏模式 */
+.blog-article.wide-mode {
+    /* 在宽屏模式下取消居中，使用可用空间（收起 TOC 后向左扩展） */
+    max-width: 1200px;
+    width: 100%;
+    /* 不居中，靠左展开以占据收起后的目录空间 */
+    margin-left: 0;
+    margin-right: 0;
+    flex: 1 1 auto;
+}
+
+.blog-toc.toc-collapsed {
+    width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    min-width: 0 !important;
+    flex: 0 0 0 !important;
+    /* ensure flex-basis is removed so it doesn't reserve space */
+    overflow: hidden;
+    opacity: 0;
+    transition: width 0.28s ease, opacity 0.28s ease, padding 0.28s ease, flex 0.28s ease;
+}
+
+/* 自定义 tooltip（马卡龙风）基于 data-tooltip 属性 */
+[data-tooltip] {
+    position: relative;
+}
+
+[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    right: 100%;
+    bottom: 50%;
+    transform: translateY(50%);
+    background: linear-gradient(90deg, rgba(255, 182, 201, 0.98), rgba(167, 243, 208, 0.95));
+    color: #102027;
+    padding: 8px 10px;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(44, 62, 80, 0.12);
+    white-space: nowrap;
+    font-size: 0.95rem;
+    z-index: 1003;
+}
+
+/* 回到顶部内部文字永不显示（所有文案通过悬浮提示 data-tooltip 显示） */
+#back-to-top span {
+    display: none !important;
+}
+
+/* 当回到顶部被放入浮动容器时，取消其固定定位，由容器负责布局，避免重合 */
+#floating-controls #back-to-top {
+    position: static !important;
+    right: auto !important;
+    bottom: auto !important;
+    z-index: auto !important;
+}
+
+/* ensure settings button does not overlap back-to-top */
+#settings-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Remove underline inside profile card links and make card-link fill block */
+.profile-card-link,
+.profile-card-link:link,
+.profile-card-link:visited {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.profile-card a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Hide visible scrollbars on selected pages while keeping content scrollable */
+body.home,
+body.categories-page,
+body.quick-links-page {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+body.home::-webkit-scrollbar,
+body.categories-page::-webkit-scrollbar,
+body.quick-links-page::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Opera */
+}
+
+/* Also support toggling via a class on the root element (added by JS) */
+html.hide-scrollbar,
+body.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+html.hide-scrollbar::-webkit-scrollbar,
+body.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
 /* 博客详情页目录与返回顶部按钮样式 */
 .blog-detail .container {
     display: flex;

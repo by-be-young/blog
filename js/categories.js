@@ -366,7 +366,7 @@ function renderBlogList() {
         // render left (title/excerpt) and right (tags)
         const tagsHtml = Array.isArray(blog.tags) ? blog.tags.map((t, i) => `<span class="blog-tag" data-level="${i}" data-path="${encodeURIComponent(JSON.stringify(blog.tags))}">${t}</span>`).join('') : '';
         item.innerHTML = `
-            <a class="blog-link" href="blog-detail.html?id=${blog.id}">
+            <a class="blog-link" href="blog-detail.html?id=${blog.id}" target="_blank" rel="noopener noreferrer">
                 <div class="blog-left">
                     <div class="blog-title">${blog.title}</div>
                     <div class="blog-excerpt">${blog.excerpt || ''}</div>

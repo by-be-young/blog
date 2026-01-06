@@ -7,6 +7,7 @@
     <title>博客详情</title>
     <link rel="icon" href="assets/avatar.png" type="image/png">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/blog-detail.css">
     <link rel="stylesheet" href="css/butterfly.css">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/search.css">
@@ -376,12 +377,16 @@
 
                             if (prev) {
                                 prevEl.href = 'blog-detail.html?id=' + prev.id;
+                                prevEl.target = '_blank';
+                                prevEl.rel = 'noopener noreferrer';
                                 prevEl.querySelector('.post-nav-title').textContent = prev.title || '';
                                 prevEl.style.display = 'flex';
                             } else prevEl.style.display = 'none';
 
                             if (next) {
                                 nextEl.href = 'blog-detail.html?id=' + next.id;
+                                nextEl.target = '_blank';
+                                nextEl.rel = 'noopener noreferrer';
                                 nextEl.querySelector('.post-nav-title').textContent = next.title || '';
                                 nextEl.style.display = 'flex';
                             } else nextEl.style.display = 'none';
@@ -403,6 +408,8 @@
 
                             if (similar) {
                                 simEl.href = 'blog-detail.html?id=' + similar.id;
+                                simEl.target = '_blank';
+                                simEl.rel = 'noopener noreferrer';
                                 simEl.querySelector('.post-nav-title').textContent = similar.title || '';
                                 simEl.style.display = 'flex';
                             } else {
@@ -600,32 +607,47 @@
             initFloatingSettings();
 
             // 将目录高度设置为与详情页右侧搜索面板一致的高度，
-            // 计算方式与 `js/search.js` 中的 right-sidebar 逻辑保持一致。
+            // 只在载入与窗口尺寸变化时计算一次高度，避免在滚动时改变高度导致抖动。
             function adjustTocHeight() {
                 try {
                     const nav = document.querySelector('.navbar');
                     const toc = document.getElementById('blog-toc');
                     if (!toc) return;
                     const top = nav ? nav.offsetHeight : 60;
-                    let desiredTop = top + 12; // 与 search.js 保持一致的基准偏移
-                    const tocRect = toc.getBoundingClientRect();
-                    if (tocRect && typeof tocRect.top === 'number' && !isNaN(tocRect.top)) {
-                        desiredTop = Math.max(desiredTop, Math.round(tocRect.top));
+                    // 记录首次计算时的 toc 顶部（相对于视口），后续以此为参考避免滚动时高度变大
+                    if (!toc.dataset.initialViewportTop) {
+                        const rect = toc.getBoundingClientRect();
+                        toc.dataset.initialViewportTop = String(Math.max(0, Math.round(rect.top)));
                     }
-                    const heightPx = Math.max(120, window.innerHeight - desiredTop - 18);
-                    toc.style.height = heightPx + 'px';
-                    // 确保 toc-list 使用滚动填充
+                    const initialTop = Number(toc.dataset.initialViewportTop) || 0;
+                    const desiredTop = Math.max(top + 12, initialTop);
+
+                    // 计算可用高度并固定到目录容器，目录整体不随页面滚动调整高度
+                    // 限制为视口高度的 60%-75% 区间以避免目录过高
+                    const rawHeight = Math.max(120, window.innerHeight - desiredTop - 18);
+                    const clamped = Math.max(120, Math.min(rawHeight, Math.round(window.innerHeight * 0.85)));
+                    toc.style.height = clamped + 'px';
+                    toc.style.overflow = 'hidden';
+
+                    // 让内部的 toc-list 使用滚动填充可用空间
                     const tocList = document.getElementById('toc-list');
                     if (tocList) {
-                        tocList.style.maxHeight = 'none';
+                        const titleEl = toc.querySelector('.toc-title');
+                        const postNav = document.getElementById('post-nav-left');
+                        const titleH = titleEl ? Math.ceil(titleEl.getBoundingClientRect().height) : 0;
+                        const postNavH = postNav ? Math.ceil(postNav.getBoundingClientRect().height) : 0;
+                        const paddingGap = 20; // 容器内间距与缓冲
+                        const listMax = Math.max(80, clamped - titleH - postNavH - paddingGap);
+                        tocList.style.maxHeight = listMax + 'px';
+                        tocList.style.overflowY = 'auto';
+                        tocList.style.boxSizing = 'border-box';
                     }
                 } catch (e) { console.warn('adjustTocHeight failed', e); }
             }
 
-            // 初始调整并在窗口尺寸/滚动变化时更新
+            // 初始调整并在窗口尺寸变化时更新（不在滚动时更新）
             adjustTocHeight();
             window.addEventListener('resize', adjustTocHeight);
-            window.addEventListener('scroll', adjustTocHeight, { passive: true });
 
             // 使用站点统一的 formatDate（由 main.js 提供），不再定义本地格式化函数
         });

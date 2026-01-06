@@ -178,7 +178,8 @@
                 div.addEventListener('click', () => {
                     // navigate to blog-detail with q param so target page can highlight
                     const url = `blog-detail.html?id=${r.blog.id}&q=${encodeURIComponent(keyword)}`;
-                    window.location.href = url;
+                    const w = window.open(url, '_blank', 'noopener,noreferrer');
+                    try { if (w) w.opener = null; } catch (e) { /* ignore */ }
                 });
                 resultsEl.appendChild(div);
             });

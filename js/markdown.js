@@ -178,6 +178,19 @@ function renderMarkdownContent() {
     // Ensure asset URLs (especially images) resolve correctly on GitHub Pages
     rewriteMarkdownAssetUrls(contentElement);
 
+    // Make any links that point to other blog details open in a new tab
+    try {
+        Array.from(contentElement.querySelectorAll('a')).forEach(a => {
+            try {
+                const href = a.getAttribute('href') || '';
+                if (href.indexOf('blog-detail.html') !== -1) {
+                    a.setAttribute('target', '_blank');
+                    a.setAttribute('rel', 'noopener noreferrer');
+                }
+            } catch (e) { /* ignore per-link errors */ }
+        });
+    } catch (e) { /* ignore overall */ }
+
     // 渲染数学公式（KaTeX）
     if (window.renderMathInElement) {
         renderMathInElement(contentElement, {
