@@ -859,6 +859,19 @@ body {
     line-height: 1.4;
 }
 
+/* Blog type label: keep font, size and color consistent with title, but distinguish via left separator and italic style */
+.blog-type {
+    display: inline-block;
+    margin-left: 10px;
+    padding-left: 10px;
+    border-left: 1px solid rgba(0, 0, 0, 0.06);
+    color: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    font-style: italic;
+    opacity: 0.95;
+}
+
 .blog-excerpt {
     color: var(--gray-color);
     margin-bottom: 15px;

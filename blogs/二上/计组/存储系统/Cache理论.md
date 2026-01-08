@@ -1,12 +1,8 @@
 ---
-id: 238031024
-title: Cache理论|轻松笔记
+title: Cache理论
 date: 2025-12-18
-tags:
-  - 二上
-  - 计组
-  - Cache
 excerpt: Cache的基本概念、工作原理及映射机制
+type: 轻松笔记
 ---
 
 Cache就是我们所说的缓存，也称高速缓存。 

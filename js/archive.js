@@ -50,13 +50,14 @@ function renderTimeline(blogs) {
     item.className = 'timeline-item';
     item.dataset.date = blog.date;
     const displayDate = (typeof window !== 'undefined' && typeof window.formatDate === 'function') ? window.formatDate(blog.date) : blog.date;
+    function escapeHtml(s) { return String(s).replace(/[&<>\"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
     item.innerHTML = `
     <a class="timeline-link" href="blog-detail.html?id=${blog.id}" target="_blank" rel="noopener noreferrer">
       <div class="timeline-dot"></div>
       <div class="timeline-content">
         <div class="timeline-badge" aria-hidden="true"><i class="fas fa-book"></i></div>
         <div class="timeline-left">
-          <div class="timeline-title">${blog.title}</div>
+          <div class="timeline-title">${escapeHtml(blog.title)}${blog.type ? `<span class="blog-type">${escapeHtml(blog.type)}</span>` : ''}</div>
           <div class="timeline-excerpt">${blog.excerpt || ''}</div>
         </div>
         <div class="timeline-right">

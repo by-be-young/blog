@@ -339,7 +339,15 @@
 
                     // 设置标题
                     const titleEl = document.getElementById('article-title');
-                    if (titleEl) titleEl.textContent = blog.title || '';
+                    if (titleEl) {
+                        titleEl.textContent = blog.title || '';
+                        if (blog.type) {
+                            const tspan = document.createElement('span');
+                            tspan.className = 'blog-type';
+                            tspan.textContent = blog.type;
+                            titleEl.appendChild(tspan);
+                        }
+                    }
 
                     // 设置日期（保留原始 ISO 在 data-date，用全局 formatDate 优先格式化）
                     const dateEl = document.getElementById('article-date');

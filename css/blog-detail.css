@@ -825,13 +825,38 @@
 
 /* 强化马卡龙配色 —— 颜色更明显（仅影响展示，不改动 pre/code 本体配色） */
 .blog-detail-page .article-title {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
     background: linear-gradient(90deg, #00acff 0%, #48dbbb 50%, #ff6e9b 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     -webkit-text-fill-color: transparent;
     filter: drop-shadow(0 6px 12px rgba(0, 172, 255, 0.12));
+}
+
+/* Ensure the blog-type label is visible on the detail page (title uses gradient text) */
+.blog-detail-page .article-title .blog-type {
+    /* keep separator and match gradient text of title, but align center */
+    display: inline-flex;
+    align-items: center;
+    padding-left: 10px;
+    border-left: 1px solid rgba(0, 0, 0, 0.06);
+    background: linear-gradient(90deg, #00acff 0%, #48dbbb 50%, #ff6e9b 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+    -webkit-text-fill-color: transparent !important;
+    font-size: inherit;
+    font-weight: inherit;
+    font-style: normal;
+    /* cancel italic from global rules */
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    word-break: break-word;
+    vertical-align: middle;
 }
 
 .blog-detail-page .article-content h1 {

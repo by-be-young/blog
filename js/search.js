@@ -157,7 +157,15 @@
             results.forEach(r => {
                 const div = document.createElement('div');
                 div.className = 'search-item';
-                const title = document.createElement('div'); title.className = 'title'; title.textContent = r.blog.title;
+                const title = document.createElement('div'); title.className = 'title';
+                title.textContent = r.blog.title || '';
+                if (r.blog.type) {
+                    const tspan = document.createElement('span');
+                    tspan.className = 'blog-type';
+                    tspan.textContent = r.blog.type;
+                    // keep title and type inline
+                    title.appendChild(tspan);
+                }
                 const meta = document.createElement('div'); meta.className = 'meta';
                 // date span (language-aware formatting via window.formatDate)
                 const dateSpan = document.createElement('span');

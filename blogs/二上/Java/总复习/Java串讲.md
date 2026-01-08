@@ -1,12 +1,8 @@
 ---
-id: 784512695
-title: Java串讲（待完善）
+title: Java串讲
 date: 2025-12-28
-tags:
-  - 二上
-  - Java
-  - 总复习
 excerpt: Java串讲ppt大纲
+type: 待完善
 ---
 # 一、封装（Encapsulation）
 

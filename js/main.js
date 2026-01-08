@@ -1,6 +1,10 @@
 // 博客数据
 let blogs = [];
 
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
 function updateProfileStats() {
     const articleCountEl = document.getElementById('article-count');
     const tagCountEl = document.getElementById('tag-count');
@@ -264,7 +268,7 @@ function createBlogCard(blog) {
             <img src="assets/blog_bg.png" alt="${blog.title}">
         </div>
         <div class="blog-content">
-            <h3 class="blog-title">${blog.title}</h3>
+            <h3 class="blog-title">${escapeHtml(blog.title)}${blog.type ? `<span class="blog-type">${escapeHtml(blog.type)}</span>` : ''}</h3>
             <p class="blog-excerpt">${blog.excerpt}</p>
             <div class="blog-meta">
                 <span class="date" data-date="${blog.date}">${formatDate(blog.date)}</span>

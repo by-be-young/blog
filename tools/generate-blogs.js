@@ -144,7 +144,15 @@ async function main() {
                 ? data.excerpt.trim()
                 : extractExcerpt(raw);
 
-        const tags = normalizeTags(data.tags);
+        // derive tags/keywords from folder structure under `blogs/`
+        // relFromBlogs e.g. "二上/离散二/总复习/离散数学题型总复习.md"
+        const relFromBlogs = toPosix(path.relative(BLOGS_DIR, filePath));
+        const dirParts = relFromBlogs.split('/').slice(0, -1).filter(Boolean);
+        // take first three folders as keywords (用户保证只有三个关键词)
+        const tags = dirParts.slice(0, 3);
+
+        // blog type comes from front-matter `type` if provided
+        const type = (typeof data.type === 'string' && data.type.trim()) ? data.type.trim() : null;
 
         // support recommended flag in front-matter: accept either 'recommended' or Chinese '推荐'
         const recommended = Boolean(data.recommended) || Boolean(data['推荐']);
@@ -161,6 +169,7 @@ async function main() {
             date,
             image: 'assets/images/blog_bg.png',
             tags,
+            type,
             contentFile: relFromRoot,
             recommended
         });

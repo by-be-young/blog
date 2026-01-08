@@ -2,6 +2,10 @@
 let blogsData = [];
 let selectedTags = [];
 
+function escapeHtml(s) {
+    return String(s).replace(/[&<>\"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
 const MAX_LEVELS = 3;
 const wheelTimers = new Map();
 const programmaticUntil = new Map();
@@ -368,7 +372,7 @@ function renderBlogList() {
         item.innerHTML = `
             <a class="blog-link" href="blog-detail.html?id=${blog.id}" target="_blank" rel="noopener noreferrer">
                 <div class="blog-left">
-                    <div class="blog-title">${blog.title}</div>
+                    <div class="blog-title">${escapeHtml(blog.title)}${blog.type ? `<span class="blog-type">${escapeHtml(blog.type)}</span>` : ''}</div>
                     <div class="blog-excerpt">${blog.excerpt || ''}</div>
                 </div>
                 <div class="blog-right">
