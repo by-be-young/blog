@@ -103,7 +103,16 @@ function renderAnnouncementBanner() {
     fetch('data/announcements.json')
         .then(r => r.json())
         .then(list => {
-            const arr = Array.isArray(list) ? list : [];
+            const arr = Array.isArray(list) ? list.slice() : [];
+            // pick the most recent announcement by date (defensive: JSON order may vary)
+            arr.sort((a, b) => {
+                const da = a && a.date ? new Date(a.date).getTime() : 0;
+                const db = b && b.date ? new Date(b.date).getTime() : 0;
+                if (db !== da) return db - da;
+                const ia = Number(a && a.id ? a.id : 0);
+                const ib = Number(b && b.id ? b.id : 0);
+                return ib - ia;
+            });
             const latest = arr[0];
             if (!latest || !latest.message) return;
 
@@ -130,6 +139,8 @@ function renderAnnouncementBanner() {
 
             host.classList.add('is-visible');
             try { if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') window.siteI18n.applyTo(host); } catch (e) { }
+            // 启动横幅正文自动滚动（如果超出高度则向下滚动，滚动到底部停顿后回到顶部重启）
+            try { startAnnouncementAutoScroll(host); } catch (e) { }
         })
         .catch(() => {
             // no banner on errors
@@ -138,6 +149,64 @@ function renderAnnouncementBanner() {
     function escapeHtml(s) {
         return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
+}
+
+// 首页公告：自动滚动实现
+// 首页公告：自动滚动实现（使用 CSS 动画，平滑且性能好）
+function startAnnouncementAutoScroll(bannerEl, opts) {
+    if (!bannerEl) return;
+    const msg = bannerEl.querySelector('.announcement-message');
+    if (!msg) return;
+
+    // 清理以前的滚动实例（包括动态 style）
+    try {
+        if (msg.__autoScroll) {
+            if (msg.__autoScroll.styleEl && msg.__autoScroll.styleEl.parentNode) msg.__autoScroll.styleEl.parentNode.removeChild(msg.__autoScroll.styleEl);
+            msg.__autoScroll = null;
+        }
+    } catch (e) { }
+
+    // 仅当内容溢出时启用自动滚动
+    if (msg.scrollHeight <= msg.clientHeight) return;
+
+    const speed = (opts && opts.speed) ? opts.speed : 50; // px per second (faster and smoother)
+    const pauseMs = (opts && opts.pauseMs) ? opts.pauseMs : 1000; // pause at bottom
+
+    // 将内容复制一份，使用 transform 动画平滑滚动
+    const originalHtml = msg.innerHTML;
+    // create inner wrapper containing two copies
+    const inner = document.createElement('div');
+    inner.className = 'announcement-scroll-inner';
+    // spacer to separate loops slightly
+    // 用可见分割线隔断两份内容
+    const spacer = '<div class="announcement-scroll-sep" aria-hidden="true"></div>';
+    inner.innerHTML = originalHtml + spacer + originalHtml;
+
+    // replace content
+    msg.innerHTML = '';
+    msg.appendChild(inner);
+
+    // compute height of a single copy
+    const singleHeight = inner.scrollHeight / 2;
+    // compute scroll duration based on speed
+    const tScroll = Math.max(0.8, singleHeight / speed); // seconds
+    const totalDuration = tScroll + (pauseMs / 1000);
+    const p = (tScroll / totalDuration) * 100;
+
+    // create unique keyframes name
+    const animName = 'annScroll_' + Date.now();
+    const keyframes = `@keyframes ${animName} { 0% { transform: translateY(0); } ${p}% { transform: translateY(-50%); } 100% { transform: translateY(-50%); } }`;
+
+    const styleEl = document.createElement('style');
+    styleEl.type = 'text/css';
+    styleEl.textContent = keyframes;
+    document.head.appendChild(styleEl);
+
+    inner.style.willChange = 'transform';
+    inner.style.animation = `${animName} ${totalDuration}s linear infinite`;
+
+    // store references for cleanup if needed
+    msg.__autoScroll = { styleEl: styleEl, animName: animName };
 }
 
 // （已删除轮播实现）

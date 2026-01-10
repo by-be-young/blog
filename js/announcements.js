@@ -21,16 +21,24 @@
             return;
         }
 
+        // Observe items and toggle `.is-visible` on every enter/leave so
+        // animations play each time the element re-enters the viewport.
+        // Exclude items that are intended to be fixed (top/bottom centered).
         const obs = new IntersectionObserver((entries) => {
             entries.forEach(en => {
-                if (en.isIntersecting) {
-                    en.target.classList.add('is-visible');
-                    obs.unobserve(en.target);
-                }
+                try {
+                    const el = en.target;
+                    if (el.classList.contains('ann-item--top') || el.classList.contains('ann-item--bottom')) return;
+                    if (en.isIntersecting) el.classList.add('is-visible');
+                    else el.classList.remove('is-visible');
+                } catch (e) { }
             });
         }, { threshold: 0.12 });
 
-        items.forEach(it => obs.observe(it));
+        items.forEach(it => {
+            if (it.classList.contains('ann-item--top') || it.classList.contains('ann-item--bottom')) return;
+            obs.observe(it);
+        });
     }
 
     function renderTimeline(list) {
@@ -49,12 +57,14 @@
         if (empty) empty.style.display = 'none';
         timeline.innerHTML = '';
 
+        // Render timeline in descending order (newest -> oldest)
         arr.forEach((a, idx) => {
             const msg = a && a.message ? String(a.message) : '';
             const date = a && a.date ? String(a.date) : '';
             if (!msg) return;
 
             if (idx === 0) {
+                // newest -> top special item
                 const item = document.createElement('div');
                 item.className = 'ann-item ann-item--top';
                 item.innerHTML = `
@@ -66,6 +76,27 @@
                         <div class="ann-message">${escapeHtml(msg)}</div>
                     </div>
                 `;
+                // mark visible by default (top item should not animate)
+                item.classList.add('is-visible');
+                timeline.appendChild(item);
+                return;
+            }
+
+            if (idx === arr.length - 1) {
+                // oldest -> bottom special item
+                const item = document.createElement('div');
+                item.className = 'ann-item ann-item--bottom';
+                item.innerHTML = `
+                    <div class="ann-mid">
+                        <div class="ann-dot" aria-hidden="true"></div>
+                        <div class="ann-time"><span class="date" data-date="${escapeHtml(date)}"></span></div>
+                    </div>
+                    <div class="ann-card">
+                        <div class="ann-message">${escapeHtml(msg)}</div>
+                    </div>
+                `;
+                // mark visible by default (bottom item should not animate)
+                item.classList.add('is-visible');
                 timeline.appendChild(item);
                 return;
             }

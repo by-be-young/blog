@@ -138,6 +138,36 @@
     line-height: 1.6;
 }
 
+/* 顶部与底部特殊项始终可见，不参与翻入动画 */
+.ann-item.ann-item--top,
+.ann-item.ann-item--bottom {
+    opacity: 1;
+    transform: none;
+    transition: none;
+}
+
+/* 固定底部的公告卡片（居中） */
+.ann-item.ann-item--bottom {
+    grid-template-columns: 1fr;
+    margin: 34px 0 8px;
+}
+
+.ann-item.ann-item--bottom .ann-mid {
+    margin: 0 auto 12px;
+}
+
+.ann-item.ann-item--bottom .ann-card {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 18px 20px;
+}
+
+.ann-item.ann-item--bottom .ann-card .ann-message {
+    font-size: 1.1rem;
+    font-weight: 800;
+    line-height: 1.6;
+}
+
 /* 左右交错 */
 .ann-item.ann-item--left .ann-card {
     grid-column: 1;

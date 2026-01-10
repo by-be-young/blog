@@ -68,65 +68,105 @@ function rewriteMarkdownAssetUrls(rootEl) {
 function renderMarkdownContent() {
     const contentElement = document.getElementById('markdown-content');
     if (!contentElement) return;
-
     const markdown = stripFrontMatter(contentElement.textContent || '');
 
-    // 提取显示公式（$$...$$）与内联公式 ($...$)，防止 marked 对其中的反斜杠或行尾 \\ 做错误处理。
-    // 处理流程：先抽取所有 $$...$$ 为占位符，再抽取所有未转义的 $...$ 为占位符，解析 Markdown 后再还原并用 KaTeX 渲染。
+    // 全局数学占位集合（会被各个段落共享）
     const displayMathBlocks = [];
     const inlineMathBlocks = [];
 
-    // 抽取所有 $$$$ 显示数学块（非贪婪）
-    let tmp = markdown.replace(/\$\$[\s\S]*?\$\$/g, match => {
-        // 保留原始主体（不去除内侧空行），但去掉外层 $$ 标记
-        const inner = match.slice(2, -2);
-        const idx = displayMathBlocks.length;
-        displayMathBlocks.push(inner);
-        return `@@MATHD_${idx}@@`;
+    // 从单一文本中抽取数学表达式并返回带占位符的文本（会向上面的数组追加）
+    function extractMathFrom(text) {
+        if (!text) return '';
+
+        // 先处理显示数学 $$...$$（非贪婪）
+        let tmp = text.replace(/\$\$[\s\S]*?\$\$/g, match => {
+            const inner = match.slice(2, -2);
+            const idx = displayMathBlocks.length;
+            displayMathBlocks.push(inner);
+            return `@@MATHD_${idx}@@`;
+        });
+
+        // 再处理内联数学 $...$（支持转义 \$）
+        let out = '';
+        for (let i = 0; i < tmp.length;) {
+            const ch = tmp[i];
+            if (ch === '$' && tmp[i + 1] !== '$' && tmp[i - 1] !== '\\') {
+                let j = i + 1;
+                let closed = false;
+                while (j < tmp.length) {
+                    if (tmp[j] === '$' && tmp[j - 1] !== '\\') { closed = true; break; }
+                    j++;
+                }
+                if (closed) {
+                    const inner = tmp.slice(i + 1, j);
+                    const idx = inlineMathBlocks.length;
+                    inlineMathBlocks.push(inner);
+                    out += `@@MATHI_${idx}@@`;
+                    i = j + 1;
+                    continue;
+                }
+            }
+            out += ch;
+            i++;
+        }
+        return out;
+    }
+
+    // 先将文档按 [answer]...[\answer] 拆分为若干普通段与答案段，分别处理数学与预渲染答案内部 Markdown
+    const answerRegex = /\[answer\]([\s\S]*?)\[\\answer\]/g;
+    const segments = []; // {type: 'text'|'answer', content: string}
+    let lastIdx = 0;
+    let m; let answerIndex = 0;
+    while ((m = answerRegex.exec(markdown)) !== null) {
+        const before = markdown.slice(lastIdx, m.index);
+        if (before) segments.push({ type: 'text', content: extractMathFrom(before) });
+
+        const innerRaw = m[1] || '';
+        // 为答案内部也抽取数学占位符（会追加到全局数组），并用 marked 预渲染为 HTML（保留数学占位符）
+        const innerProtected = extractMathFrom(innerRaw);
+        const innerHtml = (window.marked && typeof window.marked.parse === 'function') ? window.marked.parse(innerProtected) : innerProtected;
+        segments.push({ type: 'answer', content: innerHtml, index: answerIndex++ });
+
+        lastIdx = m.index + m[0].length;
+    }
+    // 追加尾部
+    if (lastIdx < markdown.length) {
+        const tail = markdown.slice(lastIdx);
+        if (tail) segments.push({ type: 'text', content: extractMathFrom(tail) });
+    }
+
+    // 拼接为带答案占位符的受保护 Markdown（答案占位符为 @@ANSWERN_i@@）
+    let combinedProtected = '';
+    const answersHtml = [];
+    segments.forEach(seg => {
+        if (seg.type === 'text') combinedProtected += seg.content;
+        else if (seg.type === 'answer') {
+            answersHtml.push(seg.content || '');
+            combinedProtected += `@@ANSWERN_${answersHtml.length - 1}@@`;
+        }
     });
 
-    // 抽取内联数学 $...$（简单状态机，支持转义 \$）
-    let protectedMarkdown = '';
-    for (let i = 0; i < tmp.length;) {
-        const ch = tmp[i];
-        if (ch === '$' && tmp[i + 1] !== '$' && tmp[i - 1] !== '\\') {
-            // 开始内联数学
-            let j = i + 1;
-            let closed = false;
-            while (j < tmp.length) {
-                if (tmp[j] === '$' && tmp[j - 1] !== '\\') { closed = true; break; }
-                j++;
-            }
-            if (closed) {
-                const inner = tmp.slice(i + 1, j);
-                const idx = inlineMathBlocks.length;
-                inlineMathBlocks.push(inner);
-                protectedMarkdown += `@@MATHI_${idx}@@`;
-                i = j + 1;
-                continue;
-            }
-        }
-        protectedMarkdown += ch;
-        i++;
-    }
-    // 使用 marked 解析（显式开启 GFM，确保表格等语法可用）
-    if (window.marked && typeof window.marked.setOptions === 'function') {
-        window.marked.setOptions({
-            gfm: true
-        });
-    }
-    const htmlParsed = window.marked ? window.marked.parse(protectedMarkdown) : protectedMarkdown;
+    // 使用 marked 解析整体（GFM）
+    if (window.marked && typeof window.marked.setOptions === 'function') window.marked.setOptions({ gfm: true });
+    const htmlParsed = (window.marked && typeof window.marked.parse === 'function') ? window.marked.parse(combinedProtected) : combinedProtected;
 
-    // 还原占位符为占位 DOM 元素，用于后续用 KaTeX 渲染（避免 marked 对公式源做任何转义）
-    let html = htmlParsed
-        // 还原显示数学占位符为可识别节点
+    // 还原答案占位符为可折叠容器（内部 HTML 可能包含数学占位符）
+    let html = htmlParsed.replace(/@@ANSWERN_(\d+)@@/g, (_, num) => {
+        const i = parseInt(num, 10);
+        const inner = answersHtml[i] || '';
+        const contentId = `answer-content-${i}`;
+        const toggleId = `answer-toggle-${i}`;
+        // 使用无文本的图标按钮（SVG）并将内部 HTML 直接插入
+        return `\n<div class="answer-block">\n  <div id="${contentId}" class="answer-content" hidden>\n    ${inner}\n  </div>\n  <button id="${toggleId}" class="answer-toggle" type="button" aria-expanded="false" aria-controls="${contentId}">\n    <svg class="answer-toggle-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">\n      <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>\n    </svg>\n  </button>\n</div>\n`;
+    });
+
+    // 还原数学占位符为占位 DOM 元素，用于后续 KaTeX 渲染
+    html = html
         .replace(/@@MATHD_(\d+)@@/g, (_, num) => {
             const i = parseInt(num, 10);
             const src = displayMathBlocks[i] || '';
-            // 使用 data 属性保存原始 LaTeX，避免直接注入导致 HTML 解析问题
             return `<span class="math-display-placeholder" data-math="${encodeURIComponent(src)}"></span>`;
         })
-        // 还原内联数学占位符
         .replace(/@@MATHI_(\d+)@@/g, (_, num) => {
             const i = parseInt(num, 10);
             const src = inlineMathBlocks[i] || '';
@@ -138,44 +178,24 @@ function renderMarkdownContent() {
     // 使用 KaTeX API 对占位元素逐个渲染（若 KaTeX 可用）
     try {
         if (window.katex && typeof window.katex.render === 'function') {
-            // 渲染显示公式
             Array.from(contentElement.querySelectorAll('.math-display-placeholder')).forEach(el => {
                 const src = decodeURIComponent(el.getAttribute('data-math') || '');
                 const span = document.createElement('span');
-                try {
-                    window.katex.render(src, span, { displayMode: true, throwOnError: false });
-                    el.parentNode.replaceChild(span, el);
-                } catch (e) {
-                    // 渲染失败则恢复原始文本
-                    el.textContent = `$$${src}$$`;
-                }
+                try { window.katex.render(src, span, { displayMode: true, throwOnError: false }); el.parentNode.replaceChild(span, el); }
+                catch (e) { el.textContent = `$$${src}$$`; }
             });
-
-            // 渲染内联公式
             Array.from(contentElement.querySelectorAll('.math-inline-placeholder')).forEach(el => {
                 const src = decodeURIComponent(el.getAttribute('data-math') || '');
                 const span = document.createElement('span');
-                try {
-                    window.katex.render(src, span, { displayMode: false, throwOnError: false });
-                    el.parentNode.replaceChild(span, el);
-                } catch (e) {
-                    el.textContent = `$${src}$`;
-                }
+                try { window.katex.render(src, span, { displayMode: false, throwOnError: false }); el.parentNode.replaceChild(span, el); }
+                catch (e) { el.textContent = `$${src}$`; }
             });
         } else if (window.renderMathInElement) {
-            // 回退到 auto-render（如果 KaTeX auto-render 可用）
-            renderMathInElement(contentElement, {
-                delimiters: [
-                    { left: '$$', right: '$$', display: true },
-                    { left: '$', right: '$', display: false }
-                ]
-            });
+            renderMathInElement(contentElement, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }] });
         }
-    } catch (e) {
-        console.warn('math render error', e);
-    }
+    } catch (e) { console.warn('math render error', e); }
 
-    // Ensure asset URLs (especially images) resolve correctly on GitHub Pages
+    // Ensure asset URLs (especially images) resolve correctly onGitHub Pages
     rewriteMarkdownAssetUrls(contentElement);
 
     // Make any links that point to other blog details open in a new tab
@@ -183,34 +203,61 @@ function renderMarkdownContent() {
         Array.from(contentElement.querySelectorAll('a')).forEach(a => {
             try {
                 const href = a.getAttribute('href') || '';
-                if (href.indexOf('blog-detail.html') !== -1) {
-                    a.setAttribute('target', '_blank');
-                    a.setAttribute('rel', 'noopener noreferrer');
-                }
-            } catch (e) { /* ignore per-link errors */ }
+                if (href.indexOf('blog-detail.html') !== -1) { a.setAttribute('target', '_blank'); a.setAttribute('rel', 'noopener noreferrer'); }
+            } catch (e) { }
         });
-    } catch (e) { /* ignore overall */ }
-
-    // 渲染数学公式（KaTeX）
-    if (window.renderMathInElement) {
-        renderMathInElement(contentElement, {
-            delimiters: [
-                { left: '$$', right: '$$', display: true },
-                { left: '$', right: '$', display: false }
-            ]
-        });
-    }
+    } catch (e) { }
 
     // 高亮代码块
-    if (window.hljs) {
-        document.querySelectorAll('pre code').forEach(block => {
-            window.hljs.highlightElement(block);
-        });
-    }
+    if (window.hljs) { document.querySelectorAll('pre code').forEach(block => { window.hljs.highlightElement(block); }); }
 
     enhanceCodeBlocks(contentElement);
-    // Apply i18n to dynamically created elements inside markdown (e.g., codeblock labels)
     try { if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') window.siteI18n.applyTo(contentElement); } catch (e) { }
+
+    // 绑定答案折叠交互：平滑过渡、无文本图标按钮、aria 支持
+    (function bindAnswerToggles() {
+        const toggles = Array.from(contentElement.querySelectorAll('.answer-block .answer-toggle'));
+        toggles.forEach(btn => {
+            const contentId = btn.getAttribute('aria-controls');
+            const contentEl = contentElement.querySelector(`#${contentId}`);
+            if (!contentEl) return;
+
+            // 初始化样式
+            contentEl.style.overflow = 'hidden';
+            contentEl.style.transition = 'max-height 260ms ease, opacity 220ms ease';
+            contentEl.style.maxHeight = '0px';
+            contentEl.style.opacity = '0';
+            contentEl.hidden = true;
+
+            btn.addEventListener('click', () => {
+                const expanded = btn.classList.toggle('is-open');
+                btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+
+                if (expanded) {
+                    // 展开：先确保显示以便读取 scrollHeight
+                    contentEl.hidden = false;
+                    // 在下一帧设置为实际高度以触发过渡
+                    requestAnimationFrame(() => {
+                        contentEl.style.maxHeight = contentEl.scrollHeight + 'px';
+                        contentEl.style.opacity = '1';
+                    });
+                    // 在过渡结束后清理 maxHeight 以便支持内部尺寸变化
+                    const onEnd = () => { contentEl.style.maxHeight = ''; contentEl.removeEventListener('transitionend', onEnd); };
+                    contentEl.addEventListener('transitionend', onEnd);
+                } else {
+                    // 收起：先将 maxHeight 固定为当前高度，再触发到 0
+                    const cur = contentEl.scrollHeight;
+                    contentEl.style.maxHeight = cur + 'px';
+                    requestAnimationFrame(() => {
+                        contentEl.style.maxHeight = '0px';
+                        contentEl.style.opacity = '0';
+                    });
+                    const onEndHide = () => { contentEl.hidden = true; contentEl.removeEventListener('transitionend', onEndHide); };
+                    contentEl.addEventListener('transitionend', onEndHide);
+                }
+            });
+        });
+    })();
 }
 
 function normalizeLangLabel(raw) {

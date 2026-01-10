@@ -958,3 +958,76 @@
 }
 
 /* End of blog-detail styles */
+
+/* =============================
+   答案块：可折叠的 answer 区域（用于 [answer][\answer]）
+   图标按钮无文本，带平滑过渡动画，兼容页面其他样式
+   ============================= */
+.blog-detail .article-content .answer-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: stretch;
+    margin: 1.1em 0;
+}
+
+/* 按钮置于答案下方，撑满答案宽度，使用深黄色边框（初始与展开后一致） */
+.blog-detail .article-content .answer-toggle {
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    /* 初始状态显示边框，与展开后保持一致 */
+    border: 1px solid rgba(212, 160, 23, 0.85);
+    color: #d4a017;
+    /* 深黄色 */
+    width: 100%;
+    height: 44px;
+    padding: 6px 0;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.18s ease, border-color 0.18s ease;
+}
+
+/* 保留键盘可达时的 focus 边框以保证可访问性，但不使用 title tooltip */
+.blog-detail .article-content .answer-toggle:focus {
+    outline: none;
+}
+
+.blog-detail .article-content .answer-toggle:focus-visible {
+    outline: 2px solid rgba(212, 160, 23, 0.18);
+    outline-offset: 2px;
+}
+
+.blog-detail .article-content .answer-toggle-icon {
+    display: block;
+    width: 22px;
+    height: 22px;
+    transition: transform 0.26s ease;
+    color: inherit;
+    /* 使用 currentColor / button color */
+}
+
+.blog-detail .article-content .answer-toggle.is-open .answer-toggle-icon {
+    transform: rotate(180deg);
+}
+
+/* 确保展开状态边框与初始状态一致 */
+.blog-detail .article-content .answer-toggle.is-open {
+    border: 1px solid rgba(212, 160, 23, 0.85);
+}
+
+.blog-detail .article-content .answer-content {
+    overflow: hidden;
+    transition: max-height 260ms ease, opacity 220ms ease;
+}
+
+.blog-detail .article-content .answer-content p {
+    margin: 0.5em 0;
+}
+
+.blog-detail .article-content .answer-block+.answer-block {
+    margin-top: 0.6em;
+}
