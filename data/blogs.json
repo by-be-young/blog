@@ -3,19 +3,19 @@
         "id": 1786809215,
         "title": "计组总复习",
         "excerpt": "计组总复习，强调重点与例题",
-        "date": "2026-01-10",
+        "date": "2026-01-11",
         "image": "assets/images/blog_bg.png",
         "tags": [
             "二上",
             "计组",
             "总复习"
         ],
-        "type": "待完善",
+        "type": "概要笔记",
         "contentFile": "blogs/二上/计组/总复习/计组总复习.md",
         "recommended": true
     },
     {
-        "id": 2152878250,
+        "id": 464226462,
         "title": "链接与运行",
         "excerpt": "链接、符号、重定位等",
         "date": "2026-01-09",
@@ -26,7 +26,7 @@
             "链接"
         ],
         "type": "系统笔记",
-        "contentFile": "blogs/二上/计组/链接/链接与运行笔记.md",
+        "contentFile": "blogs/二上/计组/链接/链接与运行.md",
         "recommended": false
     },
     {
