@@ -84,6 +84,31 @@
     font-size: 1rem;
 }
 
+/* 高亮当前所在章节的 TOC h2 项：稍微加深底色作为提示 */
+.toc-h2 {
+    position: relative;
+}
+
+/* 在 li 上使用伪元素绘制高亮背景，避免改变 a 的布局与内边距，从而保持换行和位置不变 */
+.toc-h2.is-active::before {
+    content: '';
+    position: absolute;
+    /* 将高亮左侧向左延伸 12px，以便与 h1 项目左侧对齐（h2 的 a 有 margin-left:12px） */
+    left: -12px;
+    right: 0;
+    /* 向上/下扩展以增加高亮区域高度，但不改变文本布局 */
+    top: -4px;
+    bottom: -4px;
+    background: rgba(25, 190, 107, 0.08);
+    border-radius: 8px;
+    z-index: 0;
+}
+
+.toc-h2>a {
+    position: relative;
+    z-index: 1;
+}
+
 
 /* h3提醒框样式 */
 
@@ -184,6 +209,23 @@
     padding: 9px 12px;
     background: linear-gradient(90deg, rgba(234, 255, 243, 0.95) 0%, rgba(234, 255, 243, 0.6) 60%);
     border-radius: 6px;
+}
+
+/* 当 h2 被标记为当前章节时，使用伪元素绘制背景/阴影，而不改变文本布局或产生额外内边距 */
+.blog-detail .article-content h2 {
+    position: relative;
+}
+
+.blog-detail .article-content h2.is-toc-active::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    /* fill the heading box */
+    /* use a subtle translucent background that sits behind the text */
+    background: rgba(25, 190, 107, 0.06);
+    border-radius: 6px;
+    z-index: -1;
+    /* place behind text without affecting layout */
 }
 
 
@@ -303,6 +345,21 @@
     border-radius: 12px;
     padding: 3px 12px;
     font-size: 0.92rem;
+}
+
+/* 链接样式：移除下划线，但保留悬浮反馈（不使用提示文字） */
+.blog-detail a.tag,
+.blog-detail .tag {
+    text-decoration: none;
+    cursor: pointer;
+    display: inline-block;
+    transition: background 160ms ease, transform 120ms ease, color 120ms ease;
+}
+
+.blog-detail a.tag:hover {
+    background: rgba(52, 152, 219, 0.14);
+    transform: translateY(-2px);
+    text-decoration: none;
 }
 
 .blog-detail .article-content p {

@@ -116,20 +116,19 @@
                 if (!h1Id || !h1Map.has(h1Id)) return;
                 if (activeH1Id === h1Id) return;
 
-                // 收起所有h1
+                // 收起所有 h1 下的子列表（若存在）并将所有 h1 的 toggle 设为收起状态 ▶
                 document.querySelectorAll('.toc-h1 > .toc-sub-list').forEach(ul => {
                     ul.style.display = 'none';
-                    const t = ul.parentElement.querySelector('.toc-toggle');
-                    if (t) t.textContent = '▶';
                 });
+                document.querySelectorAll('.toc-h1 > .toc-toggle').forEach(t => { t.textContent = '▶'; });
 
                 const h1Li = h1Map.get(h1Id);
+                if (!h1Li) { activeH1Id = h1Id; return; }
                 const ul = h1Li.querySelector('ul');
-                if (ul) {
-                    ul.style.display = 'block';
-                    const toggle = h1Li.querySelector('.toc-toggle');
-                    if (toggle) toggle.textContent = '▼';
-                }
+                const toggle = h1Li.querySelector('.toc-toggle');
+                // 若存在子列表则展开；不管是否存在子列表，都把 toggle 置为展开状态 ▼
+                if (ul) ul.style.display = 'block';
+                if (toggle) toggle.textContent = '▼';
 
                 activeH1Id = h1Id;
             }
@@ -181,6 +180,7 @@
             const headers = Array.from(content.querySelectorAll('h1, h2'));
             let lastH1 = null, lastH2 = null;
             const h1Map = new Map();
+            const h2Map = new Map();
             headers.forEach((header, idx) => {
                 if (!header.id) header.id = 'toc-h-' + idx;
                 const tag = header.tagName.toLowerCase();
@@ -207,6 +207,7 @@
                     lastH2.className = 'toc-h2';
                     lastH2.innerHTML = `<a href=\"#${header.id}\">${header.textContent}</a>`;
                     ul.appendChild(lastH2);
+                    h2Map.set(header.id, lastH2);
                     // h2目录点击
                     lastH2.querySelector('a').addEventListener('click', function (e) {
                         scrollToHeaderAndExpand(e, header.id);
@@ -286,6 +287,25 @@
                 // 仅更新目录展开状态，不触发浏览器锚点跳转
                 openH1ById(current.id);
 
+                // 更新当前可视的 h2 高亮（取最后一个 top <= offset 的 h2）
+                try {
+                    const h2s = Array.from(content.querySelectorAll('h2'));
+                    let currentH2 = null;
+                    for (let i = 0; i < h2s.length; i++) {
+                        const r = h2s[i].getBoundingClientRect();
+                        if (r.top <= offset) currentH2 = h2s[i];
+                        else break;
+                    }
+                    // 清除旧的高亮（目录与正文）
+                    document.querySelectorAll('.toc-h2.is-active').forEach(el => el.classList.remove('is-active'));
+                    content.querySelectorAll('h2.is-toc-active').forEach(h => h.classList.remove('is-toc-active'));
+                    if (currentH2 && currentH2.id) {
+                        const li = h2Map.get(currentH2.id);
+                        if (li) li.classList.add('is-active');
+                        currentH2.classList.add('is-toc-active');
+                    }
+                } catch (e) { }
+
                 // 可选：同步URL，且不会导致页面跳动
                 if (lastUrlH1Id !== current.id) {
                     lastUrlH1Id = current.id;
@@ -297,9 +317,34 @@
                 }
             });
             // hash变化时自动展开
-            window.addEventListener('hashchange', openCurrentH1ByHash);
+            window.addEventListener('hashchange', function () {
+                openCurrentH1ByHash();
+                // also update active h2 on hash change and body heading highlight
+                try {
+                    const target = document.querySelector(location.hash);
+                    document.querySelectorAll('.toc-h2.is-active').forEach(el => el.classList.remove('is-active'));
+                    content.querySelectorAll('h2.is-toc-active').forEach(h => h.classList.remove('is-toc-active'));
+                    if (target && target.tagName.toLowerCase() === 'h2') {
+                        const li = h2Map.get(target.id);
+                        if (li) li.classList.add('is-active');
+                        target.classList.add('is-toc-active');
+                    }
+                } catch (e) { }
+            });
             // 初始展开
             openCurrentH1ByHash();
+            // 初始高亮（如果页面有 hash）
+            try {
+                if (location.hash) {
+                    const t = document.querySelector(location.hash);
+                    if (t && t.tagName.toLowerCase() === 'h2' && h2Map.has(t.id)) {
+                        document.querySelectorAll('.toc-h2.is-active').forEach(el => el.classList.remove('is-active'));
+                        content.querySelectorAll('h2.is-toc-active').forEach(h => h.classList.remove('is-toc-active'));
+                        h2Map.get(t.id).classList.add('is-active');
+                        t.classList.add('is-toc-active');
+                    }
+                }
+            } catch (e) { }
         }
 
         // 返回顶部按钮
@@ -361,7 +406,12 @@
                     // 设置标签
                     const tagsEl = document.getElementById('article-tags');
                     if (tagsEl && Array.isArray(blog.tags)) {
-                        tagsEl.innerHTML = blog.tags.map(tag => `<span class=\"tag\">${tag}</span>`).join('');
+                        // 每个 tag 点击后在新标签打开分类页，并将该 tag 与其上级路径作为 tags 参数传递
+                        tagsEl.innerHTML = blog.tags.map((tag, idx) => {
+                            const path = blog.tags.slice(0, idx + 1);
+                            const href = 'categories.html?tags=' + encodeURIComponent(JSON.stringify(path));
+                            return `<a class=\"tag\" href=\"${href}\" target=\"_blank\" rel=\"noopener noreferrer\">${tag}</a>`;
+                        }).join('');
                     }
 
                     // 左下文章导航：上一篇/下一篇/相似博客（按时间顺序）

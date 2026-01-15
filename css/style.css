@@ -33,6 +33,9 @@ body {
     font-weight: normal;
     font-style: normal;
     font-display: swap;
+    /* 相对路径：从 css/style.css 到 fonts 目录为 ../fonts/ */
+    src: local('仓耳今楷01'),
+        url('../fonts/仓耳今楷01-W04.ttf') format('truetype');
 }
 
 .navbar {
@@ -275,9 +278,9 @@ body {
     color: rgba(0, 0, 0, 0.72);
     line-height: 1.7;
     max-width: 100%;
-    /* 改为可滚动的多行显示，超出时可纵向滚动并隐藏滚动条 */
+    /* 改为多行显示；通过隐藏内部滚动，让滚轮事件继续作用于页面以避免卡顿 */
     max-height: 120px;
-    overflow-y: auto;
+    overflow: hidden;
     white-space: normal;
 }
 

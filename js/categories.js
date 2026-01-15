@@ -336,7 +336,13 @@ function renderCategories() {
         displayTags.forEach((tag, idx) => {
             const item = document.createElement('div');
             item.className = 'wheel-item' + ((selectedTags[level] == null && idx === 0) || (selectedTags[level] === tag) ? ' is-selected' : '');
-            item.textContent = tag == null ? placeholderLabel : tag;
+            // 对于占位（null）项，使用 data-i18n 标记以支持动态语言切换；同时设置即时文本作为回退
+            if (tag == null) {
+                item.setAttribute('data-i18n', 'filter_all');
+                item.textContent = placeholderLabel;
+            } else {
+                item.textContent = tag;
+            }
             item.dataset.index = String(idx);
             wheel.appendChild(item);
         });
@@ -416,6 +422,20 @@ fetch('data/blogs.json')
     .then(res => res.json())
     .then(blogs => {
         blogsData = blogs;
+        // 如果 URL 中包含 tags 参数（JSON），则用其初始化 selectedTags
+        try {
+            const url = new URL(window.location.href);
+            const t = url.searchParams.get('tags');
+            if (t) {
+                const parsed = JSON.parse(t);
+                if (Array.isArray(parsed)) {
+                    // 保证长度不超过 MAX_LEVELS
+                    selectedTags = parsed.slice(0, MAX_LEVELS).map(v => (v === null ? null : v));
+                }
+            }
+        } catch (e) {
+            // ignore malformed param
+        }
         renderCategories();
         renderBlogList();
     });

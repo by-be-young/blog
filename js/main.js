@@ -141,6 +141,14 @@ function renderAnnouncementBanner() {
             try { if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') window.siteI18n.applyTo(host); } catch (e) { }
             // 启动横幅正文自动滚动（如果超出高度则向下滚动，滚动到底部停顿后回到顶部重启）
             try { startAnnouncementAutoScroll(host); } catch (e) { }
+            // 确保不再注册阻塞滚轮的处理器（避免 preventDefault 导致滚动卡顿）
+            try {
+                const msgEl = host.querySelector('.announcement-message');
+                if (msgEl && msgEl.__wheelHandler) {
+                    try { msgEl.removeEventListener('wheel', msgEl.__wheelHandler); } catch (e) { }
+                    msgEl.__wheelHandler = null;
+                }
+            } catch (e) { }
         })
         .catch(() => {
             // no banner on errors
