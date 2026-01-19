@@ -341,8 +341,21 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
 
 /* 博客详情页美化 */
 .blog-detail {
-    background: url('../assets/detail_bg.png') center / cover no-repeat fixed;
+    /* 将 background-attachment 默认设为 scroll，避免 iOS/iPadOS 上 fixed 导致的放大/随滚动问题。
+       使用单独属性以便通过媒体查询在桌面设备恢复 fixed 行为。 */
+    background-image: url('../assets/detail_bg.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: scroll;
     min-height: 100vh;
+}
+
+/* 在支持精确指针（桌面）设备上启用固定背景以获得期望的视觉效果 */
+@media (pointer: fine) {
+    .blog-detail {
+        background-attachment: fixed;
+    }
 }
 
 /* 详情页背景遮罩：提升内容可读性 */
