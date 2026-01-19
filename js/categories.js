@@ -278,10 +278,14 @@ function renderCategories() {
     if (prevH > 0) container.style.minHeight = `${prevH}px`;
     container.innerHTML = '';
 
-    const panelTitle = document.createElement('div');
-    panelTitle.className = 'categories-panel-title';
-    panelTitle.setAttribute('data-i18n', 'categories_filter_title');
-    container.appendChild(panelTitle);
+    // 在窄屏下移除/隐藏筛选标题（由 DOM 层面不创建），以满足“不要筛选框标题”的需求
+    const isNarrow = (typeof window !== 'undefined') ? window.innerWidth <= 948 : false;
+    if (!isNarrow) {
+        const panelTitle = document.createElement('div');
+        panelTitle.className = 'categories-panel-title';
+        panelTitle.setAttribute('data-i18n', 'categories_filter_title');
+        container.appendChild(panelTitle);
+    }
 
     const wheelRow = document.createElement('div');
     wheelRow.className = 'categories-wheel-row';
@@ -331,6 +335,12 @@ function renderCategories() {
         wheel.setAttribute('tabindex', '0');
         wheel.setAttribute('aria-label', `${labels[level]}筛选`);
 
+        // 在窄屏下收窄滚轮高度以减少筛选框总体高度
+        if (isNarrow) {
+            wheel.style.height = '220px';
+            wheel.style.setProperty('--wheel-overlay-height', '42px');
+        }
+
         // 在每列前插入一个占位项（表示未选择 / 全部），以 index 0 呈现
         const displayTags = [null].concat(tags);
         displayTags.forEach((tag, idx) => {
@@ -360,7 +370,24 @@ function renderCategories() {
     if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') {
         try { window.siteI18n.applyTo(container); } catch (e) { /* ignore */ }
     }
+    try { updateSidebarSticky && updateSidebarSticky(); } catch (e) { }
 }
+
+// 在窗口宽度跨越断点时重新渲染 categories，以保证标题/高度行为同步
+try {
+    (function () {
+        window.__categories_last_width = window.innerWidth;
+        window.addEventListener('resize', function () {
+            const last = window.__categories_last_width || 0;
+            const curr = window.innerWidth;
+            const crossed = (last <= 948 && curr > 948) || (last > 948 && curr <= 948);
+            window.__categories_last_width = curr;
+            if (crossed) {
+                try { renderCategories(); renderBlogList(); } catch (e) { /* ignore */ }
+            }
+        });
+    })();
+} catch (e) { /* ignore */ }
 
 function renderBlogList() {
     const listDiv = document.getElementById('blogList');
@@ -405,8 +432,39 @@ function renderBlogList() {
                 renderCategories();
                 renderBlogList();
             });
+
+            // 根据侧边栏高度与可视高度比较，动态启用/禁用粘性定位，避免覆盖博客列表
+            function updateSidebarSticky() {
+                try {
+                    const sidebar = document.querySelector('.categories-sidebar');
+                    if (!sidebar) return;
+                    // 在窄屏单列模式下，不启用粘性定位
+                    if (window.innerWidth <= 948) {
+                        sidebar.classList.remove('no-sticky');
+                        return;
+                    }
+                    const topOffset = 60 + 12; // 与 CSS 中的 top: calc(60px + 12px)
+                    const avail = window.innerHeight - topOffset - 24; // 预留少量空间
+                    const sidebarH = sidebar.getBoundingClientRect().height;
+                    if (sidebarH > avail) {
+                        sidebar.classList.add('no-sticky');
+                    } else {
+                        sidebar.classList.remove('no-sticky');
+                    }
+                } catch (e) { /* ignore */ }
+            }
+
+            // 初次加载与窗口尺寸变化时校准
+            try {
+                window.addEventListener('load', function () { try { updateSidebarSticky(); } catch (e) { } });
+                window.addEventListener('resize', throttle(function () { try { updateSidebarSticky(); } catch (e) { } }, 160));
+            } catch (e) { /* ignore */ }
         });
     });
+    // 初始化 ResizeObserver 以便在单个卡片尺寸变化时动态调整 tags（无需刷新）
+    try { initItemsResizeObserver && initItemsResizeObserver(); } catch (e) { }
+    // 立即执行一次调整
+    try { adjustTagsVisibility && adjustTagsVisibility(); } catch (e) { }
     if (!filtered.length) {
         try {
             const lang = (window.siteI18n && typeof window.siteI18n.getLang === 'function') ? window.siteI18n.getLang() : 'zh';
@@ -417,6 +475,66 @@ function renderBlogList() {
         }
     }
 }
+
+// 使用 ResizeObserver 监听每个 .blog-item 的尺寸变化，触发 adjustTagsVisibility
+function initItemsResizeObserver() {
+    try {
+        // disconnect previous observer
+        if (window.__cat_ro) {
+            try { window.__cat_ro.disconnect(); } catch (e) { }
+            window.__cat_ro = null;
+        }
+        const items = Array.from(document.querySelectorAll('.blog-item'));
+        if (!items.length) return;
+        const onResize = throttle(function () {
+            try { adjustTagsVisibility(); } catch (e) { }
+        }, 120);
+        const ro = new ResizeObserver(function (entries) {
+            // entries contains which elements changed; we don't need per-entry work
+            onResize();
+        });
+        items.forEach(it => {
+            try { ro.observe(it); } catch (e) { }
+        });
+        window.__cat_ro = ro;
+    } catch (e) { /* ignore */ }
+}
+
+// 根据卡片宽度决定是否显示 tags：当卡片宽度小于 threshold 时隐藏 tags
+function adjustTagsVisibility() {
+    try {
+        const items = Array.from(document.querySelectorAll('.blog-item'));
+        if (!items.length) return;
+        // 计算阈值：基于设计需要放大一点，使用 520px 作为默认阈值
+        const defaultThreshold = 520;
+        // 如果 CSS 变量可用，可据此动态计算更合适的阈值
+        let tagW = 90;
+        try {
+            const v = getComputedStyle(document.documentElement).getPropertyValue('--cat-tag-width');
+            if (v) {
+                const n = parseInt(v, 10);
+                if (!Number.isNaN(n) && n > 0) tagW = n;
+            }
+        } catch (e) { }
+        const threshold = Math.max(defaultThreshold, tagW * 3 + 160);
+
+        items.forEach(it => {
+            const right = it.querySelector('.blog-right');
+            if (!right) return;
+            const w = it.getBoundingClientRect().width;
+            if (w <= threshold) {
+                it.classList.add('tags-hidden');
+            } else {
+                it.classList.remove('tags-hidden');
+            }
+        });
+    } catch (e) { /* ignore */ }
+}
+
+// 在窗口缩放时也更新 tag 可见性（节流）
+try {
+    window.addEventListener('resize', throttle(function () { try { adjustTagsVisibility(); } catch (e) { } }, 150));
+} catch (e) { /* ignore */ }
 
 fetch('data/blogs.json')
     .then(res => res.json())

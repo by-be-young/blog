@@ -3,7 +3,7 @@
         "id": 2424142839,
         "title": "概率统计总复习",
         "excerpt": "概率统计",
-        "date": "2026-01-13",
+        "date": "2026-01-14",
         "image": "assets/images/blog_bg.png",
         "tags": [
             "二上",
@@ -115,7 +115,7 @@
             "Java",
             "总复习"
         ],
-        "type": "待完善",
+        "type": "概要笔记",
         "contentFile": "blogs/二上/Java/总复习/Java总复习.md",
         "recommended": true
     },

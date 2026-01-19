@@ -1,40 +1,25 @@
 /* 响应式设计 */
 
 @media (max-width: 992px) {
-    .content-wrapper {
+
+    /* 仅对非首页生效，避免首页侧边栏过早折叠导致单列布局 */
+    body:not(.home) .content-wrapper {
         grid-template-columns: 1fr;
         gap: 30px;
     }
 
-    .profile-card {
+    body:not(.home) .profile-card {
         position: static;
     }
 
-    .welcome-text {
+    body:not(.home) .welcome-text {
         font-size: 2.8rem;
     }
 }
 
 @media (max-width: 768px) {
-    .nav-menu {
-        position: fixed;
-        top: 60px;
-        left: -100%;
-        width: 100%;
-        height: calc(100vh - 60px);
-        background: white;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-        padding-top: 40px;
-        transition: var(--transition);
-        z-index: 999;
-    }
 
-    .nav-menu.active {
-        left: 0;
-    }
-
+    /* 在小屏保留切换按钮，但 offcanvas 菜单样式由 .nav-menu.offcanvas 控制，避免白色/固定像素覆盖 */
     .nav-toggle {
         display: block;
     }
@@ -74,5 +59,158 @@
 
     .welcome-text {
         font-size: 1.8rem;
+    }
+}
+
+/* 极窄屏（<=600px）：彻底隐藏首页侧栏，头部内联菜单隐藏，显示切换按钮；侧边 offcanvas 使用不透明马卡龙背景并为 30% 宽度（设置最小值以保证可点击） */
+@media (max-width: 600px) {
+    .home .sidebar {
+        display: none !important;
+    }
+
+    .home .content-wrapper {
+        grid-template-columns: 1fr;
+    }
+
+    /* 隐藏头部内联菜单（链接项），但保持搜索与语言控件始终可见 */
+    .nav-container>.nav-menu {
+        display: none !important;
+    }
+
+    .nav-toggle {
+        display: block !important;
+    }
+
+    /* 搜索与语言始终可见并可交互，提升层级以覆盖遮罩 */
+    .nav-search-btn,
+    .nav-lang-wrap {
+        display: inline-flex !important;
+        align-items: center !important;
+        position: relative !important;
+        z-index: 1501 !important;
+    }
+
+    .nav-lang {
+        display: block !important;
+    }
+
+    /* offcanvas 使用 transform 隐藏以避免留下可视缝隙，同时使用不透明马卡龙渐变 */
+    .nav-menu.offcanvas {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        transform: translateX(-100%);
+        width: 30% !important;
+        min-width: 240px !important;
+        height: calc(100vh - 60px);
+        background: linear-gradient(135deg, #ffd6e0 0%, #c8f7dc 50%, #e7e7ff 100%) !important;
+        display: flex !important;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: 20px 12px;
+        transition: transform 280ms ease;
+        z-index: 1400;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16) !important;
+        overflow-y: auto;
+    }
+
+    .nav-menu.offcanvas.active {
+        transform: translateX(0) !important;
+    }
+
+    /* 遮罩（默认隐藏）；当 body 有 .offcanvas-open 时显示 */
+    .offcanvas-backdrop {
+        display: none;
+    }
+
+    body.offcanvas-open .offcanvas-backdrop {
+        /* 在极窄屏彻底不显示遮罩 */
+        display: none !important;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.32);
+        z-index: 1350;
+        /* keep below nav-menu (1400) but above page content */
+    }
+}
+
+/* 当视口宽度使网格一行放两个卡片时（近似 520px-900px），强制每个 tag 独占一行 */
+@media (min-width: 520px) and (max-width: 900px) {
+    .blog-card .tags {
+        display: block;
+    }
+
+    .blog-card .tag {
+        display: block;
+        width: 100%;
+        margin-bottom: 8px;
+        border-radius: 10px;
+    }
+}
+
+/* 新增：在中间宽度区间，隐藏首页侧栏但保持博客两列（避免出现“有侧栏、单列”中间状态） */
+@media (max-width: 1100px) and (min-width: 601px) {
+    .home .sidebar {
+        display: none !important;
+    }
+
+    .home .content-wrapper {
+        grid-template-columns: 1fr;
+    }
+
+    .home .nav-avatar {
+        display: inline-flex;
+    }
+
+    .home .blog-grid {
+        grid-template-columns: repeat(2, minmax(260px, 1fr));
+        gap: 20px;
+    }
+
+    /* 在无侧栏（中间区间）将导航项收进侧边 off-canvas 菜单 */
+    .nav-toggle {
+        display: block;
+    }
+
+    .nav-container>.nav-menu {
+        display: none;
+    }
+
+    /* 侧边 off-canvas 菜单（复用同一元素，但仅定位在该区间） */
+    .nav-menu.offcanvas {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        transform: translateX(-100%);
+        width: 30% !important;
+        min-width: 260px !important;
+        height: calc(100vh - 60px);
+        background: linear-gradient(135deg, #ffd6e0 0%, #c8f7dc 50%, #e7e7ff 100%) !important;
+        display: flex !important;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: 20px 12px;
+        transition: transform 280ms ease;
+        z-index: 1400;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+        overflow-y: auto;
+    }
+
+    .nav-menu.offcanvas.active {
+        transform: translateX(0);
+    }
+
+    /* 中间区间同样使用遮罩样式 */
+    body.offcanvas-open .offcanvas-backdrop {
+        display: block;
+    }
+}
+
+/* 更窄时改为单列 */
+@media (max-width: 600px) {
+    .home .blog-grid {
+        grid-template-columns: 1fr;
     }
 }

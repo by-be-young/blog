@@ -7,6 +7,8 @@
     <title>归档 | Be Young's Blog</title>
     <link rel="icon" href="assets/avatar.png" type="image/png">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/butterfly.css">
+    <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/archive.css">
     <link rel="stylesheet" href="css/search.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -81,6 +83,17 @@
     <script src="js/search.js"></script>
     <script src="js/archive.js"></script>
     <script src="js/main.js"></script>
+    <!-- Calendar floating action button + modal for small screens -->
+    <button id="calendarFab" class="calendar-fab" aria-label="打开日历" aria-hidden="true">
+        <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+    </button>
+    <div id="calendarModal" class="calendar-modal" aria-hidden="true">
+        <div class="calendar-modal-backdrop" data-role="backdrop"></div>
+        <div class="calendar-modal-inner" role="dialog" aria-modal="true">
+            <button class="calendar-modal-close" aria-label="关闭日历"><i class="fas fa-times"></i></button>
+            <div class="calendar-modal-body"></div>
+        </div>
+    </div>
 </body>
 
 </html>

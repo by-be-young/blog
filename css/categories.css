@@ -16,13 +16,75 @@
     align-items: start;
 }
 
+/* 当内容列宽度小于左侧筛选框宽度时（approx container < 948px），将博客列表置于筛选框下方 */
+@media (max-width: 948px) {
+    .categories-layout {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    /* 取消侧栏粘性定位并让其成为页面流的一部分 */
+    .categories-sidebar {
+        position: static;
+        top: auto;
+        z-index: 1;
+        align-self: stretch;
+    }
+
+    /* 隐藏筛选框标题以节省高度 */
+    .categories-panel-title {
+        display: none;
+    }
+
+    /* 缩短滚轮高度、减小遮罩，以便筛选框在窄屏时更紧凑 */
+    .categories-wheel {
+        height: 220px;
+        --wheel-overlay-height: 42px;
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+
+    .wheel-item {
+        height: 56px;
+        padding: 0 6px;
+    }
+
+    .categories-container {
+        padding: 12px 12px;
+    }
+
+    /* 博客卡片右侧列收窄，保证主要内容仍可阅读 */
+    .blog-item {
+        --blog-card-height: 140px;
+        height: var(--blog-card-height);
+    }
+
+    .blog-item .blog-right {
+        flex: 0 0 120px;
+        padding-right: 12px;
+        justify-content: flex-end;
+    }
+
+    /* 微调标题与段落的内边距，避免换行溢出 */
+    .blog-item .blog-left {
+        padding-left: 10px;
+    }
+}
+
 .categories-sidebar {
     position: sticky;
     /* 固定在导航栏下方，避免被顶部固定的 .navbar 覆盖（.navbar 高度为 60px） */
-    top: calc(60px + 12px);
+    top: calc(10px);
     transform: none;
     z-index: 20;
     align-self: start;
+}
+
+/* 当侧边栏高度超过可视区域时，禁用粘性定位以避免遮挡内容 */
+.categories-sidebar.no-sticky {
+    position: static !important;
+    top: auto !important;
+    z-index: 1 !important;
 }
 
 .categories-section .page-title {
@@ -530,6 +592,38 @@
     padding-right: 12px;
     margin-top: 8px;
 }
+
+/* 当卡片添加 .tags-hidden 时，隐藏右侧标签列并让左侧占满 */
+.blog-item.tags-hidden .blog-right {
+    display: none !important;
+}
+
+.blog-item.tags-hidden .blog-left {
+    flex: 1 1 100% !important;
+}
+
+/* 强制标签尺寸与侧栏区域使得一行恰好容纳 3 个标签 */
+:root {
+    --cat-tag-width: 90px;
+    --cat-tag-gap: 10px;
+}
+
+.blog-item .blog-tags .blog-tag {
+    width: var(--cat-tag-width);
+    flex: 0 0 var(--cat-tag-width);
+    max-width: var(--cat-tag-width);
+    /* 保持原始形状高度（与设计一致），不要改扁 */
+    padding: 8px 10px;
+    height: 100px;
+}
+
+/* 右侧区域宽度 = 3 * tag-width + 2 * gap + 内边距 (approx 24px) */
+.blog-item .blog-right {
+    flex: 0 0 314px;
+    /* 270 + 20 + 24 = 314 */
+}
+
+/* 注意：标签的隐藏由 JS 根据单张卡片宽度控制，移除全局媒体查询以避免冲突 */
 
 
 .categories-collapsed {

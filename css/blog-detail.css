@@ -188,6 +188,68 @@
     box-shadow: 0 4px 16px rgba(52, 152, 219, 0.28);
 }
 
+/* 小屏时将目录收起为悬浮球（FAB）并提供覆盖面板展示目录 */
+/* 通过 body.toc-compact-mode 控制是否进入紧凑目录模式。
+   仅隐藏未被移动到覆盖层（即没有 .in-overlay 类）的原始目录，
+   以便 overlay 内可以显示与原目录一模一样的样式。 */
+body.toc-compact-mode .blog-toc:not(.in-overlay) {
+    display: none !important;
+}
+
+.toc-fab {
+    /* visual tweaks specific to TOC FAB; base appearance comes from .floating-btn */
+    width: 48px;
+    height: 48px;
+    display: none;
+    /* 仅在紧凑模式显示，显示由 JS 控制 */
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+.toc-fab:active {
+    transform: scale(0.98);
+}
+
+.toc-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1098;
+    display: none;
+}
+
+.toc-overlay-inner {
+    position: absolute;
+    right: 16px;
+    top: 80px;
+    width: 320px;
+    max-height: calc(100vh - 160px);
+    overflow: auto;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.28);
+    border-radius: 12px;
+    background: #fff;
+    padding: 14px 16px;
+}
+
+.toc-overlay-close {
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    background: transparent;
+    border: none;
+    color: #666;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+/* 在非常窄的视口优先进入紧凑模式 */
+@media (max-width: 880px) {
+    body.toc-compact-mode .toc-fab {
+        display: inline-flex;
+    }
+}
+
 /* 博客详情页内容层级美化 */
 .blog-detail .article-content h1 {
     color: #2d8cf0;

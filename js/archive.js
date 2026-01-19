@@ -492,6 +492,63 @@ function initArchiveCalendar(blogs) {
   } catch (e) { /* ignore */ }
 }
 
+// Floating calendar: 在小屏变为悬浮球并支持模态展开/收起
+function initCalendarFab() {
+  const fab = document.getElementById('calendarFab');
+  const modal = document.getElementById('calendarModal');
+  const modalBody = modal ? modal.querySelector('.calendar-modal-body') : null;
+  const closeBtn = modal ? modal.querySelector('.calendar-modal-close') : null;
+  const sidebar = document.querySelector('.archive-sidebar');
+  const calendarCard = document.getElementById('calendarCard');
+  if (!fab || !modal || !modalBody || !calendarCard) return;
+
+  let isOpen = false;
+
+  function openModal() {
+    if (isOpen) return;
+    // move calendarCard into modal body
+    modalBody.appendChild(calendarCard);
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    fab.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = 'hidden';
+    isOpen = true;
+  }
+
+  function closeModal() {
+    if (!isOpen) return;
+    // move calendarCard back to sidebar
+    if (sidebar) sidebar.appendChild(calendarCard);
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    fab.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = '';
+    isOpen = false;
+  }
+
+  fab.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
+  closeBtn && closeBtn.addEventListener('click', (e) => { e.preventDefault(); closeModal(); });
+  modal.addEventListener('click', (e) => {
+    if (e.target && e.target.matches('[data-role="backdrop"]')) closeModal();
+  });
+
+  // when resizing to large screens, ensure modal closed and card restored
+  function updateMode() {
+    const w = window.innerWidth;
+    if (w > 900) {
+      if (isOpen) closeModal();
+      // ensure calendarCard is inside sidebar
+      if (sidebar && calendarCard && calendarCard.parentNode !== sidebar) sidebar.appendChild(calendarCard);
+      fab.style.display = 'none';
+    } else {
+      fab.style.display = 'inline-flex';
+    }
+  }
+
+  updateMode();
+  window.addEventListener('resize', throttle(updateMode, 150));
+}
+
 // 归档页面：时间轴 + 侧边日历
 fetch('data/blogs.json')
   .then(res => res.json())
@@ -500,6 +557,7 @@ fetch('data/blogs.json')
     renderTimeline(blogs);
     initTimelineDrum();
     initArchiveCalendar(blogs);
+    try { initCalendarFab(); } catch (e) { /* ignore */ }
     // 页面进入后默认将最近一篇博文滚动到时间轴中心
     setTimeout(() => {
       const timeline = document.getElementById('archiveTimeline');

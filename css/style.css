@@ -66,6 +66,22 @@ body {
     margin-right: 150px;
 }
 
+/* 小屏显示的导航头像（默认隐藏，大屏隐藏，小屏显示） */
+.nav-avatar {
+    display: none;
+    align-items: center;
+    margin-right: 12px;
+}
+
+.nav-avatar img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary-color);
+    display: block;
+}
+
 .nav-menu {
     display: flex;
     list-style: none;
@@ -644,14 +660,19 @@ body {
     color: #ffb84d;
 }
 
-/* 首页专用：加宽侧栏（个人信息卡）并相应收窄右侧主栏，整体容器宽度不变 */
+
+/* 首页专用：侧栏使用相对宽度（最大为页面的30%，并设置最小值），主栏自适应 */
 .home .content-wrapper {
-    grid-template-columns: 360px 1fr;
+    grid-template-columns: 30% 1fr;
 }
 
 .home .profile-card {
     width: 100%;
     max-width: none;
+    /* 不透明马卡龙渐变背景，避免半透明导致页面内容透出 */
+    background: linear-gradient(135deg, #ffd6e0 0%, #c8f7dc 50%, #e7e7ff 100%);
+    color: var(--home-text);
+    border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .name {
@@ -744,6 +765,8 @@ body {
 .blog-grid {
     display: grid;
     gap: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    align-items: start;
 }
 
 .blog-card {
@@ -3639,4 +3662,32 @@ body.hide-scrollbar {
 html.hide-scrollbar::-webkit-scrollbar,
 body.hide-scrollbar::-webkit-scrollbar {
     display: none;
+}
+
+/* Responsive adjustments for very small screens: show nav avatar, force welcome text to wrap */
+@media (max-width: 600px) {
+    .home .content-wrapper {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    /* 在导航栏显示小头像（更窄屏时） */
+    .nav-avatar {
+        display: inline-flex;
+    }
+
+    /* 在小屏稍微缩小欢迎语并允许按行显示 */
+    .welcome-text {
+        font-size: 2rem;
+        line-height: 1.2;
+        white-space: pre-line;
+        word-break: break-word;
+        margin-bottom: 0.6rem;
+    }
+}
+
+/* 当侧边栏以 offcanvas 打开时禁止页面滚动并确保顶层层级 */
+body.offcanvas-open {
+    overflow: hidden;
+    touch-action: none;
 }

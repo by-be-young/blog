@@ -3,6 +3,10 @@
     let lastGridMinHeight = 0;
 
     function initNavigation() {
+        // If a global navigation initializer exists (from main.js), skip local init
+        // to avoid duplicate event handlers which cause double-toggling.
+        if (typeof window.initNavigation === 'function') return;
+
         const toggle = document.querySelector('.nav-toggle');
         const menu = document.querySelector('.nav-menu');
 
@@ -268,6 +272,9 @@
             renderCards(gridEl, []);
         }
 
+        // 调整侧边粘性（立即）
+        try { updateQuickLinksSticky && updateQuickLinksSticky(); } catch (e) { }
+
         // 滚动：实时更新视觉；停下后自动吸附并切换分类
         wheelEl.addEventListener('scroll', () => {
             scheduleVisuals();
@@ -341,6 +348,7 @@
         window.addEventListener('resize', () => {
             adjustWheelPadding(wheelEl);
             scheduleVisuals();
+            try { updateQuickLinksSticky && updateQuickLinksSticky(); } catch (e) { }
         });
         // update wheel labels when language changes
         document.addEventListener('site:languageChanged', function () {
@@ -348,6 +356,24 @@
                 try { window.siteI18n.applyTo(wheelEl); } catch (e) { /* ignore */ }
             }
         });
+    }
+
+    // 控制侧边粘性：当侧边高度超过可视区域时禁用粘性，避免覆盖卡片
+    function updateQuickLinksSticky() {
+        try {
+            const sidebar = document.querySelector('.quick-links-sidebar');
+            if (!sidebar) return;
+            // 仅在窄屏上下结构下启用粘性逻辑
+            if (window.innerWidth > 760) {
+                sidebar.classList.remove('no-sticky');
+                return;
+            }
+            const topOffset = 60 + 12;
+            const avail = window.innerHeight - topOffset - 24;
+            const sidebarH = sidebar.getBoundingClientRect().height;
+            if (sidebarH > avail) sidebar.classList.add('no-sticky');
+            else sidebar.classList.remove('no-sticky');
+        } catch (e) { /* ignore */ }
     }
 
     async function initQuickLinks() {

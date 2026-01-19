@@ -89,6 +89,13 @@
     transform: translateY(-8%);
 }
 
+/* 当侧栏高度超过可视高度时禁用粘性定位以避免遮挡 */
+.quick-links-sidebar.no-sticky {
+    position: static !important;
+    top: auto !important;
+    transform: none !important;
+}
+
 .quick-links-panel {
     position: relative;
     backdrop-filter: blur(14px);
@@ -321,21 +328,43 @@
     font-weight: 700;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 760px) {
     .quick-links-layout {
         flex-direction: column;
+        /* 在窄屏上下结构时，使用一个最大宽度变量来让侧栏（滚轮）与卡片同宽并居中 */
+        --ql-side-width: min(720px, 100%);
+        align-items: center;
     }
 
+    /* 在上下结构下，将滚轮固定在视口顶部（粘性），以便在浏览卡片时仍能切换分类 */
     .quick-links-sidebar {
         width: 100%;
+        max-width: var(--ql-side-width);
         flex: 0 0 auto;
-        position: static;
-        top: auto;
+        position: sticky;
+        top: calc(60px + 12px);
         transform: none;
+        z-index: 20;
+        margin: 0 auto;
+    }
+
+    .quick-links-panel {
+        max-width: var(--ql-side-width);
+        margin: 0 auto;
     }
 
     .quick-links-wheel {
-        height: 340px;
-        padding: 122px 12px;
+        height: 220px;
+        padding: 48px 12px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* 在上下结构下，下方卡片改为单列且与侧栏等宽居中 */
+    .quick-links-grid {
+        grid-template-columns: 1fr;
+        width: 100%;
+        max-width: var(--ql-side-width);
+        margin: 0 auto;
     }
 }

@@ -80,6 +80,10 @@ document.addEventListener('DOMContentLoaded', function () {
     // 初始化个人联系方式交互
     try { initProfileContacts && initProfileContacts(); } catch (e) { }
 
+    // 适配欢迎语换行（小屏时将空格替换为换行）
+    try { adaptWelcomeText && adaptWelcomeText(); } catch (e) { }
+    window.addEventListener('resize', throttle(function () { try { adaptWelcomeText && adaptWelcomeText(); } catch (e) { } }, 150));
+
     // make the entire profile card clickable (navigate to about), but
     // ignore clicks on internal interactive elements (links, buttons)
     try {
@@ -334,6 +338,41 @@ function throttle(fn, wait) {
     };
 }
 
+// 在小屏时将欢迎语中的空格替换为换行；恢复时还原原始内容
+function adaptWelcomeText() {
+    try {
+        const el = document.querySelector('.welcome-text');
+        if (!el) return;
+        // 保存初始 HTML 与“纯文本（保留换行）”形式，供恢复与处理使用
+        if (!el.dataset.originalHtml) el.dataset.originalHtml = el.innerHTML;
+        // 为了可靠保留原始翻译中的换行符（<br> 或 \n），我们从 originalHtml 中将 <br> 替换为 \n，然后去除其他 HTML 标签
+        if (!el.dataset.originalText) {
+            const html = el.dataset.originalHtml || '';
+            // 将 <br> 转为换行，再利用临时元素取得纯文本，保留换行
+            const withNewlines = html.replace(/<br\s*\/?\>/gi, '\n');
+            const tmp = document.createElement('div');
+            tmp.innerHTML = withNewlines;
+            el.dataset.originalText = (tmp.textContent || tmp.innerText || '').replace(/\r/g, '');
+        }
+
+        const originalHtml = el.dataset.originalHtml;
+        const originalText = el.dataset.originalText;
+        const small = window.innerWidth <= 720;
+        if (small) {
+            // 保留原有换行（\n），但将每行内的空格替换为 <br>
+            const lines = (originalText || '').split('\n');
+            const processed = lines.map(line => {
+                const collapsed = line.replace(/\s+/g, ' ').trim();
+                return collapsed.replace(/ /g, '<br>');
+            }).join('<br>');
+            el.innerHTML = (processed && processed.replace(/^(?:<br>)+|(?:<br>)+$/g, '').length) ? processed : originalHtml;
+        } else {
+            // 恢复由 i18n 提供的原始 HTML（包含原始的 <br>）
+            el.innerHTML = originalHtml;
+        }
+    } catch (e) { /* ignore errors */ }
+}
+
 
 // 创建博客卡片
 function createBlogCard(blog) {
@@ -411,6 +450,23 @@ document.addEventListener('site:languageChanged', function (e) {
     updateDates();
 });
 
+// 当语言切换时，更新 welcome-text 的原始缓存并重新应用适配逻辑
+document.addEventListener('site:languageChanged', function (e) {
+    try {
+        const el = document.querySelector('.welcome-text');
+        if (!el) return;
+        // 更新原始 HTML/text 缓存为最新语言渲染后内容
+        el.dataset.originalHtml = el.innerHTML;
+        // 将 HTML 中的 <br> 转为 \n，再取纯文本以保留换行
+        const withNewlines = (el.dataset.originalHtml || '').replace(/<br\s*\/?\>/gi, '\n');
+        const tmp = document.createElement('div');
+        tmp.innerHTML = withNewlines;
+        el.dataset.originalText = (tmp.textContent || tmp.innerText || '').replace(/\r/g, '');
+        // 立即重新应用适配（以维持当前窗口宽度下的换行规则）
+        try { adaptWelcomeText && adaptWelcomeText(); } catch (err) { }
+    } catch (e) { /* ignore */ }
+});
+
 // 已移除 initStickySidebar 相关代码
 
 // 导航栏初始化
@@ -420,14 +476,66 @@ function initNavigation() {
 
     if (toggle) {
         toggle.addEventListener('click', () => {
-            menu.classList.toggle('active');
+            if (!menu) return;
+            const isActive = menu.classList.toggle('active');
+            // ensure offcanvas mode body class to control backdrop and scroll
+            if (isActive) {
+                document.body.classList.add('offcanvas-open');
+            } else {
+                document.body.classList.remove('offcanvas-open');
+            }
         });
+
+        // create backdrop element (single instance) and wire click to close menu
+        (function ensureBackdrop() {
+            if (document.querySelector('.offcanvas-backdrop')) return;
+            const b = document.createElement('div');
+            b.className = 'offcanvas-backdrop';
+            // only close when the backdrop itself is clicked
+            b.addEventListener('click', (ev) => {
+                ev.stopPropagation();
+                if (menu) menu.classList.remove('active');
+                document.body.classList.remove('offcanvas-open');
+            });
+            // insert the backdrop before the navbar so the navbar (and its offcanvas menu)
+            // remain after it in DOM order and receive pointer events above the backdrop
+            try {
+                const nav = document.querySelector('.navbar');
+                if (nav && nav.parentNode) {
+                    nav.parentNode.insertBefore(b, nav);
+                } else {
+                    document.body.appendChild(b);
+                }
+            } catch (e) {
+                document.body.appendChild(b);
+            }
+        })();
     }
+
+    // 根据窗口宽度切换 offcanvas 模式（用于中间区间将导航收进侧边栏）
+    function updateMenuMode() {
+        try {
+            const w = window.innerWidth;
+            if (!menu) return;
+            // 当视口较窄或处于中间区间时启用 offcanvas（与 CSS 区间保持一致）
+            if (w <= 1100) {
+                menu.classList.add('offcanvas');
+            } else {
+                // disable offcanvas and ensure any open state is fully closed
+                menu.classList.remove('offcanvas');
+                menu.classList.remove('active');
+                document.body.classList.remove('offcanvas-open');
+            }
+        } catch (e) { }
+    }
+    updateMenuMode();
+    window.addEventListener('resize', throttle(updateMenuMode, 150));
 
     // 点击链接关闭菜单（移动端）
     document.querySelectorAll('.nav-menu a').forEach(link => {
         link.addEventListener('click', () => {
-            menu.classList.remove('active');
+            if (menu) menu.classList.remove('active');
+            document.body.classList.remove('offcanvas-open');
         });
     });
 }
