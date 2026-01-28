@@ -92,6 +92,11 @@
                     "title": "PRTS wiki",
                     "url": "https://prts.wiki/",
                     "image": "assets/images/bg1.png"
+                },
+                {
+                    "title": "终末地wiki",
+                    "url": "https://wiki.skland.com/endfield",
+                    "image": "assets/images/bg1.png"
                 }
             ]
         },

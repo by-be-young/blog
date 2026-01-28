@@ -1,8 +1,11 @@
+// js/announcements.js - 用于加载和显示公告时间轴
 (function () {
+    // 简单的 HTML 转义函数
     function escapeHtml(s) {
         return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
 
+    // 公告排序函数：按日期降序排列，日期相同则按 ID 降序排列
     function sortAnnouncements(a, b) {
         const da = new Date(a && a.date ? a.date : 0).getTime();
         const db = new Date(b && b.date ? b.date : 0).getTime();
@@ -12,6 +15,7 @@
         return ib - ia;
     }
 
+    // 确保动画在元素进入视口时触发
     function ensureVisibleAnimations(root) {
         const items = Array.from(root.querySelectorAll('.ann-item'));
         if (items.length === 0) return;
@@ -20,10 +24,7 @@
             items.forEach(it => it.classList.add('is-visible'));
             return;
         }
-
-        // Observe items and toggle `.is-visible` on every enter/leave so
-        // animations play each time the element re-enters the viewport.
-        // Exclude items that are intended to be fixed (top/bottom centered).
+        // 使用 IntersectionObserver 监听可见性变化
         const obs = new IntersectionObserver((entries) => {
             entries.forEach(en => {
                 try {
@@ -41,6 +42,7 @@
         });
     }
 
+    // 渲染公告时间轴
     function renderTimeline(list) {
         const timeline = document.getElementById('announcementsTimeline');
         const empty = document.getElementById('announcementsEmpty');
@@ -57,14 +59,12 @@
         if (empty) empty.style.display = 'none';
         timeline.innerHTML = '';
 
-        // Render timeline in descending order (newest -> oldest)
         arr.forEach((a, idx) => {
             const msg = a && a.message ? String(a.message) : '';
             const date = a && a.date ? String(a.date) : '';
             if (!msg) return;
-
+            // 顶部的特殊处理
             if (idx === 0) {
-                // newest -> top special item
                 const item = document.createElement('div');
                 item.className = 'ann-item ann-item--top';
                 item.innerHTML = `
@@ -76,14 +76,12 @@
                         <div class="ann-message">${escapeHtml(msg)}</div>
                     </div>
                 `;
-                // mark visible by default (top item should not animate)
                 item.classList.add('is-visible');
                 timeline.appendChild(item);
                 return;
             }
-
+            // 底部特殊处理
             if (idx === arr.length - 1) {
-                // oldest -> bottom special item
                 const item = document.createElement('div');
                 item.className = 'ann-item ann-item--bottom';
                 item.innerHTML = `
@@ -95,12 +93,11 @@
                         <div class="ann-message">${escapeHtml(msg)}</div>
                     </div>
                 `;
-                // mark visible by default (bottom item should not animate)
                 item.classList.add('is-visible');
                 timeline.appendChild(item);
                 return;
             }
-
+            // 左右交替显示
             const side = (idx % 2 === 1) ? 'left' : 'right';
             const item = document.createElement('div');
             item.className = `ann-item ann-item--${side}`;
@@ -126,7 +123,7 @@
             timeline.appendChild(item);
         });
 
-        // apply i18n & date formatting
+        // 应用国际化和日期格式化
         try { if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') window.siteI18n.applyTo(timeline); } catch (e) { }
         try {
             if (typeof window.formatDate === 'function') {
@@ -139,7 +136,7 @@
 
         ensureVisibleAnimations(timeline);
     }
-
+    // 主逻辑
     document.addEventListener('DOMContentLoaded', function () {
         fetch('data/announcements.json')
             .then(r => r.json())

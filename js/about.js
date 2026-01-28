@@ -1,5 +1,6 @@
-// about.js - load localized about markdown and initialize profile counts
+// about.js - 能够根据语言加载对应的 about 页面 Markdown 内容
 (function () {
+    // 为指定语言加载 about 页面 Markdown 内容
     function loadMarkdownForLang(lang) {
         const candidates = [
             `data/about.${lang}.md`,
@@ -7,7 +8,6 @@
             `data/about.md.${lang}`,
             `data/about.md`
         ];
-        // try candidates sequentially
         return candidates.reduce((p, path) => {
             return p.then(found => {
                 if (found) return Promise.resolve(found);
@@ -19,8 +19,8 @@
         }, Promise.resolve(null));
     }
 
+    // 初始化个人资料中的文章数和标签数
     function initProfileCounts() {
-        // count articles and tags from data/blogs.json
         fetch('data/blogs.json').then(r => r.json()).then(blogs => {
             try {
                 const articleCount = Array.isArray(blogs) ? blogs.length : 0;
@@ -31,28 +31,28 @@
                 acEls.forEach(el => el.textContent = String(articleCount));
                 const tcEls = document.querySelectorAll('#tag-count--about, #tag-count');
                 tcEls.forEach(el => el.textContent = String(tagCount));
-            } catch (e) { /* ignore */ }
+            } catch (e) { }
         }).catch(() => { });
     }
 
+    // 主逻辑
     document.addEventListener('DOMContentLoaded', function () {
+        // 初始加载
         const lang = (window.siteI18n && typeof window.siteI18n.getLang === 'function') ? window.siteI18n.getLang() : 'ja';
+        // 加载对应语言的 about Markdown 内容
         loadMarkdownForLang(lang).then(found => {
             const mdEl = document.getElementById('markdown-content');
             if (!mdEl) return;
             if (found && found.text) {
-                // set source path for asset URL rewriting
                 window.__mdSourcePath = found.path || '';
                 mdEl.textContent = found.text;
             } else {
-                // fallback message localized via i18n
                 mdEl.textContent = '';
             }
-            // render markdown (markdown.js)
             try { renderMarkdownContent(); } catch (e) { /* ignore */ }
         });
 
-        // ensure i18n applies to dynamic content when language changes
+        // 监听语言切换事件
         document.addEventListener('site:languageChanged', function () {
             const lang2 = (window.siteI18n && typeof window.siteI18n.getLang === 'function') ? window.siteI18n.getLang() : 'ja';
             loadMarkdownForLang(lang2).then(found => {
@@ -65,7 +65,7 @@
                 try { renderMarkdownContent(); } catch (e) { }
             });
         });
-
+        // 初始化个人资料中的文章数和标签数
         initProfileCounts();
     });
 })();
