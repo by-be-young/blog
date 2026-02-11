@@ -602,17 +602,30 @@ body {
 }
 
 .contact-popup {
-    position: absolute;
+    position: fixed;
+    /* use fixed so we can place it under the clicked button */
+    top: 0;
     left: 0;
-    top: 56px;
+    transform: translate3d(0, 0, 0);
     background: rgba(255, 255, 255, 0.98);
     border-radius: 10px;
-    padding: 10px;
+    padding: 10px 12px;
     box-shadow: 0 8px 26px rgba(0, 0, 0, 0.08);
-    display: none;
+    display: block;
+    /* keep in flow but hidden by visibility/opacity */
     z-index: 1200;
     min-width: 160px;
     text-align: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .12s ease, transform .12s ease;
+    pointer-events: none;
+}
+
+.contact-popup.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
 }
 
 .contact-popup .contact-item {
@@ -1165,17 +1178,33 @@ body {
 }
 
 /* 首页博客卡片：Tag 马卡龙配色（前三个不同色，底色不透明） */
+.home .blog-card .blog-image {
+    position: relative;
+}
+
+/* 将卡片内的 tags 移到图片右上角并竖直排列 */
 .home .blog-card .tags {
-    gap: 10px;
+    position: absolute;
+    top: 12px;
+    right: 0;
+    /* 紧贴图片右边缘 */
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+    /* 让每个 tag 靠右对齐 */
 }
 
 .home .blog-card .tag {
-    padding: 4px 10px;
-    border-radius: 999px;
+    padding: 4px 8px;
+    /* 左侧圆角，右侧取消圆角 */
+    border-radius: 999px 0 0 999px;
     font-size: 0.8rem;
     border: 1px solid rgba(0, 0, 0, 0.10);
     background: #ffffff;
     color: rgba(44, 62, 80, 0.88);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .home .blog-card .tag:nth-child(1) {
@@ -1194,6 +1223,21 @@ body {
     background: #ffd2a6;
     border-color: rgba(255, 210, 166, 0.88);
     color: rgba(126, 69, 0, 0.92);
+}
+
+/* 移动端适配：减小标签字号和内边距 */
+@media (max-width: 599px) {
+    .home .blog-card .tags {
+        top: 10px;
+        right: 0;
+        gap: 6px;
+    }
+
+    .home .blog-card .tag {
+        font-size: 0.72rem;
+        padding: 3px 6px;
+        border-radius: 10px 0 0 10px;
+    }
 }
 
 /* 全局马卡龙滚动条样式 —— 与归档页一致 */
@@ -1546,7 +1590,8 @@ body.hide-scrollbar::-webkit-scrollbar {
     margin: 1.4em 0 0.8em 0;
     border-left: 6px solid #2d8cf0;
     padding: 10px 14px;
-    background: linear-gradient(90deg, rgba(234, 246, 255, 0.95) 0%, rgba(234, 246, 255, 0.6) 60%);
+    /* 上 右 下 左：右侧内边距加倍以增加文字与右边缘间距 */
+    padding: 4px 16px 4px 8px;
     border-radius: 8px;
 }
 
@@ -1557,7 +1602,8 @@ body.hide-scrollbar::-webkit-scrollbar {
     margin: 1.2em 0 0.75em 0;
     border-left: 5px solid #19be6b;
     padding: 9px 12px;
-    background: linear-gradient(90deg, rgba(234, 255, 243, 0.95) 0%, rgba(234, 255, 243, 0.6) 60%);
+    /* 移动端右侧内边距也加倍 */
+    padding: 3px 12px 3px 6px;
     border-radius: 6px;
 }
 
@@ -2772,17 +2818,29 @@ body {
 }
 
 .contact-popup {
-    position: absolute;
+    position: fixed;
+    /* place under clicked button */
+    top: 0;
     left: 0;
-    top: 56px;
+    transform: translate3d(0, 0, 0);
     background: rgba(255, 255, 255, 0.98);
     border-radius: 10px;
-    padding: 10px;
+    padding: 10px 12px;
     box-shadow: 0 8px 26px rgba(0, 0, 0, 0.08);
-    display: none;
+    display: block;
     z-index: 1200;
     min-width: 160px;
     text-align: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .12s ease, transform .12s ease;
+    pointer-events: none;
+}
+
+.contact-popup.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
 }
 
 .contact-popup .contact-item {
@@ -3359,8 +3417,9 @@ body {
 }
 
 .home .blog-card .tag {
-    padding: 4px 10px;
-    border-radius: 999px;
+    padding: 4px 8px;
+    /* 仅左侧圆角，右侧保持方角以紧贴图片边缘 */
+    border-radius: 999px 0 0 999px;
     font-size: 0.8rem;
     border: 1px solid rgba(0, 0, 0, 0.10);
     background: #ffffff;

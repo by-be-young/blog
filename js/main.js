@@ -181,7 +181,7 @@ function startAnnouncementAutoScroll(bannerEl, opts) {
     // 仅当内容溢出时启用自动滚动
     if (msg.scrollHeight <= msg.clientHeight) return;
 
-    const speed = (opts && opts.speed) ? opts.speed : 50; // px per second (faster and smoother)
+    const speed = (opts && opts.speed) ? opts.speed : 35; // px per second (slightly slower)
     const pauseMs = (opts && opts.pauseMs) ? opts.pauseMs : 1000; // pause at bottom
 
     // 将内容复制一份，使用 transform 动画平滑滚动
@@ -231,44 +231,100 @@ function initProfileContacts() {
     const wechatSpan = document.getElementById('contact-wechat');
     const qqSpan = document.getElementById('contact-qq');
     const githubLink = document.getElementById('github-link');
+
     if (githubLink) {
         githubLink.href = 'https://github.com/by-be-young';
         githubLink.target = '_blank';
         githubLink.rel = 'noopener noreferrer';
     }
 
-    function hidePopup() {
-        if (popup) popup.style.display = 'none';
+    if (!popup) return;
+
+    // 如果 popup 被放在了侧栏内，移动到 body 以避免父级 transform/overflow 影响 fixed 定位
+    if (popup.parentElement !== document.body) document.body.appendChild(popup);
+
+    let lastTrigger = null;
+
+    function repositionPopupFor(triggerBtn) {
+        if (!triggerBtn) return;
+        if (!popup.classList.contains('show')) return;
+        // measure trigger and popup, then compute
+        const rect = triggerBtn.getBoundingClientRect();
+        // ensure layout updated
+        popup.style.left = '-9999px';
+        popup.style.top = '-9999px';
+        // force reflow
+        void popup.offsetWidth;
+        const popupRect = popup.getBoundingClientRect();
+        const gap = 8;
+        let left = Math.round(rect.left + rect.width / 2 - popupRect.width / 2);
+        left = Math.max(8, Math.min(left, window.innerWidth - popupRect.width - 8));
+        let top = Math.round(rect.bottom + gap);
+        if (top + popupRect.height > window.innerHeight - 8) {
+            top = Math.round(rect.top - popupRect.height - gap);
+            if (top < 8) top = Math.max(8, window.innerHeight - popupRect.height - 8);
+        }
+        popup.style.left = left + 'px';
+        popup.style.top = top + 'px';
     }
 
+    const repositionIfVisible = throttle(() => { if (lastTrigger) repositionPopupFor(lastTrigger); }, 50);
+    window.addEventListener('resize', repositionIfVisible);
+    // use capture to catch scrolls on any ancestor
+    window.addEventListener('scroll', repositionIfVisible, true);
+
+    function hidePopup() {
+        popup.classList.remove('show');
+        lastTrigger = null;
+    }
+
+    function showPopupFor(triggerBtn, text) {
+        if (!triggerBtn) return;
+        // toggle: if already shown for this button, hide
+        if (popup.classList.contains('show') && lastTrigger === triggerBtn) {
+            hidePopup();
+            return;
+        }
+
+        // set content
+        popup.innerHTML = `<div class="contact-item"><div class="number-line">${text || ''}</div></div>`;
+
+        // temporarily place offscreen then show to measure correctly
+        popup.style.left = '-9999px';
+        popup.style.top = '-9999px';
+        popup.classList.add('show');
+        // force layout so popup size is accurate (fonts/images may change size)
+        void popup.offsetWidth;
+        repositionPopupFor(triggerBtn);
+        lastTrigger = triggerBtn;
+    }
+
+    // click outside to close — consider popup and trigger buttons as inside
     document.addEventListener('click', (e) => {
         if (!popup) return;
-        if (e.target.closest('.contact-links')) return; // click inside
+        if (e.target.closest('#contact-popup') || e.target.closest('#wechat-btn') || e.target.closest('#qq-btn')) return;
         hidePopup();
+    });
+
+    // ESC to close
+    document.addEventListener('keydown', (e) => {
+        if (!popup) return;
+        if (e.key === 'Escape' || e.key === 'Esc') {
+            if (popup.classList.contains('show')) hidePopup();
+        }
     });
 
     if (wechatBtn) {
         wechatBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            if (!popup) return;
-            // toggle
-            if (popup.style.display === 'block') { popup.style.display = 'none'; return; }
-            if (wechatSpan) {
-                // show only wechat number line
-                popup.innerHTML = `<div class="contact-item"><div class="number-line">${wechatSpan.textContent || ''}</div></div>`;
-                popup.style.display = 'block';
-            }
+            showPopupFor(wechatBtn, (wechatSpan ? wechatSpan.textContent : '') || '');
         });
     }
+
     if (qqBtn) {
         qqBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            if (!popup) return;
-            if (popup.style.display === 'block') { popup.style.display = 'none'; return; }
-            if (qqSpan) {
-                popup.innerHTML = `<div class="contact-item"><div class="number-line">${qqSpan.textContent || ''}</div></div>`;
-                popup.style.display = 'block';
-            }
+            showPopupFor(qqBtn, (qqSpan ? qqSpan.textContent : '') || '');
         });
     }
 }
@@ -382,15 +438,15 @@ function createBlogCard(blog) {
     card.innerHTML = `
         <div class="blog-image">
             <img src="assets/blog_bg.png" alt="${blog.title}">
+            <div class="tags">
+                ${tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+            </div>
         </div>
         <div class="blog-content">
             <h3 class="blog-title">${escapeHtml(blog.title)}${blog.type ? `<span class="blog-type">${escapeHtml(blog.type)}</span>` : ''}</h3>
             <p class="blog-excerpt">${blog.excerpt}</p>
             <div class="blog-meta">
                 <span class="date" data-date="${blog.date}">${formatDate(blog.date)}</span>
-                <div class="tags">
-                    ${tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-                </div>
             </div>
         </div>
     `;
