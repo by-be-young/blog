@@ -305,7 +305,7 @@
     }
 
     function init() {
-        const nav = document.querySelector('.nav-container');
+        const nav = document.querySelector('.nav-actions');
         if (nav && !document.querySelector('.nav-lang-wrap')) {
             const wrap = document.createElement('div');
             wrap.className = 'nav-lang-wrap';
@@ -320,9 +320,7 @@
                     </ul>
                 </div>
             `;
-            const searchBtn = nav.querySelector('.nav-search-btn');
-            if (searchBtn) nav.insertBefore(wrap, searchBtn);
-            else nav.appendChild(wrap);
+            nav.insertBefore(wrap, nav.firstChild);
 
             const btn = wrap.querySelector('.nav-lang-button');
             const list = wrap.querySelector('.nav-lang-list');

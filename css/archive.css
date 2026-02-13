@@ -1,15 +1,4 @@
 /* 归档页面时间轴样式 */
-.archive-page .nav-brand {
-    margin-right: 12px;
-}
-
-.categories-page .nav-brand {
-    margin-right: 12px;
-}
-
-.quick-links-page .nav-brand {
-    margin-right: 12px;
-}
 
 .archive-section {
     padding-top: 80px;
@@ -273,7 +262,18 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
+
+.archive-timeline .title-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 
 .archive-timeline .timeline-excerpt {
     color: #666;
@@ -308,11 +308,11 @@
     left: -12px;
     width: 52px;
     height: 52px;
-    border-radius: 10px;
+    border-radius: 10px 10px 25px 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, rgba(255, 110, 155, 0.98), rgba(72, 219, 187, 0.95));
+    background: linear-gradient(135deg, rgba(255, 110, 155, 0.3) 0%, rgba(255, 110, 155, 0.3) 53%, rgba(128, 128, 128, 0.5) 55%, rgba(72, 219, 187, 0.3) 58%, rgba(206, 255, 225, 0.4) 75%, rgba(72, 219, 187, 0.3) 100%);
     color: #fff;
     font-size: 18px;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
@@ -417,6 +417,20 @@
     border-radius: 999px;
     background: rgba(236, 240, 241, 0.7);
     border: 1px solid rgba(0, 0, 0, 0.06);
+    position: relative;
+}
+
+.calendar-view-toggle::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: var(--bg-left, 6px);
+    width: var(--bg-width, calc(50% - 10px));
+    height: calc(100% - 12px);
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    border-radius: 999px;
+    transition: all 0.3s ease;
+    z-index: 0;
 }
 
 .calendar-toggle-btn {
@@ -429,6 +443,8 @@
     transition: var(--transition);
     font-weight: 600;
     font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
 }
 
 .calendar-toggle-btn:hover {
@@ -436,7 +452,6 @@
 }
 
 .calendar-toggle-btn.active {
-    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
     color: #fff;
 }
 

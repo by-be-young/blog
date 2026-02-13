@@ -55,9 +55,12 @@ function renderTimeline(blogs) {
     <a class="timeline-link" href="blog-detail.html?id=${blog.id}" target="_blank" rel="noopener noreferrer">
       <div class="timeline-dot"></div>
       <div class="timeline-content">
-        <div class="timeline-badge" aria-hidden="true"><i class="fas fa-book"></i></div>
+        <div class="timeline-badge" aria-hidden="true"></div>
         <div class="timeline-left">
-          <div class="timeline-title">${escapeHtml(blog.title)}${blog.type ? `<span class="blog-type">${escapeHtml(blog.type)}</span>` : ''}</div>
+          <div class="timeline-title">
+            <span class="title-text">${escapeHtml(blog.title)}</span>
+            ${blog.type ? `<span class="blog-type">${escapeHtml(blog.type)}</span>` : ''}
+          </div>
           <div class="timeline-excerpt">${blog.excerpt || ''}</div>
         </div>
         <div class="timeline-right">
@@ -288,7 +291,21 @@ function initArchiveCalendar(blogs) {
   }
 
   // listen for language changes to update calendar labels/tips AND re-render grid
-  document.addEventListener('site:languageChanged', function () { try { render(); } catch (e) { updateCalendarI18n(); } });
+  document.addEventListener('site:languageChanged', function () {
+    try { render(); } catch (e) { updateCalendarI18n(); }
+    // 更新背景位置和大小
+    const toggleContainer = document.querySelector('.calendar-view-toggle');
+    const toggleButtons = Array.from(document.querySelectorAll('.calendar-toggle-btn'));
+    const activeBtn = toggleButtons.find(btn => btn.classList.contains('active'));
+    if (activeBtn && toggleContainer) {
+      const containerRect = toggleContainer.getBoundingClientRect();
+      const btnRect = activeBtn.getBoundingClientRect();
+      const left = btnRect.left - containerRect.left;
+      const width = btnRect.width;
+      toggleContainer.style.setProperty('--bg-left', left + 'px');
+      toggleContainer.style.setProperty('--bg-width', width + 'px');
+    }
+  });
 
   function includesDateInCurrentView(date) {
     if (view === 'year') return cursor.getFullYear() === date.getFullYear();
@@ -302,11 +319,23 @@ function initArchiveCalendar(blogs) {
 
   function setView(nextView) {
     view = nextView;
+    const toggleContainer = document.querySelector('.calendar-view-toggle');
     toggleButtons.forEach(btn => {
       const active = btn.dataset.view === view;
       btn.classList.toggle('active', active);
       btn.setAttribute('aria-selected', active ? 'true' : 'false');
     });
+
+    // 更新背景位置和大小
+    const activeBtn = toggleButtons.find(btn => btn.dataset.view === view);
+    if (activeBtn && toggleContainer) {
+      const containerRect = toggleContainer.getBoundingClientRect();
+      const btnRect = activeBtn.getBoundingClientRect();
+      const left = btnRect.left - containerRect.left;
+      const width = btnRect.width;
+      toggleContainer.style.setProperty('--bg-left', left + 'px');
+      toggleContainer.style.setProperty('--bg-width', width + 'px');
+    }
 
     // 切换视图时自动执行一次“定位到今天”
     const today = new Date();
@@ -415,15 +444,95 @@ function initArchiveCalendar(blogs) {
   }
 
   btnPrev.addEventListener('click', () => {
+    const currentHtml = calendarBody.innerHTML;
+    const currentHeight = calendarBody.offsetHeight;
+    const bodyStyle = getComputedStyle(calendarBody);
+    calendarBody.style.position = 'relative';
+    calendarBody.style.overflow = 'hidden';
+    calendarBody.style.minHeight = currentHeight + 'px';
     if (view === 'year') cursor = new Date(cursor.getFullYear() - 1, 0, 1);
     else cursor = new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1);
     render();
+    const newHtml = calendarBody.innerHTML;
+    calendarBody.innerHTML = '';
+    const currentLayer = document.createElement('div');
+    currentLayer.innerHTML = currentHtml;
+    currentLayer.style.position = 'absolute';
+    currentLayer.style.top = '0';
+    currentLayer.style.left = '0';
+    currentLayer.style.width = '100%';
+    currentLayer.style.padding = bodyStyle.padding;
+    currentLayer.style.boxSizing = bodyStyle.boxSizing;
+    currentLayer.style.transform = 'translateX(0)';
+    calendarBody.appendChild(currentLayer);
+    const newLayer = document.createElement('div');
+    newLayer.innerHTML = newHtml;
+    newLayer.style.position = 'absolute';
+    newLayer.style.top = '0';
+    newLayer.style.left = '0';
+    newLayer.style.width = '100%';
+    newLayer.style.padding = bodyStyle.padding;
+    newLayer.style.boxSizing = bodyStyle.boxSizing;
+    newLayer.style.transform = 'translateX(-100%)';
+    calendarBody.appendChild(newLayer);
+    requestAnimationFrame(() => {
+      currentLayer.style.transition = 'transform 0.3s ease';
+      newLayer.style.transition = 'transform 0.3s ease';
+      currentLayer.style.transform = 'translateX(100%)';
+      newLayer.style.transform = 'translateX(0)';
+    });
+    setTimeout(() => {
+      calendarBody.innerHTML = newHtml;
+      calendarBody.style.position = '';
+      calendarBody.style.overflow = '';
+      calendarBody.style.minHeight = '';
+    }, 300);
   });
 
   btnNext.addEventListener('click', () => {
+    const currentHtml = calendarBody.innerHTML;
+    const currentHeight = calendarBody.offsetHeight;
+    const bodyStyle = getComputedStyle(calendarBody);
+    calendarBody.style.position = 'relative';
+    calendarBody.style.overflow = 'hidden';
+    calendarBody.style.minHeight = currentHeight + 'px';
     if (view === 'year') cursor = new Date(cursor.getFullYear() + 1, 0, 1);
     else cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
     render();
+    const newHtml = calendarBody.innerHTML;
+    calendarBody.innerHTML = '';
+    const currentLayer = document.createElement('div');
+    currentLayer.innerHTML = currentHtml;
+    currentLayer.style.position = 'absolute';
+    currentLayer.style.top = '0';
+    currentLayer.style.left = '0';
+    currentLayer.style.width = '100%';
+    currentLayer.style.padding = bodyStyle.padding;
+    currentLayer.style.boxSizing = bodyStyle.boxSizing;
+    currentLayer.style.transform = 'translateX(0)';
+    calendarBody.appendChild(currentLayer);
+    const newLayer = document.createElement('div');
+    newLayer.innerHTML = newHtml;
+    newLayer.style.position = 'absolute';
+    newLayer.style.top = '0';
+    newLayer.style.left = '0';
+    newLayer.style.width = '100%';
+    newLayer.style.padding = bodyStyle.padding;
+    newLayer.style.boxSizing = bodyStyle.boxSizing;
+    newLayer.style.transform = 'translateX(100%)';
+    calendarBody.appendChild(newLayer);
+    requestAnimationFrame(() => {
+      currentLayer.style.transition = 'transform 0.3s ease';
+      newLayer.style.transition = 'transform 0.3s ease';
+      currentLayer.style.transform = 'translateX(-100%)';
+      newLayer.style.transform = 'translateX(0)';
+    });
+    setTimeout(() => {
+      calendarBody.innerHTML = newHtml;
+      calendarBody.style.position = '';
+      calendarBody.style.overflow = '';
+      calendarBody.style.minHeight = '';
+    }, 300);
   });
 
   toggleButtons.forEach(btn => {
@@ -473,6 +582,18 @@ function initArchiveCalendar(blogs) {
   });
 
   render();
+
+  // 设置初始背景位置
+  const toggleContainer = document.querySelector('.calendar-view-toggle');
+  const activeBtn = toggleButtons.find(btn => btn.classList.contains('active'));
+  if (activeBtn && toggleContainer) {
+    const containerRect = toggleContainer.getBoundingClientRect();
+    const btnRect = activeBtn.getBoundingClientRect();
+    const left = btnRect.left - containerRect.left;
+    const width = btnRect.width;
+    toggleContainer.style.setProperty('--bg-left', left + 'px');
+    toggleContainer.style.setProperty('--bg-width', width + 'px');
+  }
 
   // 页面初始化后，确保日历默认聚焦到“今天”的月份（避免刷新时停留在最新文章的月份），
   // 并在当天有文章时自动跳转时间轴到今天。

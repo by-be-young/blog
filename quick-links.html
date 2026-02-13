@@ -23,7 +23,12 @@
 
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-brand" data-i18n="brand"></div>
+            <div class="nav-brand">
+                <a class="nav-avatar" href="about.html" aria-label="profile">
+                    <img src="assets/avatar.png" alt="头像">
+                </a>
+                <span data-i18n="brand"></span>
+            </div>
             <ul class="nav-menu">
                 <li><a href="index.html"><i class="fas fa-home"></i> <span data-i18n="home"></span></a></li>
                 <li><a href="archive.html"><i class="fas fa-archive"></i> <span data-i18n="archive"></span></a></li>
@@ -31,10 +36,12 @@
                 <li><a href="quick-links.html" class="active"><i class="fas fa-link"></i> <span
                             data-i18n="quicklinks"></span></a></li>
             </ul>
-            <button class="nav-search-btn" aria-label="search"><i class="fas fa-search"></i> <span
-                    data-i18n="search"></span></button>
-            <div class="nav-toggle">
-                <i class="fas fa-bars"></i>
+            <div class="nav-actions">
+                <button class="nav-search-btn" aria-label="search"><i class="fas fa-search"></i> <span
+                        data-i18n="search"></span></button>
+                <div class="nav-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
             </div>
         </div>
     </nav>

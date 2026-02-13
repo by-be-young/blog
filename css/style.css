@@ -52,25 +52,27 @@ body {
     max-width: 1200px;
     /* 恢复原始最大宽度，避免变宽 */
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 12px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     height: 60px;
+    gap: 12px;
 }
 
 .nav-brand {
     font-size: 1.5rem;
     font-weight: bold;
     color: var(--dark-color);
-    margin-right: 150px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 /* 小屏显示的导航头像（默认隐藏，大屏隐藏，小屏显示） */
 .nav-avatar {
     display: none;
     align-items: center;
-    margin-right: 12px;
 }
 
 .nav-avatar img {
@@ -86,7 +88,7 @@ body {
     display: flex;
     list-style: none;
     gap: 30px;
-    margin-left: 0;
+    margin-left: auto;
 }
 
 /* 恢复基础导航链接样式 */
@@ -111,14 +113,16 @@ body {
     cursor: pointer;
 }
 
+.nav-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
 /* 语言选择器：与搜索按钮风格一致的马卡龙胶囊 */
 .nav-lang-wrap {
     display: inline-flex;
     align-items: center;
-    margin-left: auto;
-    /* 推到右侧，使其与搜索按钮靠拢，避免被 space-between 拉开 */
-    margin-right: 6px;
-    /* 与搜索按钮的间距 */
 }
 
 
@@ -929,6 +933,54 @@ body {
     opacity: 0.95;
 }
 
+/* For home page blog cards, position type overlay on top-left of image */
+.blog-type-overlay {
+    position: absolute;
+    top: 10px;
+    left: 25px;
+    z-index: 2;
+}
+
+/* Override blog-type style for home page: no italic, macaron color */
+.home .blog-type {
+    font-style: normal;
+    color: #FFB6C1;
+    /* Light pink macaron color */
+    border: none;
+    margin-left: 0;
+    padding-left: 0;
+    font-size: 1.3em;
+    font-weight: 500;
+}
+
+/* Override blog-type style for archive page: light background, smaller font, no italic */
+.archive-page .blog-type {
+    font-style: normal;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    color: #DDA0DD;
+    /* Light purple macaron color */
+    border: none;
+    margin-left: 0;
+    padding-left: 6px;
+}
+
+/* Override blog-type style for categories page: same as archive */
+.categories-page .blog-type {
+    font-style: normal;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    color: #DDA0DD;
+    /* Light purple macaron color */
+    border: none;
+    margin-left: 0;
+    padding-left: 6px;
+}
+
 .blog-excerpt {
     color: var(--gray-color);
     margin-bottom: 15px;
@@ -1205,6 +1257,42 @@ body {
     background: #ffffff;
     color: rgba(44, 62, 80, 0.88);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    /* 为悬停效果添加定位和过渡 */
+    position: relative;
+    transition: padding 0.3s ease, background-color 0.3s ease;
+}
+
+/* 箭头伪元素：初始隐藏在标签右侧外部 */
+.home .blog-card .tag::after {
+    content: '→';
+    position: absolute;
+    right: -1.2em;
+    /* 初始位置：隐藏在右侧外部 */
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: right 0.3s ease, opacity 0.3s ease;
+    color: inherit;
+    /* 继承文字颜色 */
+    font-size: inherit;
+    /* 继承字体大小 */
+}
+
+/* 悬停效果：标签向左延长，箭头滑入 */
+.home .blog-card .tag:hover {
+    padding-left: 16px;
+    /* 增加左内边距，使标签向左扩张（右侧边缘固定） */
+    padding-right: 24px;
+    /* 增加右内边距，给箭头腾出显示空间 */
+    background-color: rgba(255, 255, 255, 0.9);
+    /* 微调背景色为稍深（可选） */
+}
+
+.home .blog-card .tag:hover::after {
+    right: 8px;
+    /* 箭头滑入到文字右侧 */
+    opacity: 1;
+    /* 显示箭头 */
 }
 
 .home .blog-card .tag:nth-child(1) {
@@ -1213,16 +1301,31 @@ body {
     color: rgba(168, 54, 91, 0.92);
 }
 
+.home .blog-card .tag:nth-child(1):hover {
+    background: rgba(255, 182, 201, 0.95);
+    /* 悬停时稍深 */
+}
+
 .home .blog-card .tag:nth-child(2) {
     background: #a7f3d0;
     border-color: rgba(167, 243, 208, 0.85);
     color: rgba(13, 110, 87, 0.92);
 }
 
+.home .blog-card .tag:nth-child(2):hover {
+    background: rgba(167, 243, 208, 0.95);
+    /* 悬停时稍深 */
+}
+
 .home .blog-card .tag:nth-child(3) {
     background: #ffd2a6;
     border-color: rgba(255, 210, 166, 0.88);
     color: rgba(126, 69, 0, 0.92);
+}
+
+.home .blog-card .tag:nth-child(3):hover {
+    background: rgba(255, 210, 166, 0.95);
+    /* 悬停时稍深 */
 }
 
 /* 移动端适配：减小标签字号和内边距 */
@@ -1381,10 +1484,14 @@ body::-webkit-scrollbar-thumb:hover,
 
 /* 当回到顶部被放入浮动容器时，取消其固定定位，由容器负责布局，避免重合 */
 #floating-controls #back-to-top {
-    position: static !important;
+    position: relative !important;
     right: auto !important;
     bottom: auto !important;
     z-index: auto !important;
+}
+
+#floating-controls #back-to-top[data-tooltip] {
+    position: relative !important;
 }
 
 /* ensure settings button does not overlap back-to-top */
@@ -3424,6 +3531,42 @@ body {
     border: 1px solid rgba(0, 0, 0, 0.10);
     background: #ffffff;
     color: rgba(44, 62, 80, 0.88);
+    /* 为悬停效果添加定位和过渡 */
+    position: relative;
+    transition: padding 0.3s ease, background-color 0.3s ease;
+}
+
+/* 箭头伪元素：初始隐藏在标签右侧外部 */
+.home .blog-card .tag::after {
+    content: '→';
+    position: absolute;
+    right: -1.2em;
+    /* 初始位置：隐藏在右侧外部 */
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: right 0.3s ease, opacity 0.3s ease;
+    color: inherit;
+    /* 继承文字颜色 */
+    font-size: inherit;
+    /* 继承字体大小 */
+}
+
+/* 悬停效果：标签向左延长，箭头滑入 */
+.home .blog-card .tag:hover {
+    padding-left: 16px;
+    /* 增加左内边距，使标签向左扩张（右侧边缘固定） */
+    padding-right: 24px;
+    /* 增加右内边距，给箭头腾出显示空间 */
+    background-color: rgba(255, 255, 255, 0.9);
+    /* 微调背景色为稍深（可选） */
+}
+
+.home .blog-card .tag:hover::after {
+    right: 8px;
+    /* 箭头滑入到文字右侧 */
+    opacity: 1;
+    /* 显示箭头 */
 }
 
 .home .blog-card .tag:nth-child(1) {
@@ -3432,16 +3575,31 @@ body {
     color: rgba(168, 54, 91, 0.92);
 }
 
+.home .blog-card .tag:nth-child(1):hover {
+    background: rgba(255, 182, 201, 0.95);
+    /* 悬停时稍深 */
+}
+
 .home .blog-card .tag:nth-child(2) {
     background: #a7f3d0;
     border-color: rgba(167, 243, 208, 0.85);
     color: rgba(13, 110, 87, 0.92);
 }
 
+.home .blog-card .tag:nth-child(2):hover {
+    background: rgba(167, 243, 208, 0.95);
+    /* 悬停时稍深 */
+}
+
 .home .blog-card .tag:nth-child(3) {
     background: #ffd2a6;
     border-color: rgba(255, 210, 166, 0.88);
     color: rgba(126, 69, 0, 0.92);
+}
+
+.home .blog-card .tag:nth-child(3):hover {
+    background: rgba(255, 210, 166, 0.95);
+    /* 悬停时稍深 */
 }
 
 /* 全局马卡龙滚动条样式 —— 与归档页一致 */
@@ -3749,4 +3907,10 @@ body.hide-scrollbar::-webkit-scrollbar {
 body.offcanvas-open {
     overflow: hidden;
     touch-action: none;
+}
+
+.nav-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
 }

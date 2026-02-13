@@ -6,14 +6,137 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>个人博客 | 首页</title>
     <link rel="icon" href="assets/avatar.png" type="image/png">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/butterfly.css">
-    <link rel="stylesheet" href="css/responsive.css">
-    <link rel="stylesheet" href="css/search.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- KaTeX CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-    <!-- KaTeX JS -->
+
+
+    <!-- 预加载自托管字体（加速首次渲染并与 font-display: swap 配合） -->
+    <link rel="preload" href="fonts/%E4%BB%93%E8%80%B3%E4%BB%8A%E6%A5%B701-W04.ttf" as="font" type="font/ttf"
+        crossorigin>
+
+    <!-- 关键 CSS（Critical CSS）: 仅包含首屏所需样式，体积要小，保证快速首屏渲染 -->
+    <style>
+        /* Critical CSS - minimal for nav + hero + basic layout */
+        @font-face {
+            font-family: '仓耳今楷01';
+            src: url('fonts/%E4%BB%93%E8%80%B3%E4%BB%8A%E6%A5%B701-W04.ttf') format('truetype');
+            font-display: swap
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            font-family: '仓耳今楷01', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            color: #222;
+            background: #fff
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06)
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px
+        }
+
+        .nav-avatar img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: block
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 12px;
+            list-style: none;
+            margin: 0;
+            padding: 0
+        }
+
+        .nav-menu a {
+            color: inherit;
+            text-decoration: none
+        }
+
+        .hero-section {
+            height: 50vh;
+            min-height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #222;
+            background-color: #f7f7f7;
+            background-size: cover;
+            background-position: center
+        }
+
+        .welcome-text {
+            font-size: 3.5rem;
+            margin: 0 0 1rem 0;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 16px
+        }
+
+        .content-section {
+            background: #fff
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block
+        }
+    </style>
+
+    <!-- 异步加载其余（非关键）样式：使用 preload+onload 技术，提供 noscript 回退 -->
+    <link rel="preload" href="css/style.css" as="style" onload="this.rel='stylesheet'">
+    <link rel="preload" href="css/butterfly.css" as="style" onload="this.rel='stylesheet'">
+    <link rel="preload" href="css/responsive.css" as="style" onload="this.rel='stylesheet'">
+    <link rel="preload" href="css/search.css" as="style" onload="this.rel='stylesheet'">
+    <!-- 引入外部图标库与 KaTeX 样式，通过 preload 异步加载（降低阻塞） -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style"
+        crossorigin onload="this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" as="style"
+        onload="this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="css/style.css">
+        <link rel="stylesheet" href="css/butterfly.css">
+        <link rel="stylesheet" href="css/responsive.css">
+        <link rel="stylesheet" href="css/search.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    </noscript>
+
+    <!-- KaTeX JS 与 i18n 使用 defer，确保不阻塞 DOM 解析 -->
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
     <script src="js/i18n.js" defer></script>
@@ -23,10 +146,12 @@
     <!-- 导航栏 -->
     <nav class="navbar">
         <div class="nav-container">
-            <a class="nav-avatar" href="about.html" aria-label="profile">
-                <img src="assets/avatar.png" alt="头像">
-            </a>
-            <div class="nav-brand" data-i18n="brand"></div>
+            <div class="nav-brand">
+                <a class="nav-avatar" href="about.html" aria-label="profile">
+                    <img src="assets/avatar.png" alt="头像">
+                </a>
+                <span data-i18n="brand"></span>
+            </div>
             <ul class="nav-menu">
                 <li><a href="index.html" class="active"><i class="fas fa-home"></i> <span data-i18n="home"></span></a>
                 </li>
@@ -34,10 +159,12 @@
                 <li><a href="categories.html"><i class="fas fa-tags"></i> <span data-i18n="categories"></span></a></li>
                 <li><a href="quick-links.html"><i class="fas fa-link"></i> <span data-i18n="quicklinks"></span></a></li>
             </ul>
-            <button class="nav-search-btn" aria-label="search"><i class="fas fa-search"></i> <span
-                    data-i18n="search"></span></button>
-            <div class="nav-toggle">
-                <i class="fas fa-bars"></i>
+            <div class="nav-actions">
+                <button class="nav-search-btn" aria-label="search"><i class="fas fa-search"></i> <span
+                        data-i18n="search"></span></button>
+                <div class="nav-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
             </div>
         </div>
     </nav>
@@ -149,8 +276,46 @@
         </section>
     </main>
 
-    <script src="js/search.js"></script>
-    <script src="js/main.js"></script>
+    <script src="js/search.js" defer></script>
+    <script src="js/main.js" defer></script>
+
+    <!--
+            空闲时预取其它页面与公共 CSS：
+            使用 requestIdleCallback（有回退）在主页面加载完成且浏览器空闲时发起预取，
+            不影响首屏性能。
+        -->
+    <script>
+        (function () {
+            function idle(cb) {
+                if ('requestIdleCallback' in window) return requestIdleCallback(cb, { timeout: 2000 });
+                return setTimeout(cb, 2000);
+            }
+            window.addEventListener('load', function () {
+                idle(function () {
+                    try {
+                        var pages = ['archive.html', 'categories.html', 'quick-links.html', 'about.html'];
+                        pages.forEach(function (p) {
+                            var l = document.createElement('link');
+                            l.rel = 'prefetch';
+                            l.href = p;
+                            l.as = 'document';
+                            document.head.appendChild(l);
+                        });
+
+                        var commonCss = ['css/style.css', 'css/butterfly.css'];
+                        commonCss.forEach(function (h) {
+                            var l = document.createElement('link');
+                            l.rel = 'prefetch';
+                            l.as = 'style';
+                            l.href = h;
+                            l.onload = function () { this.rel = 'stylesheet'; };
+                            document.head.appendChild(l);
+                        });
+                    } catch (e) {/* 安全降级：出错时不影响页面 */ }
+                });
+            });
+        })();
+    </script>
 </body>
 
 </html>

@@ -159,7 +159,7 @@
         grid-template-columns: 1fr;
     }
 
-    .home .nav-avatar {
+    .nav-avatar {
         display: inline-flex;
     }
 

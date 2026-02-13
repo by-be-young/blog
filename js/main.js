@@ -10,10 +10,8 @@ function updateProfileStats() {
     const tagCountEl = document.getElementById('tag-count');
     if (!articleCountEl && !tagCountEl) return;
 
-    // 文章数
     const articleCount = Array.isArray(blogs) ? blogs.length : 0;
 
-    // 标签去重
     const tagSet = new Set();
     (Array.isArray(blogs) ? blogs : []).forEach(blog => {
         if (Array.isArray(blog.tags)) {
@@ -38,7 +36,7 @@ function loadBlogs(callback) {
 
 // DOM加载完成后执行
 document.addEventListener('DOMContentLoaded', function () {
-    // Hide scrollbars on selected pages while keeping content scrollable
+    // 在选定页面隐藏滚动条，同时保持内容可滚动
     try {
         var b = document.body;
         if (b && (b.classList.contains('home') || b.classList.contains('categories-page') || b.classList.contains('quick-links-page'))) {
@@ -68,10 +66,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     } catch (e) { }
 
-    // 轮播图已移除，背景固定为静态图片（原第二张）
-
-    // initStickySidebar 已移除，不再固定侧边栏
-
     // 初始化导航栏
     initNavigation();
 
@@ -84,16 +78,13 @@ document.addEventListener('DOMContentLoaded', function () {
     try { adaptWelcomeText && adaptWelcomeText(); } catch (e) { }
     window.addEventListener('resize', throttle(function () { try { adaptWelcomeText && adaptWelcomeText(); } catch (e) { } }, 150));
 
-    // make the entire profile card clickable (navigate to about), but
-    // ignore clicks on internal interactive elements (links, buttons)
+    // 使整个个人资料卡片可点击（导航到关于页面），但忽略内部交互元素（链接、按钮）的点击
     try {
         const profileCard = document.getElementById('home-profile-card');
         if (profileCard) {
             profileCard.style.cursor = 'pointer';
             profileCard.addEventListener('click', function (e) {
-                // if clicked element or its ancestor is an anchor, button, input, or has .contact-btn, do nothing
                 if (e.target.closest('a, button, input, .contact-btn')) return;
-                // otherwise navigate
                 window.location.href = 'about.html';
             });
         }
@@ -108,7 +99,7 @@ function renderAnnouncementBanner() {
         .then(r => r.json())
         .then(list => {
             const arr = Array.isArray(list) ? list.slice() : [];
-            // pick the most recent announcement by date (defensive: JSON order may vary)
+            // 按日期选择最新的公告（防御性：JSON 顺序可能变化）
             arr.sort((a, b) => {
                 const da = a && a.date ? new Date(a.date).getTime() : 0;
                 const db = b && b.date ? new Date(b.date).getTime() : 0;
@@ -145,7 +136,6 @@ function renderAnnouncementBanner() {
             try { if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') window.siteI18n.applyTo(host); } catch (e) { }
             // 启动横幅正文自动滚动（如果超出高度则向下滚动，滚动到底部停顿后回到顶部重启）
             try { startAnnouncementAutoScroll(host); } catch (e) { }
-            // 确保不再注册阻塞滚轮的处理器（避免 preventDefault 导致滚动卡顿）
             try {
                 const msgEl = host.querySelector('.announcement-message');
                 if (msgEl && msgEl.__wheelHandler) {
@@ -155,7 +145,7 @@ function renderAnnouncementBanner() {
             } catch (e) { }
         })
         .catch(() => {
-            // no banner on errors
+            // 出错时不显示横幅
         });
 
     function escapeHtml(s) {
@@ -163,14 +153,12 @@ function renderAnnouncementBanner() {
     }
 }
 
-// 首页公告：自动滚动实现
 // 首页公告：自动滚动实现（使用 CSS 动画，平滑且性能好）
 function startAnnouncementAutoScroll(bannerEl, opts) {
     if (!bannerEl) return;
     const msg = bannerEl.querySelector('.announcement-message');
     if (!msg) return;
 
-    // 清理以前的滚动实例（包括动态 style）
     try {
         if (msg.__autoScroll) {
             if (msg.__autoScroll.styleEl && msg.__autoScroll.styleEl.parentNode) msg.__autoScroll.styleEl.parentNode.removeChild(msg.__autoScroll.styleEl);
@@ -178,34 +166,26 @@ function startAnnouncementAutoScroll(bannerEl, opts) {
         }
     } catch (e) { }
 
-    // 仅当内容溢出时启用自动滚动
     if (msg.scrollHeight <= msg.clientHeight) return;
 
-    const speed = (opts && opts.speed) ? opts.speed : 35; // px per second (slightly slower)
-    const pauseMs = (opts && opts.pauseMs) ? opts.pauseMs : 1000; // pause at bottom
+    const speed = (opts && opts.speed) ? opts.speed : 20;
+    const pauseMs = (opts && opts.pauseMs) ? opts.pauseMs : 1000;
 
-    // 将内容复制一份，使用 transform 动画平滑滚动
     const originalHtml = msg.innerHTML;
-    // create inner wrapper containing two copies
     const inner = document.createElement('div');
     inner.className = 'announcement-scroll-inner';
-    // spacer to separate loops slightly
-    // 用可见分割线隔断两份内容
     const spacer = '<div class="announcement-scroll-sep" aria-hidden="true"></div>';
     inner.innerHTML = originalHtml + spacer + originalHtml;
 
-    // replace content
     msg.innerHTML = '';
     msg.appendChild(inner);
 
-    // compute height of a single copy
     const singleHeight = inner.scrollHeight / 2;
-    // compute scroll duration based on speed
-    const tScroll = Math.max(0.8, singleHeight / speed); // seconds
+    const tScroll = Math.max(0.8, singleHeight / speed);
     const totalDuration = tScroll + (pauseMs / 1000);
     const p = (tScroll / totalDuration) * 100;
 
-    // create unique keyframes name
+    // 创建唯一的关键帧名称
     const animName = 'annScroll_' + Date.now();
     const keyframes = `@keyframes ${animName} { 0% { transform: translateY(0); } ${p}% { transform: translateY(-50%); } 100% { transform: translateY(-50%); } }`;
 
@@ -217,11 +197,9 @@ function startAnnouncementAutoScroll(bannerEl, opts) {
     inner.style.willChange = 'transform';
     inner.style.animation = `${animName} ${totalDuration}s linear infinite`;
 
-    // store references for cleanup if needed
+    // 存储引用以便需要时清理
     msg.__autoScroll = { styleEl: styleEl, animName: animName };
 }
-
-// （已删除轮播实现）
 
 // 初始化个人联系方式交互（显示/隐藏微信与QQ）
 function initProfileContacts() {
@@ -248,12 +226,9 @@ function initProfileContacts() {
     function repositionPopupFor(triggerBtn) {
         if (!triggerBtn) return;
         if (!popup.classList.contains('show')) return;
-        // measure trigger and popup, then compute
         const rect = triggerBtn.getBoundingClientRect();
-        // ensure layout updated
         popup.style.left = '-9999px';
         popup.style.top = '-9999px';
-        // force reflow
         void popup.offsetWidth;
         const popupRect = popup.getBoundingClientRect();
         const gap = 8;
@@ -270,7 +245,7 @@ function initProfileContacts() {
 
     const repositionIfVisible = throttle(() => { if (lastTrigger) repositionPopupFor(lastTrigger); }, 50);
     window.addEventListener('resize', repositionIfVisible);
-    // use capture to catch scrolls on any ancestor
+    // 使用捕获来捕获任何祖先的滚动
     window.addEventListener('scroll', repositionIfVisible, true);
 
     function hidePopup() {
@@ -280,33 +255,29 @@ function initProfileContacts() {
 
     function showPopupFor(triggerBtn, text) {
         if (!triggerBtn) return;
-        // toggle: if already shown for this button, hide
         if (popup.classList.contains('show') && lastTrigger === triggerBtn) {
             hidePopup();
             return;
         }
 
-        // set content
         popup.innerHTML = `<div class="contact-item"><div class="number-line">${text || ''}</div></div>`;
 
-        // temporarily place offscreen then show to measure correctly
         popup.style.left = '-9999px';
         popup.style.top = '-9999px';
         popup.classList.add('show');
-        // force layout so popup size is accurate (fonts/images may change size)
         void popup.offsetWidth;
         repositionPopupFor(triggerBtn);
         lastTrigger = triggerBtn;
     }
 
-    // click outside to close — consider popup and trigger buttons as inside
+    // 点击外部关闭 — 将弹出框和触发按钮视为内部
     document.addEventListener('click', (e) => {
         if (!popup) return;
         if (e.target.closest('#contact-popup') || e.target.closest('#wechat-btn') || e.target.closest('#qq-btn')) return;
         hidePopup();
     });
 
-    // ESC to close
+    // ESC 键关闭
     document.addEventListener('keydown', (e) => {
         if (!popup) return;
         if (e.key === 'Escape' || e.key === 'Esc') {
@@ -372,7 +343,6 @@ function initViewMore(totalCount, shownCount) {
         }
     }
 
-    // 初始对齐（在资源加载后执行一次以避免图片加载导致的布局变更）
     window.addEventListener('load', alignWidthToFirstCard);
     setTimeout(alignWidthToFirstCard, 120);
     window.addEventListener('resize', throttle(alignWidthToFirstCard, 150));
@@ -399,12 +369,9 @@ function adaptWelcomeText() {
     try {
         const el = document.querySelector('.welcome-text');
         if (!el) return;
-        // 保存初始 HTML 与“纯文本（保留换行）”形式，供恢复与处理使用
         if (!el.dataset.originalHtml) el.dataset.originalHtml = el.innerHTML;
-        // 为了可靠保留原始翻译中的换行符（<br> 或 \n），我们从 originalHtml 中将 <br> 替换为 \n，然后去除其他 HTML 标签
         if (!el.dataset.originalText) {
             const html = el.dataset.originalHtml || '';
-            // 将 <br> 转为换行，再利用临时元素取得纯文本，保留换行
             const withNewlines = html.replace(/<br\s*\/?\>/gi, '\n');
             const tmp = document.createElement('div');
             tmp.innerHTML = withNewlines;
@@ -415,7 +382,6 @@ function adaptWelcomeText() {
         const originalText = el.dataset.originalText;
         const small = window.innerWidth <= 720;
         if (small) {
-            // 保留原有换行（\n），但将每行内的空格替换为 <br>
             const lines = (originalText || '').split('\n');
             const processed = lines.map(line => {
                 const collapsed = line.replace(/\s+/g, ' ').trim();
@@ -423,7 +389,6 @@ function adaptWelcomeText() {
             }).join('<br>');
             el.innerHTML = (processed && processed.replace(/^(?:<br>)+|(?:<br>)+$/g, '').length) ? processed : originalHtml;
         } else {
-            // 恢复由 i18n 提供的原始 HTML（包含原始的 <br>）
             el.innerHTML = originalHtml;
         }
     } catch (e) { /* ignore errors */ }
@@ -438,18 +403,38 @@ function createBlogCard(blog) {
     card.innerHTML = `
         <div class="blog-image">
             <img src="assets/blog_bg.png" alt="${blog.title}">
+            ${blog.type ? `<div class="blog-type-overlay"><span class="blog-type">${escapeHtml(blog.type)}</span></div>` : ''}
             <div class="tags">
-                ${tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                ${tags.map((tag, index) => `<span class="tag" data-level="${index}" data-path="${encodeURIComponent(JSON.stringify(blog.tags))}">${tag}</span>`).join('')}
             </div>
         </div>
         <div class="blog-content">
-            <h3 class="blog-title">${escapeHtml(blog.title)}${blog.type ? `<span class="blog-type">${escapeHtml(blog.type)}</span>` : ''}</h3>
+            <h3 class="blog-title">${escapeHtml(blog.title)}</h3>
             <p class="blog-excerpt">${blog.excerpt}</p>
             <div class="blog-meta">
                 <span class="date" data-date="${blog.date}">${formatDate(blog.date)}</span>
             </div>
         </div>
     `;
+
+    // 为标签添加点击事件，完全复用分类页面的逻辑
+    const tagElements = card.querySelectorAll('.tag');
+    tagElements.forEach(el => {
+        el.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const level = Number(el.dataset.level || 0);
+            const path = el.dataset.path ? JSON.parse(decodeURIComponent(el.dataset.path)) : null;
+            if (!path) return;
+
+            const selectedTags = [];
+            for (let i = 0; i <= level; i++) selectedTags[i] = path[i] || null;
+            for (let i = level + 1; i < 3; i++) selectedTags[i] = null;
+
+            const tagsParam = JSON.stringify(selectedTags);
+            window.location.href = `categories.html?tags=${encodeURIComponent(tagsParam)}`;
+        });
+    });
 
     card.addEventListener('click', () => {
         const url = `blog-detail.html?id=${blog.id}`;
@@ -463,7 +448,7 @@ function createBlogCard(blog) {
 // 格式化日期
 function formatDate(dateString) {
     const date = new Date(dateString);
-    // language-aware formatting
+    // 语言感知格式化
     try {
         const lang = window.siteI18n && typeof window.siteI18n.getLang === 'function' ? window.siteI18n.getLang() : 'zh';
         if (lang === 'en') {
@@ -511,7 +496,6 @@ document.addEventListener('site:languageChanged', function (e) {
     try {
         const el = document.querySelector('.welcome-text');
         if (!el) return;
-        // 更新原始 HTML/text 缓存为最新语言渲染后内容
         el.dataset.originalHtml = el.innerHTML;
         // 将 HTML 中的 <br> 转为 \n，再取纯文本以保留换行
         const withNewlines = (el.dataset.originalHtml || '').replace(/<br\s*\/?\>/gi, '\n');
@@ -523,8 +507,6 @@ document.addEventListener('site:languageChanged', function (e) {
     } catch (e) { /* ignore */ }
 });
 
-// 已移除 initStickySidebar 相关代码
-
 // 导航栏初始化
 function initNavigation() {
     const toggle = document.querySelector('.nav-toggle');
@@ -534,7 +516,6 @@ function initNavigation() {
         toggle.addEventListener('click', () => {
             if (!menu) return;
             const isActive = menu.classList.toggle('active');
-            // ensure offcanvas mode body class to control backdrop and scroll
             if (isActive) {
                 document.body.classList.add('offcanvas-open');
             } else {
@@ -542,19 +523,17 @@ function initNavigation() {
             }
         });
 
-        // create backdrop element (single instance) and wire click to close menu
+        // 创建背景元素（单实例）并连接点击以关闭菜单
         (function ensureBackdrop() {
             if (document.querySelector('.offcanvas-backdrop')) return;
             const b = document.createElement('div');
             b.className = 'offcanvas-backdrop';
-            // only close when the backdrop itself is clicked
+            // 仅在点击背景本身时关闭
             b.addEventListener('click', (ev) => {
                 ev.stopPropagation();
                 if (menu) menu.classList.remove('active');
                 document.body.classList.remove('offcanvas-open');
             });
-            // insert the backdrop before the navbar so the navbar (and its offcanvas menu)
-            // remain after it in DOM order and receive pointer events above the backdrop
             try {
                 const nav = document.querySelector('.navbar');
                 if (nav && nav.parentNode) {
@@ -577,7 +556,6 @@ function initNavigation() {
             if (w <= 1100) {
                 menu.classList.add('offcanvas');
             } else {
-                // disable offcanvas and ensure any open state is fully closed
                 menu.classList.remove('offcanvas');
                 menu.classList.remove('active');
                 document.body.classList.remove('offcanvas-open');
@@ -622,7 +600,6 @@ window.addEventListener('load', function () {
                 el.style.backgroundImage = `url('${src}')`;
                 el.classList.add('bg-loaded');
             };
-            // 触发浏览器去加载图片，但在 load 时才应用到元素上
             img.src = src;
         });
     } catch (e) {
@@ -655,7 +632,7 @@ window.addEventListener('load', function () {
         document.head.appendChild(s);
 
         function pollAndLog() {
-            var attempts = 0, maxAttempts = 50; // 大约等待 5 秒
+            var attempts = 0, maxAttempts = 50;
             var tid = setInterval(function () {
                 attempts++;
                 var vals = ids.map(function (id) {
@@ -675,4 +652,3 @@ window.addEventListener('load', function () {
         console.warn('Busuanzi 控制台打印错误', e);
     }
 })();
-// (已移除旧版 busuanzi.pure.mini.js 的重复输出)

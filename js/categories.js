@@ -405,7 +405,10 @@ function renderBlogList() {
         item.innerHTML = `
             <a class="blog-link" href="blog-detail.html?id=${blog.id}" target="_blank" rel="noopener noreferrer">
                 <div class="blog-left">
-                    <div class="blog-title">${escapeHtml(blog.title)}${blog.type ? `<span class="blog-type">${escapeHtml(blog.type)}</span>` : ''}</div>
+                    <div class="blog-title">
+                        <span class="title-text">${escapeHtml(blog.title)}</span>
+                        ${blog.type ? `<span class="blog-type">${escapeHtml(blog.type)}</span>` : ''}
+                    </div>
                     <div class="blog-excerpt">${blog.excerpt || ''}</div>
                 </div>
                 <div class="blog-right">

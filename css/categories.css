@@ -536,6 +536,16 @@
 
 .blog-item .blog-link .blog-title {
     margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.categories-page .title-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .blog-title a:hover {
