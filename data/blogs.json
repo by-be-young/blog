@@ -1,7 +1,7 @@
 [
     {
-        "id": 1009738577,
-        "title": "考试情况总结",
+        "id": 4003313883,
+        "title": "二上考试情况总结",
         "excerpt": "大二上学期各门较为重要的课程的考试情况，包括范围、注意事项以及本届的难度等",
         "date": "2026-02-13",
         "image": "assets/images/blog_bg.png",
@@ -11,21 +11,21 @@
             "考试总结"
         ],
         "type": "随笔",
-        "contentFile": "blogs/二上/二上总结/考试总结/考试情况总结.md",
+        "contentFile": "blogs/二上/二上总结/考试总结/二上考试情况总结.md",
         "recommended": false
     },
     {
         "id": 1050316623,
         "title": "元素体系——朝阳or败笔？",
         "excerpt": "详解明日方舟中三种我方元素损伤及其对应干员体系，评价设计思想与实战强度",
-        "date": "2026-01-28",
+        "date": "2026-02-13",
         "image": "assets/images/blog_bg.png",
         "tags": [
             "明日方舟",
             "干员杂谈",
             "元素体系"
         ],
-        "type": "待完善",
+        "type": "纸上行舟",
         "contentFile": "blogs/明日方舟/干员杂谈/元素体系/元素体系——朝阳or败笔？.md",
         "recommended": false
     },

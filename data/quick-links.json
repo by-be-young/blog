@@ -42,7 +42,7 @@
             "label": "个人",
             "items": [
                 {
-                    "title": "GitHub",
+                    "title": "个人GitHub主页",
                     "url": "https://github.com/by-be-young",
                     "image": "assets/images/bg1.png"
                 },
@@ -73,7 +73,7 @@
                     "image": "assets/images/bg1.png"
                 },
                 {
-                    "title": "大二上学习资料仓库",
+                    "title": "软件学院学习资料仓库",
                     "url": "https://github.com/Soft-Where-21",
                     "image": "assets/images/bg1.png"
                 }
