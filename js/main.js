@@ -402,11 +402,10 @@ function createBlogCard(blog) {
     const tags = Array.isArray(blog.tags) ? blog.tags : [];
     card.innerHTML = `
         <div class="blog-image">
-            <img src="assets/blog_bg.png" alt="${blog.title}">
+            <img src="assets/images/lantern_festival.png" alt="${blog.title}">
             ${blog.type ? `<div class="blog-type-overlay"><span class="blog-type">${escapeHtml(blog.type)}</span></div>` : ''}
             <div class="tags">
-                ${tags.map((tag, index) => `<span class="tag" data-level="${index}" data-path="${encodeURIComponent(JSON.stringify(blog.tags))}">${tag}</span>`).join('')}
-            </div>
+                ${tags.map((tag, index) => `<span class="tag" data-level="${index}" data-path="${encodeURIComponent(JSON.stringify(blog.tags))}">${tag}</span>`).join('')}</div>
         </div>
         <div class="blog-content">
             <h3 class="blog-title">${escapeHtml(blog.title)}</h3>

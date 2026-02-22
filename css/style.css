@@ -951,6 +951,10 @@ body {
     padding-left: 0;
     font-size: 1.3em;
     font-weight: 500;
+    /* 细白色描边：0.6px 主描边，使用细微阴影作为回退（避免字体显得模糊） */
+    -webkit-text-stroke: 0.01px #c29898;
+    text-stroke: 0.1px #d4b3b3;
+    text-shadow: 0.4px 0.4px 0 #fff, -0.4px 0.4px 0 #fff, 0.4px -0.4px 0 #fff, -0.4px -0.4px 0 #fff;
 }
 
 /* Override blog-type style for archive page: light background, smaller font, no italic */
