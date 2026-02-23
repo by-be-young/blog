@@ -179,10 +179,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "明日方舟/干员杂谈/元素体系——朝阳or败笔？.md"
+                "file": "明日方舟/干员杂谈/干员测评/望.md"
               },
               "icon": "lucide-info",
-              "title": "元素体系——朝阳or败笔？的笔记属性"
+              "title": "望的笔记属性"
             }
           }
         ],
@@ -190,8 +190,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 374.5,
-    "collapsed": true
+    "width": 374.5
   },
   "left-ribbon": {
     "hiddenItems": {

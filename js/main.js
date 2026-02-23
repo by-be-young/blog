@@ -62,7 +62,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // 首页公告栏（显示最新公告）
     try {
         if (document.body && document.body.classList.contains('home')) {
+            initAnnouncementModal();
             renderAnnouncementBanner();
+            showGithubDeploymentNoticeOnce();
         }
     } catch (e) { }
 
@@ -92,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function renderAnnouncementBanner() {
-    const host = document.getElementById('announcementBanner');
+    const host = document.getElementById('announcementModalContent');
     if (!host) return;
 
     fetch('data/announcements.json')
@@ -114,11 +116,12 @@ function renderAnnouncementBanner() {
             const dateText = (typeof window.formatDate === 'function') ? window.formatDate(latest.date) : (latest.date || '');
 
             host.innerHTML = `
+                <div class="announcement-banner announcement-banner--modal is-visible">
                 <div class="announcement-left">
                     <div style="display:flex;align-items:center;gap:12px;">
                         <div class="announcement-icon" aria-hidden="true"><i class="fas fa-bullhorn"></i></div>
                         <div>
-                            <div class="announcement-kicker">
+                            <div class="announcement-kicker" id="announcement-modal-title">
                                 <span data-i18n="announcement_banner_title"></span>
                                 <span class="announcement-date date" data-date="${latest.date || ''}">${dateText}</span>
                             </div>
@@ -130,9 +133,8 @@ function renderAnnouncementBanner() {
                     <span data-i18n="announcement_view_all"></span>
                     <i class="fas fa-arrow-right" aria-hidden="true"></i>
                 </a>
+                </div>
             `;
-
-            host.classList.add('is-visible');
             try { if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') window.siteI18n.applyTo(host); } catch (e) { }
             // 启动横幅正文自动滚动（如果超出高度则向下滚动，滚动到底部停顿后回到顶部重启）
             try { startAnnouncementAutoScroll(host); } catch (e) { }
@@ -151,6 +153,111 @@ function renderAnnouncementBanner() {
     function escapeHtml(s) {
         return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
+}
+
+function initAnnouncementModal() {
+    const trigger = document.getElementById('announcementFab');
+    const modal = document.getElementById('announcementModal');
+    const closeBtn = document.getElementById('announcementModalClose');
+
+    if (!trigger || !modal || !closeBtn) return;
+    let scrollStartTimer = null;
+
+    function openModal() {
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('announcement-modal-open');
+        try {
+            const host = document.getElementById('announcementModalContent');
+            if (host) {
+                if (scrollStartTimer) {
+                    clearTimeout(scrollStartTimer);
+                    scrollStartTimer = null;
+                }
+                scrollStartTimer = setTimeout(() => {
+                    if (!modal.classList.contains('is-open')) return;
+                    requestAnimationFrame(() => {
+                        try { startAnnouncementAutoScroll(host); } catch (e) { }
+                    });
+                }, 3000);
+            }
+        } catch (e) { }
+    }
+
+    function closeModal() {
+        if (scrollStartTimer) {
+            clearTimeout(scrollStartTimer);
+            scrollStartTimer = null;
+        }
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('announcement-modal-open');
+    }
+
+    trigger.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if ((e.key === 'Escape' || e.key === 'Esc') && modal.classList.contains('is-open')) {
+            closeModal();
+        }
+    });
+}
+
+function showGithubDeploymentNoticeOnce() {
+    const host = (window.location && window.location.hostname ? window.location.hostname : '').toLowerCase();
+    if (!host.includes('github.io')) return;
+
+    const storageKey = 'homeDeploymentNoticeShown_v1';
+    try {
+        if (window.localStorage && window.localStorage.getItem(storageKey) === '1') return;
+    } catch (e) { }
+
+    const modal = document.createElement('div');
+    modal.className = 'deployment-notice-modal is-open';
+    modal.setAttribute('aria-hidden', 'false');
+
+    const targetUrl = `${window.location.origin}/`;
+    modal.innerHTML = `
+        <div class="deployment-notice-card" role="dialog" aria-modal="true" aria-labelledby="deployment-notice-title">
+            <button class="deployment-notice-close" aria-label="关闭提示">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+            <h3 class="deployment-notice-title" id="deployment-notice-title">部署成功</h3>
+            <p class="deployment-notice-text">该博客已经成功部署到服务器！点击链接即可跳转。感谢支持！</p>
+            <a class="deployment-notice-link" href="${targetUrl}">点击这里跳转</a>
+        </div>
+    `;
+
+    function closeNotice() {
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        setTimeout(() => {
+            if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
+        }, 120);
+    }
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeNotice();
+    });
+
+    const closeBtn = modal.querySelector('.deployment-notice-close');
+    if (closeBtn) closeBtn.addEventListener('click', closeNotice);
+
+    document.body.appendChild(modal);
+
+    try {
+        if (window.localStorage) {
+            window.localStorage.setItem(storageKey, '1');
+            window.addEventListener('beforeunload', () => {
+                try { window.localStorage.removeItem(storageKey); } catch (e) { }
+            }, { once: true });
+        }
+    } catch (e) { }
 }
 
 // 首页公告：自动滚动实现（使用 CSS 动画，平滑且性能好）
@@ -306,8 +413,22 @@ function initBlogGrid() {
     if (!blogGrid) return;
     blogGrid.innerHTML = '';
 
-    // 仅渲染被标记为推荐的博客卡片
+    // 所有博客数据
     const all = Array.isArray(blogs) ? blogs : [];
+
+    // 先插入“最近更新”卡片（占满整行，位于公告横幅下方、其他博客卡片上方）
+    try {
+        const recentCard = createRecentUpdatesCard(all);
+        if (recentCard) blogGrid.appendChild(recentCard);
+    } catch (e) { /* 防御性：若生成失败则继续渲染其余卡片 */ }
+
+    // 在“最近更新”下方插入“推荐博客”标题卡片（占满整行）
+    try {
+        const recommendedHeaderCard = createRecommendedBlogsHeaderCard();
+        if (recommendedHeaderCard) blogGrid.appendChild(recommendedHeaderCard);
+    } catch (e) { /* 防御性：若生成失败则继续渲染其余卡片 */ }
+
+    // 仅渲染被标记为推荐的博客卡片（保持原有行为）
     const recommendedBlogs = all.filter(b => b.recommended === true);
     recommendedBlogs.forEach(blog => {
         const blogCard = createBlogCard(blog);
@@ -316,6 +437,18 @@ function initBlogGrid() {
 
     // 初始化“查看更多”交互（如果存在未显示的文章）
     initViewMore(all.length, recommendedBlogs.length);
+}
+
+function createRecommendedBlogsHeaderCard() {
+    const card = document.createElement('div');
+    card.className = 'recommended-blogs-card';
+    card.style.gridColumn = '1 / -1';
+
+    card.innerHTML = `
+        <span class="recommended-title">推荐博客</span>
+    `;
+
+    return card;
 }
 
 function initViewMore(totalCount, shownCount) {
@@ -396,6 +529,84 @@ function adaptWelcomeText() {
 
 
 // 创建博客卡片
+// 创建“最近更新”卡片，放在博客网格顶部（占满整行）
+function createRecentUpdatesCard(allBlogs) {
+    if (!Array.isArray(allBlogs) || allBlogs.length === 0) return null;
+
+    // 按更新时间降序（防御性：若无 date 字段则视为最旧）
+    const sorted = allBlogs.slice().sort((a, b) => {
+        const da = a && a.date ? new Date(a.date).getTime() : 0;
+        const db = b && b.date ? new Date(b.date).getTime() : 0;
+        return db - da;
+    });
+
+    // 只取最近 1 条
+    const latest = sorted[0];
+    if (!latest) return null;
+
+    const card = document.createElement('div');
+    card.className = 'recent-updates-card';
+    // 让该卡片占据网格整行（与公告横幅宽度一致）
+    card.style.gridColumn = '1 / -1';
+
+    const tags = Array.isArray(latest.tags) ? latest.tags.map((t, index) => `<span class="tag" data-level="${index}" data-path="${encodeURIComponent(JSON.stringify(latest.tags))}">${escapeHtml(t)}</span>`).join('') : '';
+    // 首页最近更新卡片与普通博客卡片保持同图片路径策略
+    const img = 'assets/images/lantern_festival.png';
+    const typeHtml = latest.type ? `<div class="blog-type-overlay"><span class="blog-type">${escapeHtml(latest.type)}</span></div>` : '';
+
+    const itemsHtml = `
+        <div class="recent-item" data-id="${latest.id}">
+            <div class="recent-item-main">
+                <h3 class="blog-title recent-item-title">${escapeHtml(latest.title)}</h3>
+                <p class="blog-excerpt recent-item-excerpt">${latest.excerpt || ''}</p>
+                <div class="blog-meta recent-item-meta"><span class="date" data-date="${latest.date}">${formatDate(latest.date)}</span></div>
+            </div>
+            <div class="recent-item-side">
+                <div class="blog-image recent-thumb">
+                    <img src="${img}" alt="${escapeHtml(latest.title)}">
+                    ${typeHtml}
+                    <div class="tags">${tags}</div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    card.innerHTML = `
+        <div class="recent-label"><span>最近更新</span></div>
+        <div class="recent-content">${itemsHtml}</div>
+    `;
+
+    // 点击行为与普通卡片一致：打开对应文章（针对最近列表的每一项）
+    card.addEventListener('click', (e) => {
+        const tagEl = e.target.closest('.tag');
+        if (tagEl) {
+            e.preventDefault();
+            e.stopPropagation();
+            const level = Number(tagEl.dataset.level || 0);
+            const path = tagEl.dataset.path ? JSON.parse(decodeURIComponent(tagEl.dataset.path)) : null;
+            if (path) {
+                const selectedTags = [];
+                for (let i = 0; i <= level; i++) selectedTags[i] = path[i] || null;
+                for (let i = level + 1; i < 3; i++) selectedTags[i] = null;
+                const tagsParam = JSON.stringify(selectedTags);
+                window.location.href = `categories.html?tags=${encodeURIComponent(tagsParam)}`;
+            }
+            return;
+        }
+
+        const el = e.target.closest('.recent-item');
+        if (!el) return;
+        const id = el.getAttribute('data-id');
+        if (id) {
+            const url = `blog-detail.html?id=${id}`;
+            const w = window.open(url, '_blank', 'noopener,noreferrer');
+            try { if (w) w.opener = null; } catch (err) { }
+        }
+    });
+
+    return card;
+}
+
 function createBlogCard(blog) {
     const card = document.createElement('div');
     card.className = 'blog-card';

@@ -263,7 +263,6 @@
 
                     <!-- 右侧博客列表 -->
                     <div class="main-content">
-                        <div id="announcementBanner" class="announcement-banner" aria-live="polite"></div>
                         <div class="blog-grid" id="blogGrid">
                             <!-- 博客卡片将通过JS动态生成 -->
                         </div>
@@ -276,7 +275,21 @@
         </section>
     </main>
 
+    <button id="announcementFab" class="announcement-fab" aria-label="打开公告弹窗">
+        <i class="fas fa-bullhorn" aria-hidden="true"></i>
+    </button>
+
+    <div id="announcementModal" class="announcement-modal" aria-hidden="true">
+        <div class="announcement-modal-card" role="dialog" aria-modal="true" aria-labelledby="announcement-modal-title">
+            <button id="announcementModalClose" class="announcement-modal-close" aria-label="关闭公告弹窗">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+            <div id="announcementModalContent" aria-live="polite"></div>
+        </div>
+    </div>
+
     <script src="js/search.js" defer></script>
+    <script src="js/slideshow.js" defer></script>
     <script src="js/main.js" defer></script>
 
     <!--

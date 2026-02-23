@@ -2,15 +2,15 @@
     {
         "id": 3827618110,
         "title": "望",
-        "excerpt": "初始持有 7 枚棋子，开启技能后溢出 7 枚，直接被部署；后续每放置一枚棋子消耗 3 枚弹药，最多造成 5 次伤害；最多 20 枚弹药。",
-        "date": "2026-02-22",
+        "excerpt": "望伤害计算、使用测评",
+        "date": "2026-02-23",
         "image": "assets/images/blog_bg.png",
         "tags": [
             "明日方舟",
             "干员杂谈",
             "干员测评"
         ],
-        "type": null,
+        "type": "纸上行舟",
         "contentFile": "blogs/明日方舟/干员杂谈/干员测评/望.md",
         "recommended": false
     },
