@@ -221,7 +221,7 @@ function showGithubDeploymentNoticeOnce() {
     modal.className = 'deployment-notice-modal is-open';
     modal.setAttribute('aria-hidden', 'false');
 
-    const targetUrl = `${window.location.origin}/`;
+    const targetUrl = `http://47.95.159.93/`;
     modal.innerHTML = `
         <div class="deployment-notice-card" role="dialog" aria-modal="true" aria-labelledby="deployment-notice-title">
             <button class="deployment-notice-close" aria-label="关闭提示">
