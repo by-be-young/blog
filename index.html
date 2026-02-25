@@ -4,6 +4,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        (function () {
+            function runNotice() {
+                var host = (window.location && window.location.hostname ? window.location.hostname : '').toLowerCase();
+                if (!host.includes('github.io')) return;
+
+                var storageKey = 'homeDeploymentNoticeShown_v1';
+                try { if (window.localStorage && window.localStorage.getItem(storageKey) === '1') return; } catch (e) { }
+
+                var modal = document.createElement('div');
+                modal.className = 'deployment-notice-modal is-open';
+                modal.setAttribute('aria-hidden', 'false');
+
+                var targetUrl = 'http://47.95.159.93/';
+                modal.innerHTML = `
+        <div class="deployment-notice-card" role="dialog" aria-modal="true" aria-labelledby="deployment-notice-title">
+            <button class="deployment-notice-close" aria-label="关闭提示">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+            <h3 class="deployment-notice-title" id="deployment-notice-title">部署成功</h3>
+            <p class="deployment-notice-text">该博客已经成功部署到服务器！点击链接即可跳转。感谢支持！</p>
+            <a class="deployment-notice-link" href="${targetUrl}">点击这里跳转</a>
+        </div>
+    `;
+
+                function closeNotice() {
+                    modal.classList.remove('is-open');
+                    modal.setAttribute('aria-hidden', 'true');
+                    setTimeout(function () {
+                        try { if (modal && modal.parentNode) modal.parentNode.removeChild(modal); } catch (e) { }
+                    }, 120);
+                }
+
+                modal.addEventListener('click', function (e) {
+                    if (e.target === modal) closeNotice();
+                });
+
+                // close button
+                try {
+                    var closeBtn = modal.querySelector('.deployment-notice-close');
+                    if (closeBtn) closeBtn.addEventListener('click', closeNotice);
+                } catch (e) { }
+
+                // append when body exists
+                try {
+                    if (document.body) document.body.appendChild(modal);
+                    else document.addEventListener('DOMContentLoaded', function () { document.body.appendChild(modal); }, { once: true });
+                } catch (e) { }
+
+                try {
+                    if (window.localStorage) {
+                        window.localStorage.setItem(storageKey, '1');
+                        window.addEventListener('beforeunload', function () {
+                            try { window.localStorage.removeItem(storageKey); } catch (e) { }
+                        }, { once: true });
+                    }
+                } catch (e) { }
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', runNotice);
+            } else {
+                runNotice();
+            }
+        })();
+    </script>
     <title>个人博客 | 首页</title>
     <link rel="icon" href="assets/avatar.png" type="image/png">
 
@@ -181,6 +247,7 @@
                 <p class="subtitle">❤️ <span data-i18n="beihang"></span> ❤️</p>
             </div>
             <div class="scroll-down">
+                <p class="music-tip">点击页面或按任意键启用背景音乐</p>
                 <i class="fas fa-chevron-down bounce"></i>
             </div>
         </section>
@@ -275,6 +342,10 @@
         </section>
     </main>
 
+    <button id="settingsFab" class="settings-fab" aria-label="打开设置弹窗">
+        <i class="fas fa-cog" aria-hidden="true"></i>
+    </button>
+
     <button id="announcementFab" class="announcement-fab" aria-label="打开公告弹窗">
         <i class="fas fa-bullhorn" aria-hidden="true"></i>
     </button>
@@ -285,6 +356,58 @@
                 <i class="fas fa-times" aria-hidden="true"></i>
             </button>
             <div id="announcementModalContent" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="settings-modal" aria-hidden="true">
+        <div class="settings-modal-card" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+            <button id="settingsModalClose" class="settings-modal-close" aria-label="关闭设置弹窗">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+            <div class="settings-modal-content">
+                <div class="settings-sidebar">
+                    <button class="settings-tab active" data-tab="language">语言</button>
+                    <button class="settings-tab" data-tab="music">音乐</button>
+                </div>
+                <div class="settings-panel">
+                    <div class="settings-section active" id="language-section">
+                        <h3>语言设置</h3>
+                        <div class="language-options">
+                            <label><input type="radio" name="language" value="zh"> 中文</label>
+                            <label><input type="radio" name="language" value="en"> English</label>
+                            <label><input type="radio" name="language" value="ja" checked> 日本語</label>
+                        </div>
+                    </div>
+                    <div class="settings-section" id="music-section">
+                        <h3>音乐设置</h3>
+                        <p class="music-hint">点击页面、按键盘、移动鼠标或滚动滚轮可启用背景音乐</p>
+                        <div class="music-controls">
+                            <div class="music-track">
+                                <label for="music-select">选择曲目：</label>
+                                <select id="music-select">
+                                    <option value="">无</option>
+                                    <option value="抹不去的记忆.mp3">抹不去的记忆</option>
+                                    <option value="澎湃.mp3">澎湃</option>
+                                    <option value="谎画.mp3">谎画</option>
+                                </select>
+                            </div>
+                            <div class="music-playback">
+                                <button id="play-pause-btn" class="music-btn">
+                                    <i class="fas fa-play"></i> 播放
+                                </button>
+                                <button id="stop-btn" class="music-btn">
+                                    <i class="fas fa-stop"></i> 停止
+                                </button>
+                            </div>
+                            <div class="music-volume">
+                                <label for="volume-slider">音量：</label>
+                                <input type="range" id="volume-slider" min="0.05" max="1" step="0.05" value="0.05">
+                                <span id="volume-value">5%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

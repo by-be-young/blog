@@ -63,8 +63,8 @@ document.addEventListener('DOMContentLoaded', function () {
     try {
         if (document.body && document.body.classList.contains('home')) {
             initAnnouncementModal();
+            initSettingsModal();
             renderAnnouncementBanner();
-            showGithubDeploymentNoticeOnce();
         }
     } catch (e) { }
 
@@ -208,57 +208,190 @@ function initAnnouncementModal() {
     });
 }
 
-function showGithubDeploymentNoticeOnce() {
-    const host = (window.location && window.location.hostname ? window.location.hostname : '').toLowerCase();
-    if (!host.includes('github.io')) return;
+function initSettingsModal() {
+    const trigger = document.getElementById('settingsFab');
+    const modal = document.getElementById('settingsModal');
+    const closeBtn = document.getElementById('settingsModalClose');
+    const tabs = document.querySelectorAll('.settings-tab');
+    const sections = document.querySelectorAll('.settings-section');
 
-    const storageKey = 'homeDeploymentNoticeShown_v1';
-    try {
-        if (window.localStorage && window.localStorage.getItem(storageKey) === '1') return;
-    } catch (e) { }
+    if (!trigger || !modal || !closeBtn) return;
 
-    const modal = document.createElement('div');
-    modal.className = 'deployment-notice-modal is-open';
-    modal.setAttribute('aria-hidden', 'false');
+    // 创建全局背景音乐对象
+    window.backgroundAudio = new Audio('music/澎湃.mp3');
+    window.backgroundAudio.volume = 0.05;
+    window.backgroundAudio.loop = true;
 
-    const targetUrl = `http://47.95.159.93/`;
-    modal.innerHTML = `
-        <div class="deployment-notice-card" role="dialog" aria-modal="true" aria-labelledby="deployment-notice-title">
-            <button class="deployment-notice-close" aria-label="关闭提示">
-                <i class="fas fa-times" aria-hidden="true"></i>
-            </button>
-            <h3 class="deployment-notice-title" id="deployment-notice-title">部署成功</h3>
-            <p class="deployment-notice-text">该博客已经成功部署到服务器！点击链接即可跳转。感谢支持！</p>
-            <a class="deployment-notice-link" href="${targetUrl}">点击这里跳转</a>
-        </div>
-    `;
+    // 标记是否已启用音乐
+    window.musicEnabled = false;
+    // 标记是否已发生用户交互（用于防止页面加载时的自动触发）
+    let userInteracted = false;
 
-    function closeNotice() {
-        modal.classList.remove('is-open');
-        modal.setAttribute('aria-hidden', 'true');
-        setTimeout(() => {
-            if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
-        }, 120);
+    // 点击页面任意位置启用音乐
+    function enableMusic(event) {
+        console.log('事件触发:', event.type, 'musicEnabled:', window.musicEnabled);
+
+        if (!window.musicEnabled) {
+            console.log('尝试启用音乐...');
+            userInteracted = true; // 标记已发生用户交互
+            console.log('尝试启用音乐...');
+            // 确保audio对象存在
+            if (!window.backgroundAudio) {
+                window.backgroundAudio = new Audio('music/澎湃.mp3');
+                window.backgroundAudio.volume = 0.05;
+                window.backgroundAudio.loop = true;
+            }
+
+            window.backgroundAudio.play().then(() => {
+                console.log('音乐播放成功');
+                window.musicEnabled = true;
+                document.removeEventListener('click', enableMusic);
+                document.removeEventListener('keydown', enableMusic);
+                updatePlayPauseButton();
+            }).catch(e => {
+                console.log('播放失败，重试:', e);
+                // 如果失败，尝试重新加载音频
+                setTimeout(() => {
+                    if (!window.musicEnabled) {
+                        window.backgroundAudio.load();
+                        window.backgroundAudio.play().catch(e2 => {
+                            console.log('重试播放也失败:', e2);
+                        });
+                    }
+                }, 100);
+            });
+        }
     }
 
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeNotice();
+    // 添加用户交互监听器来启用音乐
+    document.addEventListener('click', enableMusic);
+    document.addEventListener('keydown', enableMusic);
+
+    // 音乐相关变量
+    const playPauseBtn = document.getElementById('play-pause-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    const musicSelect = document.getElementById('music-select');
+    const volumeSlider = document.getElementById('volume-slider');
+    const volumeValue = document.getElementById('volume-value');
+
+    // 监听背景音乐播放状态变化
+    window.backgroundAudio.addEventListener('play', updatePlayPauseButton);
+    window.backgroundAudio.addEventListener('pause', updatePlayPauseButton);
+
+    // 同步当前音乐选择和音量到设置弹窗
+    musicSelect.value = '澎湃.mp3'; // 默认选择
+    volumeSlider.value = window.backgroundAudio.volume.toString();
+    volumeValue.textContent = Math.round(window.backgroundAudio.volume * 100) + '%';
+
+    // 更新播放/暂停按钮状态
+    function updatePlayPauseButton() {
+        if (!window.musicEnabled) {
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i> 启用音乐';
+        } else if (window.backgroundAudio.paused) {
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i> 播放';
+        } else {
+            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i> 暂停';
+        }
+    }
+
+    // 初始状态更新
+    updatePlayPauseButton();
+
+    function openModal() {
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('settings-modal-open');
+    }
+
+    function closeModal() {
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('settings-modal-open');
+    }
+
+    // 标签切换
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            sections.forEach(s => s.classList.remove('active'));
+            tab.classList.add('active');
+            const tabName = tab.dataset.tab;
+            document.getElementById(tabName + '-section').classList.add('active');
+        });
     });
 
-    const closeBtn = modal.querySelector('.deployment-notice-close');
-    if (closeBtn) closeBtn.addEventListener('click', closeNotice);
+    // 语言设置
+    const languageInputs = document.querySelectorAll('input[name="language"]');
+    languageInputs.forEach(input => {
+        input.addEventListener('change', () => {
+            if (input.checked) {
+                // 这里可以添加语言切换逻辑
+                console.log('Language changed to:', input.value);
+                // 可以使用i18n.js中的函数来切换语言
+                if (window.siteI18n && window.siteI18n.setLang) {
+                    window.siteI18n.setLang(input.value);
+                }
+            }
+        });
+    });
 
-    document.body.appendChild(modal);
-
-    try {
-        if (window.localStorage) {
-            window.localStorage.setItem(storageKey, '1');
-            window.addEventListener('beforeunload', () => {
-                try { window.localStorage.removeItem(storageKey); } catch (e) { }
-            }, { once: true });
+    // 音乐控制
+    musicSelect.addEventListener('change', () => {
+        if (musicSelect.value) {
+            // 切换音乐
+            window.backgroundAudio.src = 'music/' + musicSelect.value;
+            window.backgroundAudio.play().catch(e => {
+                console.log('播放失败:', e);
+            });
+        } else {
+            // 选择"无"时停止播放
+            window.backgroundAudio.pause();
         }
-    } catch (e) { }
+        updatePlayPauseButton();
+    });
+
+    playPauseBtn.addEventListener('click', () => {
+        if (!window.musicEnabled) {
+            // 启用音乐
+            enableMusic();
+        } else if (window.backgroundAudio.paused) {
+            window.backgroundAudio.play().catch(e => {
+                console.log('播放失败:', e);
+            });
+        } else {
+            window.backgroundAudio.pause();
+        }
+        updatePlayPauseButton();
+    });
+
+    stopBtn.addEventListener('click', () => {
+        window.backgroundAudio.pause();
+        window.backgroundAudio.currentTime = 0;
+        updatePlayPauseButton();
+    });
+
+    volumeSlider.addEventListener('input', () => {
+        const volume = parseFloat(volumeSlider.value);
+        volumeValue.textContent = Math.round(volume * 100) + '%';
+        window.backgroundAudio.volume = volume;
+    });
+
+    // 事件监听
+    trigger.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if ((e.key === 'Escape' || e.key === 'Esc') && modal.classList.contains('is-open')) {
+            closeModal();
+        }
+    });
 }
+
+
 
 // 首页公告：自动滚动实现（使用 CSS 动画，平滑且性能好）
 function startAnnouncementAutoScroll(bannerEl, opts) {
@@ -437,6 +570,9 @@ function initBlogGrid() {
 
     // 初始化“查看更多”交互（如果存在未显示的文章）
     initViewMore(all.length, recommendedBlogs.length);
+
+    // 动态内容插入后应用一次 i18n，确保标题文案与当前语言一致
+    try { if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') window.siteI18n.applyTo(blogGrid); } catch (e) { }
 }
 
 function createRecommendedBlogsHeaderCard() {
@@ -445,7 +581,7 @@ function createRecommendedBlogsHeaderCard() {
     card.style.gridColumn = '1 / -1';
 
     card.innerHTML = `
-        <span class="recommended-title">推荐博客</span>
+        <span class="recommended-title" data-i18n="home_recommended_blogs">推荐博客</span>
     `;
 
     return card;
@@ -462,23 +598,25 @@ function initViewMore(totalCount, shownCount) {
         wrap.style.display = 'none';
         return;
     }
-    // 显示在卡片下方：将按钮宽度与第一个卡片对齐，并在窗口缩放时调整
+    // 显示在卡片下方：将按钮宽度与“最近更新”卡片对齐，并在窗口缩放时调整
     wrap.style.display = 'flex';
     const blogGrid = document.getElementById('blogGrid');
 
-    function alignWidthToFirstCard() {
-        const firstCard = blogGrid && blogGrid.querySelector('.blog-card');
-        if (firstCard) {
-            const w = firstCard.getBoundingClientRect().width;
+    function alignWidthToRecentCard() {
+        const recentCard = blogGrid && blogGrid.querySelector('.recent-updates-card');
+        const fallbackCard = blogGrid && blogGrid.querySelector('.blog-card');
+        const target = recentCard || fallbackCard;
+        if (target) {
+            const w = target.getBoundingClientRect().width;
             btn.style.width = Math.floor(w) + 'px';
         } else {
             btn.style.width = '';
         }
     }
 
-    window.addEventListener('load', alignWidthToFirstCard);
-    setTimeout(alignWidthToFirstCard, 120);
-    window.addEventListener('resize', throttle(alignWidthToFirstCard, 150));
+    window.addEventListener('load', alignWidthToRecentCard);
+    setTimeout(alignWidthToRecentCard, 120);
+    window.addEventListener('resize', throttle(alignWidthToRecentCard, 150));
 
     btn.addEventListener('click', () => {
         window.location.href = 'archive.html';
@@ -572,7 +710,7 @@ function createRecentUpdatesCard(allBlogs) {
     `;
 
     card.innerHTML = `
-        <div class="recent-label"><span>最近更新</span></div>
+        <div class="recent-label"><span data-i18n="home_recent_updates">最近更新</span></div>
         <div class="recent-content">${itemsHtml}</div>
     `;
 

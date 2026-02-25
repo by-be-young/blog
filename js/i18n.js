@@ -82,6 +82,8 @@
             , announcement_view_all: '查看公告'
             , announcements_title: '公告'
             , announcements_empty: '暂无公告'
+            , home_recent_updates: '最近更新'
+            , home_recommended_blogs: '推荐博客'
         },
         en: {
             brand: "Be Young's Blog",
@@ -161,6 +163,8 @@
             , announcement_view_all: 'View announcements'
             , announcements_title: 'Announcements'
             , announcements_empty: 'No announcements yet'
+            , home_recent_updates: 'Latest'
+            , home_recommended_blogs: 'Recommended Blogs'
         },
         ja: {
             brand: '白恙のブログ',
@@ -240,6 +244,8 @@
             , announcement_view_all: 'お知らせ一覧'
             , announcements_title: 'お知らせ'
             , announcements_empty: 'お知らせはありません'
+            , home_recent_updates: '最近の更新'
+            , home_recommended_blogs: 'おすすめブログ'
         }
     };
 
