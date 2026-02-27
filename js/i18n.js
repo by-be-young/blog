@@ -68,6 +68,27 @@
             interest_language: '语言',
             back_to_top: '回到顶部',
             settings: '设置',
+            settings_tab_language: '语言',
+            settings_tab_music: '音乐',
+            settings_language_title: '语言设置',
+            settings_language_note: '语言设置不影响博客内容的语种。',
+            settings_language_zh: '中文',
+            settings_language_en: 'English',
+            settings_language_ja: '日本語',
+            settings_music_title: '音乐设置',
+            settings_music_hint: '点击页面或按任意键启用背景音乐',
+            settings_music_original: '所有音乐均为原创',
+            settings_track_label: '选择曲目：',
+            settings_track_none: '无',
+            settings_track_memory: '抹不去的记忆',
+            settings_track_passion: '澎湃',
+            settings_track_liepaint: '谎画',
+            settings_play: '播放',
+            settings_pause: '暂停',
+            settings_stop: '停止',
+            settings_enable_music: '启用音乐',
+            settings_progress_label: '进度：',
+            settings_volume_label: '音量：',
             wide_read: '宽屏阅读',
             export_markdown: '导出Markdown'
             , prev_post: '上一篇'
@@ -149,6 +170,27 @@
             interest_language: 'Languages',
             back_to_top: 'Back to top',
             settings: 'Settings',
+            settings_tab_language: 'Language',
+            settings_tab_music: 'Music',
+            settings_language_title: 'Language Settings',
+            settings_language_note: 'Language settings do not change the language of blog content.',
+            settings_language_zh: 'Chinese',
+            settings_language_en: 'English',
+            settings_language_ja: 'Japanese',
+            settings_music_title: 'Music Settings',
+            settings_music_hint: 'Click anywhere or press any key to enable background music',
+            settings_music_original: 'All music tracks are original compositions',
+            settings_track_label: 'Track:',
+            settings_track_none: 'None',
+            settings_track_memory: 'Unfading Memory',
+            settings_track_passion: 'Surge',
+            settings_track_liepaint: 'Lie Painting',
+            settings_play: 'Play',
+            settings_pause: 'Pause',
+            settings_stop: 'Stop',
+            settings_enable_music: 'Enable Music',
+            settings_progress_label: 'Progress:',
+            settings_volume_label: 'Volume:',
             wide_read: 'Wide reading',
             export_markdown: 'Export Markdown'
             , prev_post: 'Previous'
@@ -230,6 +272,27 @@
             interest_language: '語学',
             back_to_top: 'トップへ戻る',
             settings: '設定',
+            settings_tab_language: '言語',
+            settings_tab_music: '音楽',
+            settings_language_title: '言語設定',
+            settings_language_note: '言語設定はブログ本文の言語には影響しません。',
+            settings_language_zh: '中国語',
+            settings_language_en: '英語',
+            settings_language_ja: '日本語',
+            settings_music_title: '音楽設定',
+            settings_music_hint: 'ページをクリックするか任意のキーでBGMを有効化',
+            settings_music_original: 'すべての楽曲はオリジナルです',
+            settings_track_label: '曲目：',
+            settings_track_none: 'なし',
+            settings_track_memory: '消えない記憶',
+            settings_track_passion: '澎湃',
+            settings_track_liepaint: '謊画',
+            settings_play: '再生',
+            settings_pause: '一時停止',
+            settings_stop: '停止',
+            settings_enable_music: '音楽を有効化',
+            settings_progress_label: '再生位置：',
+            settings_volume_label: '音量：',
             wide_read: '広い表示',
             export_markdown: 'Markdownを出力'
             , prev_post: '前の記事'
@@ -287,11 +350,6 @@
                 try { if (el.getAttribute('aria-label') === null) el.setAttribute('aria-label', text); } catch (e) { }
             }
         });
-        const btn = document.querySelector('.nav-lang-button');
-        if (btn) {
-            const labelMap = { zh: '语', ja: '語', en: '🌐' };
-            btn.textContent = labelMap[lang] || labelMap[DEFAULT_LANG];
-        }
         // dispatch a document-level event so other modules (e.g. date formatting) can react
         (function emitLanguageChange() {
             try {
@@ -311,81 +369,27 @@
     }
 
     function init() {
-        const nav = document.querySelector('.nav-actions');
-        if (nav && !document.querySelector('.nav-lang-wrap')) {
-            const wrap = document.createElement('div');
-            wrap.className = 'nav-lang-wrap';
-            // 自定义下拉：按钮显示短符号，展开列表显示完整名称
-            wrap.innerHTML = `
-                <div class="nav-lang">
-                    <button class="nav-lang-button" aria-haspopup="listbox" aria-expanded="false">語</button>
-                    <ul class="nav-lang-list" role="listbox" aria-hidden="true">
-                        <li class="nav-lang-item" data-lang="ja">日本語</li>
-                        <li class="nav-lang-item" data-lang="zh">简体中文</li>
-                        <li class="nav-lang-item" data-lang="en">English</li>
-                    </ul>
-                </div>
-            `;
-            nav.insertBefore(wrap, nav.firstChild);
-
-            const btn = wrap.querySelector('.nav-lang-button');
-            const list = wrap.querySelector('.nav-lang-list');
-
-            // bring element to front helper
-            if (!window.__bringToFront) {
-                window.__bringToFront = function (el) {
+        // bring element to front helper（供搜索面板等动态层复用）
+        if (!window.__bringToFront) {
+            window.__bringToFront = function (el) {
+                try {
+                    if (!el || !(el.style)) return;
+                    let max = 0;
                     try {
-                        if (!el || !(el.style)) return;
-                        // compute current maximum z-index in the document
-                        let max = 0;
-                        try {
-                            const all = document.querySelectorAll('body *');
-                            for (let i = 0; i < all.length; i++) {
-                                const z = window.getComputedStyle(all[i]).zIndex;
-                                if (z && z !== 'auto') {
-                                    const n = parseInt(z, 10);
-                                    if (!Number.isNaN(n) && n > max) max = n;
-                                }
+                        const all = document.querySelectorAll('body *');
+                        for (let i = 0; i < all.length; i++) {
+                            const z = window.getComputedStyle(all[i]).zIndex;
+                            if (z && z !== 'auto') {
+                                const n = parseInt(z, 10);
+                                if (!Number.isNaN(n) && n > max) max = n;
                             }
-                        } catch (e) { max = (window.__uiZIndexCounter || 1200); }
-                        const next = Math.max(max + 1, (window.__uiZIndexCounter || 1201));
-                        window.__uiZIndexCounter = next;
-                        el.style.zIndex = String(next);
-                    } catch (e) { /* ignore */ }
-                };
-            }
-
-            function closeList() {
-                btn.setAttribute('aria-expanded', 'false');
-                list.setAttribute('aria-hidden', 'true');
-                list.style.display = 'none';
-            }
-
-            function openList() {
-                btn.setAttribute('aria-expanded', 'true');
-                list.setAttribute('aria-hidden', 'false');
-                list.style.display = 'block';
-            }
-
-            btn.addEventListener('click', e => {
-                const expanded = btn.getAttribute('aria-expanded') === 'true';
-                if (expanded) closeList(); else openList();
-                // ensure language menu appears above other UI
-                try { if (typeof window.__bringToFront === 'function') window.__bringToFront(wrap); } catch (e) { }
-            });
-
-            wrap.querySelectorAll('.nav-lang-item').forEach(item => {
-                item.addEventListener('click', e => {
-                    const lang = item.getAttribute('data-lang');
-                    setLang(lang);
-                    closeList();
-                });
-            });
-
-            // close on outside click
-            document.addEventListener('click', e => {
-                if (!wrap.contains(e.target)) closeList();
-            });
+                        }
+                    } catch (e) { max = (window.__uiZIndexCounter || 1200); }
+                    const next = Math.max(max + 1, (window.__uiZIndexCounter || 1201));
+                    window.__uiZIndexCounter = next;
+                    el.style.zIndex = String(next);
+                } catch (e) { }
+            };
         }
 
         applyLang(getLang());

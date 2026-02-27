@@ -552,6 +552,8 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
 
 .blog-detail .article-content .codeblock__body {
     padding: 0;
+    overflow: hidden;
+    transition: height 280ms ease, opacity 220ms ease;
 }
 
 .blog-detail .article-content .codeblock__content {
@@ -593,10 +595,6 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
 .blog-detail .article-content .codeblock__pre {
     flex: 1 1 auto;
     min-width: 0;
-}
-
-.blog-detail .article-content .codeblock.is-collapsed .codeblock__body {
-    display: none;
 }
 
 .blog-detail .article-content code {
@@ -803,7 +801,7 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
 .article-content .md-question {
     padding: 16px 18px;
     border-radius: 12px;
-    background: linear-gradient(180deg, rgba(249, 243, 255, 0.9), rgba(246, 255, 253, 0.9));
+    background: linear-gradient(90deg, rgba(230, 221, 243, 0.94) 0%, rgba(249, 246, 253, 0.98) 50%, rgba(230, 221, 243, 0.94) 100%);
     border: 1px solid rgba(200, 170, 255, 0.16);
     box-shadow: 0 8px 20px rgba(154, 215, 255, 0.06);
     margin: 18px 0;
@@ -823,7 +821,7 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
     padding: 12px 14px;
     border-radius: 12px;
     border: 1px solid rgba(0, 0, 0, 0.06);
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.96), rgba(250, 250, 255, 0.98));
+    background: linear-gradient(90deg, rgba(233, 227, 246, 0.95) 0%, rgba(250, 247, 254, 0.99) 50%, rgba(233, 227, 246, 0.95) 100%);
     cursor: pointer;
     transition: transform 160ms ease, box-shadow 200ms ease, background 180ms ease;
     text-align: left;
@@ -843,7 +841,7 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
     border-radius: 8px;
     font-weight: 800;
     color: #3a2b4a;
-    background: linear-gradient(180deg, rgba(255, 246, 253, 0.9), rgba(244, 231, 255, 0.9));
+    background: linear-gradient(90deg, rgba(227, 217, 241, 0.92) 0%, rgba(246, 241, 252, 0.97) 50%, rgba(227, 217, 241, 0.92) 100%);
     border: 1px solid rgba(154, 215, 255, 0.16);
 }
 
@@ -853,13 +851,13 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
 }
 
 .article-content .md-option.is-correct {
-    background: linear-gradient(90deg, rgba(215, 255, 235, 0.95), rgba(220, 255, 240, 0.9));
+    background: linear-gradient(90deg, rgba(209, 239, 223, 0.95) 0%, rgba(239, 252, 246, 0.99) 50%, rgba(209, 239, 223, 0.95) 100%);
     border-color: rgba(46, 204, 113, 0.35);
     box-shadow: 0 8px 18px rgba(46, 204, 113, 0.08);
 }
 
 .article-content .md-option.is-wrong {
-    background: linear-gradient(90deg, rgba(255, 230, 235, 0.95), rgba(255, 240, 245, 0.92));
+    background: linear-gradient(90deg, rgba(242, 214, 223, 0.95) 0%, rgba(253, 242, 246, 0.99) 50%, rgba(242, 214, 223, 0.95) 100%);
     border-color: rgba(255, 99, 132, 0.18);
     box-shadow: 0 8px 18px rgba(255, 99, 132, 0.06);
 }
@@ -908,7 +906,7 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
     height: 40px;
     border-radius: 10px;
     border: 1px solid rgba(0, 0, 0, 0.06);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(250, 250, 255, 0.98));
+    background: linear-gradient(90deg, rgba(233, 227, 246, 0.95) 0%, rgba(250, 247, 254, 0.99) 50%, rgba(233, 227, 246, 0.95) 100%);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -923,7 +921,7 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
 .article-content .answer-inner {
     padding: 12px 14px;
     border-radius: 10px;
-    background: linear-gradient(180deg, rgba(252, 249, 255, 0.96), rgba(248, 255, 250, 0.96));
+    background: linear-gradient(90deg, rgba(231, 224, 245, 0.94) 0%, rgba(249, 246, 253, 0.98) 50%, rgba(231, 224, 245, 0.94) 100%);
     border: 1px solid rgba(200, 170, 255, 0.08);
 }
 
@@ -1298,7 +1296,7 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
 }
 
 .blog-detail .article-content .answer-toggle.is-open .answer-toggle-icon {
-    transform: none;
+    transform: rotate(180deg);
 }
 
 /* 确保展开状态边框与初始状态一致 */
@@ -1321,18 +1319,49 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
 
 /* md-task: 将整个 [task]..[\task] 作为一道例题卡片展示 */
 .article-content .md-task {
+    position: relative;
     border-radius: 14px;
-    padding: 14px;
+    padding: 44px 14px 14px;
     margin: 18px 0 24px 0;
-    background: #FFF8E6;
+    background: linear-gradient(90deg, rgba(252, 234, 198, 0.96) 0%, rgba(255, 249, 236, 0.99) 50%, rgba(252, 234, 198, 0.96) 100%);
     /* 更柔和的马卡龙淡黄色 */
     border: 1px solid #FFF2D2;
     box-shadow: 0 6px 14px rgba(0, 0, 0, 0.03);
 }
 
+.article-content .md-task::before {
+    content: "例题";
+    position: absolute;
+    top: 10px;
+    left: 38px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+    border-radius: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #7a5a2e;
+    background: none;
+    border: none;
+    line-height: 1.2;
+}
+
+.article-content .md-task::after {
+    content: "";
+    --task-label-color: #7a5a2e;
+    position: absolute;
+    top: 10px;
+    left: 14px;
+    width: 16px;
+    height: 16px;
+    background-color: var(--task-label-color);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3h12a1 1 0 0 1 1 1v17l-7-3-7 3V4a1 1 0 0 1 1-1z'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3h12a1 1 0 0 1 1 1v17l-7-3-7 3V4a1 1 0 0 1 1-1z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
 .article-content .md-task .md-question {
     margin: 0 0 8px 0;
-    background: #F6FFF9;
+    background: linear-gradient(90deg, rgba(221, 239, 229, 0.95) 0%, rgba(245, 252, 248, 0.99) 50%, rgba(221, 239, 229, 0.95) 100%);
     /* 更柔和的薄荷 */
     border: 1px solid #EAFBF0;
     padding: 10px;
@@ -1344,7 +1373,7 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
 }
 
 .article-content .md-task .md-option {
-    background: #F4FBFF;
+    background: linear-gradient(90deg, rgba(218, 234, 242, 0.95) 0%, rgba(243, 250, 253, 0.99) 50%, rgba(218, 234, 242, 0.95) 100%);
     /* 更柔和的天蓝 */
     border: 1px solid rgba(0, 0, 0, 0.04);
     box-shadow: none;
@@ -1356,13 +1385,13 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
 }
 
 .article-content .md-task .md-option .md-option-key {
-    background: #FBF6FF;
+    background: linear-gradient(90deg, rgba(227, 217, 241, 0.92) 0%, rgba(246, 241, 252, 0.97) 50%, rgba(227, 217, 241, 0.92) 100%);
     /* 更柔和的薰衣草 */
     border: 1px solid rgba(200, 180, 255, 0.12);
 }
 
 .article-content .md-task .md-option.is-correct {
-    background: #E6FFF0;
+    background: linear-gradient(90deg, rgba(209, 239, 223, 0.95) 0%, rgba(239, 252, 246, 0.99) 50%, rgba(209, 239, 223, 0.95) 100%);
     /* 更明显但仍可读的亮绿色底 */
     border-color: rgba(46, 204, 113, 0.85);
     /* 强烈的绿色边框 */
@@ -1371,7 +1400,7 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
 }
 
 .article-content .md-task .md-option.is-wrong {
-    background: #FFF4F5;
+    background: linear-gradient(90deg, rgba(242, 214, 223, 0.95) 0%, rgba(253, 242, 246, 0.99) 50%, rgba(242, 214, 223, 0.95) 100%);
     /* 更明显但不过分刺眼的亮粉/红底 */
     border-color: rgba(255, 99, 132, 0.85);
     /* 强烈的红色边框 */
@@ -1386,17 +1415,17 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
 .article-content .md-task .answer-toggle {
     border: 1px solid rgba(212, 160, 23, 0.85);
     color: #8b6b3a;
-    background: #FFF8E9;
+    background: linear-gradient(90deg, rgba(252, 234, 199, 0.96) 0%, rgba(255, 249, 237, 0.99) 50%, rgba(252, 234, 199, 0.96) 100%);
 }
 
 .article-content .md-task .answer-toggle.is-open {
     border: 1px solid rgba(212, 160, 23, 0.85);
     color: #8b6b3a;
-    background: #FFF8E9;
+    background: linear-gradient(90deg, rgba(252, 234, 199, 0.96) 0%, rgba(255, 249, 237, 0.99) 50%, rgba(252, 234, 199, 0.96) 100%);
 }
 
 .article-content .md-task .answer-inner {
-    background: #FBF7FF;
+    background: linear-gradient(90deg, rgba(231, 224, 245, 0.94) 0%, rgba(249, 246, 253, 0.98) 50%, rgba(231, 224, 245, 0.94) 100%);
     /* 更柔和 */
     border: 1px solid #F3EAFB;
 }

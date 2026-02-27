@@ -34,6 +34,23 @@ function loadBlogs(callback) {
         });
 }
 
+function enforceHomeLinksOpenInNewTab(scope) {
+    try {
+        if (!document.body || !document.body.classList.contains('home')) return;
+        const root = scope && typeof scope.querySelectorAll === 'function' ? scope : document;
+        root.querySelectorAll('a[href]').forEach(link => {
+            const href = (link.getAttribute('href') || '').trim();
+            if (!href || href === '#' || /^javascript:/i.test(href)) return;
+            link.setAttribute('target', '_blank');
+
+            const rel = (link.getAttribute('rel') || '').split(/\s+/).filter(Boolean);
+            if (!rel.includes('noopener')) rel.push('noopener');
+            if (!rel.includes('noreferrer')) rel.push('noreferrer');
+            link.setAttribute('rel', rel.join(' ').trim());
+        });
+    } catch (e) { }
+}
+
 // DOM加载完成后执行
 document.addEventListener('DOMContentLoaded', function () {
     // 在选定页面隐藏滚动条，同时保持内容可滚动
@@ -62,6 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // 首页公告栏（显示最新公告）
     try {
         if (document.body && document.body.classList.contains('home')) {
+            enforceHomeLinksOpenInNewTab();
             initAnnouncementModal();
             initSettingsModal();
             renderAnnouncementBanner();
@@ -87,7 +105,8 @@ document.addEventListener('DOMContentLoaded', function () {
             profileCard.style.cursor = 'pointer';
             profileCard.addEventListener('click', function (e) {
                 if (e.target.closest('a, button, input, .contact-btn')) return;
-                window.location.href = 'about.html';
+                const w = window.open('about.html', '_blank', 'noopener,noreferrer');
+                try { if (w) w.opener = null; } catch (err) { }
             });
         }
     } catch (e) { }
@@ -135,9 +154,15 @@ function renderAnnouncementBanner() {
                 </a>
                 </div>
             `;
+            enforceHomeLinksOpenInNewTab(host);
             try { if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') window.siteI18n.applyTo(host); } catch (e) { }
-            // 启动横幅正文自动滚动（如果超出高度则向下滚动，滚动到底部停顿后回到顶部重启）
-            try { startAnnouncementAutoScroll(host); } catch (e) { }
+            // 不在渲染时立即启动滚动：仅在弹窗打开后按延时策略启动，避免双重启动导致跳回顶部
+            try {
+                const modal = document.getElementById('announcementModal');
+                if (modal && modal.classList.contains('is-open') && typeof host.__scheduleAnnouncementAutoScroll === 'function') {
+                    host.__scheduleAnnouncementAutoScroll();
+                }
+            } catch (e) { }
             try {
                 const msgEl = host.querySelector('.announcement-message');
                 if (msgEl && msgEl.__wheelHandler) {
@@ -159,29 +184,50 @@ function initAnnouncementModal() {
     const trigger = document.getElementById('announcementFab');
     const modal = document.getElementById('announcementModal');
     const closeBtn = document.getElementById('announcementModalClose');
+    const noticeShownKey = 'homeAnnouncementModalShown_v1';
+    const reloadCarryKey = 'homeAnnouncementModalReloadCarry_v1';
 
     if (!trigger || !modal || !closeBtn) return;
     let scrollStartTimer = null;
+    let modalOpenAt = 0;
+    const scrollDelayMs = 3000;
+
+    function isReloadNavigation() {
+        try {
+            const navEntry = performance.getEntriesByType && performance.getEntriesByType('navigation');
+            if (navEntry && navEntry[0] && navEntry[0].type) return navEntry[0].type === 'reload';
+        } catch (e) { }
+        try {
+            return performance && performance.navigation && performance.navigation.type === 1;
+        } catch (e) { }
+        return false;
+    }
+
+    function scheduleAutoScrollForCurrentOpen() {
+        try {
+            const host = document.getElementById('announcementModalContent');
+            if (!host) return;
+            if (scrollStartTimer) {
+                clearTimeout(scrollStartTimer);
+                scrollStartTimer = null;
+            }
+            const elapsed = modalOpenAt ? (Date.now() - modalOpenAt) : 0;
+            const remaining = Math.max(0, scrollDelayMs - elapsed);
+            scrollStartTimer = setTimeout(() => {
+                if (!modal.classList.contains('is-open')) return;
+                requestAnimationFrame(() => {
+                    try { startAnnouncementAutoScroll(host); } catch (e) { }
+                });
+            }, remaining);
+        } catch (e) { }
+    }
 
     function openModal() {
         modal.classList.add('is-open');
         modal.setAttribute('aria-hidden', 'false');
         document.body.classList.add('announcement-modal-open');
-        try {
-            const host = document.getElementById('announcementModalContent');
-            if (host) {
-                if (scrollStartTimer) {
-                    clearTimeout(scrollStartTimer);
-                    scrollStartTimer = null;
-                }
-                scrollStartTimer = setTimeout(() => {
-                    if (!modal.classList.contains('is-open')) return;
-                    requestAnimationFrame(() => {
-                        try { startAnnouncementAutoScroll(host); } catch (e) { }
-                    });
-                }, 3000);
-            }
-        } catch (e) { }
+        modalOpenAt = Date.now();
+        scheduleAutoScrollForCurrentOpen();
     }
 
     function closeModal() {
@@ -189,10 +235,19 @@ function initAnnouncementModal() {
             clearTimeout(scrollStartTimer);
             scrollStartTimer = null;
         }
+        try {
+            const host = document.getElementById('announcementModalContent');
+            stopAnnouncementAutoScroll(host);
+        } catch (e) { }
         modal.classList.remove('is-open');
         modal.setAttribute('aria-hidden', 'true');
         document.body.classList.remove('announcement-modal-open');
     }
+
+    try {
+        const host = document.getElementById('announcementModalContent');
+        if (host) host.__scheduleAnnouncementAutoScroll = scheduleAutoScrollForCurrentOpen;
+    } catch (e) { }
 
     trigger.addEventListener('click', openModal);
     closeBtn.addEventListener('click', closeModal);
@@ -206,6 +261,31 @@ function initAnnouncementModal() {
             closeModal();
         }
     });
+
+    // 首次进入首页自动弹一次：刷新后不再弹；离开页面后清除记录。
+    try {
+        const carriedFromUnload = sessionStorage.getItem(reloadCarryKey) === '1';
+        const isReload = isReloadNavigation();
+
+        if (carriedFromUnload && isReload) {
+            localStorage.setItem(noticeShownKey, '1');
+        }
+
+        const alreadyShown = localStorage.getItem(noticeShownKey) === '1';
+        if (!alreadyShown) {
+            localStorage.setItem(noticeShownKey, '1');
+            setTimeout(openModal, 0);
+        }
+
+        if (carriedFromUnload) {
+            sessionStorage.removeItem(reloadCarryKey);
+        }
+    } catch (e) { }
+
+    window.addEventListener('beforeunload', () => {
+        try { sessionStorage.setItem(reloadCarryKey, '1'); } catch (e) { }
+        try { localStorage.removeItem(noticeShownKey); } catch (e) { }
+    });
 }
 
 function initSettingsModal() {
@@ -214,12 +294,13 @@ function initSettingsModal() {
     const closeBtn = document.getElementById('settingsModalClose');
     const tabs = document.querySelectorAll('.settings-tab');
     const sections = document.querySelectorAll('.settings-section');
+    const settingsPanel = document.querySelector('.settings-panel');
 
     if (!trigger || !modal || !closeBtn) return;
 
     // 创建全局背景音乐对象
     window.backgroundAudio = new Audio('music/澎湃.mp3');
-    window.backgroundAudio.volume = 0.05;
+    window.backgroundAudio.volume = 0.2;
     window.backgroundAudio.loop = true;
 
     // 标记是否已启用音乐
@@ -232,13 +313,19 @@ function initSettingsModal() {
         console.log('事件触发:', event.type, 'musicEnabled:', window.musicEnabled);
 
         if (!window.musicEnabled) {
+            if (!hasSelectedTrack()) {
+                stopAndClearSelectedTrack();
+                updateProgressUI();
+                updatePlayPauseButton();
+                return;
+            }
             console.log('尝试启用音乐...');
             userInteracted = true; // 标记已发生用户交互
             console.log('尝试启用音乐...');
             // 确保audio对象存在
             if (!window.backgroundAudio) {
                 window.backgroundAudio = new Audio('music/澎湃.mp3');
-                window.backgroundAudio.volume = 0.05;
+                window.backgroundAudio.volume = 0.2;
                 window.backgroundAudio.loop = true;
             }
 
@@ -273,29 +360,161 @@ function initSettingsModal() {
     const musicSelect = document.getElementById('music-select');
     const volumeSlider = document.getElementById('volume-slider');
     const volumeValue = document.getElementById('volume-value');
+    const progressSlider = document.getElementById('progress-slider');
+    const progressValue = document.getElementById('progress-value');
+    const playPauseText = document.getElementById('play-pause-text');
+    const musicFloatFab = document.getElementById('musicFloatFab');
+    const musicFloatFabIcon = musicFloatFab ? musicFloatFab.querySelector('i') : null;
+    const musicFloatResumeWindowMs = 3000;
+    let musicFloatHideTimer = null;
+
+    function hasSelectedTrack() {
+        return !!(musicSelect && musicSelect.value);
+    }
+
+    function stopAndClearSelectedTrack() {
+        try { window.backgroundAudio.pause(); } catch (e) { }
+        try { window.backgroundAudio.currentTime = 0; } catch (e) { }
+        try { window.backgroundAudio.removeAttribute('src'); } catch (e) { }
+        try { window.backgroundAudio.src = ''; } catch (e) { }
+        try { window.backgroundAudio.load(); } catch (e) { }
+        hideMusicFloatFab();
+    }
+
+    function clearMusicFloatHideTimer() {
+        if (musicFloatHideTimer) {
+            clearTimeout(musicFloatHideTimer);
+            musicFloatHideTimer = null;
+        }
+    }
+
+    function hideMusicFloatFab() {
+        if (!musicFloatFab) return;
+        clearMusicFloatHideTimer();
+        musicFloatFab.classList.remove('is-visible', 'is-paused');
+        musicFloatFab.setAttribute('aria-hidden', 'true');
+        musicFloatFab.hidden = true;
+    }
+
+    function showMusicFloatFab(isPaused) {
+        if (!musicFloatFab) return;
+        clearMusicFloatHideTimer();
+        musicFloatFab.hidden = false;
+        musicFloatFab.classList.add('is-visible');
+        musicFloatFab.classList.toggle('is-paused', !!isPaused);
+        musicFloatFab.setAttribute('aria-hidden', 'false');
+        musicFloatFab.setAttribute('aria-label', isPaused ? '继续播放音乐' : '关闭音乐');
+        if (musicFloatFabIcon) {
+            musicFloatFabIcon.className = isPaused ? 'fas fa-play' : 'fas fa-pause';
+        }
+        if (isPaused) {
+            musicFloatHideTimer = setTimeout(() => {
+                hideMusicFloatFab();
+            }, musicFloatResumeWindowMs);
+        }
+    }
+
+    function getI18nText(key, fallback) {
+        try {
+            const i18n = window.siteI18n;
+            if (!i18n || typeof i18n.getLang !== 'function' || !i18n.translations) return fallback;
+            const lang = i18n.getLang();
+            const map = i18n.translations[lang] || i18n.translations.ja || {};
+            return (map && map[key]) || fallback;
+        } catch (e) {
+            return fallback;
+        }
+    }
+
+    function formatTime(seconds) {
+        if (!Number.isFinite(seconds) || seconds < 0) return '00:00';
+        const total = Math.floor(seconds);
+        const minute = Math.floor(total / 60);
+        const second = total % 60;
+        return String(minute).padStart(2, '0') + ':' + String(second).padStart(2, '0');
+    }
+
+    let isSeeking = false;
+
+    function updateProgressUI() {
+        const duration = Number.isFinite(window.backgroundAudio.duration) ? window.backgroundAudio.duration : 0;
+        const currentTime = Number.isFinite(window.backgroundAudio.currentTime) ? window.backgroundAudio.currentTime : 0;
+        if (progressSlider && !isSeeking) {
+            progressSlider.value = duration > 0 ? ((currentTime / duration) * 100).toFixed(2) : '0';
+        }
+        if (progressValue) {
+            progressValue.textContent = formatTime(currentTime) + ' / ' + formatTime(duration);
+        }
+    }
 
     // 监听背景音乐播放状态变化
     window.backgroundAudio.addEventListener('play', updatePlayPauseButton);
     window.backgroundAudio.addEventListener('pause', updatePlayPauseButton);
+    window.backgroundAudio.addEventListener('timeupdate', updateProgressUI);
+    window.backgroundAudio.addEventListener('loadedmetadata', updateProgressUI);
+    window.backgroundAudio.addEventListener('durationchange', updateProgressUI);
+    window.backgroundAudio.addEventListener('ended', updateProgressUI);
+    window.backgroundAudio.addEventListener('play', () => {
+        showMusicFloatFab(false);
+    });
+    window.backgroundAudio.addEventListener('pause', () => {
+        if (!window.musicEnabled) {
+            hideMusicFloatFab();
+            return;
+        }
+        showMusicFloatFab(true);
+    });
+
+    if (musicFloatFab) {
+        musicFloatFab.addEventListener('click', () => {
+            if (!hasSelectedTrack()) {
+                stopAndClearSelectedTrack();
+                updateProgressUI();
+                updatePlayPauseButton();
+                return;
+            }
+            if (!window.musicEnabled) {
+                enableMusic();
+                return;
+            }
+            if (window.backgroundAudio.paused) {
+                window.backgroundAudio.play().catch(e => {
+                    console.log('播放失败:', e);
+                });
+                return;
+            }
+            window.backgroundAudio.pause();
+        });
+    }
 
     // 同步当前音乐选择和音量到设置弹窗
     musicSelect.value = '澎湃.mp3'; // 默认选择
     volumeSlider.value = window.backgroundAudio.volume.toString();
     volumeValue.textContent = Math.round(window.backgroundAudio.volume * 100) + '%';
+    updateProgressUI();
 
     // 更新播放/暂停按钮状态
     function updatePlayPauseButton() {
+        let iconClass = 'fas fa-play';
+        let text = getI18nText('settings_play', '播放');
         if (!window.musicEnabled) {
-            playPauseBtn.innerHTML = '<i class="fas fa-play"></i> 启用音乐';
+            iconClass = 'fas fa-play';
+            text = getI18nText('settings_enable_music', '启用音乐');
         } else if (window.backgroundAudio.paused) {
-            playPauseBtn.innerHTML = '<i class="fas fa-play"></i> 播放';
+            iconClass = 'fas fa-play';
+            text = getI18nText('settings_play', '播放');
         } else {
-            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i> 暂停';
+            iconClass = 'fas fa-pause';
+            text = getI18nText('settings_pause', '暂停');
         }
+        const icon = playPauseBtn ? playPauseBtn.querySelector('i') : null;
+        if (icon) icon.className = iconClass;
+        if (playPauseText) playPauseText.textContent = text;
     }
 
     // 初始状态更新
     updatePlayPauseButton();
+    hideMusicFloatFab();
 
     function openModal() {
         modal.classList.add('is-open');
@@ -309,19 +528,72 @@ function initSettingsModal() {
         document.body.classList.remove('settings-modal-open');
     }
 
+    function updateSettingsPanelHeight(targetSection, immediate) {
+        if (!settingsPanel || !targetSection) return;
+        const nextHeight = Math.max(1, targetSection.scrollHeight || targetSection.offsetHeight || 0);
+        if (!nextHeight) return;
+
+        if (immediate) {
+            settingsPanel.style.height = nextHeight + 'px';
+            return;
+        }
+
+        const currentHeight = Math.max(1, Math.round(settingsPanel.getBoundingClientRect().height)) || nextHeight;
+        settingsPanel.style.height = currentHeight + 'px';
+        void settingsPanel.offsetHeight;
+        settingsPanel.style.height = nextHeight + 'px';
+    }
+
+    function activateSettingsSection(tabName, options) {
+        if (!tabName) return;
+        const opts = options || {};
+        let targetSection = null;
+
+        tabs.forEach(t => {
+            const isActive = t.dataset.tab === tabName;
+            t.classList.toggle('active', isActive);
+            t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+
+        sections.forEach(section => {
+            const isActive = section.id === (tabName + '-section');
+            section.classList.toggle('active', isActive);
+            section.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+            if (isActive) targetSection = section;
+        });
+
+        if (targetSection) {
+            updateSettingsPanelHeight(targetSection, !!opts.immediate);
+        }
+    }
+
     // 标签切换
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
-            tabs.forEach(t => t.classList.remove('active'));
-            sections.forEach(s => s.classList.remove('active'));
-            tab.classList.add('active');
             const tabName = tab.dataset.tab;
-            document.getElementById(tabName + '-section').classList.add('active');
+            activateSettingsSection(tabName);
         });
     });
 
+    const initialActiveTab = Array.from(tabs).find(t => t.classList.contains('active'));
+    if (initialActiveTab && initialActiveTab.dataset && initialActiveTab.dataset.tab) {
+        activateSettingsSection(initialActiveTab.dataset.tab, { immediate: true });
+    }
+
     // 语言设置
     const languageInputs = document.querySelectorAll('input[name="language"]');
+
+    function syncLanguageSelection() {
+        const currentLang = (window.siteI18n && typeof window.siteI18n.getLang === 'function')
+            ? window.siteI18n.getLang()
+            : 'ja';
+        languageInputs.forEach(input => {
+            input.checked = input.value === currentLang;
+        });
+    }
+
+    syncLanguageSelection();
+
     languageInputs.forEach(input => {
         input.addEventListener('change', () => {
             if (input.checked) {
@@ -345,12 +617,19 @@ function initSettingsModal() {
             });
         } else {
             // 选择"无"时停止播放
-            window.backgroundAudio.pause();
+            stopAndClearSelectedTrack();
         }
+        updateProgressUI();
         updatePlayPauseButton();
     });
 
     playPauseBtn.addEventListener('click', () => {
+        if (!hasSelectedTrack()) {
+            stopAndClearSelectedTrack();
+            updateProgressUI();
+            updatePlayPauseButton();
+            return;
+        }
         if (!window.musicEnabled) {
             // 启用音乐
             enableMusic();
@@ -367,6 +646,7 @@ function initSettingsModal() {
     stopBtn.addEventListener('click', () => {
         window.backgroundAudio.pause();
         window.backgroundAudio.currentTime = 0;
+        updateProgressUI();
         updatePlayPauseButton();
     });
 
@@ -374,6 +654,33 @@ function initSettingsModal() {
         const volume = parseFloat(volumeSlider.value);
         volumeValue.textContent = Math.round(volume * 100) + '%';
         window.backgroundAudio.volume = volume;
+    });
+
+    if (progressSlider) {
+        progressSlider.addEventListener('input', () => {
+            isSeeking = true;
+            const duration = Number.isFinite(window.backgroundAudio.duration) ? window.backgroundAudio.duration : 0;
+            const ratio = parseFloat(progressSlider.value) / 100;
+            const previewTime = duration > 0 ? ratio * duration : 0;
+            if (progressValue) {
+                progressValue.textContent = formatTime(previewTime) + ' / ' + formatTime(duration);
+            }
+        });
+
+        progressSlider.addEventListener('change', () => {
+            const duration = Number.isFinite(window.backgroundAudio.duration) ? window.backgroundAudio.duration : 0;
+            const ratio = parseFloat(progressSlider.value) / 100;
+            if (duration > 0) {
+                window.backgroundAudio.currentTime = Math.min(duration, Math.max(0, ratio * duration));
+            }
+            isSeeking = false;
+            updateProgressUI();
+        });
+    }
+
+    document.addEventListener('site:languageChanged', () => {
+        updatePlayPauseButton();
+        syncLanguageSelection();
     });
 
     // 事件监听
@@ -399,12 +706,7 @@ function startAnnouncementAutoScroll(bannerEl, opts) {
     const msg = bannerEl.querySelector('.announcement-message');
     if (!msg) return;
 
-    try {
-        if (msg.__autoScroll) {
-            if (msg.__autoScroll.styleEl && msg.__autoScroll.styleEl.parentNode) msg.__autoScroll.styleEl.parentNode.removeChild(msg.__autoScroll.styleEl);
-            msg.__autoScroll = null;
-        }
-    } catch (e) { }
+    stopAnnouncementAutoScroll(bannerEl);
 
     if (msg.scrollHeight <= msg.clientHeight) return;
 
@@ -438,7 +740,20 @@ function startAnnouncementAutoScroll(bannerEl, opts) {
     inner.style.animation = `${animName} ${totalDuration}s linear infinite`;
 
     // 存储引用以便需要时清理
-    msg.__autoScroll = { styleEl: styleEl, animName: animName };
+    msg.__autoScroll = { styleEl: styleEl, animName: animName, originalHtml: originalHtml };
+}
+
+function stopAnnouncementAutoScroll(bannerEl) {
+    if (!bannerEl) return;
+    const msg = bannerEl.querySelector('.announcement-message');
+    if (!msg || !msg.__autoScroll) return;
+
+    try {
+        const state = msg.__autoScroll;
+        if (state.styleEl && state.styleEl.parentNode) state.styleEl.parentNode.removeChild(state.styleEl);
+        if (typeof state.originalHtml === 'string') msg.innerHTML = state.originalHtml;
+        msg.__autoScroll = null;
+    } catch (e) { }
 }
 
 // 初始化个人联系方式交互（显示/隐藏微信与QQ）
@@ -619,7 +934,8 @@ function initViewMore(totalCount, shownCount) {
     window.addEventListener('resize', throttle(alignWidthToRecentCard, 150));
 
     btn.addEventListener('click', () => {
-        window.location.href = 'archive.html';
+        const w = window.open('archive.html', '_blank', 'noopener,noreferrer');
+        try { if (w) w.opener = null; } catch (e) { }
     });
 }
 
@@ -727,7 +1043,8 @@ function createRecentUpdatesCard(allBlogs) {
                 for (let i = 0; i <= level; i++) selectedTags[i] = path[i] || null;
                 for (let i = level + 1; i < 3; i++) selectedTags[i] = null;
                 const tagsParam = JSON.stringify(selectedTags);
-                window.location.href = `categories.html?tags=${encodeURIComponent(tagsParam)}`;
+                const w = window.open(`categories.html?tags=${encodeURIComponent(tagsParam)}`, '_blank', 'noopener,noreferrer');
+                try { if (w) w.opener = null; } catch (err) { }
             }
             return;
         }
@@ -780,7 +1097,8 @@ function createBlogCard(blog) {
             for (let i = level + 1; i < 3; i++) selectedTags[i] = null;
 
             const tagsParam = JSON.stringify(selectedTags);
-            window.location.href = `categories.html?tags=${encodeURIComponent(tagsParam)}`;
+            const w = window.open(`categories.html?tags=${encodeURIComponent(tagsParam)}`, '_blank', 'noopener,noreferrer');
+            try { if (w) w.opener = null; } catch (err) { }
         });
     });
 

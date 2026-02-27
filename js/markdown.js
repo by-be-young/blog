@@ -112,6 +112,63 @@ function renderMarkdownContent() {
         return out;
     }
 
+    function buildOptionsHtml(optionsText) {
+        if (!optionsText) return '<div class="md-options"></div>';
+
+        const rawLines = optionsText.split(/\r?\n/);
+        const explicitKeyPattern = /^\s*([A-Ga-g])\s*[\)）\.：:\-]?\s*(.*)$/;
+        const hasExplicitKeys = rawLines.some(line => explicitKeyPattern.test(line));
+        const optionItems = [];
+
+        if (hasExplicitKeys) {
+            let current = null;
+            rawLines.forEach(line => {
+                const matched = line.match(explicitKeyPattern);
+                if (matched) {
+                    if (current) optionItems.push(current);
+                    current = {
+                        key: matched[1].toUpperCase(),
+                        content: matched[2] || ''
+                    };
+                    return;
+                }
+
+                if (current) current.content += `\n${line}`;
+            });
+
+            if (current) optionItems.push(current);
+        } else {
+            let autoIndex = 0;
+            rawLines.forEach(line => {
+                if (!line.trim()) return;
+                optionItems.push({
+                    key: String.fromCharCode('A'.charCodeAt(0) + autoIndex),
+                    content: line.trim()
+                });
+                autoIndex++;
+            });
+        }
+
+        const parts = ['<div class="md-options">'];
+
+        optionItems.forEach(item => {
+            const optionProtected = extractMathFrom((item.content || '').trim());
+            const optionHtmlRaw = (window.marked && typeof window.marked.parse === 'function')
+                ? window.marked.parse(optionProtected)
+                : optionProtected;
+            const optionHtml = (optionHtmlRaw || '').trim();
+            parts.push(
+                `<div class="md-option" role="button" tabindex="0" data-key="${item.key}">` +
+                `<strong class="md-option-key">${item.key}</strong>` +
+                `<div class="md-option-text">${optionHtml}</div>` +
+                `</div>`
+            );
+        });
+
+        parts.push('</div>');
+        return parts.join('\n');
+    }
+
     // 自定义块转换：
     // [question]... [\question] -> <div class="md-question">...</div>
     // [options]... [\options] -> <div class="md-options">...多个 .md-option 按钮...</div>
@@ -129,30 +186,9 @@ function renderMarkdownContent() {
             return '\n<div class="md-question">' + inner + '</div>\n';
         });
 
-        // options -> 将每一行转换为按钮（自动分配字母或使用行首显式字母）
+        // options -> 将选项转换为可交互块（支持显式字母前缀与多行 Markdown）
         mdText = mdText.replace(/\[options\]([\s\S]*?)\[\\options\]/g, function (_, inner) {
-            const lines = inner.split(/\r?\n/).filter(l => l.trim() !== '');
-            const parts = [];
-            parts.push('<div class="md-options">');
-
-            // 为本组分配顺序字母（仅当行内未显式给出字母时使用）
-            let autoIndex = 0;
-            lines.forEach(line => {
-                // 允许行以 "A. 内容"、"A) 内容"、"A：内容" 等形式给出字母
-                const m = line.match(/^\s*([A-Ga-g])\s*[\)）\.：:\-]?\s*(.*)$/);
-                let key, txt;
-                if (m) {
-                    key = m[1].toUpperCase();
-                    txt = m[2].trim();
-                } else {
-                    key = String.fromCharCode('A'.charCodeAt(0) + autoIndex);
-                    txt = line.trim();
-                    autoIndex++;
-                }
-                parts.push(`<button type="button" class="md-option" data-key="${key}"><strong class="md-option-key">${key}</strong><span class="md-option-text">${txt}</span></button>`);
-            });
-            parts.push('</div>');
-            return parts.join('\n');
+            return buildOptionsHtml(inner);
         });
 
         return mdText;
@@ -173,28 +209,9 @@ function renderMarkdownContent() {
             return `@@QUESTION_${idx}@@`;
         });
 
-        // then handle options as before
+        // then handle options
         const step2 = step1.replace(/\[options\]([\s\S]*?)\[\\options\]/g, function (_, optInner) {
-            const lines = optInner.split(/\r?\n/).filter(l => l.trim() !== '');
-            const parts = [];
-            parts.push('<div class="md-options">');
-
-            let autoIndex = 0;
-            lines.forEach(line => {
-                const m = line.match(/^\s*([A-Ga-g])\s*[\)）\.：:\-]?\s*(.*)$/);
-                let key, txt;
-                if (m) {
-                    key = m[1].toUpperCase();
-                    txt = m[2].trim();
-                } else {
-                    key = String.fromCharCode('A'.charCodeAt(0) + autoIndex);
-                    txt = line.trim();
-                    autoIndex++;
-                }
-                parts.push(`<button type="button" class="md-option" data-key="${key}"><strong class="md-option-key">${key}</strong><span class="md-option-text">${txt}</span></button>`);
-            });
-            parts.push('</div>');
-            return parts.join('\n');
+            return buildOptionsHtml(optInner);
         });
         return step2;
     }
@@ -472,7 +489,10 @@ function renderMarkdownContent() {
         if (!optionsGroup) return;
         if (locked) optionsGroup.classList.add('is-locked'); else optionsGroup.classList.remove('is-locked');
         Array.from(optionsGroup.querySelectorAll('.md-option')).forEach(b => {
-            try { b.disabled = !!locked; b.setAttribute('aria-disabled', locked ? 'true' : 'false'); } catch (e) { }
+            try {
+                b.setAttribute('aria-disabled', locked ? 'true' : 'false');
+                if (locked) b.setAttribute('tabindex', '-1'); else b.setAttribute('tabindex', '0');
+            } catch (e) { }
             if (locked) b.classList.add('is-locked'); else b.classList.remove('is-locked');
         });
     }
@@ -509,82 +529,90 @@ function renderMarkdownContent() {
     })();
     // 绑定选项点击交互（基于 .md-option）
     (function bindOptionClicks() {
-        Array.from(contentElement.querySelectorAll('.md-option')).forEach(btn => {
-            btn.addEventListener('click', () => {
-                // 如果所在选项组已被锁定（被选择或答案已展开），阻止点击
-                const optionsGroup = btn.closest('.md-options');
-                if (optionsGroup && optionsGroup.classList.contains('is-locked')) return;
+        const handleOptionActivate = (btn) => {
+            // 如果所在选项组已被锁定（被选择或答案已展开），阻止点击
+            const optionsGroup = btn.closest('.md-options');
+            if (optionsGroup && optionsGroup.classList.contains('is-locked')) return;
 
-                // 防止重复标记
-                if (btn.classList.contains('is-correct') || btn.classList.contains('is-wrong')) return;
+            // 防止重复标记
+            if (btn.classList.contains('is-correct') || btn.classList.contains('is-wrong')) return;
 
-                const key = (btn.getAttribute('data-key') || '').toUpperCase();
-                if (!key) return;
+            const key = (btn.getAttribute('data-key') || '').toUpperCase();
+            if (!key) return;
 
-                // 首先尝试在同一 `.md-task` 容器内找到关联的 answer-block（保证 task 作用域）
-                const task = btn.closest && btn.closest('.md-task') ? btn.closest('.md-task') : null;
-                let answerBlock = null;
-                if (task) answerBlock = task.querySelector('.answer-block');
+            // 首先尝试在同一 `.md-task` 容器内找到关联的 answer-block（保证 task 作用域）
+            const task = btn.closest && btn.closest('.md-task') ? btn.closest('.md-task') : null;
+            let answerBlock = null;
+            if (task) answerBlock = task.querySelector('.answer-block');
 
-                // 回退：向后查找下一个 .answer-block（原有逻辑）
-                if (!answerBlock) {
-                    let cur = btn.parentElement;
-                    while (cur) {
-                        let sib = cur.nextElementSibling;
-                        while (sib) {
-                            if (sib.classList && sib.classList.contains('answer-block')) { answerBlock = sib; break; }
-                            sib = sib.nextElementSibling;
-                        }
-                        if (answerBlock) break;
-                        cur = cur.parentElement;
+            // 回退：向后查找下一个 .answer-block（原有逻辑）
+            if (!answerBlock) {
+                let cur = btn.parentElement;
+                while (cur) {
+                    let sib = cur.nextElementSibling;
+                    while (sib) {
+                        if (sib.classList && sib.classList.contains('answer-block')) { answerBlock = sib; break; }
+                        sib = sib.nextElementSibling;
                     }
+                    if (answerBlock) break;
+                    cur = cur.parentElement;
                 }
+            }
 
-                // 最后回退到全局第一个 answer-block
-                if (!answerBlock) answerBlock = contentElement.querySelector('.answer-block');
-                if (!answerBlock) return;
+            // 最后回退到全局第一个 answer-block
+            if (!answerBlock) answerBlock = contentElement.querySelector('.answer-block');
+            if (!answerBlock) return;
 
-                const contentEl = answerBlock.querySelector('.answer-content');
+            const contentEl = answerBlock.querySelector('.answer-content');
 
-                // 优先使用 data-answer（由解析器在生成占位时写入），否则回退到从文本中解析
-                let found = (answerBlock.getAttribute('data-answer') || '').toUpperCase().replace(/[^A-G]/g, '').charAt(0) || null;
+            // 优先使用 data-answer（由解析器在生成占位时写入），否则回退到从文本中解析
+            let found = (answerBlock.getAttribute('data-answer') || '').toUpperCase().replace(/[^A-G]/g, '').charAt(0) || null;
+            if (!found) {
+                const text = (contentEl && contentEl.textContent) ? contentEl.textContent : '';
+                // 尝试从文本中解析正确选项（A-G）
+                const m1 = text.match(/结论[:：]\s*([A-Ga-g])/i) || text.match(/([^A-Za-z0-9]|^)\b([A-Ga-g])\b\s*正确/i) || text.match(/^\s*([A-Ga-g])[\)）\.：:\-\s]/m);
+                if (m1) found = (m1[1] || m1[2] || m1[0]).toString().trim().toUpperCase().replace(/[^A-G]/g, '').charAt(0);
+
                 if (!found) {
-                    const text = (contentEl && contentEl.textContent) ? contentEl.textContent : '';
-                    // 尝试从文本中解析正确选项（A-G）
-                    const m1 = text.match(/结论[:：]\s*([A-Ga-g])/i) || text.match(/([^A-Za-z0-9]|^)\b([A-Ga-g])\b\s*正确/i) || text.match(/^\s*([A-Ga-g])[\)）\.：:\-\s]/m);
-                    if (m1) found = (m1[1] || m1[2] || m1[0]).toString().trim().toUpperCase().replace(/[^A-G]/g, '').charAt(0);
-
-                    if (!found) {
-                        const lines = text.split(/\r?\n/);
-                        for (const ln of lines) {
-                            const mm = ln.match(/^\s*([A-Ga-g])[^A-Za-z0-9]*正确/i);
-                            if (mm) { found = mm[1].toUpperCase(); break; }
-                        }
+                    const lines = text.split(/\r?\n/);
+                    for (const ln of lines) {
+                        const mm = ln.match(/^\s*([A-Ga-g])[^A-Za-z0-9]*正确/i);
+                        if (mm) { found = mm[1].toUpperCase(); break; }
                     }
                 }
+            }
 
-                // 标记样式与自动展开行为
-                if (found && found === key) {
-                    btn.classList.add('is-correct');
-                    // 选择正确后锁定本题所有选项组（在 task 内）
-                    if (task) Array.from(task.querySelectorAll('.md-options')).forEach(g => setOptionsLocked(g, true));
-                    else if (optionsGroup) setOptionsLocked(optionsGroup, true);
-                } else {
-                    btn.classList.add('is-wrong');
-                    // 自动展开答案块（使用统一 helper）
-                    const toggle = answerBlock.querySelector('.answer-toggle');
-                    if (toggle && !toggle.classList.contains('is-open')) expandAnswerBlock(answerBlock);
-                    // 锁定本题所有选项组（在 task 内），并高亮正确选项
-                    if (task) Array.from(task.querySelectorAll('.md-options')).forEach(g => setOptionsLocked(g, true));
-                    else if (optionsGroup) setOptionsLocked(optionsGroup, true);
-                    if (found) {
-                        // 优先在同一 task 内查找对应的正确按钮，再回退到当前组或全局
-                        let correctBtn = null;
-                        if (task) correctBtn = task.querySelector(`.md-option[data-key="${found}"]`);
-                        if (!correctBtn && optionsGroup) correctBtn = optionsGroup.querySelector(`.md-option[data-key="${found}"]`);
-                        if (!correctBtn) correctBtn = contentElement.querySelector(`.md-option[data-key="${found}"]`);
-                        if (correctBtn) correctBtn.classList.add('is-correct');
-                    }
+            // 标记样式与自动展开行为
+            if (found && found === key) {
+                btn.classList.add('is-correct');
+                // 选择正确后锁定本题所有选项组（在 task 内）
+                if (task) Array.from(task.querySelectorAll('.md-options')).forEach(g => setOptionsLocked(g, true));
+                else if (optionsGroup) setOptionsLocked(optionsGroup, true);
+            } else {
+                btn.classList.add('is-wrong');
+                // 自动展开答案块（使用统一 helper）
+                const toggle = answerBlock.querySelector('.answer-toggle');
+                if (toggle && !toggle.classList.contains('is-open')) expandAnswerBlock(answerBlock);
+                // 锁定本题所有选项组（在 task 内），并高亮正确选项
+                if (task) Array.from(task.querySelectorAll('.md-options')).forEach(g => setOptionsLocked(g, true));
+                else if (optionsGroup) setOptionsLocked(optionsGroup, true);
+                if (found) {
+                    // 优先在同一 task 内查找对应的正确按钮，再回退到当前组或全局
+                    let correctBtn = null;
+                    if (task) correctBtn = task.querySelector(`.md-option[data-key="${found}"]`);
+                    if (!correctBtn && optionsGroup) correctBtn = optionsGroup.querySelector(`.md-option[data-key="${found}"]`);
+                    if (!correctBtn) correctBtn = contentElement.querySelector(`.md-option[data-key="${found}"]`);
+                    if (correctBtn) correctBtn.classList.add('is-correct');
+                }
+            }
+        };
+
+        Array.from(contentElement.querySelectorAll('.md-option')).forEach(btn => {
+            btn.addEventListener('click', () => handleOptionActivate(btn));
+            btn.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    handleOptionActivate(btn);
                 }
             });
         });
@@ -672,6 +700,73 @@ async function copyTextToClipboard(text) {
 function enhanceCodeBlocks(rootEl) {
     if (!rootEl) return;
 
+    function collapseCodeBlock(container, bodyEl) {
+        if (!container || !bodyEl) return;
+        if (bodyEl.__expandEndHandler) {
+            bodyEl.removeEventListener('transitionend', bodyEl.__expandEndHandler);
+            bodyEl.__expandEndHandler = null;
+        }
+        if (bodyEl.__collapseEndHandler) {
+            bodyEl.removeEventListener('transitionend', bodyEl.__collapseEndHandler);
+            bodyEl.__collapseEndHandler = null;
+        }
+        bodyEl.hidden = false;
+        const currentHeight = bodyEl.getBoundingClientRect().height || bodyEl.scrollHeight;
+        bodyEl.style.overflow = 'hidden';
+        bodyEl.style.transition = 'height 280ms ease, opacity 220ms ease';
+        bodyEl.style.maxHeight = '';
+        bodyEl.style.height = currentHeight + 'px';
+        bodyEl.style.opacity = '1';
+        void bodyEl.offsetHeight;
+        requestAnimationFrame(() => {
+            container.classList.add('is-collapsed');
+            bodyEl.style.height = '0px';
+            bodyEl.style.opacity = '0';
+        });
+        const onEnd = (e) => {
+            if (e.propertyName !== 'height') return;
+            bodyEl.hidden = true;
+            bodyEl.style.height = '';
+            bodyEl.removeEventListener('transitionend', onEnd);
+            bodyEl.__collapseEndHandler = null;
+        };
+        bodyEl.__collapseEndHandler = onEnd;
+        bodyEl.addEventListener('transitionend', onEnd);
+    }
+
+    function expandCodeBlock(container, bodyEl) {
+        if (!container || !bodyEl) return;
+        if (bodyEl.__collapseEndHandler) {
+            bodyEl.removeEventListener('transitionend', bodyEl.__collapseEndHandler);
+            bodyEl.__collapseEndHandler = null;
+        }
+        if (bodyEl.__expandEndHandler) {
+            bodyEl.removeEventListener('transitionend', bodyEl.__expandEndHandler);
+            bodyEl.__expandEndHandler = null;
+        }
+        bodyEl.hidden = false;
+        bodyEl.style.overflow = 'hidden';
+        bodyEl.style.transition = 'height 280ms ease, opacity 220ms ease';
+        bodyEl.style.maxHeight = '';
+        bodyEl.style.height = '0px';
+        bodyEl.style.opacity = '0';
+        void bodyEl.offsetHeight;
+        container.classList.remove('is-collapsed');
+        const targetHeight = bodyEl.scrollHeight;
+        requestAnimationFrame(() => {
+            bodyEl.style.height = targetHeight + 'px';
+            bodyEl.style.opacity = '1';
+        });
+        const onEnd = (e) => {
+            if (e.propertyName !== 'height') return;
+            bodyEl.style.height = '';
+            bodyEl.removeEventListener('transitionend', onEnd);
+            bodyEl.__expandEndHandler = null;
+        };
+        bodyEl.__expandEndHandler = onEnd;
+        bodyEl.addEventListener('transitionend', onEnd);
+    }
+
     const pres = Array.from(rootEl.querySelectorAll('pre'));
     pres.forEach(pre => {
         const code = pre.querySelector('code');
@@ -721,6 +816,11 @@ function enhanceCodeBlocks(rootEl) {
         container.appendChild(header);
         container.appendChild(body);
 
+        body.style.overflow = 'hidden';
+        body.style.opacity = '1';
+
+        let lastToggleAt = 0;
+
         addCodeBlockLineNumbers(body, pre, code);
 
         btnCopy.addEventListener('click', async () => {
@@ -748,7 +848,12 @@ function enhanceCodeBlocks(rootEl) {
         });
 
         btnToggle.addEventListener('click', () => {
-            const collapsed = container.classList.toggle('is-collapsed');
+            const now = Date.now();
+            if (now - lastToggleAt < 200) return;
+            lastToggleAt = now;
+            const collapsed = !container.classList.contains('is-collapsed');
+            if (collapsed) collapseCodeBlock(container, body);
+            else expandCodeBlock(container, body);
             const icon = btnToggle.querySelector('i');
             const label = btnToggle.querySelector('span');
             try {

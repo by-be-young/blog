@@ -72,7 +72,7 @@
         grid-template-columns: 1fr;
     }
 
-    /* 隐藏头部内联菜单（链接项），但保持搜索与语言控件始终可见 */
+    /* 隐藏头部内联菜单（链接项），但保持搜索控件始终可见 */
     .nav-container>.nav-menu {
         display: none !important;
     }
@@ -81,17 +81,12 @@
         display: block !important;
     }
 
-    /* 搜索与语言始终可见并可交互，提升层级以覆盖遮罩 */
-    .nav-search-btn,
-    .nav-lang-wrap {
+    /* 搜索控件始终可见并可交互，提升层级以覆盖遮罩 */
+    .nav-search-btn {
         display: inline-flex !important;
         align-items: center !important;
         position: relative !important;
         z-index: 1501 !important;
-    }
-
-    .nav-lang {
-        display: block !important;
     }
 
     /* offcanvas 使用 transform 隐藏以避免留下可视缝隙，同时使用不透明马卡龙渐变 */

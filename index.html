@@ -247,7 +247,7 @@
                 <p class="subtitle">❤️ <span data-i18n="beihang"></span> ❤️</p>
             </div>
             <div class="scroll-down">
-                <p class="music-tip">点击页面或按任意键启用背景音乐</p>
+                <p class="music-tip" data-i18n="settings_music_hint">点击页面或按任意键启用背景音乐</p>
                 <i class="fas fa-chevron-down bounce"></i>
             </div>
         </section>
@@ -346,6 +346,10 @@
         <i class="fas fa-cog" aria-hidden="true"></i>
     </button>
 
+    <button id="musicFloatFab" class="music-fab" aria-label="关闭音乐" aria-hidden="true" hidden>
+        <i class="fas fa-pause" aria-hidden="true"></i>
+    </button>
+
     <button id="announcementFab" class="announcement-fab" aria-label="打开公告弹窗">
         <i class="fas fa-bullhorn" aria-hidden="true"></i>
     </button>
@@ -366,43 +370,55 @@
             </button>
             <div class="settings-modal-content">
                 <div class="settings-sidebar">
-                    <button class="settings-tab active" data-tab="language">语言</button>
-                    <button class="settings-tab" data-tab="music">音乐</button>
+                    <button class="settings-tab active" data-tab="language"
+                        data-i18n="settings_tab_language">语言</button>
+                    <button class="settings-tab" data-tab="music" data-i18n="settings_tab_music">音乐</button>
                 </div>
                 <div class="settings-panel">
                     <div class="settings-section active" id="language-section">
-                        <h3>语言设置</h3>
+                        <h3 data-i18n="settings_language_title">语言设置</h3>
+                        <p class="language-note" data-i18n="settings_language_note">语言设置不影响博客内容的语种。</p>
                         <div class="language-options">
-                            <label><input type="radio" name="language" value="zh"> 中文</label>
-                            <label><input type="radio" name="language" value="en"> English</label>
-                            <label><input type="radio" name="language" value="ja" checked> 日本語</label>
+                            <label><input type="radio" name="language" value="zh"> <span
+                                    data-i18n="settings_language_zh">中文</span></label>
+                            <label><input type="radio" name="language" value="en"> <span
+                                    data-i18n="settings_language_en">English</span></label>
+                            <label><input type="radio" name="language" value="ja" checked> <span
+                                    data-i18n="settings_language_ja">日本語</span></label>
                         </div>
                     </div>
                     <div class="settings-section" id="music-section">
-                        <h3>音乐设置</h3>
-                        <p class="music-hint">点击页面、按键盘、移动鼠标或滚动滚轮可启用背景音乐</p>
+                        <h3 data-i18n="settings_music_title">音乐设置</h3>
+                        <p class="music-hint" data-i18n="settings_music_hint">点击页面或按任意键启用背景音乐</p>
+                        <p class="music-original-note" data-i18n="settings_music_original">所有音乐均为原创</p>
                         <div class="music-controls">
                             <div class="music-track">
-                                <label for="music-select">选择曲目：</label>
+                                <label for="music-select" data-i18n="settings_track_label">选择曲目：</label>
                                 <select id="music-select">
-                                    <option value="">无</option>
-                                    <option value="抹不去的记忆.mp3">抹不去的记忆</option>
-                                    <option value="澎湃.mp3">澎湃</option>
-                                    <option value="谎画.mp3">谎画</option>
+                                    <option value="" data-i18n="settings_track_none">无</option>
+                                    <option value="抹不去的记忆.mp3" data-i18n="settings_track_memory">抹不去的记忆</option>
+                                    <option value="澎湃.mp3" data-i18n="settings_track_passion">澎湃</option>
+                                    <option value="谎画.mp3" data-i18n="settings_track_liepaint">谎画</option>
                                 </select>
                             </div>
                             <div class="music-playback">
                                 <button id="play-pause-btn" class="music-btn">
-                                    <i class="fas fa-play"></i> 播放
+                                    <i class="fas fa-play"></i> <span id="play-pause-text"
+                                        data-i18n="settings_play">播放</span>
                                 </button>
                                 <button id="stop-btn" class="music-btn">
-                                    <i class="fas fa-stop"></i> 停止
+                                    <i class="fas fa-stop"></i> <span id="stop-text" data-i18n="settings_stop">停止</span>
                                 </button>
                             </div>
+                            <div class="music-progress">
+                                <label for="progress-slider" data-i18n="settings_progress_label">进度：</label>
+                                <input type="range" id="progress-slider" min="0" max="100" step="0.1" value="0">
+                                <span id="progress-value">00:00 / 00:00</span>
+                            </div>
                             <div class="music-volume">
-                                <label for="volume-slider">音量：</label>
-                                <input type="range" id="volume-slider" min="0.05" max="1" step="0.05" value="0.05">
-                                <span id="volume-value">5%</span>
+                                <label for="volume-slider" data-i18n="settings_volume_label">音量：</label>
+                                <input type="range" id="volume-slider" min="0.05" max="1" step="0.05" value="0.2">
+                                <span id="volume-value">20%</span>
                             </div>
                         </div>
                     </div>
