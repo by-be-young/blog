@@ -1,8 +1,23 @@
 [
     {
+        "id": 652769467,
+        "title": "千鳥",
+        "excerpt": "yorushika新歌「千鳥」歌词、翻译及赏析",
+        "date": "2026-03-04",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "音乐",
+            "J-POP",
+            "ヨルシカ"
+        ],
+        "type": "落音缤纷",
+        "contentFile": "blogs/音乐/J-POP/ヨルシカ/千鳥.md",
+        "recommended": false
+    },
+    {
         "id": 430702699,
         "title": "基质刷取指南",
-        "excerpt": "可以使用**搜索**功能查找你所需要刷取的武器~",
+        "excerpt": "终末地武器基质怎么选词条最赚？这个指南帮你快速查找并确定应该选择的词条。",
         "date": "2026-03-03",
         "image": "assets/images/blog_bg.png",
         "tags": [
@@ -10,23 +25,8 @@
             "游戏工具",
             "基质刷取"
         ],
-        "type": null,
+        "type": "纸上行舟",
         "contentFile": "blogs/明日方舟·终末地/游戏工具/基质刷取/基质刷取指南.md",
-        "recommended": false
-    },
-    {
-        "id": 652769467,
-        "title": "千鳥",
-        "excerpt": "微风于外传来呼唤",
-        "date": "2026-03-03",
-        "image": "assets/images/blog_bg.png",
-        "tags": [
-            "音乐",
-            "J-POP",
-            "ヨルシカ"
-        ],
-        "type": null,
-        "contentFile": "blogs/音乐/J-POP/ヨルシカ/千鳥.md",
         "recommended": false
     },
     {
