@@ -119,6 +119,19 @@ body {
     align-items: center;
 }
 
+/* About 页面：个人信息卡片使用透明底色且不显示背景图 */
+.about-page .profile-card {
+    background: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    transition: none !important;
+}
+
+.about-page .profile-card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
 .music-tip {
     font-size: 14px;
     color: rgba(255, 255, 255, 0.9);
