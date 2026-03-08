@@ -24,14 +24,14 @@
                         <input type="search" placeholder="" data-i18n="search_placeholder" aria-label="搜索输入" id="global-search-input">
                     </div>
                     <div class="search-actions">
-                        <button class="search-close-btn" id="search-close" data-i18n="search_close" data-i18n-title="search_close" aria-label="close"></button>
+                        <button class="search-close-btn" id="search-close" data-i18n="search_close" aria-label="close"></button>
                     </div>
                 </div>
                 <div class="search-results" id="search-results" role="list"></div>
             </div>
         ` : `
             <div class="search-wrap" role="dialog" aria-label="site-search">
-                <button class="search-close-btn" id="search-close" data-i18n="search_close" data-i18n-title="search_close" aria-label="close"></button>
+                <button class="search-close-btn" id="search-close" data-i18n="search_close" aria-label="close"></button>
                 <div class="search-modal-content">
                     <div class="search-row">
                         <div class="search-input">
