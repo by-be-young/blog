@@ -85,6 +85,15 @@
                     <!-- Markdown内容将通过JS渲染 -->
                 </div>
 
+                <section class="license-notice" aria-label="版权许可声明">
+                    <p>
+                        本博客所有文章除特别声明外，均采用
+                        <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank"
+                            rel="noopener noreferrer">CC BY-NC-SA 4.0 许可协议</a>。
+                        转载请注明来源BeYoung~
+                    </p>
+                </section>
+
                 <footer class="article-footer">
                     <!-- 分享按钮已移除 -->
                 </footer>
@@ -400,6 +409,7 @@
                             titleEl.appendChild(tspan);
                         }
                     }
+                    document.title = blog.title || '博客详情';
 
                     // 设置日期（保留原始 ISO 在 data-date，用全局 formatDate 优先格式化）
                     const dateEl = document.getElementById('article-date');

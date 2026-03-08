@@ -672,6 +672,14 @@ body.announcement-modal-open {
     transition: opacity 0.28s ease, visibility 0.28s ease;
 }
 
+.settings-modal[aria-hidden="true"],
+.settings-modal[aria-hidden="true"] *,
+.announcement-modal[aria-hidden="true"],
+.announcement-modal[aria-hidden="true"] * {
+    pointer-events: none !important;
+    cursor: auto !important;
+}
+
 .settings-modal.is-open {
     opacity: 1;
     visibility: visible;
@@ -1621,8 +1629,8 @@ body.settings-modal-open {
 
 /* 最近更新 卡片（占满整行，与公告横幅等宽） */
 .recent-updates-card {
-    display: grid;
-    grid-template-columns: 56px 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 0;
     align-items: stretch;
     border-radius: 15px;
@@ -1631,20 +1639,41 @@ body.settings-modal-open {
     overflow: hidden;
 }
 
-.recent-updates-card .recent-label {
+.recent-updates-card .recent-updates-header {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.02));
+    min-height: 82px;
+    padding: 18px 20px;
     border-radius: 0;
+    border-bottom: 1px solid rgba(44, 62, 80, 0.08);
 }
 
-.recent-updates-card .recent-label span {
-    writing-mode: vertical-rl;
-    text-orientation: upright;
+.recent-updates-card .recommended-title {
+    font-size: 1.55rem;
     font-weight: 800;
-    font-size: 1rem;
+    letter-spacing: 0.08em;
     color: var(--dark-color);
+    text-align: center;
+    line-height: 1.15;
+    text-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
+    filter: saturate(1.1) contrast(1.06);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .recent-updates-card .recommended-title {
+        background: linear-gradient(120deg,
+                var(--macaron-pink-strong, #ef75a8),
+                var(--macaron-peach-strong, #ffb179),
+                var(--macaron-mint-strong, #43c8a0),
+                var(--macaron-lavender-strong, #8f83eb),
+                var(--macaron-pink-strong, #ef75a8));
+        background-size: 240% 240%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: recommended-title-macaron-flow 6s ease-in-out infinite;
+    }
 }
 
 .recent-updates-card .recent-content {
@@ -1654,28 +1683,50 @@ body.settings-modal-open {
 }
 
 .recent-item {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr) 290px;
     gap: 12px;
     align-items: stretch;
     padding: 0;
     min-height: 182px;
+    border-bottom: 1px solid rgba(44, 62, 80, 0.08);
 }
 
 .recent-item:last-child {
     border-bottom: none;
 }
 
+.recent-item-category-rail {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.02));
+    cursor: default;
+    user-select: none;
+}
+
+.recent-item-category-rail,
+.recent-item-category-rail * {
+    cursor: default !important;
+}
+
 .recent-item-main {
-    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 20px 14px 20px 20px;
+    padding: 20px 10px 20px 8px;
+}
+
+.recent-item-category {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    font-size: 0.96rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--dark-color);
 }
 
 .recent-item-side {
-    flex: 0 0 290px;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
@@ -1866,13 +1917,14 @@ body.settings-modal-open {
 
 /* 小屏适配 */
 @media (max-width: 720px) {
-    .recent-updates-card {
-        grid-template-columns: 40px 1fr;
-        padding: 0;
+    .recent-updates-card .recent-updates-header {
+        min-height: 68px;
+        padding: 14px 16px;
     }
 
-    .recent-updates-card .recent-label span {
-        font-size: 0.92rem;
+    .recent-updates-card .recommended-title {
+        font-size: 1.24rem;
+        letter-spacing: 0.06em;
     }
 
     .recommended-blogs-card {
@@ -1886,12 +1938,17 @@ body.settings-modal-open {
     }
 
     .recent-item {
+        grid-template-columns: 40px minmax(0, 1fr) 130px;
         align-items: flex-start;
         min-height: 120px;
     }
 
-    .recent-item-side {
-        flex: 0 0 130px;
+    .recent-item-main {
+        padding: 14px 8px 14px 6px;
+    }
+
+    .recent-item-category {
+        font-size: 0.84rem;
     }
 
     .recent-thumb {
@@ -2099,6 +2156,15 @@ body.settings-modal-open {
     border-radius: 3px;
     font-size: 0.8em;
     color: #DDA0DD;
+
+    .language-options label:has(input[type="radio"]:disabled) {
+        cursor: default;
+    }
+
+    .language-options label:has(input[type="radio"]:disabled):hover {
+        transform: none;
+    }
+
     /* Light purple macaron color */
     border: none;
     margin-left: 0;

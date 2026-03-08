@@ -2,25 +2,53 @@
     // 简单的搜索面板与逻辑（全站与详情页两种模式）
     let blogsCache = null;
 
+    function renderIdleHint(resultsEl) {
+        if (!resultsEl) return;
+        resultsEl.innerHTML = '<div class="search-empty-hint" data-i18n="search_idle_hint"></div>';
+        try {
+            if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') {
+                window.siteI18n.applyTo(resultsEl);
+            }
+        } catch (e) { }
+    }
+
     function createPanel() {
         if (document.querySelector('.search-panel')) return;
         const isDetail = document.body.classList.contains('blog-detail-page');
         const panel = document.createElement('div');
         panel.className = 'search-panel' + (isDetail ? ' right-sidebar' : '');
-        panel.innerHTML = `
+        panel.innerHTML = isDetail ? `
             <div class="search-wrap" role="dialog" aria-label="site-search">
                 <div class="search-row">
                     <div class="search-input">
                         <input type="search" placeholder="" data-i18n="search_placeholder" aria-label="搜索输入" id="global-search-input">
                     </div>
                     <div class="search-actions">
-                        <button class="search-close-btn" id="search-close" data-i18n="search_close"></button>
+                        <button class="search-close-btn" id="search-close" data-i18n="search_close" data-i18n-title="search_close" aria-label="close"></button>
                     </div>
                 </div>
                 <div class="search-results" id="search-results" role="list"></div>
             </div>
+        ` : `
+            <div class="search-wrap" role="dialog" aria-label="site-search">
+                <button class="search-close-btn" id="search-close" data-i18n="search_close" data-i18n-title="search_close" aria-label="close"></button>
+                <div class="search-modal-content">
+                    <div class="search-row">
+                        <div class="search-input">
+                            <input type="search" placeholder="" data-i18n="search_placeholder" aria-label="搜索输入" id="global-search-input">
+                        </div>
+                    </div>
+                    <div class="search-results" id="search-results" role="list"></div>
+                </div>
+            </div>
         `;
         document.body.appendChild(panel);
+
+        // 非详情页默认显示提示词
+        if (!isDetail) {
+            const initialResults = panel.querySelector('#search-results');
+            renderIdleHint(initialResults);
+        }
 
         // Apply i18n to newly created panel so placeholders/titles are correct immediately
         try { if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') window.siteI18n.applyTo(panel); } catch (e) { }
@@ -30,13 +58,22 @@
         // close
         panel.querySelector('#search-close').addEventListener('click', () => { hidePanel(); });
 
+        // close by clicking overlay (non-detail pages)
+        panel.addEventListener('click', (e) => {
+            if (panel.classList.contains('right-sidebar')) return;
+            if (e.target === panel) hidePanel();
+        });
+
         // input events: realtime with debounce + enter to confirm
         const input = panel.querySelector('#global-search-input');
         const debounced = debounce((val) => {
             const v = (val || '').trim();
             if (v.length > 0) doSearch(v);
             else {
-                const resultsEl = panel.querySelector('#search-results'); if (resultsEl) resultsEl.innerHTML = '';
+                const resultsEl = panel.querySelector('#search-results');
+                if (!resultsEl) return;
+                if (panel.classList.contains('right-sidebar')) resultsEl.innerHTML = '';
+                else renderIdleHint(resultsEl);
             }
         }, 220);
         input.addEventListener('input', (e) => { debounced(e.target.value); });
@@ -86,12 +123,14 @@
             // add body class so main content can shift left to avoid overlap
             try { document.body.classList.add('search-sidebar-open'); } catch (e) { }
         } else {
-            panel.style.top = top + 'px';
-            // ensure popup doesn't have lingering right/height
+            panel.style.top = '';
+            // ensure modal doesn't have lingering right/height
             panel.style.right = '';
             panel.style.left = '';
             panel.style.height = '';
             panel.style.width = '';
+            try { document.body.classList.add('search-modal-open'); } catch (e) { }
+            if (resultsEl) renderIdleHint(resultsEl);
         }
 
         panel.classList.add('active');
@@ -107,6 +146,7 @@
         panel.classList.remove('active');
         // remove body class if present
         try { document.body.classList.remove('search-sidebar-open'); } catch (e) { }
+        try { document.body.classList.remove('search-modal-open'); } catch (e) { }
         // 如果在文章详情页，关闭面板时清除正文中的高亮
         try {
             if (document.body.classList.contains('blog-detail-page')) {
@@ -166,23 +206,31 @@
                     // keep title and type inline
                     title.appendChild(tspan);
                 }
-                const meta = document.createElement('div'); meta.className = 'meta';
                 // date span (language-aware formatting via window.formatDate)
                 const dateSpan = document.createElement('span');
                 // 标记为 result-date（搜索面板专用）并同时保留通用的 date 类，
                 // 以便 main.js 的 updateDates() 在语言切换时也能刷新它们。
-                dateSpan.className = 'result-date date';
+                dateSpan.className = 'result-date date result-date-inline';
                 if (r.blog.date) dateSpan.setAttribute('data-date', r.blog.date);
                 try {
                     dateSpan.textContent = (typeof window.formatDate === 'function' ? window.formatDate(r.blog.date) : (r.blog.date || ''));
                 } catch (e) { dateSpan.textContent = (r.blog.date || ''); }
-                meta.appendChild(dateSpan);
+                title.appendChild(dateSpan);
+                let tagsDiv = null;
                 if (r.blog.tags && r.blog.tags.length) {
-                    const tagsDiv = document.createElement('div'); tagsDiv.className = 'meta-tags'; tagsDiv.textContent = ' • ' + r.blog.tags.join(', ');
-                    meta.appendChild(tagsDiv);
+                    tagsDiv = document.createElement('div');
+                    tagsDiv.className = 'meta-tags';
+                    r.blog.tags.forEach(tag => {
+                        const tagSpan = document.createElement('span');
+                        tagSpan.className = 'meta-tag';
+                        tagSpan.textContent = tag;
+                        tagsDiv.appendChild(tagSpan);
+                    });
                 }
                 const snippet = document.createElement('div'); snippet.className = 'snippet'; snippet.textContent = r.blog.excerpt || '';
-                div.appendChild(title); div.appendChild(meta); div.appendChild(snippet);
+                div.appendChild(title);
+                div.appendChild(snippet);
+                if (tagsDiv) div.appendChild(tagsDiv);
                 div.addEventListener('click', () => {
                     // navigate to blog-detail with q param so target page can highlight
                     const url = `blog-detail.html?id=${r.blog.id}&q=${encodeURIComponent(keyword)}`;
@@ -320,23 +368,130 @@
             return escapeHtml(fallbackTxt.slice(0, radius * 2));
         }
 
+        function getHeadingContext(targetEl) {
+            const headers = Array.from(contentEl.querySelectorAll('h1, h2'));
+            let h1Text = '';
+            let h2Text = '';
+            headers.forEach(h => {
+                if (h === targetEl || (h.compareDocumentPosition(targetEl) & Node.DOCUMENT_POSITION_FOLLOWING)) {
+                    if (h.tagName.toLowerCase() === 'h1') {
+                        h1Text = (h.textContent || '').trim();
+                        h2Text = '';
+                    } else if (h.tagName.toLowerCase() === 'h2') {
+                        h2Text = (h.textContent || '').trim();
+                    }
+                }
+            });
+            return { h1Text, h2Text };
+        }
+
+        function expandHiddenAncestors(targetEl) {
+            if (!targetEl) return false;
+            let expanded = false;
+            const expandedAnswerBlocks = new Set();
+            const expandedCodeBlocks = new Set();
+            let cur = targetEl.parentElement;
+
+            while (cur && cur !== document.body) {
+                // Native collapsed container.
+                if (cur.tagName && cur.tagName.toLowerCase() === 'details' && !cur.open) {
+                    cur.open = true;
+                    expanded = true;
+                }
+
+                // Custom answer collapse block generated in markdown.js.
+                if (cur.classList && cur.classList.contains('answer-content')) {
+                    const answerBlock = cur.closest('.answer-block');
+                    if (answerBlock && !expandedAnswerBlocks.has(answerBlock)) {
+                        const btn = answerBlock.querySelector('.answer-toggle');
+                        const isClosed = btn ? btn.getAttribute('aria-expanded') !== 'true' : !answerBlock.classList.contains('is-open');
+                        if (isClosed && btn) {
+                            btn.click();
+                            expanded = true;
+                        }
+                        expandedAnswerBlocks.add(answerBlock);
+                    }
+                }
+
+                // Custom code collapse block generated in markdown.js.
+                if (cur.classList && cur.classList.contains('codeblock__body')) {
+                    const codeBlock = cur.closest('.codeblock');
+                    if (codeBlock && !expandedCodeBlocks.has(codeBlock)) {
+                        const isCollapsed = codeBlock.classList.contains('is-collapsed');
+                        if (isCollapsed) {
+                            const toggleBtns = codeBlock.querySelectorAll('.codeblock__btn');
+                            const toggleBtn = toggleBtns.length > 1 ? toggleBtns[1] : null;
+                            if (toggleBtn) {
+                                toggleBtn.click();
+                                expanded = true;
+                            }
+                        }
+                        expandedCodeBlocks.add(codeBlock);
+                    }
+                }
+
+                if (cur.hasAttribute && cur.hasAttribute('hidden')) {
+                    cur.removeAttribute('hidden');
+                    expanded = true;
+                }
+
+                if (cur === contentEl) break;
+                cur = cur.parentElement;
+            }
+
+            return expanded;
+        }
+
         matches.forEach((el, idx) => {
             const div = document.createElement('div');
-            div.className = 'search-item';
-            const title = document.createElement('div'); title.className = 'title';
-            // mark this title as a detail-match so we can update its label on language change
-            title.dataset.matchIndex = String(idx + 1);
-            const map = (window.siteI18n && window.siteI18n.translations) ? (window.siteI18n.translations[window.siteI18n.getLang()] || {}) : {};
-            const matchLabel = (map.match_label || '匹配 {n}').replace('{n}', String(idx + 1));
-            title.textContent = matchLabel;
-            const snippet = document.createElement('div'); snippet.className = 'snippet';
-            snippet.innerHTML = makeSnippetForMatch(el, 80);
-            div.appendChild(title); div.appendChild(snippet);
+            div.className = 'search-item detail-search-item';
+
+            const indexEl = document.createElement('div');
+            indexEl.className = 'result-index';
+            indexEl.textContent = String(idx + 1);
+
+            const rightEl = document.createElement('div');
+            rightEl.className = 'result-main';
+
+            const headerEl = document.createElement('div');
+            headerEl.className = 'result-headings';
+
+            const headingCtx = getHeadingContext(el);
+            const h1El = document.createElement('div');
+            h1El.className = 'result-h1';
+            h1El.textContent = headingCtx.h1Text || '未定位一级标题';
+
+            const h2El = document.createElement('div');
+            h2El.className = 'result-h2';
+            h2El.textContent = headingCtx.h2Text || '未定位二级标题';
+
+            const paragraphEl = document.createElement('div');
+            paragraphEl.className = 'result-paragraph';
+            paragraphEl.innerHTML = makeSnippetForMatch(el, 100);
+
+            headerEl.appendChild(h1El);
+            headerEl.appendChild(h2El);
+            rightEl.appendChild(headerEl);
+            rightEl.appendChild(paragraphEl);
+
+            div.appendChild(indexEl);
+            div.appendChild(rightEl);
             div.addEventListener('click', () => {
-                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                // flash
-                el.classList.add('active-match');
-                setTimeout(() => el.classList.remove('active-match'), 800);
+                // Suppress outside-click close while triggering programmatic expand clicks.
+                window.__searchSuppressOutsideClose = true;
+                const hasExpanded = expandHiddenAncestors(el);
+                const focusMatchedElement = () => {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // flash
+                    el.classList.add('active-match');
+                    setTimeout(() => el.classList.remove('active-match'), 800);
+                };
+                if (hasExpanded) {
+                    setTimeout(focusMatchedElement, 320);
+                } else {
+                    focusMatchedElement();
+                }
+                setTimeout(() => { window.__searchSuppressOutsideClose = false; }, hasExpanded ? 520 : 180);
             });
             resultsEl.appendChild(div);
         });
@@ -353,13 +508,6 @@
                     el.textContent = (typeof window.formatDate === 'function') ? window.formatDate(d) : d;
                 } catch (e) { el.textContent = d; }
             });
-            // update detail-match titles
-            document.querySelectorAll('.search-item .title[data-match-index]').forEach(el => {
-                const idx = el.getAttribute('data-match-index');
-                if (!idx) return;
-                const map = (window.siteI18n && window.siteI18n.translations) ? (window.siteI18n.translations[window.siteI18n.getLang()] || {}) : {};
-                el.textContent = (map.match_label || '匹配 {n}').replace('{n}', String(idx));
-            });
             // also apply translations to any elements inside the search panel (placeholders, buttons)
             try {
                 const panel = document.querySelector('.search-panel');
@@ -370,8 +518,14 @@
                 const resultsEl = document.getElementById('search-results');
                 if (resultsEl && resultsEl.children.length === 1) {
                     const first = resultsEl.children[0];
-                    // if it's a plain no-result item (no .title inside), update text
-                    if (!first.querySelector('.title')) {
+                    if (first.classList && first.classList.contains('search-empty-hint')) {
+                        try {
+                            if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') {
+                                window.siteI18n.applyTo(first);
+                            }
+                        } catch (e) { }
+                    } else if (!first.querySelector('.title')) {
+                        // if it's a plain no-result item (no .title inside), update text
                         const map = (window.siteI18n && window.siteI18n.translations) ? (window.siteI18n.translations[window.siteI18n.getLang()] || {}) : {};
                         const noDetail = map.search_no_results_detail || '未在本文中找到匹配';
                         first.textContent = noDetail;
@@ -524,6 +678,7 @@
             const panel = document.querySelector('.search-panel');
             const btn = e.target.closest('.nav-search-btn');
             if (btn) return; // handled by button
+            if (window.__searchSuppressOutsideClose) return;
             if (!panel) return;
             if (!panel.contains(e.target)) {
                 // do not close when clicking on navbar

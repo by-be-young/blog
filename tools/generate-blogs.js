@@ -6,6 +6,11 @@ const ROOT = path.resolve(process.cwd());
 const BLOGS_DIR = path.join(ROOT, 'blogs');
 const OUTPUT_JSON = path.join(ROOT, 'data', 'blogs.json');
 const ANNOUNCEMENTS_JSON = path.join(ROOT, 'data', 'announcements.json');
+const LEARNING_FIRST_TAGS = new Set(['二上', '二下']);
+const HOME_CATEGORY = {
+    LEARNING: '学习',
+    ENTERTAINMENT: '娱乐'
+};
 
 function toPosix(p) {
     return p.split(path.sep).join('/');
@@ -39,6 +44,14 @@ function formatDateYYYYMMDD(date) {
     const m = String(date.getMonth() + 1).padStart(2, '0');
     const d = String(date.getDate()).padStart(2, '0');
     return `${y}-${m}-${d}`;
+}
+
+function resolveHomeCategoryByTags(tags) {
+    const firstTag = Array.isArray(tags) && typeof tags[0] === 'string' ? tags[0].trim() : '';
+    if (LEARNING_FIRST_TAGS.has(firstTag)) {
+        return HOME_CATEGORY.LEARNING;
+    }
+    return HOME_CATEGORY.ENTERTAINMENT;
 }
 
 async function appendAnnouncementIfProvided() {
@@ -150,6 +163,7 @@ async function main() {
         const dirParts = relFromBlogs.split('/').slice(0, -1).filter(Boolean);
         // take first three folders as keywords (用户保证只有三个关键词)
         const tags = dirParts.slice(0, 3);
+        const category = resolveHomeCategoryByTags(tags);
 
         // blog type comes from front-matter `type` if provided
         const type = (typeof data.type === 'string' && data.type.trim()) ? data.type.trim() : null;
@@ -169,6 +183,7 @@ async function main() {
             date,
             image: 'assets/images/blog_bg.png',
             tags,
+            category,
             type,
             contentFile: relFromRoot,
             recommended

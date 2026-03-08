@@ -278,6 +278,33 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
     position: relative;
 }
 
+.license-notice {
+    margin-top: 28px;
+    padding: 14px 16px;
+    border: 1px solid #ffd7e6;
+    border-left: 5px solid #a9c9ff;
+    border-radius: 10px;
+    background: #fff7fb;
+    color: #5f5a67;
+    font-size: 0.98rem;
+    line-height: 1.8;
+}
+
+.license-notice p {
+    margin: 0;
+}
+
+.license-notice a {
+    color: #6b8ecf;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.license-notice a:hover {
+    color: #4f76bf;
+}
+
 .blog-detail .article-content h2.is-toc-active::before {
     content: '';
     position: absolute;

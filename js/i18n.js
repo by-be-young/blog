@@ -30,6 +30,7 @@
             quick_ai: 'AI',
             search_placeholder: '输入关键词：',
             search_close: '关闭',
+            search_idle_hint: '输入关键词以搜索标题、摘要和标签',
             search_no_results: '未找到匹配结果',
             search_no_results_detail: '未在本文中找到匹配',
             quick_no_links: '该分类下暂无链接。',
@@ -105,6 +106,8 @@
             , announcements_empty: '暂无公告'
             , home_recent_updates: '最近更新'
             , home_recommended_blogs: '推荐博客'
+            , home_category_learning: '学习'
+            , home_category_entertainment: '娱乐'
         },
         en: {
             brand: "Be Young's Blog",
@@ -132,6 +135,7 @@
             quick_ai: 'AI',
             search_placeholder: 'Type keywords:',
             search_close: 'Close',
+            search_idle_hint: 'Type keywords to search titles, excerpts, and tags',
             search_no_results: 'No matches found',
             search_no_results_detail: 'No matches found in this article',
             quick_no_links: 'No links in this category.',
@@ -207,6 +211,8 @@
             , announcements_empty: 'No announcements yet'
             , home_recent_updates: 'Latest'
             , home_recommended_blogs: 'Recommended Blogs'
+            , home_category_learning: 'Study'
+            , home_category_entertainment: 'Entertainment'
         },
         ja: {
             brand: '白恙のブログ',
@@ -234,6 +240,7 @@
             quick_ai: 'AI',
             search_placeholder: 'キーワードを入力：',
             search_close: '閉じる',
+            search_idle_hint: 'キーワードを入力してタイトル・概要・タグを検索',
             search_no_results: '一致する結果は見つかりませんでした',
             search_no_results_detail: '本文内で一致が見つかりませんでした',
             quick_no_links: 'このカテゴリにリンクはありません。',
@@ -309,6 +316,8 @@
             , announcements_empty: 'お知らせはありません'
             , home_recent_updates: '最近の更新'
             , home_recommended_blogs: 'おすすめブログ'
+            , home_category_learning: '学習'
+            , home_category_entertainment: '娯楽'
         }
     };
 

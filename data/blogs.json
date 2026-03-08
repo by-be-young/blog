@@ -1,5 +1,21 @@
 [
     {
+        "id": 1407902224,
+        "title": "终末地数值计算方法",
+        "excerpt": "详细分析终末地角色面板、伤害等计算公式及注意事项",
+        "date": "2026-03-07",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "终末地",
+            "游戏机制",
+            "数值计算"
+        ],
+        "category": "娱乐",
+        "type": "纸上行舟",
+        "contentFile": "blogs/终末地/游戏机制/数值计算/终末地数值计算方法.md",
+        "recommended": false
+    },
+    {
         "id": 652769467,
         "title": "千鳥",
         "excerpt": "yorushika新歌「千鳥」歌词、翻译及赏析",
@@ -10,23 +26,41 @@
             "J-POP",
             "ヨルシカ"
         ],
+        "category": "娱乐",
         "type": "落音缤纷",
         "contentFile": "blogs/音乐/J-POP/ヨルシカ/千鳥.md",
         "recommended": false
     },
     {
-        "id": 430702699,
+        "id": 3406903262,
         "title": "基质刷取指南",
         "excerpt": "终末地武器基质怎么选词条最赚？这个指南帮你快速查找并确定应该选择的词条。",
-        "date": "2026-03-03",
+        "date": "2026-03-04",
         "image": "assets/images/blog_bg.png",
         "tags": [
-            "明日方舟·终末地",
+            "终末地",
             "游戏工具",
-            "基质刷取"
+            "基质"
         ],
+        "category": "娱乐",
         "type": "纸上行舟",
-        "contentFile": "blogs/明日方舟·终末地/游戏工具/基质刷取/基质刷取指南.md",
+        "contentFile": "blogs/终末地/游戏工具/基质/基质刷取指南.md",
+        "recommended": false
+    },
+    {
+        "id": 1838053265,
+        "title": "装备精锻较好适配速查",
+        "excerpt": "终末地武器精锻怎么才能最为划算？一图流找到较好适配的武器！",
+        "date": "2026-03-04",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "终末地",
+            "游戏工具",
+            "装备"
+        ],
+        "category": "娱乐",
+        "type": "纸上行舟",
+        "contentFile": "blogs/终末地/游戏工具/装备/装备精锻较好适配速查.md",
         "recommended": false
     },
     {
@@ -40,6 +74,7 @@
             "干员杂谈",
             "干员测评"
         ],
+        "category": "娱乐",
         "type": "纸上行舟",
         "contentFile": "blogs/明日方舟/干员杂谈/干员测评/望.md",
         "recommended": false
@@ -55,6 +90,7 @@
             "计组",
             "链接"
         ],
+        "category": "学习",
         "type": "系统笔记",
         "contentFile": "blogs/二上/计组/链接/链接与运行.md",
         "recommended": false
@@ -70,6 +106,7 @@
             "计组",
             "总复习"
         ],
+        "category": "学习",
         "type": "概要笔记",
         "contentFile": "blogs/二上/计组/总复习/计组总复习.md",
         "recommended": false
@@ -85,6 +122,7 @@
             "二上总结",
             "考试总结"
         ],
+        "category": "学习",
         "type": "随心所记",
         "contentFile": "blogs/二上/二上总结/考试总结/二上考试情况总结.md",
         "recommended": false
@@ -100,6 +138,7 @@
             "干员杂谈",
             "元素体系"
         ],
+        "category": "娱乐",
         "type": "纸上行舟",
         "contentFile": "blogs/明日方舟/干员杂谈/元素体系/元素体系——朝阳or败笔？.md",
         "recommended": false
@@ -115,6 +154,7 @@
             "计组",
             "MIPS"
         ],
+        "category": "学习",
         "type": "概要笔记",
         "contentFile": "blogs/二上/计组/MIPS/指令系统与MIPS汇编语言.md",
         "recommended": false
@@ -130,6 +170,7 @@
             "基物实验",
             "总复习"
         ],
+        "category": "学习",
         "type": "系统笔记",
         "contentFile": "blogs/二上/基物实验/总复习/基物实验.md",
         "recommended": false
@@ -145,6 +186,7 @@
             "计组",
             "存储系统"
         ],
+        "category": "学习",
         "type": "系统笔记",
         "contentFile": "blogs/二上/计组/存储系统/虚拟存储器.md",
         "recommended": false
@@ -160,6 +202,7 @@
             "计组",
             "存储系统"
         ],
+        "category": "学习",
         "type": "系统笔记",
         "contentFile": "blogs/二上/计组/存储系统/主存储器.md",
         "recommended": false
@@ -175,6 +218,7 @@
             "Java",
             "总复习"
         ],
+        "category": "学习",
         "type": "概要笔记",
         "contentFile": "blogs/二上/Java/总复习/Java总复习.md",
         "recommended": true
@@ -190,6 +234,7 @@
             "离散二",
             "总复习"
         ],
+        "category": "学习",
         "type": "系统笔记",
         "contentFile": "blogs/二上/离散二/总复习/离散数学题型总复习.md",
         "recommended": true
@@ -205,6 +250,7 @@
             "离散二",
             "图论"
         ],
+        "category": "学习",
         "type": "概要笔记",
         "contentFile": "blogs/二上/离散二/图论/穿程问题.md",
         "recommended": false
@@ -220,6 +266,7 @@
             "离散二",
             "图论"
         ],
+        "category": "学习",
         "type": "待完善",
         "contentFile": "blogs/二上/离散二/图论/二分图的匹配问题.md",
         "recommended": false
@@ -235,6 +282,7 @@
             "离散二",
             "图论"
         ],
+        "category": "学习",
         "type": "概要笔记",
         "contentFile": "blogs/二上/离散二/图论/树.md",
         "recommended": false
@@ -250,6 +298,7 @@
             "离散二",
             "图论"
         ],
+        "category": "学习",
         "type": "轻松笔记",
         "contentFile": "blogs/二上/离散二/图论/通路问题.md",
         "recommended": false
@@ -265,6 +314,7 @@
             "离散二",
             "图论"
         ],
+        "category": "学习",
         "type": "概要笔记",
         "contentFile": "blogs/二上/离散二/图论/图的矩阵表示.md",
         "recommended": false
@@ -280,6 +330,7 @@
             "离散二",
             "图论"
         ],
+        "category": "学习",
         "type": "轻松笔记",
         "contentFile": "blogs/二上/离散二/图论/图论基本概念.md",
         "recommended": false
@@ -295,6 +346,7 @@
             "Java",
             "总复习"
         ],
+        "category": "学习",
         "type": "待完善",
         "contentFile": "blogs/二上/Java/总复习/Java串讲.md",
         "recommended": false
@@ -310,6 +362,7 @@
             "算法",
             "模板"
         ],
+        "category": "学习",
         "type": null,
         "contentFile": "blogs/二上/算法/模板/算法选择题速查.md",
         "recommended": false
@@ -325,6 +378,7 @@
             "概率统计",
             "总复习"
         ],
+        "category": "学习",
         "type": "概要笔记",
         "contentFile": "blogs/二上/概率统计/总复习/概率统计必背公式.md",
         "recommended": true
@@ -340,6 +394,7 @@
             "算法",
             "图"
         ],
+        "category": "学习",
         "type": "轻松笔记",
         "contentFile": "blogs/二上/算法/图/并查集.md",
         "recommended": false
@@ -355,6 +410,7 @@
             "诗词",
             "词"
         ],
+        "category": "娱乐",
         "type": null,
         "contentFile": "blogs/文学/诗词/词/卜算子·元旦晚会.md",
         "recommended": false
@@ -370,6 +426,7 @@
             "计组",
             "存储系统"
         ],
+        "category": "学习",
         "type": "轻松笔记",
         "contentFile": "blogs/二上/计组/存储系统/Cache.md",
         "recommended": false
@@ -385,6 +442,7 @@
             "算法",
             "模板"
         ],
+        "category": "学习",
         "type": "概要笔记",
         "contentFile": "blogs/二上/算法/模板/算法板子.md",
         "recommended": true
@@ -400,6 +458,7 @@
             "诗词",
             "词"
         ],
+        "category": "娱乐",
         "type": null,
         "contentFile": "blogs/文学/诗词/词/行香子·初雪.md",
         "recommended": false

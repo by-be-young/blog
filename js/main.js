@@ -1,8 +1,28 @@
 // 博客数据
 let blogs = [];
 
+const HOME_CATEGORY_RULES = {
+    learningFirstTags: new Set(['二上', '二下']),
+    learningKey: 'home_category_learning',
+    entertainmentKey: 'home_category_entertainment'
+};
+
 function escapeHtml(s) {
     return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
+function getHomeCategoryKey(blog) {
+    if (blog && typeof blog.category === 'string' && blog.category.trim()) {
+        const normalized = blog.category.trim();
+        if (normalized === '学习') return HOME_CATEGORY_RULES.learningKey;
+        if (normalized === '娱乐') return HOME_CATEGORY_RULES.entertainmentKey;
+    }
+    const tags = Array.isArray(blog && blog.tags) ? blog.tags : [];
+    const firstTag = typeof tags[0] === 'string' ? tags[0].trim() : '';
+    if (HOME_CATEGORY_RULES.learningFirstTags.has(firstTag)) {
+        return HOME_CATEGORY_RULES.learningKey;
+    }
+    return HOME_CATEGORY_RULES.entertainmentKey;
 }
 
 function updateProfileStats() {
@@ -188,6 +208,7 @@ function initAnnouncementModal() {
     const reloadCarryKey = 'homeAnnouncementModalReloadCarry_v1';
 
     if (!trigger || !modal || !closeBtn) return;
+    try { modal.inert = true; } catch (e) { }
     let scrollStartTimer = null;
     let modalOpenAt = 0;
     const scrollDelayMs = 3000;
@@ -223,6 +244,7 @@ function initAnnouncementModal() {
     }
 
     function openModal() {
+        try { modal.inert = false; } catch (e) { }
         modal.classList.add('is-open');
         modal.setAttribute('aria-hidden', 'false');
         document.body.classList.add('announcement-modal-open');
@@ -241,6 +263,7 @@ function initAnnouncementModal() {
         } catch (e) { }
         modal.classList.remove('is-open');
         modal.setAttribute('aria-hidden', 'true');
+        try { modal.inert = true; } catch (e) { }
         document.body.classList.remove('announcement-modal-open');
     }
 
@@ -297,6 +320,7 @@ function initSettingsModal() {
     const settingsPanel = document.querySelector('.settings-panel');
 
     if (!trigger || !modal || !closeBtn) return;
+    try { modal.inert = true; } catch (e) { }
 
     // 创建全局背景音乐对象
     window.backgroundAudio = new Audio('music/澎湃.mp3');
@@ -516,16 +540,27 @@ function initSettingsModal() {
     updatePlayPauseButton();
     hideMusicFloatFab();
 
+    function setLanguageInputsEnabled(enabled) {
+        languageInputs.forEach(input => {
+            input.disabled = !enabled;
+        });
+    }
+
     function openModal() {
+        try { modal.inert = false; } catch (e) { }
         modal.classList.add('is-open');
         modal.setAttribute('aria-hidden', 'false');
         document.body.classList.add('settings-modal-open');
+        setLanguageInputsEnabled(true);
     }
 
     function closeModal() {
         modal.classList.remove('is-open');
         modal.setAttribute('aria-hidden', 'true');
+        try { modal.inert = true; } catch (e) { }
         document.body.classList.remove('settings-modal-open');
+        setLanguageInputsEnabled(false);
+        try { trigger.focus(); } catch (e) { }
     }
 
     function updateSettingsPanelHeight(targetSection, immediate) {
@@ -593,9 +628,14 @@ function initSettingsModal() {
     }
 
     syncLanguageSelection();
+    setLanguageInputsEnabled(false);
 
     languageInputs.forEach(input => {
         input.addEventListener('change', () => {
+            if (!modal.classList.contains('is-open')) {
+                syncLanguageSelection();
+                return;
+            }
             if (input.checked) {
                 // 这里可以添加语言切换逻辑
                 console.log('Language changed to:', input.value);
@@ -994,44 +1034,57 @@ function createRecentUpdatesCard(allBlogs) {
         return db - da;
     });
 
-    // 只取最近 1 条
-    const latest = sorted[0];
-    if (!latest) return null;
+    const latestStudy = sorted.find(blog => getHomeCategoryKey(blog) === HOME_CATEGORY_RULES.learningKey) || null;
+    const latestEntertainment = sorted.find(blog => getHomeCategoryKey(blog) === HOME_CATEGORY_RULES.entertainmentKey) || null;
+
+    const recentBlogs = [latestStudy, latestEntertainment].filter(Boolean);
+    if (recentBlogs.length === 0) return null;
 
     const card = document.createElement('div');
     card.className = 'recent-updates-card';
     // 让该卡片占据网格整行（与公告横幅宽度一致）
     card.style.gridColumn = '1 / -1';
 
-    const tags = Array.isArray(latest.tags) ? latest.tags.map((t, index) => `<span class="tag" data-level="${index}" data-path="${encodeURIComponent(JSON.stringify(latest.tags))}">${escapeHtml(t)}</span>`).join('') : '';
-    // 首页最近更新卡片与普通博客卡片保持同图片路径策略
-    const img = 'assets/images/lantern_festival.png';
-    const typeHtml = latest.type ? `<div class="blog-type-overlay"><span class="blog-type">${escapeHtml(latest.type)}</span></div>` : '';
+    const itemsHtml = recentBlogs.map(blog => {
+        const categoryKey = getHomeCategoryKey(blog);
+        const fallbackCategoryText = categoryKey === HOME_CATEGORY_RULES.learningKey ? '学习' : '娱乐';
+        const tags = Array.isArray(blog.tags) ? blog.tags.map((t, index) => `<span class="tag" data-level="${index}" data-path="${encodeURIComponent(JSON.stringify(blog.tags))}">${escapeHtml(t)}</span>`).join('') : '';
+        const img = 'assets/images/lantern_festival.png';
+        const typeHtml = blog.type ? `<div class="blog-type-overlay"><span class="blog-type">${escapeHtml(blog.type)}</span></div>` : '';
 
-    const itemsHtml = `
-        <div class="recent-item" data-id="${latest.id}">
-            <div class="recent-item-main">
-                <h3 class="blog-title recent-item-title">${escapeHtml(latest.title)}</h3>
-                <p class="blog-excerpt recent-item-excerpt">${latest.excerpt || ''}</p>
-                <div class="blog-meta recent-item-meta"><span class="date" data-date="${latest.date}">${formatDate(latest.date)}</span></div>
-            </div>
-            <div class="recent-item-side">
-                <div class="blog-image recent-thumb">
-                    <img src="${img}" alt="${escapeHtml(latest.title)}">
-                    ${typeHtml}
-                    <div class="tags">${tags}</div>
+        return `
+            <div class="recent-item" data-id="${blog.id}">
+                <div class="recent-item-category-rail"><span class="recent-item-category" data-i18n="${categoryKey}">${fallbackCategoryText}</span></div>
+                <div class="recent-item-main">
+                    <h3 class="blog-title recent-item-title">${escapeHtml(blog.title)}</h3>
+                    <p class="blog-excerpt recent-item-excerpt">${escapeHtml(blog.excerpt || '')}</p>
+                    <div class="blog-meta recent-item-meta"><span class="date" data-date="${blog.date}">${formatDate(blog.date)}</span></div>
+                </div>
+                <div class="recent-item-side">
+                    <div class="blog-image recent-thumb">
+                        <img src="${img}" alt="${escapeHtml(blog.title)}">
+                        ${typeHtml}
+                        <div class="tags">${tags}</div>
+                    </div>
                 </div>
             </div>
-        </div>
-    `;
+        `;
+    }).join('');
 
     card.innerHTML = `
-        <div class="recent-label"><span data-i18n="home_recent_updates">最近更新</span></div>
+        <div class="recent-updates-header"><span class="recommended-title" data-i18n="home_recent_updates">最近更新</span></div>
         <div class="recent-content">${itemsHtml}</div>
     `;
 
     // 点击行为与普通卡片一致：打开对应文章（针对最近列表的每一项）
     card.addEventListener('click', (e) => {
+        const categoryRailEl = e.target.closest('.recent-item-category-rail');
+        if (categoryRailEl) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+        }
+
         const tagEl = e.target.closest('.tag');
         if (tagEl) {
             e.preventDefault();
