@@ -1,9 +1,41 @@
 [
     {
+        "id": 1857093037,
+        "title": "C语言无痛转型Shell脚本",
+        "excerpt": "OS中Shell语法的C语言类比，方便初学者快速掌握基础语法~",
+        "date": "2026-03-10",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "操作系统",
+            "Shell"
+        ],
+        "category": "学习",
+        "type": "轻松笔记",
+        "contentFile": "blogs/二下/操作系统/Shell/C语言无痛转型Shell脚本.md",
+        "recommended": false
+    },
+    {
+        "id": 3406903262,
+        "title": "基质刷取指南",
+        "excerpt": "终末地武器基质怎么选词条最赚？这个指南帮你快速查找并确定应该选择的词条。",
+        "date": "2026-03-10",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "终末地",
+            "游戏工具",
+            "基质"
+        ],
+        "category": "娱乐",
+        "type": "纸上行舟",
+        "contentFile": "blogs/终末地/游戏工具/基质/基质刷取指南.md",
+        "recommended": false
+    },
+    {
         "id": 1407902224,
         "title": "终末地数值计算方法",
         "excerpt": "详细分析终末地角色面板、伤害等计算公式及注意事项",
-        "date": "2026-03-07",
+        "date": "2026-03-08",
         "image": "assets/images/blog_bg.png",
         "tags": [
             "终末地",
@@ -29,22 +61,6 @@
         "category": "娱乐",
         "type": "落音缤纷",
         "contentFile": "blogs/音乐/J-POP/ヨルシカ/千鳥.md",
-        "recommended": false
-    },
-    {
-        "id": 3406903262,
-        "title": "基质刷取指南",
-        "excerpt": "终末地武器基质怎么选词条最赚？这个指南帮你快速查找并确定应该选择的词条。",
-        "date": "2026-03-04",
-        "image": "assets/images/blog_bg.png",
-        "tags": [
-            "终末地",
-            "游戏工具",
-            "基质"
-        ],
-        "category": "娱乐",
-        "type": "纸上行舟",
-        "contentFile": "blogs/终末地/游戏工具/基质/基质刷取指南.md",
         "recommended": false
     },
     {
