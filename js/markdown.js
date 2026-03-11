@@ -78,8 +78,21 @@ function renderMarkdownContent() {
     function extractMathFrom(text) {
         if (!text) return '';
 
+        // Protect fenced/inline code first so shell variables like $num are not treated as math.
+        const codeBlocks = [];
+        const stashCode = (match) => {
+            const idx = codeBlocks.length;
+            codeBlocks.push(match);
+            return `@@CODE_${idx}@@`;
+        };
+
+        let protectedText = text
+            .replace(/```[\s\S]*?```/g, stashCode)
+            .replace(/~~~[\s\S]*?~~~/g, stashCode)
+            .replace(/`[^`\n]*`/g, stashCode);
+
         // 先处理显示数学 $$...$$（非贪婪）
-        let tmp = text.replace(/\$\$[\s\S]*?\$\$/g, match => {
+        let tmp = protectedText.replace(/\$\$[\s\S]*?\$\$/g, match => {
             const inner = match.slice(2, -2);
             const idx = displayMathBlocks.length;
             displayMathBlocks.push(inner);
@@ -109,7 +122,12 @@ function renderMarkdownContent() {
             out += ch;
             i++;
         }
-        return out;
+
+        // Restore protected code as-is.
+        return out.replace(/@@CODE_(\d+)@@/g, (_, num) => {
+            const i = parseInt(num, 10);
+            return codeBlocks[i] || '';
+        });
     }
 
     function buildOptionsHtml(optionsText) {
