@@ -4,8 +4,10 @@ import matter from 'gray-matter';
 
 const ROOT = path.resolve(process.cwd());
 const BLOGS_DIR = path.join(ROOT, 'blogs');
+const BACKGROUND_DIR = path.join(ROOT, 'assets', 'images', 'background');
 const OUTPUT_JSON = path.join(ROOT, 'data', 'blogs.json');
 const ANNOUNCEMENTS_JSON = path.join(ROOT, 'data', 'announcements.json');
+const BACKGROUND_JSON = path.join(ROOT, 'data', 'background-images.json');
 const LEARNING_FIRST_TAGS = new Set(['二上', '二下']);
 const HOME_CATEGORY = {
     LEARNING: '学习',
@@ -126,8 +128,31 @@ async function listMarkdownFiles(dir) {
     return files;
 }
 
+async function generateBackgroundImagesManifest() {
+    let entries = [];
+    try {
+        entries = await fs.readdir(BACKGROUND_DIR, { withFileTypes: true });
+    } catch (e) {
+        entries = [];
+    }
+
+    const images = entries
+        .filter(entry => entry.isFile())
+        .map(entry => entry.name)
+        .filter(name => /\.(png|jpe?g|webp|gif|avif)$/i.test(name))
+        .sort((a, b) => a.localeCompare(b, 'zh-CN'))
+        .map(name => toPosix(path.join('assets', 'images', 'background', name)));
+
+    const payload = { images };
+    await fs.mkdir(path.dirname(BACKGROUND_JSON), { recursive: true });
+    await fs.writeFile(BACKGROUND_JSON, JSON.stringify(payload, null, 4) + '\n', 'utf8');
+
+    console.log(`[generate] Wrote ${images.length} background images -> ${toPosix(path.relative(ROOT, BACKGROUND_JSON))}`);
+}
+
 async function main() {
     await appendAnnouncementIfProvided();
+    await generateBackgroundImagesManifest();
 
     const mdFiles = await listMarkdownFiles(BLOGS_DIR);
     mdFiles.sort((a, b) => a.localeCompare(b, 'zh-CN'));

@@ -53,7 +53,7 @@
         items.forEach(item => {
             const title = (item && item.title) ? String(item.title) : ((window.siteI18n && window.siteI18n.translations && window.siteI18n.translations[(window.siteI18n.getLang && window.siteI18n.getLang()) || 'zh'] && window.siteI18n.translations[window.siteI18n.getLang()].link_unnamed) || '未命名链接');
             const url = (item && item.url) ? String(item.url) : '#';
-            const image = (item && item.image) ? String(item.image) : 'assets/blog_bg.png';
+            const image = (item && item.image) ? String(item.image) : 'assets/images/background/bg1.png';
 
             const a = document.createElement('a');
             a.className = 'link-card';

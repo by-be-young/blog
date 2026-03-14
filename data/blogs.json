@@ -1,9 +1,41 @@
 [
     {
+        "id": 2993316592,
+        "title": "意大利语自然拼读攻略",
+        "excerpt": "意大利语被誉为“世界上最美丽的语言”之一，最大的特点就是“所见即所读”。",
+        "date": "2026-03-13",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "语言",
+            "意大利语",
+            "发音规则"
+        ],
+        "category": "娱乐",
+        "type": null,
+        "contentFile": "blogs/语言/意大利语/发音规则/意大利语自然拼读攻略.md",
+        "recommended": false
+    },
+    {
+        "id": 642086862,
+        "title": "Linux 命令指南",
+        "excerpt": "Linux基本命令的语法、格式及用法举例。",
+        "date": "2026-03-12",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "操作系统",
+            "Linux"
+        ],
+        "category": "学习",
+        "type": "轻松笔记",
+        "contentFile": "blogs/二下/操作系统/Linux/Linux 命令指南.md",
+        "recommended": false
+    },
+    {
         "id": 1857093037,
         "title": "C语言无痛转型Shell脚本",
         "excerpt": "OS中Shell语法的C语言类比，方便初学者快速掌握基础语法~",
-        "date": "2026-03-10",
+        "date": "2026-03-11",
         "image": "assets/images/blog_bg.png",
         "tags": [
             "二下",

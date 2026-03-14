@@ -7,22 +7,22 @@
                 {
                     "title": "Connor大佬的博客",
                     "url": "https://connorz.site/",
-                    "image": "assets/images/bg1.png"
+                    "image": "assets/images/background/bg1.png"
                 },
                 {
                     "title": "Rainel学长的博客",
                     "url": "https://rainel.site/",
-                    "image": "assets/images/bg1.png"
+                    "image": "assets/images/background/bg1.png"
                 },
                 {
                     "title": "写了详细OS的学长的博客",
                     "url": "https://www.oldjoy.top/",
-                    "image": "assets/images/bg1.png"
+                    "image": "assets/images/background/bg1.png"
                 },
                 {
                     "title": "Hyggge学长的博客",
                     "url": "https://hyggge.github.io/",
-                    "image": "assets/images/bg1.png"
+                    "image": "assets/images/background/bg1.png"
                 }
             ]
         },
@@ -33,17 +33,17 @@
                 {
                     "title": "智学北航",
                     "url": "https://spoc.buaa.edu.cn/spocnew/common/zycskzy?initData_props=1711526076221d6fc6f5279ef3c22778fd9524c64c918ff",
-                    "image": "assets/images/bg1.png"
+                    "image": "assets/images/background/bg1.png"
                 },
                 {
                     "title": "本研教务系统",
                     "url": "https://byxt.buaa.edu.cn/jwapp/sys/jwsybuaa/login/index.html",
-                    "image": "assets/images/bg1.png"
+                    "image": "assets/images/background/bg1.png"
                 },
                 {
                     "title": "校园网",
                     "url": "https://gw.buaa.edu.cn/srun_portal_success?ac_id=1&theme=buaa",
-                    "image": "assets/images/bg1.png"
+                    "image": "assets/images/background/bg1.png"
                 }
             ]
         },
@@ -54,12 +54,12 @@
                 {
                     "title": "个人GitHub主页",
                     "url": "https://github.com/by-be-young",
-                    "image": "assets/images/bg1.png"
+                    "image": "assets/images/background/bg1.png"
                 },
                 {
                     "title": "明日方舟答题网站",
                     "url": "https://by-be-young.github.io/arknights_test/",
-                    "image": "assets/images/bg1.png"
+                    "image": "assets/images/background/bg1.png"
                 }
             ]
         },
@@ -70,22 +70,22 @@
                 {
                     "title": "ACCoding",
                     "url": "https://accoding.buaa.edu.cn/index",
-                    "image": "assets/images/bg1.png"
+                    "image": "assets/images/background/bg1.png"
                 },
                 {
                     "title": "Pat Pat (Java)",
                     "url": "http://10.251.255.164/login",
-                    "image": "assets/images/bg1.png"
+                    "image": "assets/images/background/bg1.png"
                 },
                 {
                     "title": "洛谷",
                     "url": "https://www.luogu.com.cn/",
-                    "image": "assets/images/bg1.png"
+                    "image": "assets/images/background/bg1.png"
                 },
                 {
                     "title": "软件学院学习资料仓库",
                     "url": "https://github.com/Soft-Where-21",
-                    "image": "assets/images/bg1.png"
+                    "image": "assets/images/background/bg1.png"
                 }
             ]
         },
@@ -96,17 +96,17 @@
                 {
                     "title": "哔哩哔哩",
                     "url": "https://www.bilibili.com/",
-                    "image": "assets/images/bg1.png"
+                    "image": "assets/images/background/bg1.png"
                 },
                 {
                     "title": "PRTS wiki",
                     "url": "https://prts.wiki/",
-                    "image": "assets/images/bg1.png"
+                    "image": "assets/images/background/bg1.png"
                 },
                 {
                     "title": "终末地wiki",
                     "url": "https://wiki.skland.com/endfield",
-                    "image": "assets/images/bg1.png"
+                    "image": "assets/images/background/bg1.png"
                 }
             ]
         },
@@ -117,17 +117,17 @@
                 {
                     "title": "deepseek",
                     "url": "https://chat.deepseek.com/",
-                    "image": "assets/images/bg1.png"
+                    "image": "assets/images/background/bg1.png"
                 },
                 {
                     "title": "Kimi",
                     "url": "https://www.kimi.com/",
-                    "image": "assets/images/bg1.png"
+                    "image": "assets/images/background/bg1.png"
                 },
                 {
                     "title": "豆包",
                     "url": "https://www.doubao.com/chat",
-                    "image": "assets/images/bg1.png"
+                    "image": "assets/images/background/bg1.png"
                 }
             ]
         }
