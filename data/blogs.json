@@ -2,7 +2,7 @@
     {
         "id": 3721673332,
         "title": "gcc语法速成",
-        "excerpt": "gcc hello.c -o hello",
+        "excerpt": "GCC 的语法详解",
         "date": "2026-03-17",
         "image": "assets/images/blog_bg.png",
         "tags": [
@@ -11,7 +11,7 @@
             "gcc"
         ],
         "category": "学习",
-        "type": null,
+        "type": "轻松笔记",
         "contentFile": "blogs/二下/操作系统/gcc/gcc语法速成.md",
         "recommended": false
     },

@@ -1,6 +1,6 @@
 ---
-Excerpt: GCC 的语法详解
-Type: 轻松笔记
+excerpt: GCC 的语法详解
+type: 轻松笔记
 ---
 # GCC 编译原理
 
@@ -187,18 +187,18 @@ int main() {
     return 0;
 }
 ```
-[/question]
-[options]A 没有警告，一切正常[/options]
-[options]B warning: unused variable 'x'[/options]
-[options]C warning: 'x' is used uninitialized[/options]
-[options]D warning: printf format mismatch[/options]
-[answer]C[/answer]
+[\question]
+[options]A 没有警告，一切正常[\options]
+[options]B warning: unused variable 'x'[\options]
+[options]C warning: 'x' is used uninitialized[\options]
+[options]D warning: printf format mismatch[\options]
+[answer]C[\answer]
 [analysis]
 定义变量 x 但没有初始化就直接使用，这是未定义行为。`-Wall` 会检测到这种情况并警告：'x' is used uninitialized。  
 B 选项不对，因为 x 被使用了（printf 用了它）。  
 D 选项不对，因为 %d 和 int 类型匹配。
-[/analysis]
-[/task]
+[\analysis]
+[\task]
 
 ---
 
@@ -235,19 +235,19 @@ compilation terminated.
 [task]
 [question]
 编译时遇到 "undefined reference to `sqrt`" 错误，最可能的原因是什么？
-[/question]
-[options]A 忘记 `#include <math.h>`[/options]
-[options]B 忘记链接数学库（忘了加 -lm）[/options]
-[options]C sqrt 函数拼写错误[/options]
-[options]D 编译器版本太低[/options]
-[answer]B[/answer]
+[\question]
+[options]A 忘记 `#include <math.h>`[\options]
+[options]B 忘记链接数学库（忘了加 -lm）[\options]
+[options]C sqrt 函数拼写错误[\options]
+[options]D 编译器版本太低[\options]
+[answer]B[\answer]
 [analysis]
 这是一个链接错误（ld 报的），不是编译错误。`sqrt` 函数在数学库 libm. So 里，需要加 `-lm` 链接。  
 A 选项：缺少头文件会导致编译警告或错误，但不是这个链接错误。  
 C 选项：如果拼写错误，编译器会报 implicit declaration 之类的错误，也不会是 undefined reference。  
 D 选项：跟版本无关。
-[/analysis]
-[/task]
+[\analysis]
+[\task]
 
 ---
 

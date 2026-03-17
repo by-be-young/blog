@@ -544,9 +544,26 @@
                 return md;
             }
 
+            function normalizeExerciseMarkers(md) {
+                if (!md) return md;
+
+                // Replace opening markers with readable labels.
+                let normalized = md
+                    .replace(/\[task\]/gi, '例题：')
+                    .replace(/\[answer\]/gi, '答案：')
+                    .replace(/\[analysis\]/gi, '解析：');
+
+                // Remove all remaining known custom markers (opening/closing).
+                normalized = normalized
+                    .replace(/\[(?:\\|\/)?(?:task|answer|analysis|question|options)\]/gi, '');
+
+                return normalized;
+            }
+
             function getExportMarkdownContent() {
                 const raw = window.__rawMarkdown || '';
-                return stripFrontMatter(raw);
+                const clean = stripFrontMatter(raw);
+                return normalizeExerciseMarkers(clean);
             }
 
             function getI18nText(key, fallback) {
