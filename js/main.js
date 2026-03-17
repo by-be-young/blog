@@ -136,6 +136,20 @@ function renderAnnouncementBanner() {
     const host = document.getElementById('announcementModalContent');
     if (!host) return;
 
+    function renderAnnouncementMessageHtml(msg) {
+        const lines = String(msg || '').split(/\r?\n/);
+        return lines.map((line, idx) => {
+            const safe = escapeHtml(line);
+            if (!line.trim()) {
+                return '<div class="ann-line ann-line--blank" aria-hidden="true">&nbsp;</div>';
+            }
+            const classes = ['ann-line'];
+            if (idx === 0) classes.push('ann-line--headline');
+            if (line.includes('>>')) classes.push('ann-line--section');
+            return `<div class="${classes.join(' ')}">${safe}</div>`;
+        }).join('');
+    }
+
     fetch('data/announcements.json')
         .then(r => r.json())
         .then(list => {
@@ -151,6 +165,7 @@ function renderAnnouncementBanner() {
             });
             const latest = arr[0];
             if (!latest || !latest.message) return;
+            const messageHtml = renderAnnouncementMessageHtml(latest.message);
 
             const dateText = (typeof window.formatDate === 'function') ? window.formatDate(latest.date) : (latest.date || '');
 
@@ -164,7 +179,7 @@ function renderAnnouncementBanner() {
                                 <span data-i18n="announcement_banner_title"></span>
                                 <span class="announcement-date date" data-date="${latest.date || ''}">${dateText}</span>
                             </div>
-                                            <div class="announcement-message">${escapeHtml(latest.message).replace(/\n/g, '<br/>')}</div>
+                            <div class="announcement-message">${messageHtml}</div>
                         </div>
                     </div>
                 </div>

@@ -106,6 +106,8 @@
                 style="display:none;"><i class="fas fa-expand"></i></button>
             <button id="export-md-btn" class="floating-btn sub-btn" data-i18n-title="export_markdown" aria-hidden="true"
                 style="display:none;"><i class="fas fa-download"></i></button>
+            <button id="copy-md-btn" class="floating-btn sub-btn" data-i18n-title="copy_markdown" aria-hidden="true"
+                style="display:none;"><i class="fas fa-copy"></i></button>
             <button id="settings-btn" class="floating-btn control-btn" data-i18n-title="settings" aria-haspopup="true"
                 aria-expanded="false"><i class="fas fa-cog"></i></button>
             <!-- 返回顶部按钮（仅图标，文字通过 tooltip 显示） -->
@@ -542,10 +544,26 @@
                 return md;
             }
 
+            function getExportMarkdownContent() {
+                const raw = window.__rawMarkdown || '';
+                return stripFrontMatter(raw);
+            }
+
+            function getI18nText(key, fallback) {
+                try {
+                    const i18n = window.siteI18n;
+                    if (!i18n || typeof i18n.getLang !== 'function' || !i18n.translations) return fallback;
+                    const lang = i18n.getLang();
+                    const map = i18n.translations[lang] || i18n.translations.zh || {};
+                    return map[key] || fallback;
+                } catch (e) {
+                    return fallback;
+                }
+            }
+
             function downloadMarkdown() {
                 try {
-                    const raw = window.__rawMarkdown || '';
-                    const clean = stripFrontMatter(raw);
+                    const clean = getExportMarkdownContent();
                     const title = (document.getElementById('article-title') || {}).textContent || 'post';
                     const filename = title.replace(/[^a-z0-9\u4e00-\u9fa5_-]/ig, '_') + '.md';
                     const blob = new Blob([clean], { type: 'text/markdown;charset=utf-8' });
@@ -562,14 +580,57 @@
                 }
             }
 
+            async function copyMarkdown() {
+                const clean = getExportMarkdownContent();
+                if (!clean) return false;
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(clean);
+                    return true;
+                }
+
+                const ta = document.createElement('textarea');
+                ta.value = clean;
+                ta.setAttribute('readonly', '');
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                ta.style.pointerEvents = 'none';
+                document.body.appendChild(ta);
+                ta.focus();
+                ta.select();
+                let copied = false;
+                try {
+                    copied = document.execCommand('copy');
+                } finally {
+                    ta.remove();
+                }
+                return copied;
+            }
+
+            function showCopySuccess(btn) {
+                if (!btn) return;
+                const icon = btn.querySelector('i');
+                if (!icon) return;
+                const copiedText = getI18nText('code_copied', '已复制');
+                const restoreText = getI18nText('copy_markdown', '复制Markdown');
+                icon.className = 'fas fa-check';
+                btn.setAttribute('data-tooltip', copiedText);
+                btn.title = copiedText;
+                setTimeout(() => {
+                    icon.className = 'fas fa-copy';
+                    btn.setAttribute('data-tooltip', restoreText);
+                    btn.title = restoreText;
+                }, 1200);
+            }
+
             function initFloatingSettings() {
                 const settingsBtn = document.getElementById('settings-btn');
                 const wideBtn = document.getElementById('wide-read-btn');
                 const exportBtn = document.getElementById('export-md-btn');
+                const copyBtn = document.getElementById('copy-md-btn');
                 const container = document.getElementById('floating-controls');
                 const toc = document.getElementById('blog-toc');
                 const article = document.querySelector('.blog-article');
-                if (!settingsBtn || !wideBtn || !exportBtn || !container) return;
+                if (!settingsBtn || !wideBtn || !exportBtn || !copyBtn || !container) return;
 
                 // toggle sub buttons visibility by toggling a class on container
                 let subVisible = false;
@@ -579,23 +640,29 @@
                     if (subVisible) {
                         wideBtn.style.display = 'inline-flex';
                         exportBtn.style.display = 'inline-flex';
+                        copyBtn.style.display = 'inline-flex';
                         wideBtn.setAttribute('aria-hidden', 'false');
                         exportBtn.setAttribute('aria-hidden', 'false');
+                        copyBtn.setAttribute('aria-hidden', 'false');
                         // animate in
                         requestAnimationFrame(() => {
                             wideBtn.style.opacity = '1'; wideBtn.style.transform = 'translateX(0)';
                             exportBtn.style.opacity = '1'; exportBtn.style.transform = 'translateX(0)';
+                            copyBtn.style.opacity = '1'; copyBtn.style.transform = 'translateX(0)';
                         });
                     } else {
                         // animate out then hide
                         wideBtn.style.opacity = '0'; wideBtn.style.transform = 'translateX(8px)';
                         exportBtn.style.opacity = '0'; exportBtn.style.transform = 'translateX(8px)';
+                        copyBtn.style.opacity = '0'; copyBtn.style.transform = 'translateX(8px)';
                         setTimeout(() => {
                             if (!subVisible) {
                                 wideBtn.style.display = 'none';
                                 exportBtn.style.display = 'none';
+                                copyBtn.style.display = 'none';
                                 wideBtn.setAttribute('aria-hidden', 'true');
                                 exportBtn.setAttribute('aria-hidden', 'true');
+                                copyBtn.setAttribute('aria-hidden', 'true');
                             }
                         }, 180);
                     }
@@ -676,6 +743,15 @@
 
                 exportBtn.addEventListener('click', function (e) {
                     downloadMarkdown();
+                });
+
+                copyBtn.addEventListener('click', async function (e) {
+                    try {
+                        const ok = await copyMarkdown();
+                        if (ok) showCopySuccess(copyBtn);
+                    } catch (err) {
+                        console.error('copy markdown failed', err);
+                    }
                 });
             }
             // call now to wire handlers

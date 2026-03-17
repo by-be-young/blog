@@ -332,6 +332,41 @@ body {
     white-space: normal;
 }
 
+.announcement-banner .announcement-message .ann-line {
+    display: block;
+}
+
+.announcement-banner .announcement-message .ann-line--blank {
+    line-height: 1;
+    min-height: 0.8em;
+}
+
+.announcement-banner .announcement-message .ann-line--headline {
+    text-align: center;
+    font-size: 1.16em;
+    font-weight: 900;
+    color: #6b2b4a;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.08em;
+}
+
+.announcement-banner .announcement-message .ann-line--section {
+    color: #ff6f91;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+}
+
+.announcement-banner .announcement-message .ann-line--section::after {
+    content: "～～～～～～～～～～～～～～～～～～";
+    color: #ff97ad;
+    letter-spacing: -0.08em;
+    white-space: nowrap;
+    overflow: hidden;
+    flex: 1 1 auto;
+}
+
 /* 提高横幅最小高度以便卡片更高视觉更醒目 */
 .announcement-banner {
     min-height: 92px;
@@ -2307,8 +2342,8 @@ body.settings-modal-open {
 .home .welcome-text {
     color: #ff5f8a;
     text-shadow:
-        0 2px 0 rgba(255, 255, 255, 0.35),
-        0 10px 22px rgba(255, 95, 138, 0.22);
+        0 2px 0 rgba(255, 255, 255, 0.40),
+        0 12px 24px rgba(110, 10, 37, 0.845);
     /* 增大单词间距，使空格看起来更宽 */
     word-spacing: 0.6em;
     /* 细微字母间距，提高可读性（可按需调整或删除） */
@@ -2330,7 +2365,7 @@ body.settings-modal-open {
         -webkit-text-fill-color: transparent;
         text-shadow: none;
         filter:
-            drop-shadow(0 2px 0 rgba(255, 255, 255, 0.32)) drop-shadow(0 10px 22px rgba(255, 95, 138, 0.18));
+            drop-shadow(0 2px 0 rgba(255, 255, 255, 0.38)) drop-shadow(0 12px 24px rgba(255, 95, 138, 0.24));
     }
 
     /* 首页导航栏标题：渐变字体（显眼但不喧宾夺主） */
@@ -4631,8 +4666,8 @@ body {
 .home .welcome-text {
     color: #ff5f8a;
     text-shadow:
-        0 2px 0 rgba(255, 255, 255, 0.35),
-        0 10px 22px rgba(255, 95, 138, 0.22);
+        0 2px 0 rgba(255, 255, 255, 0.40),
+        0 12px 24px rgba(255, 95, 138, 0.30);
     /* 增大单词间距，使空格看起来更宽 */
     word-spacing: 0.6em;
     /* 细微字母间距，提高可读性（可按需调整或删除） */
@@ -4654,7 +4689,7 @@ body {
         -webkit-text-fill-color: transparent;
         text-shadow: none;
         filter:
-            drop-shadow(0 2px 0 rgba(255, 255, 255, 0.32)) drop-shadow(0 10px 22px rgba(255, 95, 138, 0.18));
+            drop-shadow(0 2px 0 rgba(255, 255, 255, 0.38)) drop-shadow(0 12px 24px rgba(255, 95, 138, 0.24));
     }
 
     /* 首页导航栏标题：渐变字体（显眼但不喧宾夺主） */

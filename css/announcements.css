@@ -113,7 +113,42 @@
     font-size: 1rem;
     font-weight: 700;
     line-height: 1.6;
-    color: #ff5f8a;
+    color: #2b3440;
+}
+
+.announcements-page .ann-card .ann-message .ann-line {
+    display: block;
+}
+
+.announcements-page .ann-card .ann-message .ann-line--blank {
+    line-height: 1;
+    min-height: 0.8em;
+}
+
+.announcements-page .ann-card .ann-message .ann-line--headline {
+    text-align: center;
+    font-size: 1.22em;
+    font-weight: 900;
+    color: #6b2b4a;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.1em;
+}
+
+.announcements-page .ann-card .ann-message .ann-line--section {
+    color: #ff6f91;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 0.42em;
+}
+
+.announcements-page .ann-card .ann-message .ann-line--section::after {
+    content: "～～～～～～～～～～～～～～～";
+    color: #ff97ad;
+    letter-spacing: -0.08em;
+    white-space: nowrap;
+    overflow: hidden;
+    flex: 1 1 auto;
 }
 
 /* 最新公告：顶部居中，字号更大 */

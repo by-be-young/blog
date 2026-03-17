@@ -17,6 +17,9 @@
             beihang: '中国 北航',
             toc: '目录',
             archive_timeline_title: '时间轴归档',
+            archive_filter_learning: '只显示学习类博客',
+            archive_filter_all: '显示全部博客',
+            archive_filter_non_learning: '只显示非学习类博客',
             categories_filter_title: '筛选相关博客',
             label_domain: '领域',
             label_subject: '科目',
@@ -91,7 +94,8 @@
             settings_progress_label: '进度：',
             settings_volume_label: '音量：',
             wide_read: '宽屏阅读',
-            export_markdown: '导出Markdown'
+            export_markdown: '导出Markdown',
+            copy_markdown: '复制Markdown'
             , prev_post: '上一篇'
             , next_post: '下一篇'
             , similar_post: '相似博客'
@@ -122,6 +126,9 @@
             beihang: 'Beihang China',
             toc: 'Table of Contents',
             archive_timeline_title: 'Timeline Archive',
+            archive_filter_learning: 'Show Learning Posts Only',
+            archive_filter_all: 'Show All Posts',
+            archive_filter_non_learning: 'Show Non-Learning Posts Only',
             categories_filter_title: 'Filter Blogs',
             label_domain: 'Domain',
             label_subject: 'Subject',
@@ -196,7 +203,8 @@
             settings_progress_label: 'Progress:',
             settings_volume_label: 'Volume:',
             wide_read: 'Wide reading',
-            export_markdown: 'Export Markdown'
+            export_markdown: 'Export Markdown',
+            copy_markdown: 'Copy Markdown'
             , prev_post: 'Previous'
             , next_post: 'Next'
             , similar_post: 'Similar Post'
@@ -227,6 +235,9 @@
             beihang: '中国 北航',
             toc: '目次',
             archive_timeline_title: 'タイムラインアーカイブ',
+            archive_filter_learning: '学習系ブログのみ表示',
+            archive_filter_all: 'すべてのブログを表示',
+            archive_filter_non_learning: '学習系以外のブログのみ表示',
             categories_filter_title: 'ブログを絞り込む',
             label_domain: '分野',
             label_subject: '科目',
@@ -301,7 +312,8 @@
             settings_progress_label: '再生位置：',
             settings_volume_label: '音量：',
             wide_read: '広い表示',
-            export_markdown: 'Markdownを出力'
+            export_markdown: 'Markdownを出力',
+            copy_markdown: 'Markdownをコピー'
             , prev_post: '前の記事'
             , next_post: '次の記事'
             , similar_post: '類似の投稿'

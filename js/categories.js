@@ -1,6 +1,8 @@
 // 分类页面多级分类渲染
 let blogsData = [];
+let allBlogsData = [];
 let selectedTags = [];
+let selectedTypeFilter = 'all';
 
 function escapeHtml(s) {
     return String(s).replace(/[&<>\"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -12,6 +14,94 @@ const programmaticUntil = new Map();
 
 function clamp(n, min, max) {
     return Math.max(min, Math.min(max, n));
+}
+
+function getCategoriesHomeCategoryKey(blog) {
+    if (typeof getHomeCategoryKey === 'function') {
+        return getHomeCategoryKey(blog);
+    }
+
+    if (blog && typeof blog.category === 'string' && blog.category.trim()) {
+        const normalized = blog.category.trim();
+        if (normalized === '学习') return 'home_category_learning';
+        if (normalized === '娱乐') return 'home_category_entertainment';
+    }
+
+    const tags = Array.isArray(blog && blog.tags) ? blog.tags : [];
+    const firstTag = typeof tags[0] === 'string' ? tags[0].trim() : '';
+    if (firstTag === '二上' || firstTag === '二下') return 'home_category_learning';
+    return 'home_category_entertainment';
+}
+
+function isLearningBlog(blog) {
+    return getCategoriesHomeCategoryKey(blog) === 'home_category_learning';
+}
+
+function applyTypeFilterToBlogs(sourceBlogs, mode) {
+    if (!Array.isArray(sourceBlogs)) return [];
+    if (mode === 'learning') return sourceBlogs.filter(isLearningBlog);
+    if (mode === 'non-learning') return sourceBlogs.filter(blog => !isLearningBlog(blog));
+    return sourceBlogs.slice();
+}
+
+function initCategoriesTypeFilterUI(onChange) {
+    const filterRoot = document.getElementById('categoriesTypeFilterToggle');
+    if (!filterRoot) return null;
+
+    const buttons = Array.from(filterRoot.querySelectorAll('.archive-filter-btn'));
+    if (buttons.length === 0) return null;
+
+    function updateActiveBackground(activeBtn) {
+        if (!activeBtn) return;
+        const rootRect = filterRoot.getBoundingClientRect();
+        const btnRect = activeBtn.getBoundingClientRect();
+        const top = btnRect.top - rootRect.top;
+        filterRoot.style.setProperty('--filter-bg-top', `${top}px`);
+        filterRoot.style.setProperty('--filter-bg-height', `${btnRect.height}px`);
+    }
+
+    function setActive(mode, shouldEmit) {
+        let activeBtn = null;
+        buttons.forEach(btn => {
+            const active = btn.dataset.filter === mode;
+            btn.classList.toggle('active', active);
+            btn.setAttribute('aria-checked', active ? 'true' : 'false');
+            if (active) activeBtn = btn;
+        });
+        updateActiveBackground(activeBtn || buttons[0]);
+        if (shouldEmit && typeof onChange === 'function') onChange(mode);
+    }
+
+    function shiftActiveByWheel(step) {
+        const currentIndex = Math.max(0, buttons.findIndex(btn => btn.classList.contains('active')));
+        const nextIndex = Math.min(buttons.length - 1, Math.max(0, currentIndex + step));
+        if (nextIndex === currentIndex) return;
+        const nextBtn = buttons[nextIndex];
+        setActive(nextBtn.dataset.filter || 'all', true);
+    }
+
+    buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            setActive(btn.dataset.filter || 'all', true);
+        });
+    });
+
+    filterRoot.addEventListener('wheel', (e) => {
+        if (!e || !Number.isFinite(e.deltaY) || e.deltaY === 0) return;
+        e.preventDefault();
+        shiftActiveByWheel(e.deltaY > 0 ? 1 : -1);
+    }, { passive: false });
+
+    window.addEventListener('resize', () => {
+        const activeBtn = buttons.find(btn => btn.classList.contains('active')) || buttons[0];
+        updateActiveBackground(activeBtn);
+    });
+
+    setActive('all', false);
+
+    return {
+        setActive
+    };
 }
 
 function buildTagTree() {
@@ -542,7 +632,8 @@ try {
 fetch('data/blogs.json')
     .then(res => res.json())
     .then(blogs => {
-        blogsData = blogs;
+        allBlogsData = Array.isArray(blogs) ? blogs : [];
+        blogsData = applyTypeFilterToBlogs(allBlogsData, selectedTypeFilter);
         // 如果 URL 中包含 tags 参数（JSON），则用其初始化 selectedTags
         try {
             const url = new URL(window.location.href);
@@ -557,6 +648,15 @@ fetch('data/blogs.json')
         } catch (e) {
             // ignore malformed param
         }
+
+        initCategoriesTypeFilterUI((mode) => {
+            selectedTypeFilter = mode || 'all';
+            selectedTags = [];
+            blogsData = applyTypeFilterToBlogs(allBlogsData, selectedTypeFilter);
+            renderCategories();
+            renderBlogList();
+        });
+
         renderCategories();
         renderBlogList();
     });

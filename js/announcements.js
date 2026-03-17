@@ -5,6 +5,21 @@
         return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
 
+    // 将公告文本按行转为结构化 HTML，便于首行与章节行定制样式
+    function renderMessageHtml(msg) {
+        const lines = String(msg || '').split(/\r?\n/);
+        return lines.map((line, idx) => {
+            const text = escapeHtml(line);
+            if (!line.trim()) {
+                return '<div class="ann-line ann-line--blank" aria-hidden="true">&nbsp;</div>';
+            }
+            const classes = ['ann-line'];
+            if (idx === 0) classes.push('ann-line--headline');
+            if (line.includes('>>')) classes.push('ann-line--section');
+            return `<div class="${classes.join(' ')}">${text}</div>`;
+        }).join('');
+    }
+
     // 公告排序函数：按日期降序排列，日期相同则按 ID 降序排列
     function sortAnnouncements(a, b) {
         const da = new Date(a && a.date ? a.date : 0).getTime();
@@ -63,6 +78,7 @@
             const msg = a && a.message ? String(a.message) : '';
             const date = a && a.date ? String(a.date) : '';
             if (!msg) return;
+            const messageHtml = renderMessageHtml(msg);
             // 顶部的特殊处理
             if (idx === 0) {
                 const item = document.createElement('div');
@@ -73,7 +89,7 @@
                         <div class="ann-time"><span class="date" data-date="${escapeHtml(date)}"></span></div>
                     </div>
                     <div class="ann-card">
-                        <div class="ann-message">${escapeHtml(msg)}</div>
+                        <div class="ann-message">${messageHtml}</div>
                     </div>
                 `;
                 item.classList.add('is-visible');
@@ -90,7 +106,7 @@
                         <div class="ann-time"><span class="date" data-date="${escapeHtml(date)}"></span></div>
                     </div>
                     <div class="ann-card">
-                        <div class="ann-message">${escapeHtml(msg)}</div>
+                        <div class="ann-message">${messageHtml}</div>
                     </div>
                 `;
                 item.classList.add('is-visible');
@@ -103,7 +119,7 @@
             item.className = `ann-item ann-item--${side}`;
             if (side === 'left') {
                 item.innerHTML = `
-                    <div class="ann-card"><div class="ann-message">${escapeHtml(msg)}</div></div>
+                    <div class="ann-card"><div class="ann-message">${messageHtml}</div></div>
                     <div class="ann-mid">
                         <div class="ann-dot" aria-hidden="true"></div>
                         <div class="ann-time"><span class="date" data-date="${escapeHtml(date)}"></span></div>
@@ -117,7 +133,7 @@
                         <div class="ann-dot" aria-hidden="true"></div>
                         <div class="ann-time"><span class="date" data-date="${escapeHtml(date)}"></span></div>
                     </div>
-                    <div class="ann-card"><div class="ann-message">${escapeHtml(msg)}</div></div>
+                    <div class="ann-card"><div class="ann-message">${messageHtml}</div></div>
                 `;
             }
             timeline.appendChild(item);

@@ -26,6 +26,96 @@ function heat(count, max) {
   return 0.18 + ratio * 0.72;
 }
 
+function getArchiveHomeCategoryKey(blog) {
+  if (typeof getHomeCategoryKey === 'function') {
+    return getHomeCategoryKey(blog);
+  }
+
+  if (blog && typeof blog.category === 'string' && blog.category.trim()) {
+    const normalized = blog.category.trim();
+    if (normalized === '学习') return 'home_category_learning';
+    if (normalized === '娱乐') return 'home_category_entertainment';
+  }
+
+  const tags = Array.isArray(blog && blog.tags) ? blog.tags : [];
+  const firstTag = typeof tags[0] === 'string' ? tags[0].trim() : '';
+  if (firstTag === '二上' || firstTag === '二下') {
+    return 'home_category_learning';
+  }
+  return 'home_category_entertainment';
+}
+
+function isLearningBlog(blog) {
+  return getArchiveHomeCategoryKey(blog) === 'home_category_learning';
+}
+
+function filterArchiveBlogs(blogs, mode) {
+  if (!Array.isArray(blogs)) return [];
+  if (mode === 'learning') return blogs.filter(isLearningBlog);
+  if (mode === 'non-learning') return blogs.filter(blog => !isLearningBlog(blog));
+  return blogs.slice();
+}
+
+function initArchiveFilterUI(onChange) {
+  const filterRoot = document.getElementById('archiveFilterToggle');
+  if (!filterRoot) return null;
+
+  const buttons = Array.from(filterRoot.querySelectorAll('.archive-filter-btn'));
+  if (buttons.length === 0) return null;
+
+  function updateActiveBackground(activeBtn) {
+    if (!activeBtn) return;
+    const rootRect = filterRoot.getBoundingClientRect();
+    const btnRect = activeBtn.getBoundingClientRect();
+    const top = btnRect.top - rootRect.top;
+    filterRoot.style.setProperty('--filter-bg-top', `${top}px`);
+    filterRoot.style.setProperty('--filter-bg-height', `${btnRect.height}px`);
+  }
+
+  function setActive(mode, shouldEmit) {
+    let activeBtn = null;
+    buttons.forEach(btn => {
+      const active = btn.dataset.filter === mode;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-checked', active ? 'true' : 'false');
+      if (active) activeBtn = btn;
+    });
+    updateActiveBackground(activeBtn || buttons[0]);
+    if (shouldEmit && typeof onChange === 'function') onChange(mode);
+  }
+
+  function shiftActiveByWheel(step) {
+    const currentIndex = Math.max(0, buttons.findIndex(btn => btn.classList.contains('active')));
+    const nextIndex = Math.min(buttons.length - 1, Math.max(0, currentIndex + step));
+    if (nextIndex === currentIndex) return;
+    const nextBtn = buttons[nextIndex];
+    setActive(nextBtn.dataset.filter || 'all', true);
+  }
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      setActive(btn.dataset.filter || 'all', true);
+    });
+  });
+
+  filterRoot.addEventListener('wheel', (e) => {
+    if (!e || !Number.isFinite(e.deltaY) || e.deltaY === 0) return;
+    e.preventDefault();
+    shiftActiveByWheel(e.deltaY > 0 ? 1 : -1);
+  }, { passive: false });
+
+  window.addEventListener('resize', () => {
+    const activeBtn = buttons.find(btn => btn.classList.contains('active')) || buttons[0];
+    updateActiveBackground(activeBtn);
+  });
+
+  setActive('all', false);
+
+  return {
+    setActive
+  };
+}
+
 function renderTimeline(blogs) {
   const timeline = document.getElementById('archiveTimeline');
   if (!timeline) return;
@@ -206,29 +296,39 @@ function initArchiveCalendar(blogs) {
 
   if (!calendarBody || !calLabel || !btnPrev || !btnNext || !btnToday || toggleButtons.length === 0) return;
 
-  const dateCount = new Map();
-  const monthCount = new Map();
-  const monthMaxDate = new Map();
+  let dateCount = new Map();
+  let monthCount = new Map();
+  let monthMaxDate = new Map();
   let maxDay = 0;
   let maxMonth = 0;
 
-  blogs.forEach(blog => {
-    const d = new Date(blog.date);
-    if (Number.isNaN(d.getTime())) return;
-    const ymd = toYMD(d);
-    const ym = toYM(d);
+  function rebuildCalendarStats(sourceBlogs) {
+    dateCount = new Map();
+    monthCount = new Map();
+    monthMaxDate = new Map();
+    maxDay = 0;
+    maxMonth = 0;
 
-    const dayVal = (dateCount.get(ymd) ?? 0) + 1;
-    dateCount.set(ymd, dayVal);
-    if (dayVal > maxDay) maxDay = dayVal;
+    (Array.isArray(sourceBlogs) ? sourceBlogs : []).forEach(blog => {
+      const d = new Date(blog.date);
+      if (Number.isNaN(d.getTime())) return;
+      const ymd = toYMD(d);
+      const ym = toYM(d);
 
-    const monthVal = (monthCount.get(ym) ?? 0) + 1;
-    monthCount.set(ym, monthVal);
-    if (monthVal > maxMonth) maxMonth = monthVal;
+      const dayVal = (dateCount.get(ymd) ?? 0) + 1;
+      dateCount.set(ymd, dayVal);
+      if (dayVal > maxDay) maxDay = dayVal;
 
-    const prevMax = monthMaxDate.get(ym);
-    if (!prevMax || prevMax < ymd) monthMaxDate.set(ym, ymd);
-  });
+      const monthVal = (monthCount.get(ym) ?? 0) + 1;
+      monthCount.set(ym, monthVal);
+      if (monthVal > maxMonth) maxMonth = monthVal;
+
+      const prevMax = monthMaxDate.get(ym);
+      if (!prevMax || prevMax < ymd) monthMaxDate.set(ym, ymd);
+    });
+  }
+
+  rebuildCalendarStats(blogs);
 
   let view = 'month';
   const baseDate = blogs.length ? new Date(blogs[0].date) : new Date();
@@ -611,6 +711,13 @@ function initArchiveCalendar(blogs) {
       window.setTimeout(() => jumpTimelineToDate(todayYmd), 80);
     }
   } catch (e) { /* ignore */ }
+
+  return {
+    setBlogs(nextBlogs) {
+      rebuildCalendarStats(nextBlogs);
+      render();
+    }
+  };
 }
 
 // Floating calendar: 在小屏变为悬浮球并支持模态展开/收起
@@ -621,14 +728,16 @@ function initCalendarFab() {
   const closeBtn = modal ? modal.querySelector('.calendar-modal-close') : null;
   const sidebar = document.querySelector('.archive-sidebar');
   const calendarCard = document.getElementById('calendarCard');
+  const filterPanel = document.getElementById('archiveFilterPanel');
   if (!fab || !modal || !modalBody || !calendarCard) return;
 
   let isOpen = false;
 
   function openModal() {
     if (isOpen) return;
-    // move calendarCard into modal body
+    // move calendar card and filter panel into modal body
     modalBody.appendChild(calendarCard);
+    if (filterPanel) modalBody.appendChild(filterPanel);
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
     fab.setAttribute('aria-hidden', 'true');
@@ -638,8 +747,11 @@ function initCalendarFab() {
 
   function closeModal() {
     if (!isOpen) return;
-    // move calendarCard back to sidebar
-    if (sidebar) sidebar.appendChild(calendarCard);
+    // move calendar card and filter panel back to sidebar
+    if (sidebar) {
+      sidebar.appendChild(calendarCard);
+      if (filterPanel) sidebar.appendChild(filterPanel);
+    }
     modal.classList.remove('open');
     modal.setAttribute('aria-hidden', 'true');
     fab.setAttribute('aria-hidden', 'false');
@@ -658,8 +770,9 @@ function initCalendarFab() {
     const w = window.innerWidth;
     if (w > 900) {
       if (isOpen) closeModal();
-      // ensure calendarCard is inside sidebar
+      // ensure calendar card and filter panel are inside sidebar
       if (sidebar && calendarCard && calendarCard.parentNode !== sidebar) sidebar.appendChild(calendarCard);
+      if (sidebar && filterPanel && filterPanel.parentNode !== sidebar) sidebar.appendChild(filterPanel);
       fab.style.display = 'none';
     } else {
       fab.style.display = 'inline-flex';
@@ -675,9 +788,26 @@ fetch('data/blogs.json')
   .then(res => res.json())
   .then(blogs => {
     blogs.sort((a, b) => new Date(b.date) - new Date(a.date));
-    renderTimeline(blogs);
+    let activeBlogs = blogs.slice();
+
+    renderTimeline(activeBlogs);
     initTimelineDrum();
-    initArchiveCalendar(blogs);
+    const calendarController = initArchiveCalendar(activeBlogs);
+
+    function applyArchiveFilter(mode) {
+      activeBlogs = filterArchiveBlogs(blogs, mode);
+      renderTimeline(activeBlogs);
+      if (calendarController && typeof calendarController.setBlogs === 'function') {
+        calendarController.setBlogs(activeBlogs);
+      }
+
+      const timeline = document.getElementById('archiveTimeline');
+      if (timeline && typeof timeline.__drumUpdate === 'function') {
+        window.requestAnimationFrame(timeline.__drumUpdate);
+      }
+    }
+
+    initArchiveFilterUI(applyArchiveFilter);
     try { initCalendarFab(); } catch (e) { /* ignore */ }
     // 页面进入后默认将最近一篇博文滚动到时间轴中心
     setTimeout(() => {
