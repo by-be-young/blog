@@ -1,5 +1,53 @@
 [
     {
+        "id": 642086862,
+        "title": "Linux 命令指南",
+        "excerpt": "Linux基本命令的语法、格式及用法举例。",
+        "date": "2026-03-18",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "操作系统",
+            "Linux"
+        ],
+        "category": "学习",
+        "type": "轻松笔记",
+        "contentFile": "blogs/二下/操作系统/Linux/Linux 命令指南.md",
+        "recommended": false
+    },
+    {
+        "id": 3125593710,
+        "title": "Makefile基础速成",
+        "excerpt": "Makefile 是构建自动化工具 make 的配置文件，核心思想是定义**依赖关系**和**构建规则**。当你面对大型项目不知所措时，从 Makefile 开...",
+        "date": "2026-03-18",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "操作系统",
+            "Makefile"
+        ],
+        "category": "学习",
+        "type": null,
+        "contentFile": "blogs/二下/操作系统/Makefile/Makefile基础速成.md",
+        "recommended": false
+    },
+    {
+        "id": 1566786778,
+        "title": "Lab0 Pre-Exam复习",
+        "excerpt": "|执行命令|实现功能|",
+        "date": "2026-03-18",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "操作系统",
+            "Shell"
+        ],
+        "category": "学习",
+        "type": null,
+        "contentFile": "blogs/二下/操作系统/Shell/Lab0 Pre-Exam复习.md",
+        "recommended": false
+    },
+    {
         "id": 3721673332,
         "title": "gcc语法速成",
         "excerpt": "GCC 的语法详解",
@@ -13,22 +61,6 @@
         "category": "学习",
         "type": "轻松笔记",
         "contentFile": "blogs/二下/操作系统/gcc/gcc语法速成.md",
-        "recommended": false
-    },
-    {
-        "id": 642086862,
-        "title": "Linux 命令指南",
-        "excerpt": "Linux基本命令的语法、格式及用法举例。",
-        "date": "2026-03-17",
-        "image": "assets/images/blog_bg.png",
-        "tags": [
-            "二下",
-            "操作系统",
-            "Linux"
-        ],
-        "category": "学习",
-        "type": "轻松笔记",
-        "contentFile": "blogs/二下/操作系统/Linux/Linux 命令指南.md",
         "recommended": false
     },
     {

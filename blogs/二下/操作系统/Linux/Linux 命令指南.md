@@ -277,7 +277,7 @@ diff -r dir1 dir2           # 比较两个目录下的所有文件
 
 ---
 
-## `sed` - 流编辑器
+## `sed` - 查找替换
 
 即 stream editor 的缩写，文本处理神器。
 
@@ -368,13 +368,14 @@ Linux 定义了三种数据流：
 
 ## 重定向符号
 
-| 符号 | 含义 | 示例 |
-|------|------|------|
-| `>` | 输出重定向（覆盖） | `echo hello > file.txt` |
-| `>>` | 输出重定向（追加） | `echo world >> file.txt` |
-| `<` | 输入重定向 | `sort < file.txt` |
-| `2>` | 错误输出重定向 | `gcc test.c 2> error.log` |
-| `&>` | 同时重定向输出和错误 | `command &> all.log` |
+| 符号   | 含义         | 示例                          |
+| ---- | ---------- | --------------------------- |
+| `>`  | 输出重定向（覆盖）  | `echo hello > file.txt`     |
+| `>>` | 输出重定向（追加）  | `echo world >> file.txt`    |
+| `<`  | 输入重定向      | `sort < file.txt`           |
+| `1>` | 正确输出重定向    | `gcc test.c 1> correct.log` |
+| `2>` | 错误输出重定向    | `gcc test.c 2> error.log`   |
+| `&>` | 同时重定向输出和错误 | `command &> all.log`        |
 
 ```bash
 # 把ls的结果保存到文件（覆盖）
