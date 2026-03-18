@@ -1,3 +1,7 @@
+---
+type: 系统笔记
+excerpt: Lab0 Pre-Exam的习题与解答
+---
 # GCC & Makefile Quiz
 
 ## 题目
