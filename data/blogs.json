@@ -1,8 +1,24 @@
 [
     {
+        "id": 2626146186,
+        "title": "OS-Lab0-实验报告",
+        "excerpt": "操作系统Lab0课下实验实验报告",
+        "date": "2026-03-19",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "操作系统",
+            "实验报告"
+        ],
+        "category": "学习",
+        "type": "系统笔记",
+        "contentFile": "blogs/二下/操作系统/实验报告/OS-Lab0-实验报告.md",
+        "recommended": false
+    },
+    {
         "id": 3125593710,
         "title": "Makefile基础速成",
-        "excerpt": "Makefile 是构建自动化工具 make 的配置文件，核心思想是定义**依赖关系**和**构建规则**。当你面对大型项目不知所措时，从 Makefile 开...",
+        "excerpt": "Makefile语法格式基础",
         "date": "2026-03-18",
         "image": "assets/images/blog_bg.png",
         "tags": [
@@ -11,7 +27,7 @@
             "Makefile"
         ],
         "category": "学习",
-        "type": null,
+        "type": "轻松笔记",
         "contentFile": "blogs/二下/操作系统/Makefile/Makefile基础速成.md",
         "recommended": false
     },
@@ -66,7 +82,7 @@
     {
         "id": 2993316592,
         "title": "意大利语自然拼读攻略",
-        "excerpt": "意大利语被誉为“世界上最美丽的语言”之一，最大的特点就是“所见即所读”。",
+        "excerpt": "意大利语，所见即所读！",
         "date": "2026-03-13",
         "image": "assets/images/blog_bg.png",
         "tags": [
@@ -75,7 +91,7 @@
             "发音规则"
         ],
         "category": "娱乐",
-        "type": null,
+        "type": "随心所记",
         "contentFile": "blogs/语言/意大利语/发音规则/意大利语自然拼读攻略.md",
         "recommended": false
     },
@@ -459,7 +475,7 @@
             "模板"
         ],
         "category": "学习",
-        "type": null,
+        "type": "概要笔记",
         "contentFile": "blogs/二上/算法/模板/算法选择题速查.md",
         "recommended": false
     },

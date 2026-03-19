@@ -65,11 +65,11 @@ function initArchiveFilterUI(onChange) {
 
   function updateActiveBackground(activeBtn) {
     if (!activeBtn) return;
-    const rootRect = filterRoot.getBoundingClientRect();
-    const btnRect = activeBtn.getBoundingClientRect();
-    const top = btnRect.top - rootRect.top;
+    // Use layout offsets to avoid transform/animation-induced visual misalignment.
+    const top = activeBtn.offsetTop;
+    const height = activeBtn.offsetHeight;
     filterRoot.style.setProperty('--filter-bg-top', `${top}px`);
-    filterRoot.style.setProperty('--filter-bg-height', `${btnRect.height}px`);
+    filterRoot.style.setProperty('--filter-bg-height', `${height}px`);
   }
 
   function setActive(mode, shouldEmit) {
@@ -222,8 +222,20 @@ function initTimelineDrum() {
   const timeline = document.getElementById('archiveTimeline');
   if (!timeline) return;
 
-  timeline.classList.add('drum');
   if (!timeline.hasAttribute('tabindex')) timeline.setAttribute('tabindex', '0');
+
+  const isNarrowScreen = () => window.matchMedia('(max-width: 900px)').matches;
+
+  function applyMode() {
+    if (isNarrowScreen()) {
+      timeline.classList.remove('drum');
+      timeline.style.removeProperty('--drum-pad');
+    } else {
+      timeline.classList.add('drum');
+    }
+  }
+
+  applyMode();
 
   function getItems() {
     return Array.from(timeline.querySelectorAll('.timeline-item'));
@@ -250,6 +262,7 @@ function initTimelineDrum() {
   }
 
   function update() {
+    if (!timeline.classList.contains('drum')) return;
     computeDrumPadding();
     const rect = timeline.getBoundingClientRect();
     const centerY = rect.top + rect.height / 2;
@@ -269,6 +282,7 @@ function initTimelineDrum() {
   }
 
   function onScroll() {
+    if (!timeline.classList.contains('drum')) return;
     if (ticking) return;
     ticking = true;
     window.requestAnimationFrame(() => {
@@ -278,7 +292,10 @@ function initTimelineDrum() {
   }
 
   timeline.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', update);
+  window.addEventListener('resize', () => {
+    applyMode();
+    update();
+  });
 
   // 供其它逻辑（比如日历跳转）触发一次滚筒刷新
   timeline.__drumUpdate = update;
@@ -721,7 +738,7 @@ function initArchiveCalendar(blogs) {
 }
 
 // Floating calendar: 在小屏变为悬浮球并支持模态展开/收起
-function initCalendarFab() {
+function initCalendarFab(filterController) {
   const fab = document.getElementById('calendarFab');
   const modal = document.getElementById('calendarModal');
   const modalBody = modal ? modal.querySelector('.calendar-modal-body') : null;
@@ -732,31 +749,90 @@ function initCalendarFab() {
   if (!fab || !modal || !modalBody || !calendarCard) return;
 
   let isOpen = false;
+  let isAnimating = false;
+  let closeTimer = null;
+  const MODAL_ANIMATION_MS = 320;
 
-  function openModal() {
-    if (isOpen) return;
-    // move calendar card and filter panel into modal body
-    modalBody.appendChild(calendarCard);
-    if (filterPanel) modalBody.appendChild(filterPanel);
-    modal.classList.add('open');
-    modal.setAttribute('aria-hidden', 'false');
-    fab.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = 'hidden';
-    isOpen = true;
-  }
-
-  function closeModal() {
-    if (!isOpen) return;
-    // move calendar card and filter panel back to sidebar
+  function restoreCalendarToSidebar() {
     if (sidebar) {
       sidebar.appendChild(calendarCard);
       if (filterPanel) sidebar.appendChild(filterPanel);
     }
-    modal.classList.remove('open');
+  }
+
+  function finalizeClose() {
+    restoreCalendarToSidebar();
+    modal.classList.remove('closing');
     modal.setAttribute('aria-hidden', 'true');
     fab.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = '';
+    isAnimating = false;
+    closeTimer = null;
+  }
+
+  function openModal() {
+    if (isOpen || isAnimating) return;
+    if (closeTimer) {
+      window.clearTimeout(closeTimer);
+      closeTimer = null;
+    }
+    // move calendar card and filter panel into modal body
+    modalBody.appendChild(calendarCard);
+    if (filterPanel) modalBody.appendChild(filterPanel);
+
+    // 打开弹窗时默认切回“全部”筛选，并同步刷新时间轴/日历
+    if (filterController && typeof filterController.setActive === 'function') {
+      filterController.setActive('all', true);
+    }
+
+    modal.classList.remove('open');
+    modal.classList.remove('closing');
+    modal.classList.add('open-prep');
+    modal.setAttribute('aria-hidden', 'false');
+    fab.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = 'hidden';
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        modal.classList.remove('open-prep');
+        modal.classList.add('open');
+
+        // 弹窗可见后再重算一次选中态背景，确保绿色底色位置正确
+        if (filterController && typeof filterController.setActive === 'function') {
+          filterController.setActive('all', false);
+        }
+      });
+    });
+
+    isOpen = true;
+  }
+
+  function closeModal(immediate = false) {
+    if (!isOpen && !isAnimating) return;
+
+    if (closeTimer) {
+      window.clearTimeout(closeTimer);
+      closeTimer = null;
+    }
+
     isOpen = false;
+
+    if (immediate) {
+      modal.classList.remove('open');
+      modal.classList.remove('open-prep');
+      modal.classList.remove('closing');
+      finalizeClose();
+      return;
+    }
+
+    isAnimating = true;
+    modal.classList.remove('open');
+    modal.classList.remove('open-prep');
+    modal.classList.add('closing');
+
+    closeTimer = window.setTimeout(() => {
+      finalizeClose();
+    }, MODAL_ANIMATION_MS);
   }
 
   fab.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
@@ -769,7 +845,7 @@ function initCalendarFab() {
   function updateMode() {
     const w = window.innerWidth;
     if (w > 900) {
-      if (isOpen) closeModal();
+      if (isOpen || isAnimating) closeModal(true);
       // ensure calendar card and filter panel are inside sidebar
       if (sidebar && calendarCard && calendarCard.parentNode !== sidebar) sidebar.appendChild(calendarCard);
       if (sidebar && filterPanel && filterPanel.parentNode !== sidebar) sidebar.appendChild(filterPanel);
@@ -807,15 +883,16 @@ fetch('data/blogs.json')
       }
     }
 
-    initArchiveFilterUI(applyArchiveFilter);
-    try { initCalendarFab(); } catch (e) { /* ignore */ }
+    const filterController = initArchiveFilterUI(applyArchiveFilter);
+    try { initCalendarFab(filterController); } catch (e) { /* ignore */ }
     // 页面进入后默认将最近一篇博文滚动到时间轴中心
     setTimeout(() => {
       const timeline = document.getElementById('archiveTimeline');
       if (!timeline) return;
       const firstItem = timeline.querySelector('.timeline-item[data-date]');
       if (!firstItem) return;
-      firstItem.scrollIntoView({ behavior: 'auto', block: 'center' });
+      const block = timeline.classList.contains('drum') ? 'center' : 'start';
+      firstItem.scrollIntoView({ behavior: 'auto', block });
       // 如果启用了 drum 效果，触发一次更新以计算居中样式
       const update = timeline.__drumUpdate;
       if (typeof update === 'function') {

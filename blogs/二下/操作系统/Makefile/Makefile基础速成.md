@@ -1,3 +1,8 @@
+---
+type: 轻松笔记
+excerpt: Makefile语法格式基础
+date: 2026-03-18
+---
 # 什么是 Makefile？
 
 Makefile 是构建自动化工具 make 的配置文件，核心思想是定义**依赖关系**和**构建规则**。当你面对大型项目不知所措时，从 Makefile 开始读往往是最佳选择。

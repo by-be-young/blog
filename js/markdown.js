@@ -41,12 +41,19 @@ function rewriteMarkdownAssetUrls(rootEl) {
     const mdBase = origin + siteBasePath + sourceDir.replace(/^\/+/, '');
     const siteBaseNoSlash = siteBasePath.endsWith('/') ? siteBasePath.slice(0, -1) : siteBasePath;
 
+    function toAbsoluteBySiteRoot(pathLike) {
+        const prefixed = (siteBaseNoSlash || '') + '/' + String(pathLike).replace(/^\/+/, '');
+        return new URL(prefixed, origin).href;
+    }
+
     rootEl.querySelectorAll('img').forEach(img => {
-        const src = img.getAttribute('src');
+        const rawSrc = img.getAttribute('src');
+        if (!rawSrc) return;
+        const src = String(rawSrc).trim().replace(/\\/g, '/');
         if (!src) return;
 
         // Keep absolute/external/data URLs intact
-        if (/^(https?:|data:|blob:)/i.test(src)) return;
+        if (/^(https?:|data:|blob:|\/\/)/i.test(src)) return;
         if (src.startsWith('#')) return;
 
         try {
@@ -54,6 +61,20 @@ function rewriteMarkdownAssetUrls(rootEl) {
             if (src.startsWith('/')) {
                 const prefixed = (siteBaseNoSlash || '') + src;
                 img.setAttribute('src', new URL(prefixed, origin).href);
+                return;
+            }
+
+            // Compatibility: many articles use ../assets/... as site-root assets.
+            // Resolve these to <siteBase>/assets/... instead of markdown-directory-relative.
+            if (/^(?:\.\/|\.\.\/)*assets\//i.test(src)) {
+                const normalized = src.replace(/^(?:\.\/|\.\.\/)+/, '');
+                img.setAttribute('src', toAbsoluteBySiteRoot(normalized));
+                return;
+            }
+
+            // Also support assets/... shorthand as site-root assets.
+            if (/^assets\//i.test(src)) {
+                img.setAttribute('src', toAbsoluteBySiteRoot(src));
                 return;
             }
 

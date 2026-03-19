@@ -1,6 +1,148 @@
 (function () {
     const DATA_URL = 'data/quick-links.json';
     let lastGridMinHeight = 0;
+    let quickLinksRenderLockedUntil = 0;
+
+    function lockQuickLinksRender(ms) {
+        const ttl = Number(ms) || 0;
+        const until = Date.now() + Math.max(0, ttl);
+        if (until > quickLinksRenderLockedUntil) {
+            quickLinksRenderLockedUntil = until;
+        }
+    }
+
+    function initQuickLinksFab() {
+        const fab = document.getElementById('quickLinksFab');
+        const modal = document.getElementById('quickLinksModal');
+        const modalBody = modal ? modal.querySelector('.quick-links-modal-body') : null;
+        const sidebar = document.querySelector('.quick-links-sidebar');
+        const panel = document.querySelector('.quick-links-panel');
+        if (!fab || !modal || !modalBody || !panel) return;
+
+        let isOpen = false;
+        let isAnimating = false;
+        let closeTimer = null;
+        const MODAL_ANIMATION_MS = 320;
+
+        function syncWheelAfterModalOpen() {
+            try {
+                const wheelEl = panel.querySelector('#quickLinksWheel');
+                if (!wheelEl) return;
+                adjustWheelPadding(wheelEl);
+                lockQuickLinksRender(220);
+                if (typeof wheelEl.__recenterToSelected === 'function') {
+                    wheelEl.__recenterToSelected();
+                } else {
+                    const selected = wheelEl.querySelector('.quick-links-wheel-item.is-selected') || wheelEl.querySelector('.quick-links-wheel-item');
+                    if (selected) {
+                        scrollItemIntoCenter(wheelEl, selected, 'auto');
+                    }
+                    applyWheelVisuals(wheelEl);
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        function restorePanel() {
+            if (!sidebar) return;
+            if (panel.parentNode !== sidebar) {
+                sidebar.appendChild(panel);
+            }
+        }
+
+        function finalizeClose() {
+            restorePanel();
+            modal.classList.remove('closing');
+            modal.setAttribute('aria-hidden', 'true');
+            fab.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = '';
+            isAnimating = false;
+            closeTimer = null;
+        }
+
+        function openModal() {
+            if (isOpen || isAnimating) return;
+            if (closeTimer) {
+                window.clearTimeout(closeTimer);
+                closeTimer = null;
+            }
+
+            // 弹窗搬运+开启动画期间，临时锁住分类渲染，避免出现“先闪到其他分类再回到选中项”。
+            lockQuickLinksRender(MODAL_ANIMATION_MS + 260);
+
+            modalBody.appendChild(panel);
+
+            modal.classList.remove('open');
+            modal.classList.remove('closing');
+            modal.classList.add('open-prep');
+            modal.setAttribute('aria-hidden', 'false');
+            fab.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = 'hidden';
+
+            window.requestAnimationFrame(() => {
+                window.requestAnimationFrame(() => {
+                    modal.classList.remove('open-prep');
+                    modal.classList.add('open');
+                    syncWheelAfterModalOpen();
+                    window.setTimeout(syncWheelAfterModalOpen, 120);
+                });
+            });
+
+            isOpen = true;
+        }
+
+        function closeModal(immediate) {
+            if (!isOpen && !isAnimating) return;
+
+            if (closeTimer) {
+                window.clearTimeout(closeTimer);
+                closeTimer = null;
+            }
+
+            isOpen = false;
+
+            if (immediate) {
+                modal.classList.remove('open');
+                modal.classList.remove('open-prep');
+                modal.classList.remove('closing');
+                finalizeClose();
+                return;
+            }
+
+            isAnimating = true;
+            modal.classList.remove('open');
+            modal.classList.remove('open-prep');
+            modal.classList.add('closing');
+
+            closeTimer = window.setTimeout(() => {
+                finalizeClose();
+            }, MODAL_ANIMATION_MS);
+        }
+
+        fab.addEventListener('click', (e) => {
+            e.preventDefault();
+            openModal();
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target && e.target.matches('[data-role="backdrop"]')) closeModal(false);
+        });
+
+        function updateMode() {
+            const narrow = window.innerWidth <= 760;
+            if (!narrow) {
+                if (isOpen || isAnimating) closeModal(true);
+                restorePanel();
+                fab.style.display = 'none';
+                return;
+            }
+            fab.style.display = 'inline-flex';
+        }
+
+        updateMode();
+        window.addEventListener('resize', () => {
+            updateMode();
+        });
+    }
 
     function initNavigation() {
         // If a global navigation initializer exists (from main.js), skip local init
@@ -251,6 +393,18 @@
             }
         }
 
+        wheelEl.__recenterToSelected = function () {
+            const selectedEl = wheelEl.querySelector('.quick-links-wheel-item.is-selected') || wheelEl.querySelector('.quick-links-wheel-item');
+            if (!selectedEl) return;
+            const idx = Array.from(wheelEl.querySelectorAll('.quick-links-wheel-item')).indexOf(selectedEl);
+            if (idx < 0) return;
+            updateFromIndex(idx, true);
+            lockQuickLinksRender(240);
+            programmaticScrollUntil = Date.now() + 260;
+            scrollItemIntoCenter(wheelEl, selectedEl, 'auto');
+            applyWheelVisuals(wheelEl);
+        };
+
         function scheduleVisuals() {
             if (rafPending) return;
             rafPending = true;
@@ -281,7 +435,7 @@
 
             // 点击/键盘触发的平滑居中期间，避免 scroll 事件重复渲染造成右侧闪动
             const now0 = Date.now();
-            const allowRender = now0 >= programmaticScrollUntil;
+            const allowRender = now0 >= programmaticScrollUntil && now0 >= quickLinksRenderLockedUntil;
 
             const idx = findClosestWheelIndex(wheelEl);
             // 滚动过程中也保持“选中项”和“右侧内容”基本同步，但做轻量节流
@@ -294,6 +448,7 @@
 
             if (snapTimer) window.clearTimeout(snapTimer);
             snapTimer = window.setTimeout(() => {
+                if (Date.now() < quickLinksRenderLockedUntil) return;
                 const idx2 = findClosestWheelIndex(wheelEl);
                 if (idx2 === -1) return;
                 updateFromIndex(idx2, true);
@@ -397,6 +552,7 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         initNavigation();
+        initQuickLinksFab();
         initQuickLinks();
     });
 })();

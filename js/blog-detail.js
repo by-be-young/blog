@@ -21,10 +21,8 @@
     const overlay = document.createElement('div');
     overlay.id = 'toc-overlay';
     overlay.className = 'toc-overlay';
-    overlay.innerHTML = '<div class="toc-overlay-inner"><button class="toc-overlay-close" aria-label="关闭目录"><i class="fas fa-times"></i></button></div>';
     document.body.appendChild(overlay);
-    const overlayInner = overlay.querySelector('.toc-overlay-inner');
-    const overlayClose = overlay.querySelector('.toc-overlay-close');
+    let closeTimer = null;
 
     // 保存原来位置以便还原
     const originalParent = toc.parentNode;
@@ -32,8 +30,8 @@
 
     function moveTocToOverlay() {
         // 将 toc 移入 overlay 中展示
-        if (overlayInner.contains(toc)) return;
-        overlayInner.appendChild(toc);
+        if (overlay.contains(toc)) return;
+        overlay.appendChild(toc);
         // mark as in-overlay so CSS hide rule won't hide it
         toc.classList.add('in-overlay');
         // ensure toc can size naturally inside overlay
@@ -59,21 +57,82 @@
     }
 
     function openOverlay() {
-        overlay.style.display = 'block';
+        if (isOverlayOpen()) return;
+        overlay.style.display = 'flex';
         moveTocToOverlay();
+        overlay.classList.remove('is-active');
+        toc.classList.remove('is-open');
+        updatePopVector();
+        // 强制重排，确保初始态生效后再触发过渡
+        void toc.offsetWidth;
+        overlay.classList.add('is-active');
+        toc.classList.add('is-open');
         fab.setAttribute('aria-expanded', 'true');
     }
-    function closeOverlay() {
+    function finishCloseOverlay() {
+        if (closeTimer) {
+            clearTimeout(closeTimer);
+            closeTimer = null;
+        }
+        overlay.classList.remove('is-active');
         overlay.style.display = 'none';
+        toc.classList.remove('is-open');
         restoreTocToSidebar();
+    }
+
+    function closeOverlay(immediate) {
+        if (!isOverlayOpen()) return;
+        if (immediate) {
+            finishCloseOverlay();
+            fab.setAttribute('aria-expanded', 'false');
+            return;
+        }
+        updatePopVector();
+        overlay.classList.remove('is-active');
+        toc.classList.remove('is-open');
+        if (closeTimer) clearTimeout(closeTimer);
+        closeTimer = setTimeout(function () {
+            if (!toc.classList.contains('is-open') && isOverlayOpen()) {
+                finishCloseOverlay();
+            }
+        }, 380);
         fab.setAttribute('aria-expanded', 'false');
     }
+
+    function isOverlayOpen() {
+        return overlay.style.display === 'flex';
+    }
+
+    function updatePopVector() {
+        try {
+            const fabRect = fab.getBoundingClientRect();
+            const tocRect = toc.getBoundingClientRect();
+            const fabX = fabRect.left + fabRect.width / 2;
+            const fabY = fabRect.top + fabRect.height / 2;
+            const tocX = tocRect.left + tocRect.width / 2;
+            const tocY = tocRect.top + tocRect.height / 2;
+            toc.style.setProperty('--toc-pop-dx', Math.round(fabX - tocX) + 'px');
+            toc.style.setProperty('--toc-pop-dy', Math.round(fabY - tocY) + 'px');
+        } catch (e) { }
+    }
+
+    toc.addEventListener('transitionend', function (e) {
+        if (e.propertyName !== 'transform') return;
+        if (toc.classList.contains('is-open')) return;
+        if (!isOverlayOpen()) return;
+        finishCloseOverlay();
+    });
 
     overlay.addEventListener('click', function (e) {
         if (e.target === overlay) closeOverlay();
     });
-    overlayClose.addEventListener('click', function (e) { e.stopPropagation(); closeOverlay(); });
-    fab.addEventListener('click', function (e) { e.stopPropagation(); if (overlay.style.display === 'block') closeOverlay(); else openOverlay(); });
+    toc.addEventListener('click', function (e) { e.stopPropagation(); });
+    toc.addEventListener('click', function (e) {
+        const link = e.target && e.target.closest ? e.target.closest('a[href^="#"]') : null;
+        if (!link) return;
+        if (isOverlayOpen()) closeOverlay();
+    });
+    fab.addEventListener('click', function (e) { e.stopPropagation(); if (isOverlayOpen()) closeOverlay(); else openOverlay(); });
 
     // mode detection
     function shouldCompact() {
@@ -97,15 +156,14 @@
             // ensure FAB visible
             fab.style.display = 'inline-flex';
             // if overlay currently open, ensure toc is inside overlay
-            if (overlay.style.display === 'block') moveTocToOverlay();
+            if (isOverlayOpen()) moveTocToOverlay();
             else restoreTocToSidebar();
         } else {
             document.body.classList.remove('toc-compact-mode');
             fab.style.display = 'none';
             // close overlay if open
-            if (overlay.style.display === 'block') closeOverlay();
-            // restore toc always
-            restoreTocToSidebar();
+            if (isOverlayOpen()) closeOverlay(true);
+            else restoreTocToSidebar();
         }
     }
 

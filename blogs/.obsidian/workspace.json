@@ -14,13 +14,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "二下/操作系统/Linux/Linux 命令指南.md",
+                "file": "二下/操作系统/实验报告/OS-Lab0-实验报告.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Linux 命令指南 的大纲"
+              "title": "OS-Lab0-实验报告 的大纲"
             }
           }
         ]
@@ -36,12 +36,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "二下/操作系统/Linux/Linux 命令指南.md",
+                "file": "二下/操作系统/实验报告/OS-Lab0-实验报告.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Linux 命令指南"
+              "title": "OS-Lab0-实验报告"
             }
           }
         ]
@@ -179,10 +179,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "二下/操作系统/Linux/Linux 命令指南.md"
+                "file": "二下/操作系统/实验报告/OS-Lab0-实验报告.md"
               },
               "icon": "lucide-info",
-              "title": "Linux 命令指南的笔记属性"
+              "title": "OS-Lab0-实验报告的笔记属性"
             }
           }
         ],
@@ -190,7 +190,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 374.5
+    "width": 374.5,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -205,10 +206,18 @@
   },
   "active": "7c3d1d91a9716eab",
   "lastOpenFiles": [
+    "Pasted image 20260319213503.png",
     "二下/操作系统/Shell/Lab0 Pre-Exam复习.md",
+    "文学/诗词/词/卜算子·元旦晚会.md",
+    "二下/操作系统/实验报告/OS-Lab0-实验报告.md",
     "二下/操作系统/gcc/gcc语法速成.md",
-    "二下/操作系统/Linux/Linux 命令指南.md",
+    "Pasted image 20260319205217.png",
+    "Pasted image 20260319205043.png",
     "二下/操作系统/Makefile/Makefile基础速成.md",
+    "语言/意大利语/发音规则/意大利语自然拼读攻略.md",
+    "二上/算法/模板/算法选择题速查.md",
+    "二下/操作系统/实验报告",
+    "二下/操作系统/Linux/Linux 命令指南.md",
     "二下/操作系统/Shell/C语言无痛转型Shell脚本.md",
     "二下/操作系统/Makefile",
     "未命名 1.base",
@@ -216,16 +225,13 @@
     "二下/操作系统/gcc/未命名",
     "二下/操作系统/gcc",
     "终末地/游戏工具/基质/基质刷取指南.md",
-    "语言/意大利语/发音规则/意大利语自然拼读攻略.md",
     "语言/意大利语/发音规则",
     "语言/意大利语",
     "语言",
     "二下/操作系统/Linux",
     "终末地/游戏机制/数值计算/终末地数值计算方法.md",
-    "文学/诗词/词/卜算子·元旦晚会.md",
     "文学/诗词/词/行香子·初雪.md",
     "终末地/游戏工具/装备/装备精锻较好适配速查.md",
-    "终末地/游戏机制/数值计算",
     "音乐/J-POP/ヨルシカ/千鳥.md",
     "未命名.md",
     "明日方舟/干员杂谈/干员测评/望.md",
@@ -237,9 +243,6 @@
     "二上/计组/存储系统/主存储器.md",
     "二上/计组/存储系统/虚拟存储器.md",
     "二上/基物实验/总复习/基物实验.md",
-    "二上/概率统计/总复习/概率统计必背公式.md",
-    "二上/二上总结/考试总结/二上考试情况总结.md",
-    "二上/Java/总复习/Java总复习.md",
-    "明日方舟/干员杂谈/元素体系/元素体系——朝阳or败笔？.md"
+    "二上/概率统计/总复习/概率统计必背公式.md"
   ]
 }

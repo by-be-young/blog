@@ -18,7 +18,7 @@
 
 <body class="quick-links-page">
     <div class="slideshow" aria-hidden="true">
-        <div class="slide active" style="background-image: url('assets/images/bg2.png');"></div>
+        <div class="slide active" style="background-image: url('assets/images/background/bg2.png');"></div>
     </div>
 
     <nav class="navbar">
@@ -69,6 +69,16 @@
             </div>
         </section>
     </main>
+
+    <button id="quickLinksFab" class="quick-links-fab" aria-label="打开筛选" aria-hidden="true">
+        <i class="fas fa-filter" aria-hidden="true"></i>
+    </button>
+    <div id="quickLinksModal" class="quick-links-modal" aria-hidden="true">
+        <div class="quick-links-modal-backdrop" data-role="backdrop"></div>
+        <div class="quick-links-modal-inner" role="dialog" aria-modal="true">
+            <div class="quick-links-modal-body"></div>
+        </div>
+    </div>
 
     <script src="js/search.js"></script>
     <script src="js/slideshow.js"></script>

@@ -89,6 +89,91 @@
     transform: translateY(-8%);
 }
 
+/* Floating quick-links filter (small screens): 隐藏侧边筛选，显示悬浮球并支持模态展开 */
+.quick-links-fab {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: #fff;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24);
+    z-index: 1600;
+    border: none;
+    cursor: pointer;
+}
+
+.quick-links-fab i {
+    font-size: 20px;
+}
+
+.quick-links-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1650;
+    pointer-events: none;
+}
+
+.quick-links-modal .quick-links-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.42);
+    opacity: 0;
+    transition: opacity 240ms ease;
+}
+
+.quick-links-modal .quick-links-modal-inner {
+    position: relative;
+    width: min(92%, 380px);
+    max-height: 86vh;
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 12px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+    transform-origin: right bottom;
+    transform: translate3d(72px, 72px, 0) scale(0.72);
+    opacity: 0;
+    transition: transform 300ms cubic-bezier(.2, .9, .25, 1), opacity 240ms ease;
+    overflow: auto;
+}
+
+.quick-links-modal .quick-links-modal-body {
+    width: min(92vw, 380px);
+    padding: 8px;
+}
+
+.quick-links-modal.open,
+.quick-links-modal.open-prep,
+.quick-links-modal.closing {
+    display: flex;
+    pointer-events: auto;
+}
+
+.quick-links-modal.open .quick-links-modal-backdrop {
+    opacity: 1;
+}
+
+.quick-links-modal.open .quick-links-modal-inner {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 1;
+}
+
+.quick-links-modal.closing .quick-links-modal-backdrop {
+    opacity: 0;
+}
+
+.quick-links-modal.closing .quick-links-modal-inner {
+    transform: translate3d(72px, 72px, 0) scale(0.72);
+    opacity: 0;
+}
+
 /* 当侧栏高度超过可视高度时禁用粘性定位以避免遮挡 */
 .quick-links-sidebar.no-sticky {
     position: static !important;
@@ -329,35 +414,32 @@
 }
 
 @media (max-width: 760px) {
+    .quick-links-section {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
     .quick-links-layout {
         flex-direction: column;
         /* 在窄屏上下结构时，使用一个最大宽度变量来让侧栏（滚轮）与卡片同宽并居中 */
-        --ql-side-width: min(720px, 100%);
+        --ql-side-width: min(820px, calc(100vw - 12px));
         align-items: center;
     }
 
-    /* 在上下结构下，将滚轮固定在视口顶部（粘性），以便在浏览卡片时仍能切换分类 */
+    /* 窄屏改为悬浮球 + 弹窗，隐藏侧边筛选 */
     .quick-links-sidebar {
-        width: 100%;
-        max-width: var(--ql-side-width);
-        flex: 0 0 auto;
-        position: sticky;
-        top: calc(60px + 12px);
-        transform: none;
-        z-index: 20;
-        margin: 0 auto;
+        display: none !important;
     }
 
-    .quick-links-panel {
-        max-width: var(--ql-side-width);
-        margin: 0 auto;
+    .quick-links-fab {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
     }
 
-    .quick-links-wheel {
-        height: 220px;
-        padding: 48px 12px;
+    .quick-links-modal .quick-links-panel {
+        margin: 0;
         width: 100%;
-        box-sizing: border-box;
     }
 
     /* 在上下结构下，下方卡片改为单列且与侧栏等宽居中 */
@@ -366,5 +448,9 @@
         width: 100%;
         max-width: var(--ql-side-width);
         margin: 0 auto;
+    }
+
+    .quick-links-main {
+        width: 100%;
     }
 }

@@ -18,7 +18,7 @@
 
 <body class="categories-page">
     <div class="slideshow" aria-hidden="true">
-        <div class="slide active" style="background-image: url('assets/images/bg2.png');"></div>
+        <div class="slide active" style="background-image: url('assets/images/background/bg2.png');"></div>
     </div>
     <nav class="navbar">
         <div class="nav-container">
@@ -73,6 +73,17 @@
     <script src="js/slideshow.js"></script>
     <script src="js/categories.js"></script>
     <script src="js/main.js"></script>
+
+    <!-- Categories filter floating action button + modal for small screens -->
+    <button id="categoriesFab" class="categories-filter-fab" aria-label="打开筛选" aria-hidden="true">
+        <i class="fas fa-sliders" aria-hidden="true"></i>
+    </button>
+    <div id="categoriesModal" class="categories-filter-modal" aria-hidden="true">
+        <div class="categories-filter-modal-backdrop" data-role="backdrop"></div>
+        <div class="categories-filter-modal-inner" role="dialog" aria-modal="true">
+            <div class="categories-filter-modal-body"></div>
+        </div>
+    </div>
 </body>
 
 </html>

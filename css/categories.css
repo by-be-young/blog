@@ -80,6 +80,103 @@
     align-self: start;
 }
 
+/* Floating categories filter (small screens): 隐藏侧边筛选，显示悬浮球并支持模态展开 */
+.categories-filter-fab {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: #fff;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24);
+    z-index: 1600;
+    border: none;
+    cursor: pointer;
+}
+
+.categories-filter-fab i {
+    font-size: 20px;
+}
+
+.categories-filter-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1650;
+    pointer-events: none;
+}
+
+.categories-filter-modal .categories-filter-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.42);
+    opacity: 0;
+    transition: opacity 240ms ease;
+}
+
+.categories-filter-modal .categories-filter-modal-inner {
+    position: relative;
+    width: min(92%, 520px);
+    max-height: 86vh;
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 12px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+    transform-origin: right bottom;
+    transform: translate3d(72px, 72px, 0) scale(0.72);
+    opacity: 0;
+    transition: transform 300ms cubic-bezier(.2, .9, .25, 1), opacity 240ms ease;
+    overflow: auto;
+}
+
+.categories-filter-modal.open,
+.categories-filter-modal.open-prep,
+.categories-filter-modal.closing {
+    display: flex;
+    pointer-events: auto;
+}
+
+.categories-filter-modal.open .categories-filter-modal-backdrop {
+    opacity: 1;
+}
+
+.categories-filter-modal.open .categories-filter-modal-inner {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 1;
+}
+
+.categories-filter-modal.closing .categories-filter-modal-backdrop {
+    opacity: 0;
+}
+
+.categories-filter-modal.closing .categories-filter-modal-inner {
+    transform: translate3d(72px, 72px, 0) scale(0.72);
+    opacity: 0;
+}
+
+.categories-filter-modal .categories-filter-modal-body {
+    width: min(92vw, 520px);
+    padding: 6px;
+}
+
+@media (max-width: 948px) {
+    .categories-sidebar {
+        display: none !important;
+    }
+
+    .categories-filter-fab {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
 /* 当侧边栏高度超过可视区域时，禁用粘性定位以避免遮挡内容 */
 .categories-sidebar.no-sticky {
     position: static !important;

@@ -53,11 +53,10 @@ function initCategoriesTypeFilterUI(onChange) {
 
     function updateActiveBackground(activeBtn) {
         if (!activeBtn) return;
-        const rootRect = filterRoot.getBoundingClientRect();
-        const btnRect = activeBtn.getBoundingClientRect();
-        const top = btnRect.top - rootRect.top;
+        const top = activeBtn.offsetTop;
+        const height = activeBtn.offsetHeight;
         filterRoot.style.setProperty('--filter-bg-top', `${top}px`);
-        filterRoot.style.setProperty('--filter-bg-height', `${btnRect.height}px`);
+        filterRoot.style.setProperty('--filter-bg-height', `${height}px`);
     }
 
     function setActive(mode, shouldEmit) {
@@ -102,6 +101,150 @@ function initCategoriesTypeFilterUI(onChange) {
     return {
         setActive
     };
+}
+
+function initCategoriesFab(typeFilterController) {
+    const fab = document.getElementById('categoriesFab');
+    const modal = document.getElementById('categoriesModal');
+    const modalBody = modal ? modal.querySelector('.categories-filter-modal-body') : null;
+    const sidebar = document.querySelector('.categories-sidebar');
+    const categoriesContainer = document.getElementById('categoriesContainer');
+    const typeFilterPanel = document.getElementById('categoriesTypeFilterPanel');
+    if (!fab || !modal || !modalBody || !categoriesContainer || !typeFilterPanel) return;
+
+    let isOpen = false;
+    let isAnimating = false;
+    let closeTimer = null;
+    const MODAL_ANIMATION_MS = 320;
+
+    function recenterWheelsInView() {
+        try {
+            const wheels = categoriesContainer.querySelectorAll('.categories-wheel');
+            wheels.forEach((wheel) => {
+                adjustWheelPadding(wheel);
+                const items = Array.from(wheel.querySelectorAll('.wheel-item'));
+                if (!items.length) return;
+
+                let selectedIndex = items.findIndex((it) => it.classList.contains('is-selected'));
+                if (selectedIndex < 0) selectedIndex = findClosestWheelIndex(wheel);
+                if (selectedIndex < 0) return;
+
+                const it = items[selectedIndex];
+                const targetTop = Math.max(0, it.offsetTop + it.offsetHeight / 2 - wheel.clientHeight / 2);
+                wheel.scrollTop = targetTop;
+
+                applyWheelVisuals(wheel);
+            });
+        } catch (e) { /* ignore */ }
+    }
+
+    function restoreToSidebar() {
+        if (!sidebar) return;
+        sidebar.appendChild(categoriesContainer);
+        sidebar.appendChild(typeFilterPanel);
+    }
+
+    function finalizeClose() {
+        restoreToSidebar();
+        modal.classList.remove('closing');
+        modal.setAttribute('aria-hidden', 'true');
+        fab.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = '';
+        isAnimating = false;
+        closeTimer = null;
+    }
+
+    function openModal() {
+        if (isOpen || isAnimating) return;
+        if (closeTimer) {
+            window.clearTimeout(closeTimer);
+            closeTimer = null;
+        }
+
+        // 与归档页保持一致：每次打开弹窗默认切回“全部博客”。
+        if (typeFilterController && typeof typeFilterController.setActive === 'function') {
+            typeFilterController.setActive('all', true);
+        }
+
+        modalBody.appendChild(categoriesContainer);
+        modalBody.appendChild(typeFilterPanel);
+
+        modal.classList.remove('open');
+        modal.classList.remove('closing');
+        modal.classList.add('open-prep');
+        modal.setAttribute('aria-hidden', 'false');
+        fab.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = 'hidden';
+
+        window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(() => {
+                modal.classList.remove('open-prep');
+                modal.classList.add('open');
+
+                // 弹窗可见后再重算一次选中态背景，确保高亮稳定显示。
+                if (typeFilterController && typeof typeFilterController.setActive === 'function') {
+                    typeFilterController.setActive('all', false);
+                }
+
+                // 打开后立即对齐一次；再延迟一次，覆盖字体回流/动画结束后的尺寸变化。
+                recenterWheelsInView();
+                window.setTimeout(recenterWheelsInView, 120);
+            });
+        });
+
+        isOpen = true;
+    }
+
+    function closeModal(immediate = false) {
+        if (!isOpen && !isAnimating) return;
+
+        if (closeTimer) {
+            window.clearTimeout(closeTimer);
+            closeTimer = null;
+        }
+
+        isOpen = false;
+
+        if (immediate) {
+            modal.classList.remove('open');
+            modal.classList.remove('open-prep');
+            modal.classList.remove('closing');
+            finalizeClose();
+            return;
+        }
+
+        isAnimating = true;
+        modal.classList.remove('open');
+        modal.classList.remove('open-prep');
+        modal.classList.add('closing');
+
+        closeTimer = window.setTimeout(() => {
+            finalizeClose();
+        }, MODAL_ANIMATION_MS);
+    }
+
+    fab.addEventListener('click', (e) => {
+        e.preventDefault();
+        openModal();
+    });
+
+    modal.addEventListener('click', (e) => {
+        if (e.target && e.target.matches('[data-role="backdrop"]')) closeModal();
+    });
+
+    function updateMode() {
+        const w = window.innerWidth;
+        if (w > 948) {
+            if (isOpen || isAnimating) closeModal(true);
+            restoreToSidebar();
+            fab.style.display = 'none';
+        } else {
+            fab.style.display = 'inline-flex';
+        }
+    }
+
+    updateMode();
+    window.addEventListener('resize', throttle(updateMode, 150));
 }
 
 function buildTagTree() {
@@ -220,6 +363,16 @@ function applyWheelVisuals(wheelEl) {
 
     // 更新覆盖三列的选中框（如果在一个 .categories-wheel-row 下，复用同一个框）
     try {
+        function getOffsetTopWithin(node, ancestor) {
+            let top = 0;
+            let el = node;
+            while (el && el !== ancestor) {
+                top += el.offsetTop || 0;
+                el = el.offsetParent;
+            }
+            return top;
+        }
+
         const wheelRow = wheelEl.closest('.categories-wheel-row');
         if (wheelRow) {
             let frame = wheelRow.querySelector('.wheel-selected-frame');
@@ -236,9 +389,7 @@ function applyWheelVisuals(wheelEl) {
                 frame.style.transition = 'none';
             }
 
-            const wheelRect = wheelEl.getBoundingClientRect();
-            const rowRect = wheelRow.getBoundingClientRect();
-            const centerY_in_row = (wheelRect.top - rowRect.top) + (wheelEl.clientHeight / 2);
+            const centerY_in_row = getOffsetTopWithin(wheelEl, wheelRow) + (wheelEl.clientHeight / 2);
             // 使选中框略高一些以增强视觉（额外高度由 extraHeight 控制）
             const extraHeight = 8; // px，可按需调整
             const frameH = Math.round(itemH + extraHeight);
@@ -649,13 +800,15 @@ fetch('data/blogs.json')
             // ignore malformed param
         }
 
-        initCategoriesTypeFilterUI((mode) => {
+        const typeFilterController = initCategoriesTypeFilterUI((mode) => {
             selectedTypeFilter = mode || 'all';
             selectedTags = [];
             blogsData = applyTypeFilterToBlogs(allBlogsData, selectedTypeFilter);
             renderCategories();
             renderBlogList();
         });
+
+        try { initCategoriesFab(typeFilterController); } catch (e) { /* ignore */ }
 
         renderCategories();
         renderBlogList();

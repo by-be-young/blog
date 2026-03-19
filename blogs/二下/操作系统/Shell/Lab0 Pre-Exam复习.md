@@ -200,6 +200,7 @@ elif [ $# -eq 1 ]; then
 	sed -n "$1,\$p" stderr.txt
 else
 	sed -n "$1,$(($2 - 1))p" stderr.txt
+fi
 ```
 
 `$#` 的意思是“参数的个数”。
@@ -221,6 +222,7 @@ elif [ $# -eq 1 ]; then
 	sed -n "$1,\$p" stderr.txt
 else
 	sed -n "$1,$2p" stderr.txt | sed '$d'
+fi
 ```
 
 其中第三种情况，先输出所有行，再删除最后一行。

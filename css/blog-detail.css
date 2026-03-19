@@ -216,31 +216,40 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
     inset: 0;
     background: rgba(0, 0, 0, 0.4);
     z-index: 1098;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.26s ease;
     display: none;
 }
 
-.toc-overlay-inner {
-    position: absolute;
-    right: 16px;
-    top: 80px;
-    width: 320px;
-    max-height: calc(100vh - 160px);
-    overflow: auto;
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.28);
-    border-radius: 12px;
-    background: #fff;
-    padding: 14px 16px;
+.toc-overlay.is-active {
+    opacity: 1;
+    pointer-events: auto;
 }
 
-.toc-overlay-close {
-    position: absolute;
-    left: 8px;
-    top: 8px;
-    background: transparent;
-    border: none;
-    color: #666;
-    font-size: 1.1rem;
-    cursor: pointer;
+/* 紧凑模式下，目录本体作为弹窗居中展示 */
+.toc-overlay .blog-toc.in-overlay {
+    position: relative;
+    top: auto;
+    align-self: center;
+    width: min(88vw, 420px);
+    flex: 0 0 auto;
+    max-height: min(78vh, 680px);
+    margin: 0;
+    overflow: hidden;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.28);
+    transform: translate(var(--toc-pop-dx, 0), var(--toc-pop-dy, 0)) scale(0.2);
+    opacity: 0;
+    transition: transform 0.32s cubic-bezier(0.2, 0.82, 0.22, 1), opacity 0.24s ease;
+    will-change: transform, opacity;
+}
+
+.toc-overlay .blog-toc.in-overlay.is-open {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
 }
 
 /* 在非常窄的视口优先进入紧凑模式 */

@@ -57,6 +57,7 @@
     align-items: center;
     justify-content: center;
     z-index: 1650;
+    pointer-events: none;
 }
 
 .calendar-modal .calendar-modal-backdrop {
@@ -74,9 +75,10 @@
     background: rgba(255, 255, 255, 0.98);
     border-radius: 12px;
     box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
-    transform: translateY(18px) scale(0.96);
+    transform-origin: right bottom;
+    transform: translate3d(72px, 72px, 0) scale(0.72);
     opacity: 0;
-    transition: transform 260ms cubic-bezier(.2, .9, .3, 1), opacity 200ms ease;
+    transition: transform 300ms cubic-bezier(.2, .9, .25, 1), opacity 240ms ease;
     overflow: auto;
 }
 
@@ -93,6 +95,17 @@
 
 .calendar-modal.open {
     display: flex;
+    pointer-events: auto;
+}
+
+.calendar-modal.open-prep {
+    display: flex;
+    pointer-events: auto;
+}
+
+.calendar-modal.closing {
+    display: flex;
+    pointer-events: auto;
 }
 
 .calendar-modal.open .calendar-modal-backdrop {
@@ -100,11 +113,24 @@
 }
 
 .calendar-modal.open .calendar-modal-inner {
-    transform: translateY(0) scale(1);
+    transform: translate3d(0, 0, 0) scale(1);
     opacity: 1;
 }
 
+.calendar-modal.closing .calendar-modal-backdrop {
+    opacity: 0;
+}
+
+.calendar-modal.closing .calendar-modal-inner {
+    transform: translate3d(72px, 72px, 0) scale(0.72);
+    opacity: 0;
+}
+
 @media (max-width: 900px) {
+
+    .archive-page {
+        --archive-type-col-width: 96px;
+    }
 
     /* 在小屏时隐藏侧边栏，显示悬浮球 */
     .archive-sidebar {
@@ -342,28 +368,58 @@
 /* 小屏幕时改为纵向堆叠，时间放到上/右区域之上 */
 @media (max-width: 900px) {
 
-    /* 保持左右两栏布局，但为小屏收窄右侧日期列以保证日期仍在右侧 */
+    /* 小屏幕改为上下结构，日期放在卡片底部 */
     .archive-timeline .timeline-content {
         display: flex;
-        align-items: center;
+        flex-direction: column;
+        align-items: flex-start;
         gap: 12px;
     }
 
     .archive-timeline .timeline-right {
-        flex: 0 0 130px;
-        text-align: right;
-        margin-top: 0;
+        flex: 0 0 auto;
+        width: 100%;
+        text-align: left;
+        margin-top: 2px;
     }
 
     .archive-timeline .timeline-title {
-        white-space: normal;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) var(--archive-type-col-width);
+        align-items: center;
+        column-gap: 8px;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .archive-timeline .timeline-title .title-text {
+        flex: 1 1 auto;
+        min-width: 0;
         overflow: hidden;
         text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .archive-page .archive-timeline .timeline-title .blog-type {
+        justify-self: end;
+        width: var(--archive-type-col-width);
+        text-align: center;
+        white-space: nowrap;
     }
 
     /* 小屏幕减少左内边距以节省空间 */
     .archive-timeline .timeline-left {
+        width: 100%;
         padding-left: 6px;
+    }
+
+    .archive-timeline .timeline-right .timeline-date {
+        font-size: 1rem;
+        line-height: 1.25;
+    }
+
+    .archive-page .archive-timeline {
+        padding-right: 12px;
     }
 }
 
@@ -932,6 +988,13 @@
 @media (max-width: 900px) {
     .archive-page .archive-timeline.drum {
         max-height: calc(100vh - 160px);
+    }
+
+    .archive-page .archive-timeline.drum .timeline-content {
+        transform: none;
+        opacity: 1;
+        filter: none;
+        will-change: auto;
     }
 }
 
