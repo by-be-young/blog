@@ -15,6 +15,12 @@
     body:not(.home) .welcome-text {
         font-size: 2.8rem;
     }
+
+    /* 移动端/平板窄屏：首页公告保留 ">>"，去掉后续装饰波浪线 */
+    .announcement-banner .announcement-message .ann-line--section::after {
+        content: none !important;
+        display: none !important;
+    }
 }
 
 @media (max-width: 768px) {
@@ -36,6 +42,7 @@
         flex-direction: column;
         gap: 15px;
     }
+
 }
 
 @media (max-width: 576px) {
@@ -207,6 +214,27 @@
 @media (max-width: 600px) {
     .home .blog-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+/* 移动端导航栏：给站点标题更充足空间，避免“白恙的博客”换行 */
+@media (max-width: 600px) {
+    .nav-container {
+        gap: 8px;
+    }
+
+    .nav-brand {
+        flex: 1 1 auto;
+        min-width: 0;
+        margin-right: 0 !important;
+    }
+
+    .nav-brand span[data-i18n="brand"] {
+        white-space: nowrap;
+    }
+
+    .nav-actions {
+        flex: 0 0 auto;
     }
 }
 

@@ -189,7 +189,59 @@
             padding: 24px 16px 28px;
             color: #666;
             font-size: 0.95rem;
-            background: #fff;
+            background: rgba(255, 255, 255, 0.62);
+            backdrop-filter: blur(12px) saturate(1.05);
+            -webkit-backdrop-filter: blur(12px) saturate(1.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.45);
+        }
+
+        .home-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding-left: clamp(76px, 8vw, 120px);
+            padding-right: clamp(76px, 8vw, 120px);
+        }
+
+        .footer-center {
+            flex: 0 0 auto;
+        }
+
+        .footer-stats {
+            flex: 1 1 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #777;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .footer-stats-left {
+            justify-content: flex-start;
+        }
+
+        .footer-stats-right {
+            justify-content: flex-end;
+        }
+
+        .footer-stat-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .footer-stat-number {
+            font-weight: 600;
+            color: #555;
+        }
+
+        #busuanzi_container_site_uv,
+        #busuanzi_container_site_pv {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .site-footer a {
@@ -199,6 +251,18 @@
 
         .site-footer a:hover {
             text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .home-footer {
+                justify-content: center;
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .home-footer .footer-stats {
+                display: none;
+            }
         }
     </style>
 
@@ -321,6 +385,12 @@
                                     </a>
                                 </div>
                                 <div class="stat">
+                                    <a class="stat-link" href="archive.html">
+                                        <span class="count" id="word-count">0.0w</span>
+                                        <span class="label" data-i18n="total_words"></span>
+                                    </a>
+                                </div>
+                                <div class="stat">
                                     <a class="stat-link" href="categories.html">
                                         <span class="count" id="tag-count">0</span>
                                         <span class="label" data-i18n="tags"></span>
@@ -361,8 +431,23 @@
         </section>
     </main>
 
-    <footer class="site-footer">
-        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">赣ICP备2026004108号</a>
+    <footer class="site-footer home-footer">
+        <div class="footer-stats footer-stats-left" aria-hidden="true">
+            <span class="footer-stat-item"><span data-i18n="footer_blog_count"></span> <span class="footer-stat-number"
+                    id="footer-blog-count">0</span></span>
+            <span class="footer-stat-item"><span data-i18n="footer_total_words"></span> <span class="footer-stat-number"
+                    id="footer-word-count">0</span></span>
+        </div>
+        <div class="footer-center">
+            <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">赣ICP备2026004108号</a>
+        </div>
+        <div class="footer-stats footer-stats-right" aria-hidden="true">
+            <span class="footer-stat-item" id="busuanzi_container_site_uv"><span
+                    data-i18n="footer_site_visitors"></span> <span class="footer-stat-number"
+                    id="busuanzi_site_uv">0</span></span>
+            <span class="footer-stat-item" id="busuanzi_container_site_pv"><span data-i18n="footer_site_views"></span>
+                <span class="footer-stat-number" id="busuanzi_site_pv">0</span></span>
+        </div>
     </footer>
 
     <button id="settingsFab" class="settings-fab" aria-label="打开设置弹窗">

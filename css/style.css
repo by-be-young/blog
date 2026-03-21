@@ -377,6 +377,26 @@ body {
     min-height: 70px;
 }
 
+.announcement-banner .announcement-message.announcement-message--split {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.announcement-banner .announcement-message .announcement-fixed-line {
+    flex: 0 0 auto;
+}
+
+.announcement-banner .announcement-message .announcement-fixed-line .ann-line {
+    margin-bottom: 0;
+}
+
+.announcement-banner .announcement-message .announcement-scroll-viewport {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
 /* 滚动内部容器：用于平滑 CSS 动画滚动（由 JS 将内容复制一份并添加动画） */
 .announcement-banner .announcement-scroll-inner {
     display: block;
@@ -1186,7 +1206,7 @@ body.settings-modal-open {
     display: none;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: clamp(12px, 4vw, 20px);
     background: rgba(0, 0, 0, 0.35);
 }
 
@@ -1196,7 +1216,9 @@ body.settings-modal-open {
 
 .deployment-notice-card {
     position: relative;
-    width: min(560px, calc(100vw - 28px));
+    box-sizing: border-box;
+    width: min(560px, 100%);
+    max-width: 100%;
     border: var(--card-border-w) solid transparent;
     border-radius: 16px;
     padding: 26px 24px 22px;
@@ -1222,6 +1244,7 @@ body.settings-modal-open {
     margin: 0 0 14px;
     line-height: 1.8;
     color: rgba(44, 62, 80, 0.9);
+    overflow-wrap: anywhere;
 }
 
 .deployment-notice-link {
@@ -1229,6 +1252,9 @@ body.settings-modal-open {
     align-items: center;
     justify-content: center;
     padding: 8px 14px;
+    max-width: 100%;
+    white-space: normal;
+    word-break: break-word;
     border-radius: 999px;
     text-decoration: none;
     border: 1px solid rgba(0, 0, 0, 0.08);
@@ -2463,9 +2489,9 @@ body.settings-modal-open {
 
 .home .content-section {
     background: linear-gradient(135deg,
-            rgba(255, 182, 201, 0.18) 0%,
-            rgba(167, 243, 208, 0.18) 45%,
-            rgba(199, 182, 255, 0.18) 100%);
+            rgba(255, 182, 201, 1) 0%,
+            rgba(167, 243, 208, 1) 45%,
+            rgba(199, 182, 255, 1) 100%);
 }
 
 .home .profile-card {
@@ -3050,11 +3076,15 @@ body.hide-scrollbar::-webkit-scrollbar {
     font-size: 1.13rem;
     margin: 0.7em 0;
     line-height: 2.2;
-    font-family: 'KaiTi', '楷体', STKaiti, serif;
+    font-family: 'Times New Roman', 'KaiTi', '楷体', STKaiti, serif;
     margin: 1em 0 1em 2em;
     font-size: 1.08rem;
     color: #444;
     line-height: 2.1;
+}
+
+.about-page .blog-detail .article-content p {
+    font-family: 'Times New Roman', 'KaiTi', '楷体', STKaiti, serif;
 }
 
 .blog-detail .article-content ul li {
@@ -3164,7 +3194,7 @@ body.hide-scrollbar::-webkit-scrollbar {
     font-size: 1.13rem;
     margin: 0.7em 0;
     line-height: 1.85;
-    font-family: 'KaiTi', '楷体', STKaiti, serif;
+    font-family: 'Times New Roman', 'KaiTi', '楷体', STKaiti, serif;
 }
 
 /* 博客详情页 Markdown 图片样式 */
@@ -4787,9 +4817,9 @@ body {
 
 .home .content-section {
     background: linear-gradient(135deg,
-            rgba(255, 182, 201, 0.18) 0%,
-            rgba(167, 243, 208, 0.18) 45%,
-            rgba(199, 182, 255, 0.18) 100%);
+            rgba(255, 182, 201, 0.22) 0%,
+            rgba(167, 243, 208, 0.22) 45%,
+            rgba(199, 182, 255, 0.22) 100%);
 }
 
 .home .profile-card {

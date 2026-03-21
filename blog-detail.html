@@ -77,6 +77,7 @@
                     <h1 class="article-title" id="article-title"></h1>
                     <div class="article-meta">
                         <span class="date" id="article-date" data-date=""><i class="far fa-calendar"></i></span>
+                        <div class="article-metrics" id="article-metrics" aria-live="polite"></div>
                         <div class="tags" id="article-tags"></div>
                     </div>
                 </header>
@@ -388,9 +389,81 @@
             return url.searchParams.get(name);
         }
 
+        function countArticleCharacters(markdownText) {
+            const raw = String(markdownText || '');
+            const stripped = raw
+                .replace(/```[\s\S]*?```/g, ' ')
+                .replace(/`[^`\n]*`/g, ' ')
+                .replace(/!\[[^\]]*\]\([^\)]*\)/g, ' ')
+                .replace(/\[([^\]]*)\]\([^\)]*\)/g, '$1')
+                .replace(/<[^>]+>/g, ' ')
+                .replace(/[#>*~\-]/g, ' ')
+                .replace(/\s+/g, '');
+            return stripped.length;
+        }
+
+        function parseBusuanziNumber(value) {
+            const txt = String(value || '').trim();
+            if (!txt) return NaN;
+            const num = Number(txt.replace(/,/g, ''));
+            return Number.isFinite(num) ? num : NaN;
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             const id = getQueryParam('id');
             // 博客数据与 blogs.json 保持一致
+            const metricState = {
+                wordCount: null,
+                pagePv: NaN,
+                pageUv: NaN
+            };
+
+            function formatMetricInt(num) {
+                const n = Number.isFinite(Number(num)) ? Number(num) : 0;
+                return n.toLocaleString('zh-CN');
+            }
+
+            function renderArticleMetrics() {
+                const metricsEl = document.getElementById('article-metrics');
+                if (!metricsEl) return;
+
+                const parts = [];
+                if (Number.isFinite(metricState.wordCount)) {
+                    parts.push('<span class="article-metric-item"><i class="far fa-file-lines" aria-hidden="true"></i><span>' + formatMetricInt(metricState.wordCount) + '</span></span>');
+                }
+
+                const canShowViewAndVisitor = Number.isFinite(metricState.pagePv)
+                    && Number.isFinite(metricState.pageUv)
+                    && metricState.pagePv >= 100
+                    && metricState.pageUv >= 100;
+
+                if (canShowViewAndVisitor) {
+                    parts.push('<span class="article-metric-item"><i class="far fa-eye" aria-hidden="true"></i><span>' + formatMetricInt(metricState.pagePv) + '</span></span>');
+                    parts.push('<span class="article-metric-item"><i class="far fa-user" aria-hidden="true"></i><span>' + formatMetricInt(metricState.pageUv) + '</span></span>');
+                }
+
+                metricsEl.innerHTML = parts.join('');
+            }
+
+            function watchBusuanziPageStats() {
+                let attempts = 0;
+                const maxAttempts = 80;
+                const timer = setInterval(function () {
+                    attempts++;
+                    const pvEl = document.getElementById('busuanzi_page_pv');
+                    const uvEl = document.getElementById('busuanzi_page_uv');
+                    if (pvEl) metricState.pagePv = parseBusuanziNumber(pvEl.textContent);
+                    if (uvEl) metricState.pageUv = parseBusuanziNumber(uvEl.textContent);
+
+                    renderArticleMetrics();
+
+                    if ((Number.isFinite(metricState.pagePv) && Number.isFinite(metricState.pageUv)) || attempts >= maxAttempts) {
+                        clearInterval(timer);
+                    }
+                }, 150);
+            }
+
+            watchBusuanziPageStats();
 
             fetch('data/blogs.json')
                 .then(res => res.json())
@@ -512,6 +585,8 @@
                             if (contentElement) {
                                 // store raw markdown for export
                                 window.__rawMarkdown = md;
+                                metricState.wordCount = countArticleCharacters(md);
+                                renderArticleMetrics();
                                 contentElement.textContent = md;
                                 window.__mdSourcePath = blog.contentFile;
                                 if (window.renderMarkdownContent) {

@@ -1,5 +1,6 @@
 // 博客数据
 let blogs = [];
+let footerTotalWordsPromise = null;
 
 const HOME_CATEGORY_RULES = {
     learningFirstTags: new Set(['二上', '二下']),
@@ -27,8 +28,11 @@ function getHomeCategoryKey(blog) {
 
 function updateProfileStats() {
     const articleCountEl = document.getElementById('article-count');
+    const wordCountEl = document.getElementById('word-count');
     const tagCountEl = document.getElementById('tag-count');
-    if (!articleCountEl && !tagCountEl) return;
+    const footerBlogCountEl = document.getElementById('footer-blog-count');
+    const footerWordCountEl = document.getElementById('footer-word-count');
+    if (!articleCountEl && !wordCountEl && !tagCountEl && !footerBlogCountEl && !footerWordCountEl) return;
 
     const articleCount = Array.isArray(blogs) ? blogs.length : 0;
 
@@ -42,6 +46,75 @@ function updateProfileStats() {
 
     if (articleCountEl) articleCountEl.textContent = articleCount;
     if (tagCountEl) tagCountEl.textContent = tagCount;
+    if (footerBlogCountEl) footerBlogCountEl.textContent = formatFooterStatNumber(articleCount);
+    if (wordCountEl) wordCountEl.textContent = '...';
+
+    if (footerWordCountEl || wordCountEl) {
+        if (footerWordCountEl) footerWordCountEl.textContent = '...';
+        getFooterTotalWords().then(totalWords => {
+            if (footerWordCountEl) footerWordCountEl.textContent = formatFooterStatNumber(totalWords);
+            if (wordCountEl) wordCountEl.textContent = formatProfileWordCount(totalWords);
+        }).catch(() => {
+            if (footerWordCountEl) footerWordCountEl.textContent = '0';
+            if (wordCountEl) wordCountEl.textContent = '0.0w';
+        });
+    }
+}
+
+function formatFooterStatNumber(value) {
+    const num = Number.isFinite(Number(value)) ? Number(value) : 0;
+    return num.toLocaleString('zh-CN');
+}
+
+function getCurrentSiteLang() {
+    try {
+        if (window.siteI18n && typeof window.siteI18n.getLang === 'function') {
+            return window.siteI18n.getLang();
+        }
+    } catch (e) { }
+    try {
+        return localStorage.getItem('site_language') || 'ja';
+    } catch (e) { }
+    return 'ja';
+}
+
+function formatProfileWordCount(totalWords) {
+    const words = Number.isFinite(Number(totalWords)) ? Number(totalWords) : 0;
+    const lang = getCurrentSiteLang();
+    if (lang === 'zh') {
+        return (words / 10000).toFixed(1) + 'w';
+    }
+    return Math.round(words / 1000).toLocaleString('en-US') + 'k';
+}
+
+function countBlogCharacters(markdownText) {
+    const raw = String(markdownText || '');
+    const stripped = raw
+        .replace(/```[\s\S]*?```/g, ' ')
+        .replace(/`[^`\n]*`/g, ' ')
+        .replace(/!\[[^\]]*\]\([^\)]*\)/g, ' ')
+        .replace(/\[([^\]]*)\]\([^\)]*\)/g, '$1')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/[#>*~\-]/g, ' ')
+        .replace(/\s+/g, '');
+    return stripped.length;
+}
+
+function getFooterTotalWords() {
+    if (footerTotalWordsPromise) return footerTotalWordsPromise;
+
+    const contentFiles = (Array.isArray(blogs) ? blogs : [])
+        .map(blog => blog && blog.contentFile)
+        .filter(Boolean);
+
+    footerTotalWordsPromise = Promise.all(contentFiles.map(path => {
+        const encodedPath = encodeURI(path);
+        return fetch(encodedPath)
+            .then(res => res.ok ? res.text() : '')
+            .catch(() => '');
+    })).then(contents => contents.reduce((sum, text) => sum + countBlogCharacters(text), 0));
+
+    return footerTotalWordsPromise;
 }
 
 function loadBlogs(callback) {
@@ -94,6 +167,11 @@ document.addEventListener('DOMContentLoaded', function () {
         if (document.getElementById('blogGrid')) {
             initBlogGrid();
         }
+    });
+
+    // 语言切换后刷新统计单位显示（总字数的 w/k 规则）
+    document.addEventListener('site:languageChanged', function () {
+        updateProfileStats();
     });
 
     // 首页公告栏（显示最新公告）
@@ -769,15 +847,43 @@ function startAnnouncementAutoScroll(bannerEl, opts) {
     const pauseMs = (opts && opts.pauseMs) ? opts.pauseMs : 1000;
 
     const originalHtml = msg.innerHTML;
+    const lines = Array.from(msg.querySelectorAll('.ann-line'));
+    if (lines.length <= 1) return;
+
+    const fixedLineHtml = lines[0].outerHTML;
+    const scrollingHtml = lines.slice(1).map(line => line.outerHTML).join('');
+    if (!scrollingHtml.trim()) return;
+
+    msg.innerHTML = '';
+    msg.classList.add('announcement-message--split');
+
+    const fixedLine = document.createElement('div');
+    fixedLine.className = 'announcement-fixed-line';
+    fixedLine.innerHTML = fixedLineHtml;
+
+    const viewport = document.createElement('div');
+    viewport.className = 'announcement-scroll-viewport';
+
     const inner = document.createElement('div');
     inner.className = 'announcement-scroll-inner';
     const spacer = '<div class="announcement-scroll-sep" aria-hidden="true"></div>';
-    inner.innerHTML = originalHtml + spacer + originalHtml;
+    inner.innerHTML = scrollingHtml + spacer + scrollingHtml;
 
-    msg.innerHTML = '';
-    msg.appendChild(inner);
+    viewport.appendChild(inner);
+    msg.appendChild(fixedLine);
+    msg.appendChild(viewport);
 
     const singleHeight = inner.scrollHeight / 2;
+    const viewportHeight = viewport.clientHeight;
+    if (singleHeight <= viewportHeight + 1) {
+        msg.__autoScroll = {
+            styleEl: null,
+            animName: null,
+            originalHtml: originalHtml
+        };
+        return;
+    }
+
     const tScroll = Math.max(0.8, singleHeight / speed);
     const totalDuration = tScroll + (pauseMs / 1000);
     const p = (tScroll / totalDuration) * 100;
@@ -807,6 +913,7 @@ function stopAnnouncementAutoScroll(bannerEl) {
         const state = msg.__autoScroll;
         if (state.styleEl && state.styleEl.parentNode) state.styleEl.parentNode.removeChild(state.styleEl);
         if (typeof state.originalHtml === 'string') msg.innerHTML = state.originalHtml;
+        msg.classList.remove('announcement-message--split');
         msg.__autoScroll = null;
     } catch (e) { }
 }
@@ -1357,13 +1464,29 @@ window.addEventListener('load', function () {
             }
         });
 
-        // 加载官方 Busuanzi 脚本（使用官方 CDN）
-        var s = document.createElement('script');
-        s.src = '//cdn.busuanzi.cc/busuanzi/3.6.9/busuanzi.min.js';
-        s.defer = true;
-        s.onload = pollAndLog;
-        s.onerror = function () { console.warn('Busuanzi 脚本加载失败'); pollAndLog(); };
-        document.head.appendChild(s);
+        // 加载 Busuanzi 脚本：优先官方 HTTPS，失败时自动切换备用源
+        var busuanziSources = [
+            'https://cdn.busuanzi.cc/busuanzi/3.6.9/busuanzi.min.js',
+            'https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js'
+        ];
+        loadBusuanziWithFallback(0);
+
+        function loadBusuanziWithFallback(index) {
+            if (index >= busuanziSources.length) {
+                console.warn('Busuanzi 脚本加载失败：所有源均不可用');
+                pollAndLog();
+                return;
+            }
+
+            var s = document.createElement('script');
+            s.src = busuanziSources[index];
+            s.defer = true;
+            s.onload = pollAndLog;
+            s.onerror = function () {
+                loadBusuanziWithFallback(index + 1);
+            };
+            document.head.appendChild(s);
+        }
 
         function pollAndLog() {
             var attempts = 0, maxAttempts = 50;

@@ -112,6 +112,11 @@
             , home_recommended_blogs: '推荐博客'
             , home_category_learning: '学习'
             , home_category_entertainment: '娱乐'
+            , total_words: '总字数'
+            , footer_blog_count: '博客总数'
+            , footer_total_words: '总字数'
+            , footer_site_visitors: '访客数'
+            , footer_site_views: '总访问'
         },
         en: {
             brand: "Be Young's Blog",
@@ -185,9 +190,9 @@
             settings_tab_music: 'Music',
             settings_language_title: 'Language Settings',
             settings_language_note: 'Language settings do not change the language of blog content.',
-            settings_language_zh: 'Chinese',
+            settings_language_zh: '中文',
             settings_language_en: 'English',
-            settings_language_ja: 'Japanese',
+            settings_language_ja: '日本語',
             settings_music_title: 'Music Settings',
             settings_music_hint: 'Click anywhere or press any key to enable background music',
             settings_music_original: 'All music tracks are original compositions',
@@ -220,7 +225,12 @@
             , home_recent_updates: 'Latest'
             , home_recommended_blogs: 'Recommended Blogs'
             , home_category_learning: 'Study'
-            , home_category_entertainment: 'Entertainment'
+            , home_category_entertainment: 'Fun'
+            , total_words: 'Total Characters'
+            , footer_blog_count: 'Posts'
+            , footer_total_words: 'Total Characters'
+            , footer_site_visitors: 'Visitors'
+            , footer_site_views: 'Total Views'
         },
         ja: {
             brand: '白恙のブログ',
@@ -294,8 +304,8 @@
             settings_tab_music: '音楽',
             settings_language_title: '言語設定',
             settings_language_note: '言語設定はブログ本文の言語には影響しません。',
-            settings_language_zh: '中国語',
-            settings_language_en: '英語',
+            settings_language_zh: '中文',
+            settings_language_en: 'English',
             settings_language_ja: '日本語',
             settings_music_title: '音楽設定',
             settings_music_hint: 'ページをクリックするか任意のキーでBGMを有効化',
@@ -330,6 +340,11 @@
             , home_recommended_blogs: 'おすすめブログ'
             , home_category_learning: '学習'
             , home_category_entertainment: '娯楽'
+            , total_words: '総文字数'
+            , footer_blog_count: '記事数'
+            , footer_total_words: '総文字数'
+            , footer_site_visitors: '訪問者数'
+            , footer_site_views: '総閲覧数'
         }
     };
 

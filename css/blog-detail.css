@@ -347,7 +347,7 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
     font-size: 1.13rem;
     margin: 0.7em 0;
     line-height: 2.2;
-    font-family: 'KaiTi', '楷体', STKaiti, serif;
+    font-family: 'Times New Roman', 'KaiTi', '楷体', STKaiti, serif;
     margin: 1em 0 1em 2em;
     font-size: 1.08rem;
     color: #444;
@@ -446,6 +446,26 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
     align-items: center;
 }
 
+.blog-detail .article-metrics {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 1.6em;
+}
+
+.blog-detail .article-metric-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #5f6b7a;
+    font-size: 0.96rem;
+}
+
+.blog-detail .article-metric-item i {
+    font-size: 0.95rem;
+    opacity: 0.88;
+}
+
 .blog-detail .tags {
     gap: 8px;
 }
@@ -478,7 +498,7 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
     font-size: 1.13rem;
     margin: 0.7em 0;
     line-height: 1.85;
-    font-family: 'KaiTi', '楷体', STKaiti, serif;
+    font-family: 'Times New Roman', 'KaiTi', '楷体', STKaiti, serif;
 }
 
 /* 博客详情页 Markdown 图片样式 */

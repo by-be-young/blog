@@ -116,6 +116,24 @@
     color: #2b3440;
 }
 
+.announcements-page .ann-card .ann-message.ann-message--split {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow: hidden;
+}
+
+.announcements-page .ann-card .ann-message .ann-message-fixed {
+    flex: 0 0 auto;
+}
+
+.announcements-page .ann-card .ann-message .ann-message-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
 .announcements-page .ann-card .ann-message .ann-line {
     display: block;
 }
@@ -143,7 +161,7 @@
 }
 
 .announcements-page .ann-card .ann-message .ann-line--section::after {
-    content: "～～～～～～～～～～～～～～～";
+    content: "～～～～～～～～～～～～～～～～～～～～～";
     color: #ff97ad;
     letter-spacing: -0.08em;
     white-space: nowrap;
@@ -234,39 +252,92 @@
 }
 
 @media (max-width: 880px) {
-    .ann-item {
-        grid-template-columns: 1fr;
-        gap: 10px;
+    .announcements-section {
+        padding: 24px 0 44px;
+    }
+
+    .announcements-title {
+        font-size: 2rem;
+        line-height: 1.12;
+        padding: 24px 0 26px 0;
+    }
+
+    .announcements-timeline {
+        max-width: 640px;
+        padding: 2px 0 6px;
     }
 
     .announcements-timeline::before {
-        left: 22px;
-        transform: none;
+        display: none;
+    }
+
+    .ann-item,
+    .ann-item.ann-item--top,
+    .ann-item.ann-item--bottom,
+    .ann-item.ann-item--left,
+    .ann-item.ann-item--right,
+    .ann-item.ann-item--mobile {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        margin: 0 0 16px;
+    }
+
+    .ann-item:last-child,
+    .ann-item.ann-item--mobile:last-child {
+        margin-bottom: 0;
+    }
+
+    .ann-item .ann-spacer {
+        display: none;
     }
 
     .ann-mid {
-        align-items: flex-start;
+        align-items: center;
         flex-direction: row;
         justify-content: flex-start;
-        gap: 10px;
-        padding-left: 8px;
+        gap: 8px;
+        min-height: 0;
+        padding-left: 0;
     }
 
-    .ann-item.ann-item--left .ann-card,
-    .ann-item.ann-item--right .ann-card {
-        grid-column: 1;
-        justify-self: stretch;
-        text-align: left;
-        margin-left: 46px;
-    }
-
-    .ann-item.ann-item--top .ann-card {
-        margin-left: 46px;
-        max-width: none;
+    .ann-dot {
+        width: 10px;
+        height: 10px;
+        border-width: 2px;
     }
 
     .ann-time {
         max-width: none;
+        font-size: 0.9rem;
+        font-weight: 700;
+        padding: 5px 10px;
+        border-radius: 999px;
+    }
+
+    .ann-item .ann-card,
+    .ann-item.ann-item--top .ann-card,
+    .ann-item.ann-item--bottom .ann-card,
+    .ann-item.ann-item--left .ann-card,
+    .ann-item.ann-item--right .ann-card,
+    .ann-item.ann-item--mobile .ann-card {
+        grid-column: 1;
+        justify-self: stretch;
+        text-align: left;
+        margin: 0;
+        max-width: none;
+        padding: 14px 14px;
+        border-radius: 12px;
+    }
+
+    .ann-item .ann-card .ann-message {
+        font-size: 0.98rem;
+        line-height: 1.64;
+    }
+
+    /* 移动端：公告卡片保留 ">>"，去掉后续装饰波浪线 */
+    .announcements-page .ann-card .ann-message .ann-line--section::after {
+        content: none !important;
+        display: none !important;
     }
 }
 
@@ -370,6 +441,10 @@
     font-weight: 700;
 }
 
+.ann-card .ann-message.ann-message--split {
+    overflow: hidden;
+}
+
 /* 更大的顶部最新公告卡 */
 .ann-item.ann-item--top .ann-card {
     max-height: 480px !important;
@@ -380,18 +455,14 @@
 
     .announcements-page .ann-card,
     .announcements-section .ann-card {
-        max-height: 260px !important;
+        max-height: 320px !important;
         padding: 14px 16px;
-    }
-
-    .announcements-page .ann-item.ann-item--top .ann-card {
-        max-height: 380px !important;
-        padding: 16px 18px;
     }
 }
 
 /* 隐藏滚动条（WebKit / Blink） */
 .announcements-page .ann-card .ann-message::-webkit-scrollbar,
+.announcements-page .ann-card .ann-message .ann-message-scroll::-webkit-scrollbar,
 .announcements-section .ann-card .ann-message::-webkit-scrollbar {
     width: 0;
     height: 0;
@@ -399,6 +470,7 @@
 
 /* 隐藏滚动条（Firefox / IE/Edge） */
 .announcements-page .ann-card .ann-message,
+.announcements-page .ann-card .ann-message .ann-message-scroll,
 .announcements-section .ann-card .ann-message {
     scrollbar-width: none;
     -ms-overflow-style: none;
