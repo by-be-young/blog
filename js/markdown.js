@@ -86,10 +86,371 @@ function rewriteMarkdownAssetUrls(rootEl) {
     });
 }
 
+function transformObsidianImageEmbeds(markdown) {
+    if (typeof markdown !== 'string' || !markdown) return markdown || '';
+
+    return markdown.replace(/!\[\[([^\]\n]+)\]\]/g, function (match, inner) {
+        const raw = String(inner || '').trim();
+        if (!raw) return match;
+
+        const parts = raw.split('|');
+        const targetRaw = (parts[0] || '').trim();
+        if (!targetRaw) return match;
+
+        const target = targetRaw.replace(/\\/g, '/');
+        if (!/\.(png|jpe?g|gif|webp|svg|bmp|avif)$/i.test(target)) return match;
+
+        let alt = (parts[1] || '').trim();
+        if (!alt) alt = target.split('/').pop().replace(/\.[^.]+$/, '');
+
+        let src = target;
+        const hasKnownPrefix = /^(?:https?:\/\/|\/|\.{1,2}\/|assets\/|blogs\/)/i.test(src);
+        const isBareFilename = src.indexOf('/') === -1;
+
+        // Obsidian commonly stores unnamed attachments under blogs/图片/
+        if (!hasKnownPrefix && isBareFilename) {
+            src = `/blogs/图片/${src}`;
+        }
+
+        return `![${alt}](${src})`;
+    });
+}
+
+function setupBlogDetailImageViewer(rootEl) {
+    if (!rootEl) return;
+    if (!document.body || !document.body.classList.contains('blog-detail-page')) return;
+
+    let overlay = document.getElementById('image-viewer-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'image-viewer-overlay';
+        overlay.className = 'image-viewer-overlay';
+        overlay.setAttribute('aria-hidden', 'true');
+        overlay.innerHTML = [
+            '<div class="image-viewer-stage" role="dialog" aria-modal="true" aria-label="图片查看器">',
+            '  <button class="image-viewer-nav image-viewer-prev" type="button" aria-label="上一张">&#10094;</button>',
+            '  <button class="image-viewer-nav image-viewer-next" type="button" aria-label="下一张">&#10095;</button>',
+            '  <div class="image-viewer-toolbar">',
+            '    <span class="image-viewer-counter">1 / 1</span>',
+            '    <button class="image-viewer-tool image-viewer-download" type="button" aria-label="下载图片"><i class="fas fa-download" aria-hidden="true"></i><span class="image-viewer-tool-label">下载</span></button>',
+            '    <button class="image-viewer-tool image-viewer-copy" type="button" aria-label="复制图片"><i class="fas fa-copy" aria-hidden="true"></i><span class="image-viewer-tool-label">复制</span></button>',
+            '    <button class="image-viewer-close" type="button" aria-label="关闭图片查看器">&times;</button>',
+            '  </div>',
+            '  <img class="image-viewer-image" alt="" draggable="false" />',
+            '</div>'
+        ].join('');
+        document.body.appendChild(overlay);
+
+        const stage = overlay.querySelector('.image-viewer-stage');
+        const prevBtn = overlay.querySelector('.image-viewer-prev');
+        const nextBtn = overlay.querySelector('.image-viewer-next');
+        const closeBtn = overlay.querySelector('.image-viewer-close');
+        const counterEl = overlay.querySelector('.image-viewer-counter');
+        const downloadBtn = overlay.querySelector('.image-viewer-download');
+        const copyBtn = overlay.querySelector('.image-viewer-copy');
+        const imageEl = overlay.querySelector('.image-viewer-image');
+
+        const state = {
+            items: [],
+            index: 0,
+            scale: 1,
+            tx: 0,
+            ty: 0,
+            dragging: false,
+            dragStartX: 0,
+            dragStartY: 0,
+            dragOriginX: 0,
+            dragOriginY: 0
+        };
+        overlay.__viewerState = state;
+
+        function getViewerI18n() {
+            try {
+                const lang = (window.siteI18n && typeof window.siteI18n.getLang === 'function')
+                    ? window.siteI18n.getLang()
+                    : 'zh';
+                const all = (window.siteI18n && window.siteI18n.translations) ? window.siteI18n.translations : null;
+                const map = (all && all[lang]) ? all[lang] : {};
+                return {
+                    download: map.image_download || '下载',
+                    copy: map.image_copy || '复制',
+                    copied: map.image_copied || '已复制',
+                    copyFailed: map.image_copy_failed || '复制失败'
+                };
+            } catch (e) {
+                return {
+                    download: '下载',
+                    copy: '复制',
+                    copied: '已复制',
+                    copyFailed: '复制失败'
+                };
+            }
+        }
+
+        function applyViewerI18n() {
+            const t = getViewerI18n();
+            if (downloadBtn) {
+                const label = downloadBtn.querySelector('.image-viewer-tool-label');
+                if (label) label.textContent = t.download;
+                else downloadBtn.textContent = t.download;
+                downloadBtn.setAttribute('aria-label', t.download);
+            }
+            if (copyBtn) {
+                const label = copyBtn.querySelector('.image-viewer-tool-label');
+                if (label) label.textContent = t.copy;
+                else copyBtn.textContent = t.copy;
+                copyBtn.setAttribute('aria-label', t.copy);
+            }
+        }
+
+        function clamp(value, min, max) {
+            return Math.max(min, Math.min(max, value));
+        }
+
+        function applyTransform() {
+            if (!imageEl) return;
+            imageEl.style.transform = `translate(${state.tx}px, ${state.ty}px) scale(${state.scale})`;
+            imageEl.style.cursor = state.dragging ? 'grabbing' : (state.scale > 1 ? 'grab' : 'zoom-in');
+        }
+
+        function resetTransform() {
+            state.scale = 1;
+            state.tx = 0;
+            state.ty = 0;
+            applyTransform();
+        }
+
+        function getDownloadName(item) {
+            if (!item || !item.src) return 'image';
+            try {
+                const clean = String(item.src).split('#')[0].split('?')[0];
+                const filename = clean.split('/').pop();
+                return filename || 'image';
+            } catch (e) {
+                return 'image';
+            }
+        }
+
+        function updateNav() {
+            const len = state.items.length;
+            const oneBased = len > 0 ? state.index + 1 : 0;
+            if (counterEl) counterEl.textContent = `${oneBased} / ${len}`;
+
+            if (prevBtn) {
+                prevBtn.disabled = len <= 1;
+                prevBtn.classList.toggle('is-disabled', len <= 1);
+            }
+            if (nextBtn) {
+                nextBtn.disabled = len <= 1;
+                nextBtn.classList.toggle('is-disabled', len <= 1);
+            }
+        }
+
+        function renderCurrent() {
+            if (!imageEl || !state.items.length) return;
+            const item = state.items[state.index];
+            imageEl.setAttribute('src', item.src);
+            imageEl.setAttribute('alt', item.alt || '图片预览');
+            resetTransform();
+            updateNav();
+        }
+
+        function showAt(index) {
+            if (!state.items.length) return;
+            const len = state.items.length;
+            const normalized = (index + len) % len;
+            state.index = normalized;
+            renderCurrent();
+        }
+
+        function openViewer(index) {
+            if (!state.items.length) return;
+            showAt(index || 0);
+            overlay.classList.add('is-open');
+            overlay.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('image-viewer-open');
+        }
+
+        function closeViewer() {
+            overlay.classList.remove('is-open');
+            overlay.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('image-viewer-open');
+            state.dragging = false;
+            resetTransform();
+        }
+
+        async function copyCurrentImage() {
+            const item = state.items[state.index];
+            if (!item || !item.src || !copyBtn) return;
+            const t = getViewerI18n();
+            const label = copyBtn.querySelector('.image-viewer-tool-label');
+
+            function setCopyText(text) {
+                if (label) label.textContent = text;
+                else copyBtn.textContent = text;
+            }
+            try {
+                if (!(navigator.clipboard && window.ClipboardItem)) {
+                    throw new Error('clipboard unavailable');
+                }
+                const res = await fetch(item.src);
+                if (!res.ok) throw new Error('fetch failed');
+                const blob = await res.blob();
+                const mime = blob.type || 'image/png';
+                await navigator.clipboard.write([new ClipboardItem({ [mime]: blob })]);
+                setCopyText(t.copied);
+            } catch (e) {
+                setCopyText(t.copyFailed);
+            }
+            window.setTimeout(function () {
+                const nextT = getViewerI18n();
+                setCopyText(nextT.copy);
+            }, 1200);
+        }
+
+        function downloadCurrentImage() {
+            const item = state.items[state.index];
+            if (!item || !item.src) return;
+            const a = document.createElement('a');
+            a.href = item.src;
+            a.download = getDownloadName(item);
+            a.rel = 'noopener noreferrer';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        overlay.__openViewerAt = openViewer;
+        overlay.__setViewerItems = function (items) {
+            state.items = Array.isArray(items) ? items : [];
+            if (state.index >= state.items.length) state.index = 0;
+            updateNav();
+        };
+
+        overlay.addEventListener('click', function (e) {
+            if (e.target === overlay || e.target === stage) closeViewer();
+        });
+
+        if (closeBtn) closeBtn.addEventListener('click', closeViewer);
+        if (prevBtn) prevBtn.addEventListener('click', function () { showAt(state.index - 1); });
+        if (nextBtn) nextBtn.addEventListener('click', function () { showAt(state.index + 1); });
+        if (downloadBtn) downloadBtn.addEventListener('click', downloadCurrentImage);
+        if (copyBtn) copyBtn.addEventListener('click', copyCurrentImage);
+
+        applyViewerI18n();
+        document.addEventListener('site:languageChanged', applyViewerI18n);
+
+        document.addEventListener('keydown', function (e) {
+            if (!overlay.classList.contains('is-open')) return;
+            if (e.key === 'Escape') {
+                closeViewer();
+                return;
+            }
+            if (e.key === 'ArrowLeft') {
+                showAt(state.index - 1);
+                return;
+            }
+            if (e.key === 'ArrowRight') {
+                showAt(state.index + 1);
+            }
+        });
+
+        if (imageEl) {
+            imageEl.addEventListener('wheel', function (e) {
+                if (!overlay.classList.contains('is-open')) return;
+                e.preventDefault();
+                const ratio = e.deltaY < 0 ? 1.14 : 1 / 1.14;
+                const nextScale = clamp(state.scale * ratio, 1, 5);
+                if (nextScale === state.scale) return;
+                state.scale = nextScale;
+                if (state.scale === 1) {
+                    state.tx = 0;
+                    state.ty = 0;
+                }
+                applyTransform();
+            }, { passive: false });
+
+            imageEl.addEventListener('mousedown', function (e) {
+                if (!overlay.classList.contains('is-open')) return;
+                if (state.scale <= 1) return;
+                state.dragging = true;
+                state.dragStartX = e.clientX;
+                state.dragStartY = e.clientY;
+                state.dragOriginX = state.tx;
+                state.dragOriginY = state.ty;
+                applyTransform();
+                e.preventDefault();
+            });
+
+            imageEl.addEventListener('dragstart', function (e) {
+                e.preventDefault();
+            });
+        }
+
+        window.addEventListener('mousemove', function (e) {
+            if (!state.dragging || !overlay.classList.contains('is-open')) return;
+            state.tx = state.dragOriginX + (e.clientX - state.dragStartX);
+            state.ty = state.dragOriginY + (e.clientY - state.dragStartY);
+            applyTransform();
+        });
+
+        window.addEventListener('mouseup', function () {
+            if (!state.dragging) return;
+            state.dragging = false;
+            applyTransform();
+        });
+    }
+
+    const images = Array.from(rootEl.querySelectorAll('img')).filter(img => {
+        const src = (img.getAttribute('src') || '').trim();
+        if (!src) return false;
+        if (img.closest('.image-viewer-overlay')) return false;
+        return true;
+    }).map(img => ({
+        element: img,
+        src: img.currentSrc || img.getAttribute('src') || '',
+        alt: img.getAttribute('alt') || '图片预览'
+    })).filter(item => !!item.src);
+
+    const items = images.map(item => ({ src: item.src, alt: item.alt }));
+    if (typeof overlay.__setViewerItems === 'function') {
+        overlay.__setViewerItems(items);
+    }
+
+    images.forEach((item, idx) => {
+        const img = item.element;
+        img.classList.add('md-zoomable-image');
+        if (!img.hasAttribute('tabindex')) img.setAttribute('tabindex', '0');
+        if (!img.hasAttribute('role')) img.setAttribute('role', 'button');
+        img.setAttribute('aria-label', '点击查看大图');
+
+        if (img.dataset.viewerBound === '1') return;
+        img.dataset.viewerBound = '1';
+
+        const openViewer = function (e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            if (typeof overlay.__openViewerAt === 'function') {
+                overlay.__openViewerAt(idx);
+            }
+        };
+
+        img.addEventListener('click', openViewer);
+        img.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                openViewer(e);
+            }
+        });
+    });
+}
+
 function renderMarkdownContent() {
     const contentElement = document.getElementById('markdown-content');
     if (!contentElement) return;
-    const markdown = stripFrontMatter(contentElement.textContent || '');
+    const rawMarkdown = stripFrontMatter(contentElement.textContent || '');
+    const markdown = transformObsidianImageEmbeds(rawMarkdown);
 
     // 全局数学占位集合（会被各个段落共享）
     const displayMathBlocks = [];
@@ -418,6 +779,7 @@ function renderMarkdownContent() {
 
     // Ensure asset URLs (especially images) resolve correctly onGitHub Pages
     rewriteMarkdownAssetUrls(contentElement);
+    setupBlogDetailImageViewer(contentElement);
 
     // Make any links that point to other blog details open in a new tab
     try {

@@ -300,6 +300,38 @@
     white-space: nowrap;
 }
 
+.archive-timeline .title-text>.title-scroll-inner {
+    display: inline-block;
+    white-space: nowrap;
+    will-change: transform;
+}
+
+@keyframes archive-title-marquee {
+    0% {
+        transform: translateX(0);
+    }
+
+    28% {
+        transform: translateX(0);
+    }
+
+    68% {
+        transform: translateX(var(--title-scroll-distance, 0px));
+    }
+
+    82% {
+        transform: translateX(var(--title-scroll-distance, 0px));
+    }
+
+    82.01% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
 
 .archive-timeline .timeline-excerpt {
     color: #666;
@@ -398,6 +430,17 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+    }
+
+    .archive-timeline .timeline-title .title-text.title-text-scroll {
+        text-overflow: clip;
+    }
+
+    .archive-timeline .timeline-title .title-text.title-text-scroll>.title-scroll-inner {
+        animation-name: archive-title-marquee;
+        animation-duration: var(--title-scroll-duration, 7000ms);
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
     }
 
     .archive-page .archive-timeline .timeline-title .blog-type {
@@ -1024,4 +1067,11 @@
     /* 更强的文字阴影和投影，使标题更醒目 */
     text-shadow: 0 18px 44px rgba(44, 62, 80, 0.22), 0 6px 16px rgba(255, 255, 255, 0.6);
     filter: drop-shadow(0 14px 36px rgba(44, 62, 80, 0.14));
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .archive-timeline .timeline-title .title-text.title-text-scroll>.title-scroll-inner {
+        animation: none !important;
+        transform: none !important;
+    }
 }

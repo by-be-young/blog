@@ -163,6 +163,48 @@ function renderTimeline(blogs) {
   });
   // After rendering all items, format dates once using current language
   if (typeof updateArchiveDates === 'function') updateArchiveDates();
+  initArchiveMobileTitleMarquee();
+}
+
+function initArchiveMobileTitleMarquee() {
+  const timeline = document.getElementById('archiveTimeline');
+  if (!timeline) return;
+
+  const isMobile = window.matchMedia('(max-width: 900px)').matches;
+  const titleNodes = Array.from(timeline.querySelectorAll('.timeline-title .title-text'));
+
+  titleNodes.forEach((titleEl) => {
+    if (!titleEl) return;
+
+    let inner = titleEl.querySelector(':scope > .title-scroll-inner');
+    if (!inner) {
+      const text = titleEl.textContent || '';
+      titleEl.textContent = '';
+      inner = document.createElement('span');
+      inner.className = 'title-scroll-inner';
+      inner.textContent = text;
+      titleEl.appendChild(inner);
+    }
+
+    titleEl.classList.remove('title-text-scroll');
+    titleEl.style.removeProperty('--title-scroll-distance');
+    titleEl.style.removeProperty('--title-scroll-duration');
+
+    if (!isMobile) return;
+
+    const boxWidth = Math.ceil(titleEl.clientWidth || 0);
+    const textWidth = Math.ceil(inner.scrollWidth || 0);
+    const overflow = textWidth - boxWidth;
+    if (overflow <= 6) return;
+
+    const distance = -overflow;
+    const travelMs = Math.round((overflow / 38) * 1000);
+    const duration = Math.max(5600, Math.min(15000, travelMs + 3600));
+
+    titleEl.style.setProperty('--title-scroll-distance', `${distance}px`);
+    titleEl.style.setProperty('--title-scroll-duration', `${duration}ms`);
+    titleEl.classList.add('title-text-scroll');
+  });
 }
 
 // Archive-specific date formatter (language-aware) and updater
@@ -216,7 +258,19 @@ function updateArchiveDates() {
 // listen for language changes
 document.addEventListener('site:languageChanged', function (e) {
   updateArchiveDates();
+  initArchiveMobileTitleMarquee();
 });
+
+if (!window.__archiveTitleMarqueeResizeBound) {
+  window.__archiveTitleMarqueeResizeBound = true;
+  let archiveTitleResizeTimer = null;
+  window.addEventListener('resize', function () {
+    if (archiveTitleResizeTimer) window.clearTimeout(archiveTitleResizeTimer);
+    archiveTitleResizeTimer = window.setTimeout(function () {
+      initArchiveMobileTitleMarquee();
+    }, 140);
+  });
+}
 
 function initTimelineDrum() {
   const timeline = document.getElementById('archiveTimeline');

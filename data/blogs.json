@@ -1,5 +1,21 @@
 [
     {
+        "id": 553436030,
+        "title": "江城子·樱",
+        "excerpt": "观樱花有感",
+        "date": "2026-03-22",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "文学",
+            "诗词",
+            "词"
+        ],
+        "category": "娱乐",
+        "type": "落笔生花",
+        "contentFile": "blogs/文学/诗词/词/江城子·樱.md",
+        "recommended": false
+    },
+    {
         "id": 2626146186,
         "title": "OS-Lab0-实验报告",
         "excerpt": "操作系统Lab0课下实验实验报告",

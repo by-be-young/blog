@@ -117,6 +117,10 @@
             , footer_total_words: '总字数'
             , footer_site_visitors: '访客数'
             , footer_site_views: '总访问'
+            , image_download: '下载'
+            , image_copy: '复制'
+            , image_copied: '已复制'
+            , image_copy_failed: '复制失败'
         },
         en: {
             brand: "Be Young's Blog",
@@ -231,6 +235,10 @@
             , footer_total_words: 'Total Characters'
             , footer_site_visitors: 'Visitors'
             , footer_site_views: 'Total Views'
+            , image_download: 'Download'
+            , image_copy: 'Copy'
+            , image_copied: 'Copied'
+            , image_copy_failed: 'Copy failed'
         },
         ja: {
             brand: '白恙のブログ',
@@ -345,6 +353,10 @@
             , footer_total_words: '総文字数'
             , footer_site_visitors: '訪問者数'
             , footer_site_views: '総閲覧数'
+            , image_download: 'ダウンロード'
+            , image_copy: 'コピー'
+            , image_copied: 'コピー済み'
+            , image_copy_failed: 'コピー失敗'
         }
     };
 
