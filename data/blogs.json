@@ -1,5 +1,21 @@
 [
     {
+        "id": 1493245956,
+        "title": "阿戈尔盟约底层逻辑及运营思路",
+        "excerpt": "卫戍协议阿戈尔阵营攻略",
+        "date": "2026-03-24",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "明日方舟",
+            "卫戍协议",
+            "阿戈尔"
+        ],
+        "category": "娱乐",
+        "type": "纸上行舟",
+        "contentFile": "blogs/明日方舟/卫戍协议/阿戈尔/阿戈尔盟约底层逻辑及运营思路.md",
+        "recommended": false
+    },
+    {
         "id": 553436030,
         "title": "江城子·樱",
         "excerpt": "观樱花有感",
