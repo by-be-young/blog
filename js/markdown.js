@@ -119,6 +119,15 @@ function transformObsidianImageEmbeds(markdown) {
 function setupBlogDetailImageViewer(rootEl) {
     if (!rootEl) return;
     if (!document.body || !document.body.classList.contains('blog-detail-page')) return;
+    const isAboutPage = document.body.classList.contains('about-page');
+    if (isAboutPage) {
+        const staleOverlay = document.getElementById('image-viewer-overlay');
+        if (staleOverlay && staleOverlay.parentNode) {
+            staleOverlay.parentNode.removeChild(staleOverlay);
+        }
+        document.body.classList.remove('image-viewer-open');
+        return;
+    }
 
     let overlay = document.getElementById('image-viewer-overlay');
     if (!overlay) {
@@ -126,14 +135,17 @@ function setupBlogDetailImageViewer(rootEl) {
         overlay.id = 'image-viewer-overlay';
         overlay.className = 'image-viewer-overlay';
         overlay.setAttribute('aria-hidden', 'true');
+        const viewerToolButtons = [
+            '    <button class="image-viewer-tool image-viewer-download" type="button" aria-label="下载图片"><i class="fas fa-download" aria-hidden="true"></i><span class="image-viewer-tool-label">下载</span></button>',
+            '    <button class="image-viewer-tool image-viewer-copy" type="button" aria-label="复制图片"><i class="fas fa-copy" aria-hidden="true"></i><span class="image-viewer-tool-label">复制</span></button>'
+        ].join('');
         overlay.innerHTML = [
             '<div class="image-viewer-stage" role="dialog" aria-modal="true" aria-label="图片查看器">',
             '  <button class="image-viewer-nav image-viewer-prev" type="button" aria-label="上一张">&#10094;</button>',
             '  <button class="image-viewer-nav image-viewer-next" type="button" aria-label="下一张">&#10095;</button>',
             '  <div class="image-viewer-toolbar">',
             '    <span class="image-viewer-counter">1 / 1</span>',
-            '    <button class="image-viewer-tool image-viewer-download" type="button" aria-label="下载图片"><i class="fas fa-download" aria-hidden="true"></i><span class="image-viewer-tool-label">下载</span></button>',
-            '    <button class="image-viewer-tool image-viewer-copy" type="button" aria-label="复制图片"><i class="fas fa-copy" aria-hidden="true"></i><span class="image-viewer-tool-label">复制</span></button>',
+            viewerToolButtons,
             '    <button class="image-viewer-close" type="button" aria-label="关闭图片查看器">&times;</button>',
             '  </div>',
             '  <img class="image-viewer-image" alt="" draggable="false" />',

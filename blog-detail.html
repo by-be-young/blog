@@ -50,6 +50,7 @@
             <!-- 固定目录 -->
             <nav class="blog-toc" id="blog-toc">
                 <div class="toc-title" data-i18n="toc"></div>
+                <div class="toc-progress" id="toc-progress" aria-live="polite">0</div>
                 <ul class="toc-list" id="toc-list">
                     <!-- JS自动生成目录 -->
                 </ul>
@@ -128,6 +129,19 @@
         // 目录生成
         // 生成可折叠嵌套目录
         function generateTOC() {
+            const tocProgressEl = document.getElementById('toc-progress');
+            const articleContentEl = document.getElementById('markdown-content');
+
+            function updateTocProgress() {
+                if (!tocProgressEl || !articleContentEl) return;
+                const rect = articleContentEl.getBoundingClientRect();
+                const viewportBottom = window.innerHeight || document.documentElement.clientHeight || 0;
+                const total = Math.max(rect.height, 1);
+                const passed = viewportBottom - rect.top;
+                const ratio = Math.max(0, Math.min(1, passed / total));
+                tocProgressEl.textContent = String(Math.round(ratio * 100));
+            }
+
             let activeH1Id = null;
             let lastUrlH1Id = null;
 
@@ -284,6 +298,7 @@
             }
             // 页面滚动时自动展开当前h1
             window.addEventListener('scroll', function () {
+                updateTocProgress();
                 if (window.__scrollingToTOC) return;
 
                 // 找到当前可视区域的h1
@@ -335,6 +350,7 @@
                     }
                 }
             });
+            window.addEventListener('resize', updateTocProgress);
             // hash变化时自动展开
             window.addEventListener('hashchange', function () {
                 openCurrentH1ByHash();
@@ -364,6 +380,8 @@
                     }
                 }
             } catch (e) { }
+
+            updateTocProgress();
         }
 
         // 返回顶部按钮

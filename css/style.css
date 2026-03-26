@@ -1463,7 +1463,7 @@ body.settings-modal-open {
     font-weight: 700;
     color: var(--detail-text);
     margin-bottom: 6px;
-    background: rgba(255, 255, 255, 0.28);
+    background: rgba(255, 255, 255, 0.72);
     border-radius: 10px;
     padding: 6px 10px;
 }
@@ -1603,7 +1603,7 @@ body.settings-modal-open {
     font-size: 1.8rem;
     color: var(--dark-color);
     margin-bottom: 10px;
-    background: rgba(255, 255, 255, 0.28);
+    background: rgba(255, 255, 255, 0.72);
     border-radius: 12px;
     padding: 6px 10px;
 }
@@ -1624,7 +1624,7 @@ body.settings-modal-open {
     padding: 20px 0;
     border-top: 1px solid #eee;
     border-bottom: 1px solid #eee;
-    background: rgba(255, 255, 255, 0.24);
+    background: rgba(255, 255, 255, 0.72);
     border-radius: 12px;
 }
 
@@ -2402,7 +2402,6 @@ body.settings-modal-open {
 /* 重要文字：使用单一马卡龙色（不使用渐变文字） */
 .home .welcome-text,
 .home .nav-brand,
-.home .name,
 .home .blog-title {
     background: none;
     -webkit-background-clip: border-box;
@@ -4238,7 +4237,7 @@ body {
     font-weight: 700;
     color: var(--detail-text);
     margin-bottom: 6px;
-    background: rgba(255, 255, 255, 0.28);
+    background: rgba(255, 255, 255, 0.72);
     border-radius: 10px;
     padding: 6px 10px;
 }
@@ -4372,7 +4371,7 @@ body {
     font-size: 1.8rem;
     color: var(--dark-color);
     margin-bottom: 10px;
-    background: rgba(255, 255, 255, 0.28);
+    background: rgba(255, 255, 255, 0.72);
     border-radius: 12px;
     padding: 6px 10px;
 }
@@ -4393,7 +4392,7 @@ body {
     padding: 20px 0;
     border-top: 1px solid #eee;
     border-bottom: 1px solid #eee;
-    background: rgba(255, 255, 255, 0.24);
+    background: rgba(255, 255, 255, 0.72);
     border-radius: 12px;
 }
 
@@ -4730,7 +4729,6 @@ body {
 /* 重要文字：使用单一马卡龙色（不使用渐变文字） */
 .home .welcome-text,
 .home .nav-brand,
-.home .name,
 .home .blog-title {
     background: none;
     -webkit-background-clip: border-box;
