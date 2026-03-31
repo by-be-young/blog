@@ -366,14 +366,43 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
     line-height: 2.1;
 }
 
-.blog-detail .article-content ul li {
-    list-style: disc inside;
-    margin-bottom: 0.3em;
+.blog-detail .article-content ul,
+.blog-detail .article-content ol {
+    margin: 0.8em 0;
 }
 
+.blog-detail .article-content ul {
+    padding-left: 0;
+    list-style-position: inside;
+}
+
+.blog-detail .article-content ol {
+    padding-left: 1.6em;
+    list-style-position: outside;
+}
+
+.blog-detail .article-content ul li,
 .blog-detail .article-content ol li {
-    list-style: decimal inside;
-    margin-bottom: 0.3em;
+    margin-bottom: 0.35em;
+    font-family: 'Times New Roman', 'KaiTi', '楷体', STKaiti, serif;
+    font-size: 1.08rem;
+    line-height: 2.1;
+}
+
+.blog-detail .article-content ul li::marker,
+.blog-detail .article-content ol li::marker {
+    color: var(--macaron-marker-color, #9ad7ff);
+    font-family: inherit;
+}
+
+.blog-detail .article-content ul li::marker {
+    content: '● ';
+}
+
+/* marked 生成的列表项常包裹单个 p，压平该场景以避免出现额外换行 */
+.blog-detail .article-content li>p:first-child:last-child {
+    display: inline;
+    margin: 0;
 }
 
 .blog-detail .article-content blockquote {
@@ -793,7 +822,7 @@ body.image-viewer-open {
     justify-content: space-between;
     gap: 10px;
     padding: 10px 12px;
-    background: #befff3fa;
+    background: #d8fff7fa;
     color: rgba(20, 25, 35, 0.92);
     border-bottom: 1px solid rgba(0, 0, 0, 0.10);
 }

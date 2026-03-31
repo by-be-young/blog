@@ -116,6 +116,27 @@ function transformObsidianImageEmbeds(markdown) {
     });
 }
 
+function applyRandomMacaronListMarkerColors(rootEl) {
+    if (!rootEl) return;
+
+    const macaronPalette = [
+        '#f59ab5',
+        '#74c4f7',
+        '#86dfbe',
+        '#f7bf8a',
+        '#b29af2',
+        '#eea9ef',
+        '#8fd8fb',
+        '#f6bddc'
+    ];
+
+    const listItems = Array.from(rootEl.querySelectorAll('ul li, ol li'));
+    listItems.forEach(li => {
+        const idx = Math.floor(Math.random() * macaronPalette.length);
+        li.style.setProperty('--macaron-marker-color', macaronPalette[idx]);
+    });
+}
+
 function setupBlogDetailImageViewer(rootEl) {
     if (!rootEl) return;
     if (!document.body || !document.body.classList.contains('blog-detail-page')) return;
@@ -792,6 +813,7 @@ function renderMarkdownContent() {
     // Ensure asset URLs (especially images) resolve correctly onGitHub Pages
     rewriteMarkdownAssetUrls(contentElement);
     setupBlogDetailImageViewer(contentElement);
+    applyRandomMacaronListMarkerColors(contentElement);
 
     // Make any links that point to other blog details open in a new tab
     try {
