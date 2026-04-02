@@ -72,7 +72,7 @@ gcc hello.o -o hello_x86
 
 执行后，屏幕中输出了：
 
-![[图片/hello_x86.png]]
+![[hello_x86.png]]
 
 说明这一步才最终生成了可执行文件。这个可执行文件仍然是 ELF 文件。
 
@@ -100,7 +100,7 @@ mips-linux-gnu-gcc hello_mips.o -o hello_mips
 
 执行后查看 `hello_mips` 文件：
 
-![[图片/hello_mips.png]]
+![[hello_mips.png]]
 
 但是这个文件不能直接在我们实验环境中运行，因为不是 MIPS 架构的。
 

@@ -14,13 +14,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "二下/操作系统/MOS/Lab1 复习.md",
+                "file": "二下/操作系统/实验报告/OS-Lab1-实验报告.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Lab1 复习 的大纲"
+              "title": "OS-Lab1-实验报告 的大纲"
             }
           }
         ]
@@ -36,12 +36,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "二下/操作系统/MOS/Lab1 复习.md",
+                "file": "二下/操作系统/实验报告/OS-Lab1-实验报告.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Lab1 复习"
+              "title": "OS-Lab1-实验报告"
             }
           },
           {
@@ -193,10 +193,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "二下/操作系统/MOS/Lab1 复习.md"
+                "file": "二下/操作系统/实验报告/OS-Lab1-实验报告.md"
               },
               "icon": "lucide-info",
-              "title": "Lab1 复习的笔记属性"
+              "title": "OS-Lab1-实验报告的笔记属性"
             }
           }
         ],
@@ -219,22 +219,21 @@
   },
   "active": "d5d74b564af8c18d",
   "lastOpenFiles": [
+    "图片/hello_mips.o.png",
+    "图片/hello_mips.png",
     "二下/操作系统/实验报告/OS-Lab1-实验报告.md",
+    "二下/操作系统/MOS/Lab1 复习.md",
     "二下/操作系统/启动/计算机的启动过程.md",
     "二下/操作系统/启动/ELF文件结构.md",
     "二下/操作系统/实验报告/OS-Lab0-实验报告.md",
-    "图片/hello_mips.png",
-    "图片/hello_mips.png",
     "图片/dump_mips.png",
     "图片/dump_x86.png",
     "图片/hello_x86 1.png",
-    "图片/hello_mips.o.png",
     "图片/hello_x86.png",
     "d7470570279d905ecd7fdd81489a9daa.png",
     "图片/hello.o.png",
     "图片/hello.s.png",
     "二下/操作系统/gcc/gcc语法速成.md",
-    "二下/操作系统/MOS/Lab1 复习.md",
     "二下/操作系统/Shell/C语言无痛转型Shell脚本.md",
     "二下/操作系统/Shell/Lab0 Pre-Exam复习.md",
     "二下/操作系统/启动",
