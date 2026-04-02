@@ -104,7 +104,7 @@
         <!-- 设置与返回顶部容器（固定右下） -->
         <div id="floating-controls">
             <!-- 顺序从上到下：宽屏、导出、设置、回到顶部 -->
-            <button id="wide-read-btn" class="floating-btn sub-btn" data-i18n-title="wide_read" aria-hidden="true"
+            <button id="wide-read-btn" class="floating-btn sub-btn" data-i18n-title="immersive_read" aria-hidden="true"
                 style="display:none;"><i class="fas fa-expand"></i></button>
             <button id="export-md-btn" class="floating-btn sub-btn" data-i18n-title="export_markdown" aria-hidden="true"
                 style="display:none;"><i class="fas fa-download"></i></button>
@@ -790,22 +790,71 @@
                     }
                 });
 
-                // wide reading toggle
-                let wideMode = false;
-                function enterWideMode() {
-                    wideMode = true;
+                // immersive reading mode
+                let immersiveMode = false;
+                const immersiveHint = document.createElement('div');
+                immersiveHint.id = 'immersive-read-hint';
+                immersiveHint.setAttribute('aria-live', 'polite');
+                document.body.appendChild(immersiveHint);
+
+                let hintFadeTimer = null;
+                let hintHideTimer = null;
+                function showImmersiveHint() {
+                    if (hintFadeTimer) clearTimeout(hintFadeTimer);
+                    if (hintHideTimer) clearTimeout(hintHideTimer);
+                    const exitHint = getI18nText('immersive_exit_hint', '按ESC以退出沉浸阅读');
+                    const pdfHint = getI18nText('immersive_pdf_hint', '使用快捷键Ctrl+P可以导出PDF');
+                    const exitHintHtml = exitHint.replace('ESC', '<strong class="immersive-key">ESC</strong>');
+                    const pdfHintHtml = pdfHint.replace('Ctrl+P', '<strong class="immersive-key">Ctrl+P</strong>');
+                    immersiveHint.innerHTML = '<span class="immersive-hint-line">' + exitHintHtml + '</span>' +
+                        '<span class="immersive-hint-line">' + pdfHintHtml + '</span>';
+                    immersiveHint.classList.remove('is-fading');
+                    immersiveHint.classList.add('is-visible');
+                    hintFadeTimer = setTimeout(() => {
+                        immersiveHint.classList.add('is-fading');
+                    }, 3300);
+                    hintHideTimer = setTimeout(() => {
+                        immersiveHint.classList.remove('is-visible');
+                        immersiveHint.classList.remove('is-fading');
+                    }, 4300);
+                }
+
+                function enterImmersiveMode() {
+                    const isMobileViewport = window.matchMedia('(max-width: 880px)').matches;
+                    immersiveMode = true;
                     if (article) article.classList.add('wide-mode');
                     if (toc) {
                         toc.classList.add('toc-collapsed');
-                        // fully hide the TOC element in wide mode to avoid flicker
+                        // fully hide the TOC element in immersive mode to avoid flicker
                         toc.style.display = 'none';
                     }
-                    // debug indicator: mark body and log
-                    try { document.body.classList.add('wide-mode-active'); } catch (e) { }
-                    try { console.log('wide-mode: enter'); } catch (e) { }
+                    // close floating sub-buttons before hiding floating controls
+                    showSubs(false);
+                    // close TOC overlay if currently open
+                    try {
+                        const tocOverlay = document.getElementById('toc-overlay');
+                        const tocFab = document.getElementById('toc-fab');
+                        if (tocOverlay) {
+                            tocOverlay.classList.remove('is-active');
+                            tocOverlay.style.display = 'none';
+                        }
+                        if (tocFab) tocFab.setAttribute('aria-expanded', 'false');
+                    } catch (e) { }
+                    try {
+                        document.body.classList.add('wide-mode-active');
+                        document.body.classList.add('immersive-reading-active');
+                        if (isMobileViewport) document.body.classList.add('immersive-mobile-mode');
+                        else document.body.classList.remove('immersive-mobile-mode');
+                    } catch (e) { }
+                    if (!isMobileViewport) {
+                        showImmersiveHint();
+                    } else {
+                        immersiveHint.classList.remove('is-visible');
+                        immersiveHint.classList.remove('is-fading');
+                    }
                 }
-                function exitWideMode() {
-                    wideMode = false;
+                function exitImmersiveMode() {
+                    immersiveMode = false;
                     if (article) article.classList.remove('wide-mode');
                     if (toc) {
                         toc.classList.remove('toc-collapsed');
@@ -820,35 +869,29 @@
                         toc.style.boxShadow = '';
                         toc.style.opacity = '';
                     }
-                    try { document.body.classList.remove('wide-mode-active'); } catch (e) { }
-                    try { console.log('wide-mode: exit'); } catch (e) { }
-                }
-
-                function tocOverlayShow() {
-                    if (!wideMode) return;
-                    // show TOC as an overlay on the left side above the article
-                    toc.style.position = 'fixed';
-                    toc.style.left = '24px';
-                    toc.style.top = '120px';
-                    toc.style.zIndex = '1002';
-                    toc.style.width = '360px';
-                    toc.style.boxShadow = '0 20px 48px rgba(0,0,0,0.18)';
-                    toc.style.opacity = '1';
-                }
-                function tocOverlayHide() {
-                    if (!wideMode) return;
-                    // revert to collapsed (hidden)
-                    toc.style.position = '';
-                    toc.style.left = '';
-                    toc.style.top = '';
-                    toc.style.zIndex = '';
-                    toc.style.width = '';
-                    toc.style.boxShadow = '';
-                    toc.style.opacity = '';
+                    try {
+                        document.body.classList.remove('wide-mode-active');
+                        document.body.classList.remove('immersive-reading-active');
+                        document.body.classList.remove('immersive-mobile-mode');
+                    } catch (e) { }
+                    immersiveHint.classList.remove('is-visible');
+                    immersiveHint.classList.remove('is-fading');
                 }
 
                 wideBtn.addEventListener('click', function (e) {
-                    if (!wideMode) enterWideMode(); else exitWideMode();
+                    if (!immersiveMode) {
+                        enterImmersiveMode();
+                    } else {
+                        const isMobileViewport = window.matchMedia('(max-width: 880px)').matches;
+                        if (!isMobileViewport) showImmersiveHint();
+                    }
+                });
+
+                document.addEventListener('keydown', function (e) {
+                    if (!immersiveMode) return;
+                    if (e.key !== 'Escape') return;
+                    e.preventDefault();
+                    exitImmersiveMode();
                 });
 
                 exportBtn.addEventListener('click', function (e) {

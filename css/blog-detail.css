@@ -170,18 +170,21 @@
 }
 
 /* 可视化调试：当宽屏模式触发时在正文加粗边框，便于确认 */
-.blog-detail-page.wide-mode-active .blog-article {
+.blog-detail-page.wide-mode-active .blog-article,
+.blog-detail-page.immersive-reading-active .blog-article {
     outline: 4px solid rgba(255, 110, 155, 0.9);
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
 }
 
 /* 宽屏阅读模式：让容器居中，正文扩展到更大的最大宽度 */
-.blog-detail-page.wide-mode-active .blog-detail .container {
+.blog-detail-page.wide-mode-active .blog-detail .container,
+.blog-detail-page.immersive-reading-active .blog-detail .container {
     justify-content: center;
 }
 
 .blog-detail-page .blog-article.wide-mode,
-.blog-detail-page.wide-mode-active .blog-article.wide-mode {
+.blog-detail-page.wide-mode-active .blog-article.wide-mode,
+.blog-detail-page.immersive-reading-active .blog-article.wide-mode {
     /* 解除固定的 900px 限制，使正文在宽屏时可扩展并居中 */
     max-width: 1200px;
     width: calc(100% - 96px);
@@ -802,18 +805,21 @@ body.image-viewer-open {
     margin: 18px 0;
     overflow-x: auto;
     font-size: 1.02rem;
-    box-shadow: 0 10px 22px rgba(44, 62, 80, 0.04);
+    box-shadow:
+        inset 0 2px 6px rgba(24, 49, 58, 0.10),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.55);
 }
 
 /* 博客详情页：带标题栏的代码块容器（白色边框，上边更粗） */
 .blog-detail .article-content .codeblock {
-    border: none;
+    border: 1px solid rgba(24, 49, 58, 0.10);
     border-radius: 10px;
     overflow: hidden;
     margin: 18px 0;
     box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.06),
-        0 12px 26px rgba(0, 0, 0, 0.24);
+        inset 0 2px 8px rgba(24, 49, 58, 0.14),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.40),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 .blog-detail .article-content .codeblock__header {
@@ -825,6 +831,9 @@ body.image-viewer-open {
     background: #d8fff7fa;
     color: rgba(20, 25, 35, 0.92);
     border-bottom: 1px solid rgba(0, 0, 0, 0.10);
+    box-shadow:
+        inset 0 1px 4px rgba(24, 49, 58, 0.10),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.42);
 }
 
 .blog-detail .article-content .codeblock__lang {
@@ -870,6 +879,20 @@ body.image-viewer-open {
     background: rgba(46, 204, 113, 0.18);
 }
 
+@media (max-width: 720px) {
+    .blog-detail .article-content .codeblock__btn {
+        width: 30px;
+        min-width: 30px;
+        padding: 0;
+        gap: 0;
+    }
+
+    .blog-detail .article-content .codeblock__btn .code-copy-label,
+    .blog-detail .article-content .codeblock__btn .code-toggle-label {
+        display: none;
+    }
+}
+
 .blog-detail .article-content .codeblock__body {
     padding: 0;
     overflow: hidden;
@@ -881,9 +904,11 @@ body.image-viewer-open {
     align-items: stretch;
     /* 正文框采用单一薄荷色 */
     background: rgba(167, 243, 208, 0.22);
-    border-radius: 10px;
+    border-radius: 0 0 10px 10px;
     padding: 12px 12px 14px 12px;
-    box-shadow: 0 8px 18px rgba(24, 49, 58, 0.04);
+    box-shadow:
+        inset 0 1px 4px rgba(24, 49, 58, 0.08),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.40);
 }
 
 .blog-detail .article-content .codeblock__gutter {
@@ -917,13 +942,16 @@ body.image-viewer-open {
     min-width: 0;
 }
 
-.blog-detail .article-content code {
+.blog-detail .article-content :not(pre)>code {
     font-size: 1.02rem;
     border-radius: 6px;
-    background: rgba(245, 247, 250, 0.9);
+    background: transparent;
     color: #18313a;
-    border: 1px solid rgba(24, 49, 58, 0.06);
+    border: 1px solid rgba(24, 49, 58, 0.14);
     padding: 2px 6px;
+    box-shadow:
+        inset 0 1px 3px rgba(24, 49, 58, 0.12),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.34);
     /* 行内代码也使用 Comic Mono 字体 */
     font-family: 'Comic Mono', 'Comic Sans MS', 'Comic Neue', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
@@ -932,7 +960,9 @@ body.image-viewer-open {
     background: transparent;
     color: inherit;
     border: none;
+    border-radius: 0;
     padding: 0;
+    box-shadow: none;
 }
 
 /* Markdown 表格样式：避免挤压/溢出导致“看不见” */
@@ -1031,6 +1061,77 @@ body.image-viewer-open {
             rgba(199, 182, 255, 0.14) 100%);
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     box-shadow: 0 10px 24px rgba(44, 62, 80, 0.10);
+    transform: translateY(0);
+    opacity: 1;
+    transition: transform 0.32s ease, opacity 0.26s ease;
+    will-change: transform;
+}
+
+.blog-detail-page.immersive-reading-active .navbar {
+    transform: translateY(calc(-100% - 24px));
+    opacity: 0;
+    pointer-events: none;
+}
+
+#floating-controls,
+.toc-fab {
+    transition: transform 0.28s ease, opacity 0.22s ease, visibility 0.22s ease;
+}
+
+.blog-detail-page.immersive-reading-active:not(.immersive-mobile-mode) #floating-controls,
+.blog-detail-page.immersive-reading-active:not(.immersive-mobile-mode) .toc-fab {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(28px) scale(0.96);
+}
+
+.blog-detail-page.immersive-reading-active:not(.immersive-mobile-mode) .toc-overlay {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+#immersive-read-hint {
+    position: fixed;
+    top: 14px;
+    left: 50%;
+    transform: translate(-50%, -10px);
+    z-index: 1205;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(24, 49, 58, 0.16);
+    background: rgba(255, 255, 255, 0.88);
+    color: #18313a;
+    font-size: 0.92rem;
+    font-weight: 600;
+    box-shadow: 0 8px 20px rgba(24, 49, 58, 0.12);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.32s ease, visibility 0.3s ease;
+    text-align: center;
+    line-height: 1.35;
+}
+
+#immersive-read-hint.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+}
+
+#immersive-read-hint.is-fading {
+    opacity: 0;
+    transform: translate(-50%, -8px);
+}
+
+#immersive-read-hint .immersive-key {
+    color: #ff6e9b;
+    font-weight: 800;
+}
+
+#immersive-read-hint .immersive-hint-line {
+    display: block;
 }
 
 .blog-detail-page .nav-menu a {
@@ -1525,9 +1626,15 @@ body.image-viewer-open {
     color: #18313a;
     /* 深色文字，提高对比 */
     border-bottom: 1px solid rgba(24, 49, 58, 0.06);
+    border-left: 1px solid rgba(24, 49, 58, 0.10);
+    border-right: 1px solid rgba(24, 49, 58, 0.10);
     padding: 10px 12px;
     border-radius: 10px 10px 0 0;
-    box-shadow: 0 6px 18px rgba(24, 49, 58, 0.06) inset;
+    box-shadow:
+        inset 0 3px 8px rgba(24, 49, 58, 0.20),
+        inset 0 -2px 4px rgba(255, 255, 255, 0.50),
+        inset 1px 0 0 rgba(255, 255, 255, 0.22),
+        inset -1px 0 0 rgba(24, 49, 58, 0.10);
 }
 
 .blog-detail-page .article-content .codeblock__lang {

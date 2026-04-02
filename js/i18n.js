@@ -94,6 +94,9 @@
             settings_progress_label: '进度：',
             settings_volume_label: '音量：',
             wide_read: '宽屏阅读',
+            immersive_read: '沉浸阅读',
+            immersive_exit_hint: '按ESC以退出沉浸阅读',
+            immersive_pdf_hint: '使用快捷键Ctrl+P可以导出PDF',
             export_markdown: '导出Markdown',
             copy_markdown: '复制Markdown'
             , prev_post: '上一篇'
@@ -212,6 +215,9 @@
             settings_progress_label: 'Progress:',
             settings_volume_label: 'Volume:',
             wide_read: 'Wide reading',
+            immersive_read: 'Immersive reading',
+            immersive_exit_hint: 'Press ESC to exit immersive reading',
+            immersive_pdf_hint: 'Use Ctrl+P to export PDF',
             export_markdown: 'Export Markdown',
             copy_markdown: 'Copy Markdown'
             , prev_post: 'Previous'
@@ -330,6 +336,9 @@
             settings_progress_label: '再生位置：',
             settings_volume_label: '音量：',
             wide_read: '広い表示',
+            immersive_read: '没入読書',
+            immersive_exit_hint: 'ESCキーで没入読書を終了',
+            immersive_pdf_hint: 'Ctrl+P のショートカットで PDF を書き出せます',
             export_markdown: 'Markdownを出力',
             copy_markdown: 'Markdownをコピー'
             , prev_post: '前の記事'

@@ -8,25 +8,25 @@ excerpt: 操作系统Lab0课下实验实验报告
 
 > 思考下列有关Git的问题： 
 > 
-> •在已初始化的 `~/learnGit` 目录下，创建一个名为 `README.txt` 的文件。执行命令 `git status > Untracked.txt`
+> - 在已初始化的 `~/learnGit` 目录下，创建一个名为 `README.txt` 的文件。执行命令 `git status > Untracked.txt`
 > 
->  •在 `README.txt` 文件中添加任意文件内容，然后使用 `add` 命令，再执行命令 ` git status > Stage.txt `。
+>  - 在 `README.txt` 文件中添加任意文件内容，然后使用 `add` 命令，再执行命令 ` git status > Stage.txt `。
 > 
->  •提交 `README.txt`，并在提交说明里写入自己的学号。 
+>  - 提交 `README.txt`，并在提交说明里写入自己的学号。 
 > 
-> •执行命令 `cat Untracked.txt` 和 `cat Stage.txt `，对比两次运行的结果，体会 `README.txt` 两次所处位置的不同。 
+> - 执行命令 `cat Untracked.txt` 和 `cat Stage.txt `，对比两次运行的结果，体会 `README.txt` 两次所处位置的不同。 
 > 
-> •修改 `README.txt` 文件，再执行命令 `git status > Modified.txt`。 
+> - 修改 `README.txt` 文件，再执行命令 `git status > Modified.txt`。 
 > 
-> •执行命令 `cat Modified.txt`，观察其结果和第一次执行 `add` 命令之前的 status 是否一样，并思考原因。
+> - 执行命令 `cat Modified.txt`，观察其结果和第一次执行 `add` 命令之前的 status 是否一样，并思考原因。
 
-第一步中，创建完 `READE.txt` 文件后，我们并未执行 `add` 命令，就直接执行了 `git status` 命令。此时，这个文件未被加入暂存区，属于 **“未跟踪的文件”**。【Untracked】
+1. 第一步中，创建完 `READE.txt` 文件后，我们并未执行 `add` 命令，就直接执行了 `git status` 命令。此时，这个文件未被加入暂存区，属于 **“未跟踪的文件”**。【Untracked】
 
-而第二步执行了 `add` 命令，此时这个文件被加入了暂存区，但未提交，会提示 **“要提交的变更”** 。【Staged】
+2. 而第二步执行了 `add` 命令，此时这个文件被加入了暂存区，但未提交，会提示 **“要提交的变更”** 。【Staged】
 
-第三步提交了文件之后，工作目录变得很干净整洁，`README.txt` 文件已被 git 管理。【Unmodified】
+3. 第三步提交了文件之后，工作目录变得很干净整洁，`README.txt` 文件已被 git 管理。【Unmodified】
 
-第五步重新修改了 `README.txt`，但是并没有 `add`。此时，git 发现了其管理的文件有修改，会提示 **“尚未暂存以备提交的变更”**。【Modified】
+4. 第五步重新修改了 `README.txt`，但是并没有 `add`。此时，git 发现了其管理的文件有修改，会提示 **“尚未暂存以备提交的变更”**。【Modified】
 ## Thinking 0.2
 
 > 思考一下add the file、stage the file和 commit 分别对应的是Git里的哪些命令呢？
@@ -81,39 +81,39 @@ git restore print.c
 
 > 思考下列有关Git的问题： 
 > 
-> •找到在 `/home/2xxxxxxx/learnGit` 下刚刚创建的 `README.txt` 文件，若不存在则新建该文件。 
+> - 找到在 `/home/2xxxxxxx/learnGit` 下刚刚创建的 `README.txt` 文件，若不存在则新建该文件。 
 > 
-> •在文件里加入 `Testing 1`，`git add`，`git commit`，提交说明记为1。 
+> - 在文件里加入 `Testing 1`，`git add`，`git commit`，提交说明记为1。 
 > 
-> •模仿上述做法，把1分别改为2和3，再提交两次。 
+> - 模仿上述做法，把1分别改为2和3，再提交两次。 
 > 
-> •使用 `git log` 命令查看提交日志，看是否已经有三次提交，记下提交说明为3的哈希值。 
+> - 使用 `git log` 命令查看提交日志，看是否已经有三次提交，记下提交说明为3的哈希值。 
 > 
-> •进行版本回退。执行命令 `git reset --hard HEAD^` 后，再执行 `git log`，观察其变化。 
+> - 进行版本回退。执行命令 `git reset --hard HEAD^` 后，再执行 `git log`，观察其变化。 
 > 
-> •找到提交说明为1的哈希值，执行命令 `git reset --hard <hash>` 后，再执行 `git log`，观察其变化。 
+> - 找到提交说明为1的哈希值，执行命令 `git reset --hard <hash>` 后，再执行 `git log`，观察其变化。 
 > 
-> •现在已经回到了旧版本，为了再次回到新版本，执行 `git reset --hard <hash>` ，再执行 `git log`，观察其变化。
+> - 现在已经回到了旧版本，为了再次回到新版本，执行 `git reset --hard <hash>` ，再执行 `git log`，观察其变化。
 
-第一次执行 `git log` 后，已有 3 次提交，我在执行的时候，提交说明为 3 的哈希值为 `e2db7b571b15c23135b87a1414a629724f9bb594`
+1. 第一次执行 `git log` 后，已有 3 次提交，我在执行的时候，提交说明为 3 的哈希值为 `e2db7b571b15c23135b87a1414a629724f9bb594`
 
-第二次执行 `git log` 后，第 3 次提交消失。
+2. 第二次执行 `git log` 后，第 3 次提交消失。
 
-第三次执行 `git log` 后，第 2 次提交也消失了。说明通过哈希值可以回退到对应的版本。
+3. 第三次执行 `git log` 后，第 2 次提交也消失了。说明通过哈希值可以回退到对应的版本。
 
-最后一次执行 `git log` 后，又回到了 3 次提交的状态。
+4. 最后一次执行 `git log` 后，又回到了 3 次提交的状态。
 
 ## Thinking 0.5
 
 > 执行如下命令, 并查看结果 
 > 
-> • `echo first` 
+> - `echo first` 
 > 
-> • `echo second > output.txt` 
+> - `echo second > output.txt` 
 > 
-> • `echo third > output.txt` 
+> - `echo third > output.txt` 
 > 
-> • `echo forth >> output.txt`
+> - `echo forth >> output.txt`
 
 运行结果如下：
 
@@ -134,11 +134,11 @@ forth
 
 ## Thinking 0.6
 
-> 使用你知道的方法（包括重定向）创建下图内容的文件（文件命名为 `test`），将创建该文件的命令序列保存在 `command` 文件中，并将 `test` 文件作为批处理文件运行，将运行结果输出至 `result` 文件中。
+> - 使用你知道的方法（包括重定向）创建下图内容的文件（文件命名为 `test`），将创建该文件的命令序列保存在 `command` 文件中，并将 `test` 文件作为批处理文件运行，将运行结果输出至 `result` 文件中。
 > 
-> 给出 `command` 文件和 `result` 文件的内容，并对最后的结果进行解释说明（可以从test文件的内容入手）。
+> -  给出 `command` 文件和 `result` 文件的内容，并对最后的结果进行解释说明（可以从test文件的内容入手）。
 > 
-> 具体实现的过程中思考下列问题: `echo echo Shell Start` 与 `echo 【反引号】echo Shell Start【反引号】 `  效果是否有区别; `echo echo $c>file1` 与 ` echo 【反引号】echo $c>file1【反引号】` 效果是否有区别。
+> - 具体实现的过程中思考下列问题: `echo echo Shell Start` 与 `echo 【反引号】echo Shell Start【反引号】 `  效果是否有区别; `echo echo $c>file1` 与 ` echo 【反引号】echo $c>file1【反引号】` 效果是否有区别。
 
 由于需要创建一个很长的文件，直接在命令行内写的话不好看，而且如果写错了也不是很好修改，不如写一个 shell 脚本。
 

@@ -14,13 +14,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "二下/操作系统/启动/ELF文件结构.md",
+                "file": "二下/操作系统/MOS/Lab1 复习.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "ELF文件结构 的大纲"
+              "title": "Lab1 复习 的大纲"
             }
           }
         ]
@@ -31,21 +31,7 @@
         "dimension": 75.55555555555556,
         "children": [
           {
-            "id": "7c3d1d91a9716eab",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "二下/操作系统/启动/ELF文件结构.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "ELF文件结构"
-            }
-          },
-          {
-            "id": "f067682d1e509e0c",
+            "id": "d5d74b564af8c18d",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -59,7 +45,7 @@
             }
           },
           {
-            "id": "d5d74b564af8c18d",
+            "id": "a48429dd9b66ac0b",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -207,10 +193,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "二下/操作系统/启动/ELF文件结构.md"
+                "file": "二下/操作系统/MOS/Lab1 复习.md"
               },
               "icon": "lucide-info",
-              "title": "ELF文件结构的笔记属性"
+              "title": "Lab1 复习的笔记属性"
             }
           }
         ],
@@ -231,16 +217,26 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "7c3d1d91a9716eab",
+  "active": "d5d74b564af8c18d",
   "lastOpenFiles": [
+    "二下/操作系统/实验报告/OS-Lab1-实验报告.md",
     "二下/操作系统/启动/计算机的启动过程.md",
     "二下/操作系统/启动/ELF文件结构.md",
+    "二下/操作系统/实验报告/OS-Lab0-实验报告.md",
+    "图片/hello_mips.png",
+    "图片/hello_mips.png",
+    "图片/dump_mips.png",
+    "图片/dump_x86.png",
+    "图片/hello_x86 1.png",
+    "图片/hello_mips.o.png",
+    "图片/hello_x86.png",
+    "d7470570279d905ecd7fdd81489a9daa.png",
+    "图片/hello.o.png",
+    "图片/hello.s.png",
+    "二下/操作系统/gcc/gcc语法速成.md",
     "二下/操作系统/MOS/Lab1 复习.md",
     "二下/操作系统/Shell/C语言无痛转型Shell脚本.md",
-    "二下/操作系统/实验报告/OS-Lab0-实验报告.md",
     "二下/操作系统/Shell/Lab0 Pre-Exam复习.md",
-    "图片/MIPS程序地址空间结构.png",
-    "二下/操作系统/gcc/gcc语法速成.md",
     "二下/操作系统/启动",
     "明日方舟/卫戍协议/阿戈尔/阿戈尔盟约底层逻辑及运营思路.md",
     "二下/操作系统/MOS",
@@ -255,11 +251,6 @@
     "文学/诗词/词/卜算子·元旦晚会.md",
     "文学/诗词/词/行香子·初雪.md",
     "语言/意大利语/发音规则/意大利语自然拼读攻略.md",
-    "图片/樱花2.jpg",
-    "图片/樱花1.jpg",
-    "Pasted image 20260319213503.png",
-    "Pasted image 20260319205217.png",
-    "Pasted image 20260319205043.png",
     "二上/算法/模板/算法选择题速查.md",
     "二下/操作系统/实验报告",
     "二下/操作系统/Makefile",
@@ -272,8 +263,6 @@
     "未命名.md",
     "明日方舟/干员杂谈/干员测评/望.md",
     "二上/离散二/图论/穿程问题.md",
-    "二上/计组/MIPS/指令系统与MIPS汇编语言.md",
-    "二上/计组/总复习/计组总复习.md",
-    "二上/计组/链接/链接与运行.md"
+    "二上/计组/MIPS/指令系统与MIPS汇编语言.md"
   ]
 }

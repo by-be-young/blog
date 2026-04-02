@@ -1207,6 +1207,118 @@ body.announcement-modal-open {
     font-variant-numeric: tabular-nums;
 }
 
+@media (max-width: 768px) {
+    .settings-modal {
+        align-items: center;
+        justify-content: center;
+        padding: 12px;
+        overflow: hidden;
+    }
+
+    .settings-modal-card {
+        width: min(680px, 100%);
+        height: min(86vh, 720px);
+        max-height: none;
+        padding: 12px;
+        border-radius: 14px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transform-origin: center bottom;
+        transform: translateY(24px) scale(0.96);
+    }
+
+    .settings-modal-content {
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        padding: 14px;
+        gap: 14px;
+        overflow: hidden;
+    }
+
+    .settings-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        padding-right: 0;
+        padding-bottom: 12px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .settings-tab {
+        margin-bottom: 0;
+        text-align: center;
+        padding: 10px 12px;
+    }
+
+    .settings-panel {
+        padding-left: 0;
+        min-height: 0;
+        height: auto !important;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .settings-section {
+        min-height: 0;
+    }
+
+    .settings-section.active {
+        max-height: 100%;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .settings-section h3 {
+        margin-bottom: 14px;
+    }
+
+    .language-note,
+    .music-hint,
+    .music-original-note {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .music-track,
+    .music-volume,
+    .music-progress {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .music-playback {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    #volume-value,
+    #progress-value {
+        min-width: 0;
+        text-align: left;
+    }
+}
+
+@media (max-width: 460px) {
+    .settings-panel {
+        min-height: 0;
+    }
+
+    .settings-modal-card {
+        height: min(88vh, 760px);
+    }
+
+    .music-playback {
+        grid-template-columns: 1fr;
+    }
+}
+
 body.settings-modal-open {
     overflow: hidden;
 }
