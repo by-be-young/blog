@@ -114,7 +114,7 @@ readelf -h hello_x86
 
 屏幕输出如下：
 
-![[hello_x86 1.png]]
+![[hello_x86_1.png]]
 
 - 查看 `hello_mips`
 
@@ -128,7 +128,7 @@ mips-linux-gnu-readelf -h hello_mips
 
 其中，除了在【系统架构】字段与 `x86` 有区别之外，其他字段也或多或少有出入。主要原因大概是 ABI（应用二进制接口）不同，当然也有其他的原因。
 
-当然，还可以用 `readelf` 的 `-l`、`-S ` 查看段头和节头，这里就不再赘述。
+当然，还可以用 `readelf` 的 `-l`、`-S` 查看段头和节头，这里就不再赘述。
 
 ### 使用 `objdump` 反汇编
 

@@ -299,13 +299,16 @@
                 <a class="nav-avatar" href="about.html" aria-label="profile">
                     <img src="assets/avatar.png" alt="头像">
                 </a>
-                <span data-i18n="brand"></span>
+                <a class="nav-brand-link" href="index.html" aria-label="home">
+                    <span data-i18n="brand"></span>
+                </a>
             </div>
             <ul class="nav-menu">
                 <li><a href="index.html" class="active"><i class="fas fa-home"></i> <span data-i18n="home"></span></a>
                 </li>
                 <li><a href="archive.html"><i class="fas fa-archive"></i> <span data-i18n="archive"></span></a></li>
                 <li><a href="categories.html"><i class="fas fa-tags"></i> <span data-i18n="categories"></span></a></li>
+                <li><a href="series.html"><i class="fas fa-layer-group"></i> <span data-i18n="series"></span></a></li>
                 <li><a href="quick-links.html"><i class="fas fa-link"></i> <span data-i18n="quicklinks"></span></a></li>
             </ul>
             <div class="nav-actions">
@@ -553,7 +556,7 @@
             window.addEventListener('load', function () {
                 idle(function () {
                     try {
-                        var pages = ['archive.html', 'categories.html', 'quick-links.html', 'about.html'];
+                        var pages = ['archive.html', 'categories.html', 'series.html', 'quick-links.html', 'about.html'];
                         pages.forEach(function (p) {
                             var l = document.createElement('link');
                             l.rel = 'prefetch';

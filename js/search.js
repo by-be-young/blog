@@ -1,6 +1,9 @@
 (function () {
     // 简单的搜索面板与逻辑（全站与详情页两种模式）
     let blogsCache = null;
+    let includeBodySearch = false;
+    let bodyTextCache = new Map();
+    let bodyLoadPromise = null;
 
     function renderIdleHint(resultsEl) {
         if (!resultsEl) return;
@@ -38,6 +41,12 @@
                             <input type="search" placeholder="" data-i18n="search_placeholder" aria-label="搜索输入" id="global-search-input">
                         </div>
                     </div>
+                    <div class="search-options" role="group" aria-label="search-options">
+                        <label class="search-option-item">
+                            <input type="checkbox" id="search-include-body">
+                            <span data-i18n="search_include_body">搜索正文</span>
+                        </label>
+                    </div>
                     <div class="search-results" id="search-results" role="list"></div>
                 </div>
             </div>
@@ -66,6 +75,16 @@
 
         // input events: realtime with debounce + enter to confirm
         const input = panel.querySelector('#global-search-input');
+        const includeBodyInput = panel.querySelector('#search-include-body');
+        if (includeBodyInput) {
+            includeBodyInput.checked = includeBodySearch;
+            includeBodyInput.addEventListener('change', function (e) {
+                includeBodySearch = !!(e && e.target && e.target.checked);
+                const value = (input && input.value ? input.value.trim() : '');
+                if (value) doSearch(value);
+            });
+        }
+
         const debounced = debounce((val) => {
             const v = (val || '').trim();
             if (v.length > 0) doSearch(v);
@@ -90,8 +109,13 @@
         // reset input and results when opening
         const input = panel.querySelector('#global-search-input');
         const resultsEl = panel.querySelector('#search-results');
+        const includeBodyInput = panel.querySelector('#search-include-body');
         if (input) {
             input.value = '';
+        }
+        if (includeBodyInput && !panel.classList.contains('right-sidebar')) {
+            includeBodySearch = false;
+            includeBodyInput.checked = false;
         }
         if (resultsEl) resultsEl.innerHTML = '';
         // clear any existing highlights in detail page
@@ -175,17 +199,26 @@
             return;
         }
         // Global search across blogs.json
-        ensureBlogsLoaded().then(blogList => {
+        ensureBlogsLoaded().then(async blogList => {
             const q = keyword.toLowerCase();
             const results = [];
+
+            if (includeBodySearch) {
+                await ensureBodyTextLoaded(blogList);
+            }
+
             blogList.forEach(b => {
                 let score = 0;
                 const t = (b.title || '').toLowerCase();
                 const ex = (b.excerpt || '').toLowerCase();
                 const tags = Array.isArray(b.tags) ? b.tags.join(' ').toLowerCase() : '';
+                const series = (b.series || '').toLowerCase();
+                const body = includeBodySearch ? getBodyTextByBlog(b) : '';
                 if (t.includes(q)) score += 10;
                 if (ex.includes(q)) score += 6;
                 if (tags.includes(q)) score += 8;
+                if (series.includes(q)) score += 12;
+                if (body && body.includes(q)) score += 5;
                 if (score > 0) results.push({ blog: b, score, source: determineMatchSource(b, q) });
             });
             results.sort((a, b) => b.score - a.score);
@@ -234,8 +267,23 @@
                 div.addEventListener('click', () => {
                     // navigate to blog-detail with q param so target page can highlight
                     const url = `blog-detail.html?id=${r.blog.id}&q=${encodeURIComponent(keyword)}`;
-                    const w = window.open(url, '_blank', 'noopener,noreferrer');
-                    try { if (w) w.opener = null; } catch (e) { /* ignore */ }
+                    const sameTabPages = !!(
+                        document.body && (
+                            document.body.classList.contains('home') ||
+                            document.body.classList.contains('archive-page') ||
+                            document.body.classList.contains('categories-page')
+                        )
+                    );
+                    if (sameTabPages) {
+                        if (typeof window.navigateWithTransition === 'function') {
+                            window.navigateWithTransition(url);
+                        } else {
+                            window.location.href = url;
+                        }
+                    } else {
+                        const w = window.open(url, '_blank', 'noopener,noreferrer');
+                        try { if (w) w.opener = null; } catch (e) { /* ignore */ }
+                    }
                 });
                 resultsEl.appendChild(div);
             });
@@ -258,6 +306,8 @@
         const t = (b.title || '').toLowerCase();
         const ex = (b.excerpt || '').toLowerCase();
         const tags = Array.isArray(b.tags) ? b.tags.join(' ').toLowerCase() : '';
+        const series = (b.series || '').toLowerCase();
+        if (series.includes(q)) return 'series';
         if (t.includes(q)) return 'title';
         if (tags.includes(q)) return 'tag';
         if (ex.includes(q)) return 'excerpt';
@@ -267,6 +317,51 @@
     function ensureBlogsLoaded() {
         if (blogsCache) return Promise.resolve(blogsCache);
         return fetch('data/blogs.json').then(r => r.json()).then(data => { blogsCache = data; return data; }).catch(() => []);
+    }
+
+    function getBodyTextByBlog(blog) {
+        if (!blog || typeof blog !== 'object') return '';
+        const key = Number(blog.id);
+        if (Number.isFinite(key) && bodyTextCache.has(key)) return bodyTextCache.get(key) || '';
+        return '';
+    }
+
+    function normalizeContentPath(path) {
+        if (!path) return '';
+        const raw = String(path).trim().replace(/\\/g, '/');
+        if (!raw) return '';
+        return encodeURI(raw);
+    }
+
+    function ensureBodyTextLoaded(blogList) {
+        if (bodyLoadPromise) return bodyLoadPromise;
+        const list = Array.isArray(blogList) ? blogList : [];
+
+        bodyLoadPromise = Promise.all(list.map(async (blog) => {
+            if (!blog || typeof blog !== 'object') return;
+            const key = Number(blog.id);
+            if (!Number.isFinite(key) || bodyTextCache.has(key)) return;
+            const file = normalizeContentPath(blog.contentFile);
+            if (!file) {
+                bodyTextCache.set(key, '');
+                return;
+            }
+            try {
+                const resp = await fetch(file, { cache: 'no-store' });
+                if (!resp.ok) {
+                    bodyTextCache.set(key, '');
+                    return;
+                }
+                const text = await resp.text();
+                bodyTextCache.set(key, String(text || '').toLowerCase());
+            } catch (e) {
+                bodyTextCache.set(key, '');
+            }
+        })).finally(() => {
+            bodyLoadPromise = null;
+        });
+
+        return bodyLoadPromise;
     }
 
     // Detail page search: search within rendered markdown content
@@ -640,8 +735,14 @@
         const tryRun = () => {
             const content = document.getElementById('markdown-content');
             if (content && content.children.length > 0) {
-                // highlight and scroll to first match
-                const matches = highlightQueryInElement(content, q);
+                // Open search panel, fill keyword, and execute detail search.
+                showPanel();
+                const input = document.getElementById('global-search-input');
+                if (input) input.value = q;
+                doSearch(q);
+
+                // Keep auto-jump to the first match unchanged.
+                const matches = Array.from(content.querySelectorAll('span.search-match'));
                 if (matches && matches.length > 0) {
                     matches[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }

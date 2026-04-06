@@ -6,6 +6,7 @@ const ROOT = path.resolve(process.cwd());
 const BLOGS_DIR = path.join(ROOT, 'blogs');
 const BACKGROUND_DIR = path.join(ROOT, 'assets', 'images', 'background');
 const OUTPUT_JSON = path.join(ROOT, 'data', 'blogs.json');
+const SERIES_JSON = path.join(ROOT, 'data', 'series.json');
 const ANNOUNCEMENTS_JSON = path.join(ROOT, 'data', 'announcements.json');
 const BACKGROUND_JSON = path.join(ROOT, 'data', 'background-images.json');
 const LEARNING_FIRST_TAGS = new Set(['二上', '二下']);
@@ -34,7 +35,10 @@ function normalizeTags(tags) {
 
 function normalizeDate(value, fallbackDate) {
     if (typeof value === 'string' && value.trim()) {
-        const d = new Date(value);
+        let d = new Date(value);
+        if (Number.isNaN(d.getTime()) && value.includes(' ')) {
+            d = new Date(value.replace(' ', 'T'));
+        }
         if (!Number.isNaN(d.getTime())) return d;
     }
     if (value instanceof Date && !Number.isNaN(value.getTime())) return value;
@@ -54,6 +58,24 @@ function resolveHomeCategoryByTags(tags) {
         return HOME_CATEGORY.LEARNING;
     }
     return HOME_CATEGORY.ENTERTAINMENT;
+}
+
+function normalizeSeries(value) {
+    if (typeof value === 'string' && value.trim()) {
+        return value.trim();
+    }
+
+    if (Array.isArray(value)) {
+        const firstValid = value.find(item => typeof item === 'string' && item.trim());
+        return firstValid ? firstValid.trim() : '';
+    }
+
+    if (value && typeof value === 'object') {
+        if (typeof value.title === 'string' && value.title.trim()) return value.title.trim();
+        if (typeof value.name === 'string' && value.name.trim()) return value.name.trim();
+    }
+
+    return '';
 }
 
 async function appendAnnouncementIfProvided() {
@@ -151,8 +173,39 @@ async function generateBackgroundImagesManifest() {
 }
 
 async function main() {
+    const runTime = new Date();
+    const runDateText = formatDateYYYYMMDD(runTime);
+
+    let previousManifestMtime = null;
+    try {
+        const manifestStat = await fs.stat(OUTPUT_JSON);
+        previousManifestMtime = manifestStat.mtime;
+    } catch (e) {
+        previousManifestMtime = null;
+    }
+
     await appendAnnouncementIfProvided();
     await generateBackgroundImagesManifest();
+
+    let existingBlogs = [];
+    try {
+        const existingRaw = await fs.readFile(OUTPUT_JSON, 'utf8');
+        const parsed = JSON.parse(existingRaw);
+        if (Array.isArray(parsed)) {
+            existingBlogs = parsed;
+        }
+    } catch (e) {
+        existingBlogs = [];
+    }
+
+    const existingBlogByContentFile = new Map();
+    existingBlogs.forEach(item => {
+        if (!item || typeof item !== 'object') return;
+        const key = typeof item.contentFile === 'string' ? item.contentFile.trim() : '';
+        if (key) {
+            existingBlogByContentFile.set(key, item);
+        }
+    });
 
     const mdFiles = await listMarkdownFiles(BLOGS_DIR);
     mdFiles.sort((a, b) => a.localeCompare(b, 'zh-CN'));
@@ -165,6 +218,7 @@ async function main() {
         const raw = await fs.readFile(filePath, 'utf8');
         const stat = await fs.stat(filePath);
         const fallbackDate = stat.mtime;
+        const existingBlog = existingBlogByContentFile.get(relFromRoot);
 
         const parsed = matter(raw);
         const data = parsed.data ?? {};
@@ -174,8 +228,22 @@ async function main() {
                 ? data.title.trim()
                 : path.basename(filePath, path.extname(filePath));
 
-        const dateObj = normalizeDate(data.date, fallbackDate);
+        const existingDate = (existingBlog && typeof existingBlog.date === 'string') ? existingBlog.date : '';
+        const fallbackPreservedDate = normalizeDate(existingDate, fallbackDate);
+        const dateObj = normalizeDate(data.date, fallbackPreservedDate);
         const date = formatDateYYYYMMDD(dateObj);
+
+        let lastEditedDate = null;
+
+        if (existingBlog) {
+            const modifiedSinceLastGenerate = previousManifestMtime
+                ? fallbackDate.getTime() > previousManifestMtime.getTime()
+                : false;
+
+            if (modifiedSinceLastGenerate) {
+                lastEditedDate = runDateText;
+            }
+        }
 
         const excerpt =
             (typeof data.excerpt === 'string' && data.excerpt.trim())
@@ -192,6 +260,7 @@ async function main() {
 
         // blog type comes from front-matter `type` if provided
         const type = (typeof data.type === 'string' && data.type.trim()) ? data.type.trim() : null;
+        const series = normalizeSeries(data.series);
 
         // support recommended flag in front-matter: accept either 'recommended' or Chinese '推荐'
         const recommended = Boolean(data.recommended) || Boolean(data['推荐']);
@@ -201,7 +270,7 @@ async function main() {
         while (seenIds.has(id)) id++;
         seenIds.add(id);
 
-        blogs.push({
+        const blogItem = {
             id,
             title,
             excerpt,
@@ -210,9 +279,16 @@ async function main() {
             tags,
             category,
             type,
+            series: series || null,
             contentFile: relFromRoot,
             recommended
-        });
+        };
+
+        if (lastEditedDate) {
+            blogItem.lastEditedDate = lastEditedDate;
+        }
+
+        blogs.push(blogItem);
     }
 
     // Default ordering: newest first
@@ -221,7 +297,46 @@ async function main() {
     await fs.mkdir(path.dirname(OUTPUT_JSON), { recursive: true });
     await fs.writeFile(OUTPUT_JSON, JSON.stringify(blogs, null, 4) + '\n', 'utf8');
 
+    const seriesMap = new Map();
+    for (const blog of blogs) {
+        const seriesName = (typeof blog.series === 'string') ? blog.series.trim() : '';
+        if (!seriesName) continue;
+
+        if (!seriesMap.has(seriesName)) {
+            seriesMap.set(seriesName, []);
+        }
+        seriesMap.get(seriesName).push(blog);
+    }
+
+    const seriesList = Array.from(seriesMap.entries())
+        .map(([name, posts]) => {
+            const sortedPosts = posts
+                .slice()
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            return {
+                id: stableIdFromString(`series:${name}`),
+                title: name,
+                coverImage: 'assets/images/background/bg2.png',
+                count: sortedPosts.length,
+                posts: sortedPosts.map(post => ({
+                    id: post.id,
+                    title: post.title,
+                    date: post.date,
+                    contentFile: post.contentFile
+                }))
+            };
+        })
+        .sort((a, b) => {
+            if (b.count !== a.count) return b.count - a.count;
+            return a.title.localeCompare(b.title, 'zh-CN');
+        });
+
+    await fs.mkdir(path.dirname(SERIES_JSON), { recursive: true });
+    await fs.writeFile(SERIES_JSON, JSON.stringify(seriesList, null, 4) + '\n', 'utf8');
+
     console.log(`[generate] Wrote ${blogs.length} posts -> ${toPosix(path.relative(ROOT, OUTPUT_JSON))}`);
+    console.log(`[generate] Wrote ${seriesList.length} series -> ${toPosix(path.relative(ROOT, SERIES_JSON))}`);
 }
 
 main().catch(err => {

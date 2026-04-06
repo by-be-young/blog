@@ -3,6 +3,7 @@ title: Cache
 date: 2025-12-18
 excerpt: Cache的基本概念、工作原理及映射机制
 type: 轻松笔记
+series: 计组理论
 ---
 
 Cache就是我们所说的缓存，也称高速缓存。 

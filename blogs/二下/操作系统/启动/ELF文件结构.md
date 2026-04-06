@@ -55,6 +55,19 @@ ELF 头的内容其实可以看作一个结构体，对应的字段位置存放�
 | `p_flags`  | 段属性（可读、可写、可执行）。                                                                                     |
 | `p_align`  | 段的对齐方式（必须是 2 的幂）。我们一般不用关注这个。                                                                        |
 
+[task]
+[question]
+使用 readelf 工具解析可执行文件时，段信息中会展示 MemSiz 和 FileSiz。关于这两者的关系，下列说法正确的是（）?
+[\question]
+[options]A MemSiz 永远小于 FileSiz，因为文件加载到内存会被压缩[\options]
+[options]B MemSiz 永远大于等于 FileSiz，当文件中未初始化的全局变量需要在内存中分配并填 0 时，MemSiz 会大于 FileSiz[\options]
+[options]C MemSiz 与 FileSiz 始终完全相等，这保证了代码的完整性[\options]
+[options]D FileSiz 代表虚拟地址大小，MemSiz 代表物理地址大小[\options]
+[answer]B[\answer]
+[analysis]
+MemSiz 表示段在内存中的实际大小，FileSiz 表示段在 ELF 文件中占用的空间大小。对于 .bss 段（未初始化的全局变量和静态变量），文件中不占用实际空间（FileSiz 为 0），但加载到内存时需要分配空间并填 0，因此 MemSiz 大于 FileSiz。对于其他段（如 .text、.data），两者通常相等。所以 MemSiz 永远大于等于 FileSiz。[\analysis]
+[\task]
+
 ## 节头表
 
 描述文件中各个节（如 .text, .data, .bss）的位置、大小、属性（**用于链接**）。
@@ -73,6 +86,23 @@ ELF 头的内容其实可以看作一个结构体，对应的字段位置存放�
 | `sh_addralign`        | 节的对齐要求。我们一般不用关注这个。                                                        |
 | `sh_entsize`          | 表中每一项的大小（如符号表项固定大小）。                                                      |
 
+[task]
+[question]
+ELF 文件包含了程序相关的所有必要信息。其中，主要包含程序中各个节（section）的信息，且在程序编译和链接时必须使用的是以下哪一部分（）?
+[\question]
+[options]A ELF 头[\options]
+[options]B 段头表（program header table）[\options]
+[options]C 节头表（section header table）[\options]
+[options]D 魔数（Magic number）[\options]
+[answer]C[\answer]
+[analysis]
+节头表（section header table）记录了 ELF 文件中各个节的名称、类型、大小、偏移量等关键信息，在编译和链接过程中用于组织和管理代码、数据、符号表等不同节的内容。
+
+链接器需要依赖节头表来合并多个目标文件的节，解析符号引用并生成最终的可执行文件。
+
+而 ELF 头（A）描述文件整体结构，段头表（B）用于运行时加载，魔数（D）仅用于标识文件格式，都不是编译链接时用于获取节信息的主要部分。[\analysis]
+[\task]
+
 ## 段与节
 
 根据 ELF 头找到段头表与节头表，然后找到各个段和节。
@@ -90,6 +120,10 @@ ELF 头的内容其实可以看作一个结构体，对应的字段位置存放�
 **不是所有的节都位于段中**。比如，`.shstrtab` 记录的是所有的节的名字，不参与运行，因此不位于段中。
 
 # Linker Script
+
+## 链接的本质
+
+链接就是要把多个文件中的相同的节合并同类项为一个节。
 
 ## 作用
 
@@ -133,6 +167,19 @@ SECTIONS
 ```
 
 其中，`.` 表示当前的地址。设置地址之后，下一个节就会从这里开始。注意，这个值会自动变化，比如，在 `.text : { *(.text) }` 的下一行获取 `.` 的值时，值会变成 `0x400000 + .text节的大小`。
+
+[task]
+[question]
+在指导链接器将多个目标文件链接成可执行文件的 Linker Script 中，符号 `.` 代表什么（）?
+[\question]
+[options]A 这是一个通配符，匹配所有的相应的节[\options]
+[options]B 这是一个特殊符号，用来做定位计数器，通过设置它可以设置接下来的节的起始地址[\options]
+[options]C 代表当前文件所在的宿主根目录[\options]
+[options]D 表示链接脚本文件在此处解析结束[\options]
+[answer]B[\answer]
+[analysis]
+在链接脚本（Linker Script）中，符号 `.` 被称为位置计数器（location counter）或定位计数器。它表示当前正在输出的节（section）在虚拟地址空间中的当前位置。通过对 `.` 进行赋值（例如 `. = 0x80020000;`），可以设置后续节或输出段的起始地址。链接器在处理每个输出节时，会根据输入节的大小自动更新 `.` 的值，确保各个节在内存中连续排列。[\analysis]
+[\task]
 
 ### 对于操作系统内核
 

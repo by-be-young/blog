@@ -8,6 +8,25 @@ const HOME_CATEGORY_RULES = {
     entertainmentKey: 'home_category_entertainment'
 };
 
+const SMOOTH_NAV_DURATION_MS = 260;
+let smoothNavNavigating = false;
+
+const MACARON_RIPPLE_COLORS = ['#ffb6c9', '#ffd2a6', '#a7f3d0', '#9ad7ff', '#c7b6ff', '#b8f2e6'];
+let rippleLayerEl = null;
+
+const WELCOME_TYPING_BASE_DELAY_MS = 120;
+const WELCOME_TYPING_PUNCTUATION_DELAY_MS = 260;
+const WELCOME_TYPING_NEWLINE_DELAY_MS = 320;
+const WELCOME_TYPING_START_DELAY_MS = 180;
+
+const welcomeTypewriterState = {
+    timerId: null,
+    runId: 0,
+    isTyping: false,
+    currentText: '',
+    fullText: ''
+};
+
 function escapeHtml(s) {
     return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 }
@@ -134,18 +153,154 @@ function enforceHomeLinksOpenInNewTab(scope) {
         root.querySelectorAll('a[href]').forEach(link => {
             const href = (link.getAttribute('href') || '').trim();
             if (!href || href === '#' || /^javascript:/i.test(href)) return;
-            link.setAttribute('target', '_blank');
+            // 首页进入站内页面一律同标签打开；外链保持原有行为
+            let isInternal = false;
+            try {
+                const u = new URL(href, window.location.href);
+                isInternal = u.origin === window.location.origin;
+            } catch (e) {
+                isInternal = false;
+            }
+            if (isInternal) {
+                link.removeAttribute('target');
+            }
+        });
+    } catch (e) { }
+}
 
-            const rel = (link.getAttribute('rel') || '').split(/\s+/).filter(Boolean);
-            if (!rel.includes('noopener')) rel.push('noopener');
-            if (!rel.includes('noreferrer')) rel.push('noreferrer');
-            link.setAttribute('rel', rel.join(' ').trim());
+function isSmoothNavTargetUrl(url) {
+    try {
+        if (!url || url.origin !== window.location.origin) return false;
+        const current = new URL(window.location.href);
+        // 同页锚点滚动不拦截，保持原生滚动行为
+        if (url.pathname === current.pathname && url.search === current.search) return false;
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+function isModifiedClick(event) {
+    return event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
+}
+
+function navigateWithTransition(href) {
+    try {
+        const url = new URL(href, window.location.href);
+        if (!isSmoothNavTargetUrl(url)) {
+            window.location.href = url.href;
+            return;
+        }
+        if (smoothNavNavigating) return;
+        smoothNavNavigating = true;
+        document.body.classList.add('page-transition-leaving');
+        window.setTimeout(() => {
+            window.location.href = url.href;
+        }, SMOOTH_NAV_DURATION_MS);
+    } catch (e) {
+        window.location.href = href;
+    }
+}
+
+function ensureRippleLayer() {
+    if (rippleLayerEl && rippleLayerEl.isConnected) return rippleLayerEl;
+    const layer = document.createElement('div');
+    layer.className = 'click-ripple-layer';
+    layer.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(layer);
+    rippleLayerEl = layer;
+    return layer;
+}
+
+function pickRippleColor() {
+    return MACARON_RIPPLE_COLORS[Math.floor(Math.random() * MACARON_RIPPLE_COLORS.length)];
+}
+
+function spawnMacaronRipple(clientX, clientY) {
+    const layer = ensureRippleLayer();
+    if (!layer) return;
+
+    const sizeSeed = Math.max(26, Math.min(window.innerWidth, window.innerHeight) * 0.05);
+    const size = Math.round(sizeSeed * (0.82 + Math.random() * 0.20));
+    const ripple = document.createElement('span');
+    ripple.className = 'click-ripple';
+    ripple.style.left = `${clientX}px`;
+    ripple.style.top = `${clientY}px`;
+    ripple.style.width = `${size}px`;
+    ripple.style.height = `${size}px`;
+    ripple.style.setProperty('--ripple-color', pickRippleColor());
+    ripple.style.setProperty('--ripple-duration', `${Math.round(500 + Math.random() * 140)}ms`);
+
+    layer.appendChild(ripple);
+    ripple.addEventListener('animationend', () => {
+        ripple.remove();
+    }, { once: true });
+
+    // 兜底清理，防止极端情况下动画事件未触发导致节点堆积。
+    window.setTimeout(() => {
+        if (ripple.isConnected) ripple.remove();
+    }, 1200);
+}
+
+function initMacaronClickRipple() {
+    if (window.__macaronRippleBound) return;
+    window.__macaronRippleBound = true;
+
+    const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reducedMotion) return;
+
+    document.addEventListener('pointerdown', (event) => {
+        if (!event || !Number.isFinite(event.clientX) || !Number.isFinite(event.clientY)) return;
+        if (event.button !== undefined && event.button !== 0 && event.pointerType !== 'touch') return;
+        spawnMacaronRipple(event.clientX, event.clientY);
+    }, { passive: true });
+}
+
+function initSmoothPageTransition() {
+    try {
+        const body = document.body;
+        if (!body) return;
+        window.navigateWithTransition = navigateWithTransition;
+        const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReduced) return;
+
+        body.classList.add('page-transition-enter');
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                body.classList.add('page-transition-ready');
+            });
+        });
+
+        document.addEventListener('click', (e) => {
+            const anchor = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+            if (!anchor) return;
+            if (isModifiedClick(e)) return;
+            if (anchor.hasAttribute('download')) return;
+            const target = String(anchor.getAttribute('target') || '').toLowerCase();
+            if (target && target !== '_self') return;
+
+            const href = String(anchor.getAttribute('href') || '').trim();
+            if (!href || href === '#' || /^(javascript:|mailto:|tel:|data:|blob:)/i.test(href)) return;
+
+            const url = new URL(href, window.location.href);
+            if (!isSmoothNavTargetUrl(url)) return;
+
+            e.preventDefault();
+            navigateWithTransition(url.href);
+        }, true);
+
+        window.addEventListener('pageshow', () => {
+            body.classList.remove('page-transition-leaving');
+            smoothNavNavigating = false;
         });
     } catch (e) { }
 }
 
 // DOM加载完成后执行
 document.addEventListener('DOMContentLoaded', function () {
+    initSmoothPageTransition();
+    initMacaronClickRipple();
+
     // 在选定页面隐藏滚动条，同时保持内容可滚动
     try {
         var b = document.body;
@@ -192,8 +347,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // 初始化个人联系方式交互
     try { initProfileContacts && initProfileContacts(); } catch (e) { }
 
-    // 适配欢迎语换行（小屏时将空格替换为换行）
-    try { adaptWelcomeText && adaptWelcomeText(); } catch (e) { }
+    // 首页欢迎语：初始化打字机效果，并保持小屏换行适配。
+    try { startWelcomeTypewriter && startWelcomeTypewriter(); } catch (e) { }
     window.addEventListener('resize', throttle(function () { try { adaptWelcomeText && adaptWelcomeText(); } catch (e) { } }, 150));
 
     // 使整个个人资料卡片可点击（导航到关于页面），但忽略内部交互元素（链接、按钮）的点击
@@ -203,8 +358,11 @@ document.addEventListener('DOMContentLoaded', function () {
             profileCard.style.cursor = 'pointer';
             profileCard.addEventListener('click', function (e) {
                 if (e.target.closest('a, button, input, .contact-btn')) return;
-                const w = window.open('about.html', '_blank', 'noopener,noreferrer');
-                try { if (w) w.opener = null; } catch (err) { }
+                if (typeof window.navigateWithTransition === 'function') {
+                    window.navigateWithTransition('about.html');
+                } else {
+                    window.location.href = 'about.html';
+                }
             });
         }
     } catch (e) { }
@@ -212,7 +370,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function renderAnnouncementBanner() {
     const host = document.getElementById('announcementModalContent');
+    const announcementFab = document.getElementById('announcementFab');
     if (!host) return;
+
+    function parseYmdAsLocalDate(value) {
+        if (typeof value !== 'string') return null;
+        const m = value.trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+        if (!m) return null;
+        const y = Number(m[1]);
+        const mon = Number(m[2]);
+        const d = Number(m[3]);
+        if (!Number.isFinite(y) || !Number.isFinite(mon) || !Number.isFinite(d)) return null;
+        const date = new Date(y, mon - 1, d);
+        if (date.getFullYear() !== y || date.getMonth() !== mon - 1 || date.getDate() !== d) return null;
+        return date;
+    }
+
+    function isRecentAnnouncementDate(dateValue, maxDiffDays) {
+        const target = parseYmdAsLocalDate(dateValue) || new Date(dateValue);
+        if (!(target instanceof Date) || Number.isNaN(target.getTime())) return false;
+
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const targetDay = new Date(target.getFullYear(), target.getMonth(), target.getDate());
+        const diffDays = Math.abs(Math.round((today.getTime() - targetDay.getTime()) / 86400000));
+        return diffDays <= maxDiffDays;
+    }
 
     function renderAnnouncementMessageHtml(msg) {
         const lines = String(msg || '').split(/\r?\n/);
@@ -242,13 +425,20 @@ function renderAnnouncementBanner() {
                 return ib - ia;
             });
             const latest = arr[0];
-            if (!latest || !latest.message) return;
+            if (!latest || !latest.message) {
+                if (announcementFab) announcementFab.classList.remove('announcement-fab--recent-attention');
+                return;
+            }
             const messageHtml = renderAnnouncementMessageHtml(latest.message);
+            const isRecent = isRecentAnnouncementDate(latest.date, 3);
+            if (announcementFab) {
+                announcementFab.classList.toggle('announcement-fab--recent-attention', isRecent);
+            }
 
             const dateText = (typeof window.formatDate === 'function') ? window.formatDate(latest.date) : (latest.date || '');
 
             host.innerHTML = `
-                <div class="announcement-banner announcement-banner--modal is-visible">
+                <div class="announcement-banner announcement-banner--modal is-visible${isRecent ? ' announcement-banner--recent' : ''}">
                 <div class="announcement-left">
                     <div style="display:flex;align-items:center;gap:12px;">
                         <div class="announcement-icon" aria-hidden="true"><i class="fas fa-bullhorn"></i></div>
@@ -285,6 +475,7 @@ function renderAnnouncementBanner() {
             } catch (e) { }
         })
         .catch(() => {
+            if (announcementFab) announcementFab.classList.remove('announcement-fab--recent-attention');
             // 出错时不显示横幅
         });
 
@@ -315,6 +506,17 @@ function initAnnouncementModal() {
             return performance && performance.navigation && performance.navigation.type === 1;
         } catch (e) { }
         return false;
+    }
+
+    function isFromSameSitePage() {
+        try {
+            const ref = document.referrer;
+            if (!ref) return false;
+            const refUrl = new URL(ref, window.location.href);
+            return refUrl.origin === window.location.origin;
+        } catch (e) {
+            return false;
+        }
     }
 
     function scheduleAutoScrollForCurrentOpen() {
@@ -378,17 +580,18 @@ function initAnnouncementModal() {
         }
     });
 
-    // 首次进入首页自动弹一次：刷新后不再弹；离开页面后清除记录。
+    // 首次进入首页自动弹一次：若来自站内页面则不自动弹；刷新后不再弹；离开页面后清除记录。
     try {
         const carriedFromUnload = sessionStorage.getItem(reloadCarryKey) === '1';
         const isReload = isReloadNavigation();
+        const fromSameSite = isFromSameSitePage();
 
         if (carriedFromUnload && isReload) {
             localStorage.setItem(noticeShownKey, '1');
         }
 
         const alreadyShown = localStorage.getItem(noticeShownKey) === '1';
-        if (!alreadyShown) {
+        if (!alreadyShown && !fromSameSite) {
             localStorage.setItem(noticeShownKey, '1');
             setTimeout(openModal, 0);
         }
@@ -425,9 +628,38 @@ function initSettingsModal() {
     // 标记是否已发生用户交互（用于防止页面加载时的自动触发）
     let userInteracted = false;
 
+    function isNavigationIntentEvent(event) {
+        try {
+            if (!event) return false;
+            if (event.defaultPrevented) return true;
+            if (smoothNavNavigating) return true;
+
+            const targetEl = event.target && event.target.closest ? event.target.closest('a[href], button, [role="button"]') : null;
+            if (!targetEl) return false;
+
+            if (targetEl.matches('a[href]')) {
+                const href = String(targetEl.getAttribute('href') || '').trim();
+                // 排除不发生页面跳转的空锚点/脚本链接
+                return !!href && href !== '#' && !/^javascript:/i.test(href);
+            }
+
+            // 首页存在若干由 JS 绑定跳转的可点击区域，点击这些区域时不应触发音乐
+            if (targetEl.matches('#viewMoreBtn, #home-profile-card')) return true;
+            if (targetEl.closest && targetEl.closest('.blog-card, .recent-item')) return true;
+
+            return false;
+        } catch (e) {
+            return false;
+        }
+    }
+
     // 点击页面任意位置启用音乐
     function enableMusic(event) {
         console.log('事件触发:', event.type, 'musicEnabled:', window.musicEnabled);
+
+        if (isNavigationIntentEvent(event)) {
+            return;
+        }
 
         if (!window.musicEnabled) {
             if (!hasSelectedTrack()) {
@@ -920,12 +1152,13 @@ function stopAnnouncementAutoScroll(bannerEl) {
 
 // 初始化个人联系方式交互（显示/隐藏微信与QQ）
 function initProfileContacts() {
-    const wechatBtn = document.getElementById('wechat-btn');
-    const qqBtn = document.getElementById('qq-btn');
+    const wechatBtn = document.getElementById('wechat-btn') || document.getElementById('wechat-btn--about');
+    const qqBtn = document.getElementById('qq-btn') || document.getElementById('qq-btn--about');
     const popup = document.getElementById('contact-popup');
-    const wechatSpan = document.getElementById('contact-wechat');
-    const qqSpan = document.getElementById('contact-qq');
+    const wechatSpan = document.getElementById('contact-wechat') || document.getElementById('contact-wechat--about');
+    const qqSpan = document.getElementById('contact-qq') || document.getElementById('contact-qq--about');
     const githubLink = document.getElementById('github-link');
+    let toastTimer = null;
 
     if (githubLink) {
         githubLink.href = 'https://github.com/by-be-young';
@@ -970,6 +1203,93 @@ function initProfileContacts() {
         lastTrigger = null;
     }
 
+    function getI18nText(key, fallback) {
+        try {
+            const i18n = window.siteI18n;
+            if (!i18n || typeof i18n.getLang !== 'function' || !i18n.translations) return fallback;
+            const lang = i18n.getLang();
+            const map = i18n.translations[lang] || i18n.translations.zh || {};
+            return (map && map[key]) || fallback;
+        } catch (e) {
+            return fallback;
+        }
+    }
+
+    function getCopyToast() {
+        let toast = document.getElementById('contact-copy-toast');
+        if (toast) return toast;
+        toast = document.createElement('div');
+        toast.id = 'contact-copy-toast';
+        toast.className = 'contact-copy-toast';
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
+        document.body.appendChild(toast);
+        return toast;
+    }
+
+    function showCopyToast(message, isError) {
+        const toast = getCopyToast();
+        toast.textContent = message;
+        toast.classList.toggle('is-error', !!isError);
+        toast.classList.add('show');
+
+        if (toastTimer) {
+            clearTimeout(toastTimer);
+            toastTimer = null;
+        }
+
+        toastTimer = setTimeout(() => {
+            toast.classList.remove('show');
+            toastTimer = null;
+        }, 1800);
+    }
+
+    async function copyToClipboard(text) {
+        const value = String(text || '').trim();
+        if (!value) return false;
+
+        try {
+            if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+                await navigator.clipboard.writeText(value);
+                return true;
+            }
+        } catch (e) {
+            // fallback below
+        }
+
+        try {
+            const textarea = document.createElement('textarea');
+            textarea.value = value;
+            textarea.setAttribute('readonly', 'readonly');
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            textarea.style.pointerEvents = 'none';
+            document.body.appendChild(textarea);
+            textarea.select();
+            const ok = document.execCommand('copy');
+            textarea.remove();
+            return !!ok;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function copyContactNumber(kind, value) {
+        const number = String(value || '').trim();
+        if (!number) return;
+
+        const label = kind === 'wechat'
+            ? getI18nText('contact_wechat', '微信')
+            : getI18nText('contact_qq', 'QQ');
+        const copied = getI18nText('image_copied', '已复制');
+        const failed = getI18nText('image_copy_failed', '复制失败');
+
+        copyToClipboard(number).then(ok => {
+            if (ok) showCopyToast(`${label} ${copied}`);
+            else showCopyToast(`${label} ${failed}`, true);
+        });
+    }
+
     function showPopupFor(triggerBtn, text) {
         if (!triggerBtn) return;
         if (popup.classList.contains('show') && lastTrigger === triggerBtn) {
@@ -1005,14 +1325,18 @@ function initProfileContacts() {
     if (wechatBtn) {
         wechatBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            showPopupFor(wechatBtn, (wechatSpan ? wechatSpan.textContent : '') || '');
+            const value = (wechatSpan ? wechatSpan.textContent : '') || '';
+            showPopupFor(wechatBtn, value);
+            copyContactNumber('wechat', value);
         });
     }
 
     if (qqBtn) {
         qqBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            showPopupFor(qqBtn, (qqSpan ? qqSpan.textContent : '') || '');
+            const value = (qqSpan ? qqSpan.textContent : '') || '';
+            showPopupFor(qqBtn, value);
+            copyContactNumber('qq', value);
         });
     }
 }
@@ -1096,8 +1420,11 @@ function initViewMore(totalCount, shownCount) {
     window.addEventListener('resize', throttle(alignWidthToRecentCard, 150));
 
     btn.addEventListener('click', () => {
-        const w = window.open('archive.html', '_blank', 'noopener,noreferrer');
-        try { if (w) w.opener = null; } catch (e) { }
+        if (typeof window.navigateWithTransition === 'function') {
+            window.navigateWithTransition('archive.html');
+        } else {
+            window.location.href = 'archive.html';
+        }
     });
 }
 
@@ -1113,6 +1440,93 @@ function throttle(fn, wait) {
     };
 }
 
+function normalizeWelcomeTextFromHtml(html) {
+    const withNewlines = String(html || '').replace(/<br\s*\/?>/gi, '\n');
+    const tmp = document.createElement('div');
+    tmp.innerHTML = withNewlines;
+    return (tmp.textContent || tmp.innerText || '').replace(/\r/g, '');
+}
+
+function formatWelcomeHtmlForViewport(text, isSmallScreen) {
+    const normalized = String(text || '');
+    if (isSmallScreen) {
+        const lines = normalized.split('\n');
+        const processed = lines.map(line => {
+            const collapsed = line.replace(/\s+/g, ' ').trim();
+            return collapsed.replace(/ /g, '<br>');
+        }).join('<br>');
+        return processed.replace(/^(?:<br>)+|(?:<br>)+$/g, '');
+    }
+    return normalized.replace(/\n/g, '<br>');
+}
+
+function renderWelcomeText(el, text) {
+    if (!el) return;
+    const html = formatWelcomeHtmlForViewport(text, window.innerWidth <= 720);
+    el.innerHTML = html;
+}
+
+function stopWelcomeTypewriter() {
+    welcomeTypewriterState.runId += 1;
+    welcomeTypewriterState.isTyping = false;
+    if (welcomeTypewriterState.timerId) {
+        clearTimeout(welcomeTypewriterState.timerId);
+        welcomeTypewriterState.timerId = null;
+    }
+}
+
+function getWelcomeTypingDelay(ch) {
+    if (ch === '\n') return WELCOME_TYPING_NEWLINE_DELAY_MS;
+    if (/[,，.。!！?？;；:：]/.test(ch)) return WELCOME_TYPING_PUNCTUATION_DELAY_MS;
+    return WELCOME_TYPING_BASE_DELAY_MS;
+}
+
+function startWelcomeTypewriter() {
+    try {
+        if (!document.body || !document.body.classList.contains('home')) return;
+        const el = document.querySelector('.welcome-text');
+        if (!el) return;
+
+        if (!el.dataset.originalHtml) el.dataset.originalHtml = el.innerHTML;
+        const sourceText = normalizeWelcomeTextFromHtml(el.dataset.originalHtml || el.innerHTML);
+        el.dataset.originalText = sourceText;
+
+        stopWelcomeTypewriter();
+        welcomeTypewriterState.fullText = sourceText;
+
+        const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reducedMotion || !sourceText) {
+            welcomeTypewriterState.currentText = sourceText;
+            renderWelcomeText(el, sourceText);
+            return;
+        }
+
+        const runId = welcomeTypewriterState.runId;
+        let index = 0;
+        welcomeTypewriterState.isTyping = true;
+        welcomeTypewriterState.currentText = '';
+        renderWelcomeText(el, '');
+
+        const tick = () => {
+            if (runId !== welcomeTypewriterState.runId) return;
+            index += 1;
+            const nextText = sourceText.slice(0, index);
+            welcomeTypewriterState.currentText = nextText;
+            renderWelcomeText(el, nextText);
+
+            if (index < sourceText.length) {
+                const nextChar = sourceText.charAt(index - 1);
+                welcomeTypewriterState.timerId = setTimeout(tick, getWelcomeTypingDelay(nextChar));
+            } else {
+                welcomeTypewriterState.isTyping = false;
+                welcomeTypewriterState.timerId = null;
+            }
+        };
+
+        welcomeTypewriterState.timerId = setTimeout(tick, WELCOME_TYPING_START_DELAY_MS);
+    } catch (e) { /* ignore */ }
+}
+
 // 在小屏时将欢迎语中的空格替换为换行；恢复时还原原始内容
 function adaptWelcomeText() {
     try {
@@ -1120,25 +1534,13 @@ function adaptWelcomeText() {
         if (!el) return;
         if (!el.dataset.originalHtml) el.dataset.originalHtml = el.innerHTML;
         if (!el.dataset.originalText) {
-            const html = el.dataset.originalHtml || '';
-            const withNewlines = html.replace(/<br\s*\/?\>/gi, '\n');
-            const tmp = document.createElement('div');
-            tmp.innerHTML = withNewlines;
-            el.dataset.originalText = (tmp.textContent || tmp.innerText || '').replace(/\r/g, '');
+            el.dataset.originalText = normalizeWelcomeTextFromHtml(el.dataset.originalHtml || '');
         }
 
-        const originalHtml = el.dataset.originalHtml;
-        const originalText = el.dataset.originalText;
-        const small = window.innerWidth <= 720;
-        if (small) {
-            const lines = (originalText || '').split('\n');
-            const processed = lines.map(line => {
-                const collapsed = line.replace(/\s+/g, ' ').trim();
-                return collapsed.replace(/ /g, '<br>');
-            }).join('<br>');
-            el.innerHTML = (processed && processed.replace(/^(?:<br>)+|(?:<br>)+$/g, '').length) ? processed : originalHtml;
+        if (welcomeTypewriterState.isTyping) {
+            renderWelcomeText(el, welcomeTypewriterState.currentText || '');
         } else {
-            el.innerHTML = originalHtml;
+            renderWelcomeText(el, el.dataset.originalText || '');
         }
     } catch (e) { /* ignore errors */ }
 }
@@ -1218,8 +1620,12 @@ function createRecentUpdatesCard(allBlogs) {
                 for (let i = 0; i <= level; i++) selectedTags[i] = path[i] || null;
                 for (let i = level + 1; i < 3; i++) selectedTags[i] = null;
                 const tagsParam = JSON.stringify(selectedTags);
-                const w = window.open(`categories.html?tags=${encodeURIComponent(tagsParam)}`, '_blank', 'noopener,noreferrer');
-                try { if (w) w.opener = null; } catch (err) { }
+                const nextUrl = `categories.html?tags=${encodeURIComponent(tagsParam)}`;
+                if (typeof window.navigateWithTransition === 'function') {
+                    window.navigateWithTransition(nextUrl);
+                } else {
+                    window.location.href = nextUrl;
+                }
             }
             return;
         }
@@ -1229,8 +1635,11 @@ function createRecentUpdatesCard(allBlogs) {
         const id = el.getAttribute('data-id');
         if (id) {
             const url = `blog-detail.html?id=${id}`;
-            const w = window.open(url, '_blank', 'noopener,noreferrer');
-            try { if (w) w.opener = null; } catch (err) { }
+            if (typeof window.navigateWithTransition === 'function') {
+                window.navigateWithTransition(url);
+            } else {
+                window.location.href = url;
+            }
         }
     });
 
@@ -1272,15 +1681,22 @@ function createBlogCard(blog) {
             for (let i = level + 1; i < 3; i++) selectedTags[i] = null;
 
             const tagsParam = JSON.stringify(selectedTags);
-            const w = window.open(`categories.html?tags=${encodeURIComponent(tagsParam)}`, '_blank', 'noopener,noreferrer');
-            try { if (w) w.opener = null; } catch (err) { }
+            const nextUrl = `categories.html?tags=${encodeURIComponent(tagsParam)}`;
+            if (typeof window.navigateWithTransition === 'function') {
+                window.navigateWithTransition(nextUrl);
+            } else {
+                window.location.href = nextUrl;
+            }
         });
     });
 
     card.addEventListener('click', () => {
         const url = `blog-detail.html?id=${blog.id}`;
-        const w = window.open(url, '_blank', 'noopener,noreferrer');
-        try { if (w) w.opener = null; } catch (e) { /* ignore */ }
+        if (typeof window.navigateWithTransition === 'function') {
+            window.navigateWithTransition(url);
+        } else {
+            window.location.href = url;
+        }
     });
 
     return card;
@@ -1338,13 +1754,9 @@ document.addEventListener('site:languageChanged', function (e) {
         const el = document.querySelector('.welcome-text');
         if (!el) return;
         el.dataset.originalHtml = el.innerHTML;
-        // 将 HTML 中的 <br> 转为 \n，再取纯文本以保留换行
-        const withNewlines = (el.dataset.originalHtml || '').replace(/<br\s*\/?\>/gi, '\n');
-        const tmp = document.createElement('div');
-        tmp.innerHTML = withNewlines;
-        el.dataset.originalText = (tmp.textContent || tmp.innerText || '').replace(/\r/g, '');
-        // 立即重新应用适配（以维持当前窗口宽度下的换行规则）
-        try { adaptWelcomeText && adaptWelcomeText(); } catch (err) { }
+        el.dataset.originalText = normalizeWelcomeTextFromHtml(el.dataset.originalHtml || '');
+        // 语言切换后重新执行打字机，以展示新文案。
+        try { startWelcomeTypewriter && startWelcomeTypewriter(); } catch (err) { }
     } catch (e) { /* ignore */ }
 });
 

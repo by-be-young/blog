@@ -4,6 +4,9 @@ let allBlogsData = [];
 let selectedTags = [];
 let selectedTypeFilter = 'all';
 
+const DESKTOP_ENTRANCE_BREAKPOINT = 948;
+const BLOG_ITEM_STAGGER_MS = 72;
+
 function escapeHtml(s) {
     return String(s).replace(/[&<>\"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 }
@@ -638,13 +641,22 @@ function renderBlogList() {
         if (!selectedTags[i]) continue;
         filtered = filtered.filter(blog => blog.tags[i] === selectedTags[i]);
     }
-    filtered.forEach(blog => {
+    const shouldAnimateEntrance = (() => {
+        const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        return window.innerWidth > DESKTOP_ENTRANCE_BREAKPOINT && !reducedMotion;
+    })();
+
+    filtered.forEach((blog, index) => {
         const item = document.createElement('div');
         item.className = 'blog-item';
+        if (shouldAnimateEntrance) {
+            item.classList.add('blog-item-enter');
+            item.style.setProperty('--enter-delay', `${index * BLOG_ITEM_STAGGER_MS}ms`);
+        }
         // render left (title/excerpt) and right (tags)
         const tagsHtml = Array.isArray(blog.tags) ? blog.tags.map((t, i) => `<span class="blog-tag" data-level="${i}" data-path="${encodeURIComponent(JSON.stringify(blog.tags))}">${t}</span>`).join('') : '';
         item.innerHTML = `
-            <a class="blog-link" href="blog-detail.html?id=${blog.id}" target="_blank" rel="noopener noreferrer">
+            <a class="blog-link" href="blog-detail.html?id=${blog.id}">
                 <div class="blog-left">
                     <div class="blog-title">
                         <span class="title-text">${escapeHtml(blog.title)}</span>

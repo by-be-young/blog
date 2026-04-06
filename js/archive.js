@@ -26,6 +26,9 @@ function heat(count, max) {
   return 0.18 + ratio * 0.72;
 }
 
+const ARCHIVE_DESKTOP_ANIMATION_BREAKPOINT = 900;
+const ARCHIVE_ITEM_STAGGER_MS = 120;
+
 function getArchiveHomeCategoryKey(blog) {
   if (typeof getHomeCategoryKey === 'function') {
     return getHomeCategoryKey(blog);
@@ -121,6 +124,44 @@ function renderTimeline(blogs) {
   if (!timeline) return;
   timeline.innerHTML = '';
 
+  function getSeparatorText(date, level) {
+    const d = date instanceof Date ? date : new Date(date);
+    if (Number.isNaN(d.getTime())) return '';
+    const lang = (window.siteI18n && typeof window.siteI18n.getLang === 'function') ? window.siteI18n.getLang() : 'zh';
+    if (level === 'year') {
+      if (lang === 'en') return `${d.getFullYear()}`;
+      if (lang === 'ja') return `${d.getFullYear()}年`;
+      return `${d.getFullYear()}年`;
+    }
+
+    if (lang === 'en') {
+      try {
+        return new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long' }).format(d);
+      } catch (e) {
+        return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}`;
+      }
+    }
+
+    const month = pad2(d.getMonth() + 1);
+    return `${d.getFullYear()}年 ${month}月`;
+  }
+
+  function appendSeparator(date, level) {
+    const text = getSeparatorText(date, level);
+    if (!text) return;
+
+    const item = document.createElement('div');
+    item.className = `timeline-item timeline-separator timeline-separator-${level}`;
+    item.innerHTML = `
+      <div class="timeline-separator-content" aria-hidden="true">
+        <span class="timeline-separator-pattern">✦ ✦ ✦</span>
+        <span class="timeline-separator-label">${text}</span>
+        <span class="timeline-separator-pattern">✦ ✦ ✦</span>
+      </div>
+    `;
+    timeline.appendChild(item);
+  }
+
   // 在时间轴顶部插入一个标题性文字节点，位于第一张卡片上方，居中对齐且无背景
   const headerItem = document.createElement('div');
   headerItem.className = 'timeline-item timeline-header';
@@ -134,15 +175,41 @@ function renderTimeline(blogs) {
     try { window.siteI18n.applyTo(timeline); } catch (e) { /* ignore */ }
   }
 
-  // 接着渲染每一篇博客卡片
-  blogs.forEach(blog => {
+  // 接着渲染每一篇博客卡片，并在跨年/跨月时插入分隔
+  let lastYearKey = '';
+  let lastMonthKey = '';
+  const shouldAnimateEntrance = (() => {
+    const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return window.innerWidth > ARCHIVE_DESKTOP_ANIMATION_BREAKPOINT && !reducedMotion;
+  })();
+
+  blogs.forEach((blog, index) => {
+    const blogDate = new Date(blog.date);
+    const hasValidDate = !Number.isNaN(blogDate.getTime());
+    const yearKey = hasValidDate ? String(blogDate.getFullYear()) : '';
+    const monthKey = hasValidDate ? `${blogDate.getFullYear()}-${pad2(blogDate.getMonth() + 1)}` : '';
+
+    if (hasValidDate && yearKey !== lastYearKey) {
+      appendSeparator(blogDate, 'year');
+      appendSeparator(blogDate, 'month');
+      lastYearKey = yearKey;
+      lastMonthKey = monthKey;
+    } else if (hasValidDate && monthKey !== lastMonthKey) {
+      appendSeparator(blogDate, 'month');
+      lastMonthKey = monthKey;
+    }
+
     const item = document.createElement('div');
     item.className = 'timeline-item';
+    if (shouldAnimateEntrance) {
+      item.classList.add('timeline-item-enter');
+      item.style.setProperty('--timeline-enter-delay', `${index * ARCHIVE_ITEM_STAGGER_MS}ms`);
+    }
     item.dataset.date = blog.date;
     const displayDate = (typeof window !== 'undefined' && typeof window.formatDate === 'function') ? window.formatDate(blog.date) : blog.date;
     function escapeHtml(s) { return String(s).replace(/[&<>\"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
     item.innerHTML = `
-    <a class="timeline-link" href="blog-detail.html?id=${blog.id}" target="_blank" rel="noopener noreferrer">
+    <a class="timeline-link" href="blog-detail.html?id=${blog.id}">
       <div class="timeline-dot"></div>
       <div class="timeline-content">
         <div class="timeline-badge" aria-hidden="true"></div>

@@ -229,7 +229,7 @@
         margin-right: 0 !important;
     }
 
-    .nav-brand span[data-i18n="brand"] {
+    .nav-brand [data-i18n="brand"] {
         white-space: nowrap;
     }
 

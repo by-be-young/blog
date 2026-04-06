@@ -4,21 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>公告 | Be Young's Blog</title>
+    <title>系列 | Be Young's Blog</title>
     <link rel="icon" href="assets/avatar.png" type="image/png">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/butterfly.css">
     <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/series.css">
     <link rel="stylesheet" href="css/search.css">
-    <link rel="stylesheet" href="css/announcements.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="js/i18n.js" defer></script>
     <script src="js/formatDate.js" defer></script>
 </head>
 
-<body class="announcements-page">
+<body class="series-page">
     <div class="slideshow" aria-hidden="true">
-        <div class="slide active" style="background-image: url('assets/detail_bg.png');"></div>
+        <div class="slide active" style="background-image: url('assets/images/background/bg2.png');"></div>
     </div>
 
     <nav class="navbar">
@@ -35,7 +35,8 @@
                 <li><a href="index.html"><i class="fas fa-home"></i> <span data-i18n="home"></span></a></li>
                 <li><a href="archive.html"><i class="fas fa-archive"></i> <span data-i18n="archive"></span></a></li>
                 <li><a href="categories.html"><i class="fas fa-tags"></i> <span data-i18n="categories"></span></a></li>
-                <li><a href="series.html"><i class="fas fa-layer-group"></i> <span data-i18n="series"></span></a></li>
+                <li><a href="series.html" class="active"><i class="fas fa-layer-group"></i> <span
+                            data-i18n="series"></span></a></li>
                 <li><a href="quick-links.html"><i class="fas fa-link"></i> <span data-i18n="quicklinks"></span></a></li>
             </ul>
             <div class="nav-actions">
@@ -49,19 +50,19 @@
     </nav>
 
     <main>
-        <section class="announcements-section">
-            <div class="container">
-                <h1 class="announcements-title" data-i18n="announcements_title"></h1>
-                <div class="announcements-timeline" id="announcementsTimeline" aria-label="announcements-timeline">
-                </div>
-                <div class="announcements-empty" id="announcementsEmpty" data-i18n="announcements_empty"
-                    style="display:none;"></div>
+        <section class="series-section">
+            <h1 class="series-page-title" data-i18n="series_page_title">系列一览</h1>
+            <div class="series-layout">
+                <div class="series-list" id="seriesList" aria-live="polite"></div>
+                <div class="series-empty" id="seriesEmpty" data-i18n="series_empty" style="display:none;"></div>
             </div>
         </section>
     </main>
 
     <script src="js/search.js"></script>
-    <script src="js/announcements.js"></script>
+    <script src="js/slideshow.js"></script>
+    <script src="js/fireflies.js"></script>
+    <script src="js/series.js"></script>
     <script src="js/main.js"></script>
 </body>
 

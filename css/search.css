@@ -136,6 +136,30 @@
     align-items: center;
 }
 
+.search-options {
+    margin-top: 2px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(255, 214, 232, 0.36), rgba(232, 255, 244, 0.42));
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.search-option-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #5f3650;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.search-option-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #55c8ff;
+    cursor: pointer;
+}
+
 .search-panel .search-input {
     flex: 1 1 auto;
 }

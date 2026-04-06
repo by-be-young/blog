@@ -26,12 +26,15 @@
                 <a class="nav-avatar" href="about.html" aria-label="profile">
                     <img src="assets/avatar.png" alt="头像">
                 </a>
-                <span data-i18n="brand"></span>
+                <a class="nav-brand-link" href="index.html" aria-label="home">
+                    <span data-i18n="brand"></span>
+                </a>
             </div>
             <ul class="nav-menu">
                 <li><a href="index.html"><i class="fas fa-home"></i> <span data-i18n="home"></span></a></li>
                 <li><a href="archive.html"><i class="fas fa-archive"></i> <span data-i18n="archive"></span></a></li>
                 <li><a href="categories.html"><i class="fas fa-tags"></i> <span data-i18n="categories"></span></a></li>
+                <li><a href="series.html"><i class="fas fa-layer-group"></i> <span data-i18n="series"></span></a></li>
                 <li><a href="quick-links.html"><i class="fas fa-link"></i> <span data-i18n="quicklinks"></span></a></li>
             </ul>
             <div class="nav-actions">
@@ -78,6 +81,8 @@
                     <h1 class="article-title" id="article-title"></h1>
                     <div class="article-meta">
                         <span class="date" id="article-date" data-date=""><i class="far fa-calendar"></i></span>
+                        <span class="date" id="article-last-edited" data-date="" style="display:none;"><i
+                                class="fas fa-pencil-alt"></i></span>
                         <div class="article-metrics" id="article-metrics" aria-live="polite"></div>
                         <div class="tags" id="article-tags"></div>
                     </div>
@@ -106,15 +111,117 @@
             <!-- 顺序从上到下：宽屏、导出、设置、回到顶部 -->
             <button id="wide-read-btn" class="floating-btn sub-btn" data-i18n-title="immersive_read" aria-hidden="true"
                 style="display:none;"><i class="fas fa-expand"></i></button>
-            <button id="export-md-btn" class="floating-btn sub-btn" data-i18n-title="export_markdown" aria-hidden="true"
+            <button id="export-md-btn" class="floating-btn sub-btn" data-i18n-title="export_action" aria-hidden="true"
                 style="display:none;"><i class="fas fa-download"></i></button>
-            <button id="copy-md-btn" class="floating-btn sub-btn" data-i18n-title="copy_markdown" aria-hidden="true"
-                style="display:none;"><i class="fas fa-copy"></i></button>
+            <button id="display-manage-btn" class="floating-btn sub-btn" data-i18n-title="display_manage"
+                aria-hidden="true" style="display:none;"><i class="fas fa-eye"></i></button>
             <button id="settings-btn" class="floating-btn control-btn" data-i18n-title="settings" aria-haspopup="true"
                 aria-expanded="false"><i class="fas fa-cog"></i></button>
             <!-- 返回顶部按钮（仅图标，文字通过 tooltip 显示） -->
             <button id="back-to-top" class="floating-btn" data-i18n-title="back_to_top"><i
                     class="fas fa-arrow-up"></i></button>
+        </div>
+
+        <div id="exportModal" class="settings-modal export-modal" aria-hidden="true">
+            <div class="settings-modal-card export-modal-card" role="dialog" aria-modal="true"
+                aria-labelledby="export-modal-title">
+                <button id="exportModalClose" class="settings-modal-close export-modal-close" aria-label="关闭导出弹窗">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+                <div class="settings-modal-content export-modal-content">
+                    <section class="settings-section active export-section" id="export-section">
+                        <h3 id="export-modal-title" data-i18n="export_modal_title">导出选项</h3>
+                        <div class="export-option-group">
+                            <p class="export-option-label" data-i18n="export_method_label">导出方式</p>
+                            <div class="export-option-list" role="radiogroup" aria-label="导出方式">
+                                <label class="export-option-item">
+                                    <input type="radio" name="export-method" value="download" checked>
+                                    <i class="fas fa-download" aria-hidden="true"></i>
+                                    <span data-i18n="export_method_download">下载文件</span>
+                                </label>
+                                <label class="export-option-item">
+                                    <input type="radio" name="export-method" value="copy">
+                                    <i class="fas fa-copy" aria-hidden="true"></i>
+                                    <span data-i18n="export_method_copy">复制到剪贴板</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="export-option-group">
+                            <p class="export-option-label" data-i18n="export_exercise_label">例题导出方式</p>
+                            <div class="export-option-list" role="radiogroup" aria-label="例题导出方式">
+                                <label class="export-option-item">
+                                    <input type="radio" name="exercise-mode" value="exclude">
+                                    <span data-i18n="export_exercise_exclude">不导出例题</span>
+                                </label>
+                                <label class="export-option-item">
+                                    <input type="radio" name="exercise-mode" value="normal" checked>
+                                    <span data-i18n="export_exercise_normal">普通导出（当前模式）</span>
+                                </label>
+                                <label class="export-option-item">
+                                    <input type="radio" name="exercise-mode" value="source">
+                                    <span data-i18n="export_exercise_source">保持源码导出</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="export-actions">
+                            <button id="exportModalConfirm" class="music-btn export-confirm-btn" type="button">
+                                <i class="fas fa-file-export" aria-hidden="true"></i>
+                                <span data-i18n="export_confirm">执行导出</span>
+                            </button>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <div id="displayModal" class="settings-modal display-modal" aria-hidden="true">
+            <div class="settings-modal-card display-modal-card" role="dialog" aria-modal="true"
+                aria-labelledby="display-modal-title">
+                <button id="displayModalClose" class="settings-modal-close display-modal-close" aria-label="关闭显示管理弹窗">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+                <div class="settings-modal-content display-modal-content">
+                    <section class="settings-section active display-section" id="display-section">
+                        <h3 id="display-modal-title" data-i18n="display_modal_title">显示管理</h3>
+                        <div class="display-option-group">
+                            <p class="display-option-label" data-i18n="display_exercise_label">例题显示</p>
+                            <div class="display-option-list" role="radiogroup" aria-label="例题显示">
+                                <label class="display-option-item">
+                                    <input type="radio" name="display-exercise" value="hide">
+                                    <span data-i18n="display_exercise_hide">不显示</span>
+                                </label>
+                                <label class="display-option-item">
+                                    <input type="radio" name="display-exercise" value="collapse" checked>
+                                    <span data-i18n="display_exercise_collapse">全部收起答案</span>
+                                </label>
+                                <label class="display-option-item">
+                                    <input type="radio" name="display-exercise" value="expand">
+                                    <span data-i18n="display_exercise_expand">全部展开答案</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="display-option-group">
+                            <p class="display-option-label" data-i18n="display_code_label">代码块显示</p>
+                            <div class="display-option-list" role="radiogroup" aria-label="代码块显示">
+                                <label class="display-option-item">
+                                    <input type="radio" name="display-code" value="collapse">
+                                    <span data-i18n="display_code_collapse">全部收起</span>
+                                </label>
+                                <label class="display-option-item">
+                                    <input type="radio" name="display-code" value="expand" checked>
+                                    <span data-i18n="display_code_expand">全部展开</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="display-actions">
+                            <button id="displayModalConfirm" class="music-btn display-confirm-btn" type="button">
+                                <i class="fas fa-check" aria-hidden="true"></i>
+                                <span data-i18n="display_apply">应用设置</span>
+                            </button>
+                        </div>
+                    </section>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -131,6 +238,67 @@
         function generateTOC() {
             const tocProgressEl = document.getElementById('toc-progress');
             const articleContentEl = document.getElementById('markdown-content');
+            const TOC_SUBLIST_ANIM_MS = 220;
+
+            function setSubListState(ul, open, instant = false) {
+                if (!ul) return;
+                if (ul.__tocAnimTimer) {
+                    clearTimeout(ul.__tocAnimTimer);
+                    ul.__tocAnimTimer = null;
+                }
+
+                const seq = (Number(ul.dataset.animSeq || '0') || 0) + 1;
+                ul.dataset.animSeq = String(seq);
+                ul.dataset.open = open ? '1' : '0';
+                ul.style.overflow = 'hidden';
+                ul.style.transition = instant ? 'none' : `max-height ${TOC_SUBLIST_ANIM_MS}ms ease, opacity 180ms ease`;
+
+                if (open) {
+                    ul.style.display = 'block';
+                    const target = ul.scrollHeight;
+                    if (instant) {
+                        ul.style.maxHeight = 'none';
+                        ul.style.opacity = '1';
+                        ul.style.overflow = 'visible';
+                        return;
+                    }
+
+                    ul.style.maxHeight = '0px';
+                    ul.style.opacity = '0';
+                    requestAnimationFrame(() => {
+                        if (ul.dataset.animSeq !== String(seq) || ul.dataset.open !== '1') return;
+                        ul.style.maxHeight = `${target}px`;
+                        ul.style.opacity = '1';
+                    });
+                    ul.__tocAnimTimer = setTimeout(() => {
+                        if (ul.dataset.animSeq !== String(seq) || ul.dataset.open !== '1') return;
+                        ul.style.maxHeight = 'none';
+                        ul.style.overflow = 'visible';
+                    }, TOC_SUBLIST_ANIM_MS + 40);
+                    return;
+                }
+
+                const current = ul.scrollHeight;
+                ul.style.display = 'block';
+                if (instant) {
+                    ul.style.maxHeight = '0px';
+                    ul.style.opacity = '0';
+                    ul.style.display = 'none';
+                    return;
+                }
+
+                ul.style.maxHeight = `${current}px`;
+                ul.style.opacity = '1';
+                requestAnimationFrame(() => {
+                    if (ul.dataset.animSeq !== String(seq) || ul.dataset.open !== '0') return;
+                    ul.style.maxHeight = '0px';
+                    ul.style.opacity = '0';
+                });
+                ul.__tocAnimTimer = setTimeout(() => {
+                    if (ul.dataset.animSeq !== String(seq) || ul.dataset.open !== '0') return;
+                    ul.style.display = 'none';
+                }, TOC_SUBLIST_ANIM_MS + 40);
+            }
 
             function updateTocProgress() {
                 if (!tocProgressEl || !articleContentEl) return;
@@ -151,7 +319,7 @@
 
                 // 收起所有 h1 下的子列表（若存在）并将所有 h1 的 toggle 设为收起状态 ▶
                 document.querySelectorAll('.toc-h1 > .toc-sub-list').forEach(ul => {
-                    ul.style.display = 'none';
+                    setSubListState(ul, false);
                 });
                 document.querySelectorAll('.toc-h1 > .toc-toggle').forEach(t => { t.textContent = '▶'; });
 
@@ -160,7 +328,7 @@
                 const ul = h1Li.querySelector('ul');
                 const toggle = h1Li.querySelector('.toc-toggle');
                 // 若存在子列表则展开；不管是否存在子列表，都把 toggle 置为展开状态 ▼
-                if (ul) ul.style.display = 'block';
+                if (ul) setSubListState(ul, true);
                 if (toggle) toggle.textContent = '▼';
 
                 activeH1Id = h1Id;
@@ -210,6 +378,57 @@
             const tocList = document.getElementById('toc-list');
             if (!content || !tocList) return;
             tocList.innerHTML = '';
+            tocList.classList.add('has-animated-h2-indicator');
+
+            const h2Indicator = document.createElement('div');
+            h2Indicator.className = 'toc-h2-active-indicator';
+            tocList.appendChild(h2Indicator);
+
+            let activeH2Li = null;
+
+            function moveH2IndicatorTo(li, instant = false) {
+                if (!h2Indicator) return;
+                if (!li) {
+                    h2Indicator.style.opacity = '0';
+                    return;
+                }
+
+                const listRect = tocList.getBoundingClientRect();
+                const liRect = li.getBoundingClientRect();
+                const top = liRect.top - listRect.top + tocList.scrollTop - 4;
+                const left = liRect.left - listRect.left + tocList.scrollLeft - 12;
+                const width = liRect.width + 12;
+                const height = liRect.height + 8;
+
+                if (instant) {
+                    h2Indicator.style.transition = 'none';
+                } else {
+                    h2Indicator.style.transition = '';
+                }
+
+                h2Indicator.style.transform = `translateY(${Math.round(top)}px)`;
+                h2Indicator.style.left = `${Math.round(left)}px`;
+                h2Indicator.style.width = `${Math.round(width)}px`;
+                h2Indicator.style.height = `${Math.round(height)}px`;
+                h2Indicator.style.opacity = '1';
+
+                if (instant) {
+                    requestAnimationFrame(() => {
+                        h2Indicator.style.transition = '';
+                    });
+                }
+            }
+
+            function setActiveH2(li, headingEl, instant = false) {
+                document.querySelectorAll('.toc-h2.is-active').forEach(el => el.classList.remove('is-active'));
+                content.querySelectorAll('h2.is-toc-active').forEach(h => h.classList.remove('is-toc-active'));
+
+                activeH2Li = li || null;
+                if (li) li.classList.add('is-active');
+                if (headingEl) headingEl.classList.add('is-toc-active');
+
+                moveH2IndicatorTo(activeH2Li, instant);
+            }
             const headers = Array.from(content.querySelectorAll('h1, h2'));
             let lastH1 = null, lastH2 = null;
             const h1Map = new Map();
@@ -247,9 +466,12 @@
                     });
                 }
             });
+
+            tocList.appendChild(h2Indicator);
+            moveH2IndicatorTo(null, true);
             // 默认收起所有h1下的ul
             document.querySelectorAll('.toc-h1 > .toc-sub-list').forEach(ul => {
-                ul.style.display = 'none';
+                setSubListState(ul, false, true);
             });
             // h1折叠/展开事件
             document.querySelectorAll('.toc-h1 > .toc-toggle').forEach(toggle => {
@@ -257,18 +479,18 @@
                     e.stopPropagation();
                     const ul = this.parentElement.querySelector('ul');
                     if (!ul) return;
-                    const isOpen = ul.style.display === 'block';
+                    const isOpen = ul.dataset.open === '1';
                     // 收起所有h1
                     document.querySelectorAll('.toc-h1 > .toc-sub-list').forEach(otherUl => {
-                        otherUl.style.display = 'none';
+                        setSubListState(otherUl, false);
                         const t = otherUl.parentElement.querySelector('.toc-toggle');
                         if (t) t.textContent = '▶';
                     });
                     if (!isOpen) {
-                        ul.style.display = 'block';
+                        setSubListState(ul, true);
                         this.textContent = '▼';
                     } else {
-                        ul.style.display = 'none';
+                        setSubListState(ul, false);
                         this.textContent = '▶';
                     }
                 });
@@ -330,13 +552,11 @@
                         if (r.top <= offset) currentH2 = h2s[i];
                         else break;
                     }
-                    // 清除旧的高亮（目录与正文）
-                    document.querySelectorAll('.toc-h2.is-active').forEach(el => el.classList.remove('is-active'));
-                    content.querySelectorAll('h2.is-toc-active').forEach(h => h.classList.remove('is-toc-active'));
                     if (currentH2 && currentH2.id) {
                         const li = h2Map.get(currentH2.id);
-                        if (li) li.classList.add('is-active');
-                        currentH2.classList.add('is-toc-active');
+                        setActiveH2(li || null, currentH2);
+                    } else {
+                        setActiveH2(null, null);
                     }
                 } catch (e) { }
 
@@ -351,18 +571,20 @@
                 }
             });
             window.addEventListener('resize', updateTocProgress);
+            tocList.addEventListener('scroll', function () {
+                moveH2IndicatorTo(activeH2Li, true);
+            });
             // hash变化时自动展开
             window.addEventListener('hashchange', function () {
                 openCurrentH1ByHash();
                 // also update active h2 on hash change and body heading highlight
                 try {
                     const target = document.querySelector(location.hash);
-                    document.querySelectorAll('.toc-h2.is-active').forEach(el => el.classList.remove('is-active'));
-                    content.querySelectorAll('h2.is-toc-active').forEach(h => h.classList.remove('is-toc-active'));
                     if (target && target.tagName.toLowerCase() === 'h2') {
                         const li = h2Map.get(target.id);
-                        if (li) li.classList.add('is-active');
-                        target.classList.add('is-toc-active');
+                        setActiveH2(li || null, target);
+                    } else {
+                        setActiveH2(null, null);
                     }
                 } catch (e) { }
             });
@@ -373,10 +595,7 @@
                 if (location.hash) {
                     const t = document.querySelector(location.hash);
                     if (t && t.tagName.toLowerCase() === 'h2' && h2Map.has(t.id)) {
-                        document.querySelectorAll('.toc-h2.is-active').forEach(el => el.classList.remove('is-active'));
-                        content.querySelectorAll('h2.is-toc-active').forEach(h => h.classList.remove('is-toc-active'));
-                        h2Map.get(t.id).classList.add('is-active');
-                        t.classList.add('is-toc-active');
+                        setActiveH2(h2Map.get(t.id), t, true);
                     }
                 }
             } catch (e) { }
@@ -511,6 +730,25 @@
                         const formatted = (typeof window.formatDate === 'function') ? window.formatDate(blog.date) : (blog.date || '');
                         dateEl.innerHTML = '<i class="far fa-calendar"></i> ' + formatted;
                         dateEl.classList.add('date');
+                    }
+
+                    // 设置最近编辑时间（仅图标+日期，不显示文字）
+                    const lastEditedEl = document.getElementById('article-last-edited');
+                    if (lastEditedEl) {
+                        const lastEdited = (typeof blog.lastEditedDate === 'string' && blog.lastEditedDate.trim())
+                            ? blog.lastEditedDate.trim()
+                            : '';
+
+                        if (lastEdited) {
+                            lastEditedEl.setAttribute('data-date', lastEdited);
+                            const formattedEdited = (typeof window.formatDate === 'function') ? window.formatDate(lastEdited) : lastEdited;
+                            lastEditedEl.innerHTML = '<i class="fas fa-pencil-alt"></i> ' + formattedEdited;
+                            lastEditedEl.style.display = 'inline-flex';
+                            lastEditedEl.classList.add('date');
+                        } else {
+                            lastEditedEl.style.display = 'none';
+                            lastEditedEl.setAttribute('data-date', '');
+                        }
                     }
 
                     // 设置标签
@@ -653,9 +891,32 @@
                 return normalized;
             }
 
-            function getExportMarkdownContent() {
+            function removeExerciseBlocks(md) {
+                if (!md) return md;
+
+                let cleaned = md
+                    .replace(/\[task\][\s\S]*?\[\\task\]/gi, '')
+                    .replace(/\[(answer|analysis|question|options)\][\s\S]*?\[\\\1\]/gi, '')
+                    .replace(/^\s*\[(?:\\|\/)?(?:task|answer|analysis|question|options)\]\s*$/gim, '');
+
+                cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+                return cleaned.trim();
+            }
+
+            function getExportMarkdownContent(exerciseMode) {
                 const raw = window.__rawMarkdown || '';
+                if (!raw) return '';
+
+                if (exerciseMode === 'source') {
+                    return raw;
+                }
+
                 const clean = stripFrontMatter(raw);
+
+                if (exerciseMode === 'exclude') {
+                    return normalizeExerciseMarkers(removeExerciseBlocks(clean));
+                }
+
                 return normalizeExerciseMarkers(clean);
             }
 
@@ -671,11 +932,22 @@
                 }
             }
 
-            function downloadMarkdown() {
+            function getSourceFilename(titleFallback) {
                 try {
-                    const clean = getExportMarkdownContent();
+                    const sourcePath = (window.__mdSourcePath || '').toString().replace(/\\/g, '/');
+                    const sourceName = sourcePath.split('/').pop();
+                    if (sourceName && /\.md$/i.test(sourceName)) return sourceName;
+                } catch (e) { }
+                return titleFallback + '.md';
+            }
+
+            function downloadMarkdown(content, exerciseMode) {
+                try {
+                    const clean = String(content || '');
+                    if (!clean.trim()) return false;
                     const title = (document.getElementById('article-title') || {}).textContent || 'post';
-                    const filename = title.replace(/[^a-z0-9\u4e00-\u9fa5_-]/ig, '_') + '.md';
+                    const safeTitle = title.replace(/[^a-z0-9\u4e00-\u9fa5_-]/ig, '_') || 'post';
+                    const filename = exerciseMode === 'source' ? getSourceFilename(safeTitle) : (safeTitle + '.md');
                     const blob = new Blob([clean], { type: 'text/markdown;charset=utf-8' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
@@ -685,13 +957,15 @@
                     a.click();
                     a.remove();
                     URL.revokeObjectURL(url);
+                    return true;
                 } catch (e) {
                     console.error('export markdown failed', e);
+                    return false;
                 }
             }
 
-            async function copyMarkdown() {
-                const clean = getExportMarkdownContent();
+            async function copyMarkdown(content) {
+                const clean = String(content || '');
                 if (!clean) return false;
                 if (navigator.clipboard && window.isSecureContext) {
                     await navigator.clipboard.writeText(clean);
@@ -716,31 +990,157 @@
                 return copied;
             }
 
-            function showCopySuccess(btn) {
+            function showActionResult(btn, iconClass, message) {
                 if (!btn) return;
                 const icon = btn.querySelector('i');
-                if (!icon) return;
-                const copiedText = getI18nText('code_copied', '已复制');
-                const restoreText = getI18nText('copy_markdown', '复制Markdown');
-                icon.className = 'fas fa-check';
-                btn.setAttribute('data-tooltip', copiedText);
-                btn.title = copiedText;
+                const textNode = btn.querySelector('span');
+                const originalLabel = getI18nText('export_confirm', '执行导出');
+                const originalIcon = 'fas fa-file-export';
+                if (icon && iconClass) icon.className = iconClass;
+                if (textNode && message) textNode.textContent = message;
                 setTimeout(() => {
-                    icon.className = 'fas fa-copy';
-                    btn.setAttribute('data-tooltip', restoreText);
-                    btn.title = restoreText;
+                    if (icon) icon.className = originalIcon;
+                    if (textNode) textNode.textContent = originalLabel;
                 }, 1200);
+            }
+
+            function openExportModal() {
+                const modal = document.getElementById('exportModal');
+                if (!modal) return;
+                try { modal.inert = false; } catch (e) { }
+                modal.classList.add('is-open');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.classList.add('export-modal-open');
+            }
+
+            function closeExportModal() {
+                const modal = document.getElementById('exportModal');
+                if (!modal) return;
+                modal.classList.remove('is-open');
+                modal.setAttribute('aria-hidden', 'true');
+                try { modal.inert = true; } catch (e) { }
+                document.body.classList.remove('export-modal-open');
             }
 
             function initFloatingSettings() {
                 const settingsBtn = document.getElementById('settings-btn');
                 const wideBtn = document.getElementById('wide-read-btn');
                 const exportBtn = document.getElementById('export-md-btn');
-                const copyBtn = document.getElementById('copy-md-btn');
+                const displayBtn = document.getElementById('display-manage-btn');
                 const container = document.getElementById('floating-controls');
+                const exportModal = document.getElementById('exportModal');
+                const exportModalClose = document.getElementById('exportModalClose');
+                const exportModalConfirm = document.getElementById('exportModalConfirm');
+                const displayModal = document.getElementById('displayModal');
+                const displayModalClose = document.getElementById('displayModalClose');
+                const displayModalConfirm = document.getElementById('displayModalConfirm');
+                const markdownContent = document.getElementById('markdown-content');
                 const toc = document.getElementById('blog-toc');
                 const article = document.querySelector('.blog-article');
-                if (!settingsBtn || !wideBtn || !exportBtn || !copyBtn || !container) return;
+                if (!settingsBtn || !wideBtn || !exportBtn || !displayBtn || !container) return;
+
+                if (exportModal) {
+                    try { exportModal.inert = true; } catch (e) { }
+                }
+                if (displayModal) {
+                    try { displayModal.inert = true; } catch (e) { }
+                }
+
+                function openDisplayModal() {
+                    if (!displayModal) return;
+                    try { displayModal.inert = false; } catch (e) { }
+                    displayModal.classList.add('is-open');
+                    displayModal.setAttribute('aria-hidden', 'false');
+                    document.body.classList.add('display-modal-open');
+                }
+
+                function closeDisplayModal() {
+                    if (!displayModal) return;
+                    displayModal.classList.remove('is-open');
+                    displayModal.setAttribute('aria-hidden', 'true');
+                    try { displayModal.inert = true; } catch (e) { }
+                    document.body.classList.remove('display-modal-open');
+                }
+
+                function setAllExercisesVisible(visible) {
+                    if (!markdownContent) return;
+                    const tasks = Array.from(markdownContent.querySelectorAll('.md-task'));
+                    tasks.forEach(task => {
+                        if (visible) {
+                            task.style.display = '';
+                            task.removeAttribute('aria-hidden');
+                        } else {
+                            task.style.display = 'none';
+                            task.setAttribute('aria-hidden', 'true');
+                        }
+                    });
+                }
+
+                function setAllAnswersExpanded(expand) {
+                    if (!markdownContent) return;
+                    const answerBlocks = Array.from(markdownContent.querySelectorAll('.answer-block'));
+                    answerBlocks.forEach(block => {
+                        const toggle = block.querySelector('.answer-toggle');
+                        if (!toggle) return;
+                        const isOpen = block.classList.contains('is-open');
+                        if (expand && !isOpen) {
+                            toggle.click();
+                        } else if (!expand && isOpen) {
+                            toggle.click();
+                        }
+                    });
+                }
+
+                function setAllCodeBlocksExpanded(expand) {
+                    if (!markdownContent) return;
+                    const codeblocks = Array.from(markdownContent.querySelectorAll('.codeblock'));
+                    codeblocks.forEach(containerEl => {
+                        const toggle = containerEl.querySelector('.codeblock__actions .codeblock__btn:last-child');
+                        if (!toggle) return;
+                        const isCollapsed = containerEl.classList.contains('is-collapsed');
+                        if (expand && isCollapsed) {
+                            toggle.click();
+                        } else if (!expand && !isCollapsed) {
+                            toggle.click();
+                        }
+                    });
+                }
+
+                function applyDisplaySettings() {
+                    const exerciseEl = document.querySelector('input[name="display-exercise"]:checked');
+                    const codeEl = document.querySelector('input[name="display-code"]:checked');
+                    const exerciseMode = exerciseEl ? exerciseEl.value : 'collapse';
+                    const codeMode = codeEl ? codeEl.value : 'expand';
+
+                    if (exerciseMode === 'hide') {
+                        setAllAnswersExpanded(false);
+                        setAllExercisesVisible(false);
+                    } else if (exerciseMode === 'expand') {
+                        setAllExercisesVisible(true);
+                        setAllAnswersExpanded(true);
+                    } else {
+                        setAllExercisesVisible(true);
+                        setAllAnswersExpanded(false);
+                    }
+
+                    if (codeMode === 'expand') {
+                        setAllCodeBlocksExpanded(true);
+                    } else {
+                        setAllCodeBlocksExpanded(false);
+                    }
+
+                    if (displayModalConfirm) {
+                        const textNode = displayModalConfirm.querySelector('span');
+                        if (textNode) {
+                            const doneText = getI18nText('display_applied', '已应用');
+                            const restoreText = getI18nText('display_apply', '应用设置');
+                            textNode.textContent = doneText;
+                            setTimeout(() => {
+                                textNode.textContent = restoreText;
+                            }, 1200);
+                        }
+                    }
+                }
 
                 // toggle sub buttons visibility by toggling a class on container
                 let subVisible = false;
@@ -750,29 +1150,29 @@
                     if (subVisible) {
                         wideBtn.style.display = 'inline-flex';
                         exportBtn.style.display = 'inline-flex';
-                        copyBtn.style.display = 'inline-flex';
+                        displayBtn.style.display = 'inline-flex';
                         wideBtn.setAttribute('aria-hidden', 'false');
                         exportBtn.setAttribute('aria-hidden', 'false');
-                        copyBtn.setAttribute('aria-hidden', 'false');
+                        displayBtn.setAttribute('aria-hidden', 'false');
                         // animate in
                         requestAnimationFrame(() => {
                             wideBtn.style.opacity = '1'; wideBtn.style.transform = 'translateX(0)';
                             exportBtn.style.opacity = '1'; exportBtn.style.transform = 'translateX(0)';
-                            copyBtn.style.opacity = '1'; copyBtn.style.transform = 'translateX(0)';
+                            displayBtn.style.opacity = '1'; displayBtn.style.transform = 'translateX(0)';
                         });
                     } else {
                         // animate out then hide
                         wideBtn.style.opacity = '0'; wideBtn.style.transform = 'translateX(8px)';
                         exportBtn.style.opacity = '0'; exportBtn.style.transform = 'translateX(8px)';
-                        copyBtn.style.opacity = '0'; copyBtn.style.transform = 'translateX(8px)';
+                        displayBtn.style.opacity = '0'; displayBtn.style.transform = 'translateX(8px)';
                         setTimeout(() => {
                             if (!subVisible) {
                                 wideBtn.style.display = 'none';
                                 exportBtn.style.display = 'none';
-                                copyBtn.style.display = 'none';
+                                displayBtn.style.display = 'none';
                                 wideBtn.setAttribute('aria-hidden', 'true');
                                 exportBtn.setAttribute('aria-hidden', 'true');
-                                copyBtn.setAttribute('aria-hidden', 'true');
+                                displayBtn.setAttribute('aria-hidden', 'true');
                             }
                         }, 180);
                     }
@@ -888,6 +1288,16 @@
                 });
 
                 document.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape' && exportModal && exportModal.classList.contains('is-open')) {
+                        e.preventDefault();
+                        closeExportModal();
+                        return;
+                    }
+                    if (e.key === 'Escape' && displayModal && displayModal.classList.contains('is-open')) {
+                        e.preventDefault();
+                        closeDisplayModal();
+                        return;
+                    }
                     if (!immersiveMode) return;
                     if (e.key !== 'Escape') return;
                     e.preventDefault();
@@ -895,17 +1305,90 @@
                 });
 
                 exportBtn.addEventListener('click', function (e) {
-                    downloadMarkdown();
+                    e.stopPropagation();
+                    openExportModal();
                 });
 
-                copyBtn.addEventListener('click', async function (e) {
-                    try {
-                        const ok = await copyMarkdown();
-                        if (ok) showCopySuccess(copyBtn);
-                    } catch (err) {
-                        console.error('copy markdown failed', err);
-                    }
+                displayBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    openDisplayModal();
                 });
+
+                if (exportModalClose) {
+                    exportModalClose.addEventListener('click', function () {
+                        closeExportModal();
+                    });
+                }
+
+                if (exportModal) {
+                    exportModal.addEventListener('click', function (e) {
+                        if (e.target === exportModal) {
+                            closeExportModal();
+                        }
+                    });
+                }
+
+                if (displayModalClose) {
+                    displayModalClose.addEventListener('click', function () {
+                        closeDisplayModal();
+                    });
+                }
+
+                if (displayModal) {
+                    displayModal.addEventListener('click', function (e) {
+                        if (e.target === displayModal) {
+                            closeDisplayModal();
+                        }
+                    });
+                }
+
+                if (displayModalConfirm) {
+                    displayModalConfirm.addEventListener('click', function () {
+                        applyDisplaySettings();
+                        setTimeout(closeDisplayModal, 220);
+                    });
+                }
+
+                if (exportModalConfirm) {
+                    exportModalConfirm.addEventListener('click', async function () {
+                        const methodEl = document.querySelector('input[name="export-method"]:checked');
+                        const exerciseEl = document.querySelector('input[name="exercise-mode"]:checked');
+                        const method = methodEl ? methodEl.value : 'download';
+                        const exerciseMode = exerciseEl ? exerciseEl.value : 'normal';
+                        const content = getExportMarkdownContent(exerciseMode);
+
+                        if (!content || !String(content).trim()) {
+                            const emptyText = getI18nText('export_no_content', '当前选项下无可导出内容');
+                            showActionResult(exportModalConfirm, 'fas fa-circle-exclamation', emptyText);
+                            return;
+                        }
+
+                        if (method === 'download') {
+                            const ok = downloadMarkdown(content, exerciseMode);
+                            if (ok) {
+                                const doneText = getI18nText('export_done_download', '已下载');
+                                showActionResult(exportModalConfirm, 'fas fa-check', doneText);
+                                setTimeout(closeExportModal, 220);
+                            }
+                            return;
+                        }
+
+                        let copied = false;
+                        let msg = '';
+                        try {
+                            copied = await copyMarkdown(content);
+                            msg = copied
+                                ? getI18nText('export_done_copy', '已复制')
+                                : getI18nText('export_copy_failed', '复制失败');
+                        } catch (err) {
+                            console.error('copy markdown failed', err);
+                            copied = false;
+                            msg = getI18nText('export_copy_failed', '复制失败');
+                        }
+                        showActionResult(exportModalConfirm, copied ? 'fas fa-check' : 'fas fa-circle-xmark', msg);
+                        if (copied) setTimeout(closeExportModal, 220);
+                    });
+                }
             }
             // call now to wire handlers
             initFloatingSettings();

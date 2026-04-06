@@ -1,6 +1,7 @@
 ---
 excerpt: MIPS寻址方式、结构、常用指令
 type: 概要笔记
+series: 计组理论
 ---
 # 寻址方式
 

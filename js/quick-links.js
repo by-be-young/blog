@@ -1,5 +1,7 @@
 (function () {
     const DATA_URL = 'data/quick-links.json';
+    const QUICK_LINKS_STAGGER_BREAKPOINT = 760;
+    const QUICK_LINKS_CARD_STAGGER_MS = 85;
     let lastGridMinHeight = 0;
     let quickLinksRenderLockedUntil = 0;
 
@@ -166,6 +168,9 @@
     }
 
     function renderCards(gridEl, items) {
+        const reducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+        const enableStagger = window.innerWidth > QUICK_LINKS_STAGGER_BREAKPOINT && !reducedMotion;
+
         // 记录切换前高度，避免切换到更短内容时页面高度骤降造成滚动位置“跳变”
         try {
             const h = gridEl.getBoundingClientRect().height;
@@ -192,13 +197,18 @@
             return;
         }
 
-        items.forEach(item => {
+        const createdCards = [];
+        items.forEach((item, index) => {
             const title = (item && item.title) ? String(item.title) : ((window.siteI18n && window.siteI18n.translations && window.siteI18n.translations[(window.siteI18n.getLang && window.siteI18n.getLang()) || 'zh'] && window.siteI18n.translations[window.siteI18n.getLang()].link_unnamed) || '未命名链接');
             const url = (item && item.url) ? String(item.url) : '#';
             const image = (item && item.image) ? String(item.image) : 'assets/images/background/bg1.png';
 
             const a = document.createElement('a');
             a.className = 'link-card';
+            if (enableStagger) {
+                a.classList.add('link-card-pre-enter');
+                a.style.setProperty('--ql-card-delay', `${index * QUICK_LINKS_CARD_STAGGER_MS}ms`);
+            }
             a.href = url;
             a.target = '_blank';
             a.rel = 'noopener noreferrer';
@@ -214,7 +224,16 @@
             `;
 
             gridEl.appendChild(a);
+            if (enableStagger) createdCards.push(a);
         });
+
+        if (enableStagger && createdCards.length > 0) {
+            window.requestAnimationFrame(() => {
+                createdCards.forEach(card => {
+                    card.classList.add('link-card-enter-active');
+                });
+            });
+        }
 
         // 渲染后如果内容更短，保持上一次高度，避免页面高度瞬变
         if (lastGridMinHeight > 0) {
@@ -328,6 +347,9 @@
         const gridEl = document.getElementById('quickLinksGrid');
         if (!wheelEl || !gridEl) return;
 
+        const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+        let gridSwitchToken = 0;
+
         const categories = data && Array.isArray(data.categories) ? data.categories : [];
         wheelEl.innerHTML = '';
 
@@ -388,9 +410,65 @@
                 // 防止同一分类重复渲染导致闪动
                 if (key !== currentKey) {
                     currentKey = key;
-                    renderCards(gridEl, itemsByKey.get(key) || []);
+                    renderCardsWithTransition(itemsByKey.get(key) || []);
                 }
             }
+        }
+
+        function renderCardsWithTransition(items) {
+            const doRender = () => renderCards(gridEl, items);
+
+            // 无障碍降级：用户偏好减少动效时不做过渡。
+            if (prefersReducedMotion || typeof gridEl.animate !== 'function') {
+                doRender();
+                return;
+            }
+
+            const token = ++gridSwitchToken;
+
+            try {
+                const animations = gridEl.getAnimations();
+                if (Array.isArray(animations)) {
+                    animations.forEach(anim => anim.cancel());
+                }
+            } catch (e) {
+                // ignore
+            }
+
+            const fadeOut = gridEl.animate(
+                [
+                    { opacity: 1 },
+                    { opacity: 0 }
+                ],
+                {
+                    duration: 200,
+                    easing: 'cubic-bezier(0.4, 0, 1, 1)',
+                    fill: 'forwards'
+                }
+            );
+
+            fadeOut.onfinish = () => {
+                if (token !== gridSwitchToken) return;
+
+                doRender();
+
+                const fadeIn = gridEl.animate(
+                    [
+                        { opacity: 0 },
+                        { opacity: 1 }
+                    ],
+                    {
+                        duration: 320,
+                        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                        fill: 'both'
+                    }
+                );
+
+                fadeIn.onfinish = () => {
+                    if (token !== gridSwitchToken) return;
+                    gridEl.style.opacity = '';
+                };
+            };
         }
 
         wheelEl.__recenterToSelected = function () {

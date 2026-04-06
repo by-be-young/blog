@@ -1,6 +1,7 @@
 ---
 excerpt: GCC 的语法详解
 type: 轻松笔记
+series: 操作系统预备知识
 ---
 # GCC 编译原理
 

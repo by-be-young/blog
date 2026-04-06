@@ -962,8 +962,90 @@ function renderMarkdownContent() {
             });
         });
     })();
+
+    const updateTaskStatsSummary = (function initTaskStatsSummary() {
+        const tasks = Array.from(contentElement.querySelectorAll('.md-task'));
+        if (!tasks.length) return function () { };
+
+        const statsEntries = tasks.map(task => {
+            task.classList.add('has-task-stats');
+            let statsEl = task.querySelector('.md-task-stats');
+            if (!statsEl) {
+                statsEl = document.createElement('div');
+                statsEl.className = 'md-task-stats';
+                task.appendChild(statsEl);
+            }
+            return { task, statsEl };
+        });
+
+        const render = () => {
+            const total = tasks.length;
+            let answered = 0;
+            let correct = 0;
+
+            tasks.forEach(task => {
+                const state = (task.dataset.answerState || '').trim();
+                if (state === 'correct') {
+                    answered += 1;
+                    correct += 1;
+                } else if (state === 'wrong') {
+                    answered += 1;
+                }
+            });
+
+            const rate = answered > 0 ? Math.round((correct / answered) * 100) : 0;
+            const hasRate = answered > 0;
+            const html =
+                '<span class="md-task-stats-main">' +
+                '<span class="md-task-stats-label">答对数：</span><span class="md-task-stats-value">' + correct + '</span>' +
+                '<span class="md-task-stats-label">/总答题数：</span><span class="md-task-stats-value">' + answered + '</span>' +
+                '<span class="md-task-stats-label">/总题数：</span><span class="md-task-stats-value">' + total + '</span>' +
+                '</span>' +
+                (hasRate
+                    ? ('<span class="md-task-stats-rate">' +
+                        '<span class="md-task-stats-label">正确率：</span><span class="md-task-stats-value">' + rate + '%</span>' +
+                        '</span>')
+                    : '');
+
+            statsEntries.forEach(({ task, statsEl }) => {
+                statsEl.innerHTML = html;
+                statsEl.classList.toggle('is-rate-hidden', !hasRate);
+                if (task && task.classList) {
+                    task.classList.toggle('is-rate-hidden', !hasRate);
+                }
+            });
+        };
+
+        render();
+        return render;
+    })();
+
     // 绑定选项点击交互（基于 .md-option）
     (function bindOptionClicks() {
+        const setQuestionStateClass = (questionEl, state) => {
+            if (!questionEl || !questionEl.classList) return;
+            questionEl.classList.remove('is-question-correct', 'is-question-wrong');
+            if (state === 'correct') questionEl.classList.add('is-question-correct');
+            if (state === 'wrong') questionEl.classList.add('is-question-wrong');
+        };
+
+        const findQuestionForOption = (btn, task, optionsGroup) => {
+            if (task) {
+                const q = task.querySelector('.md-question');
+                if (q) return q;
+            }
+
+            if (optionsGroup) {
+                let sib = optionsGroup.previousElementSibling;
+                while (sib) {
+                    if (sib.classList && sib.classList.contains('md-question')) return sib;
+                    sib = sib.previousElementSibling;
+                }
+            }
+
+            return contentElement.querySelector('.md-question');
+        };
+
         const handleOptionActivate = (btn) => {
             // 如果所在选项组已被锁定（被选择或答案已展开），阻止点击
             const optionsGroup = btn.closest('.md-options');
@@ -977,6 +1059,7 @@ function renderMarkdownContent() {
 
             // 首先尝试在同一 `.md-task` 容器内找到关联的 answer-block（保证 task 作用域）
             const task = btn.closest && btn.closest('.md-task') ? btn.closest('.md-task') : null;
+            const questionBlock = findQuestionForOption(btn, task, optionsGroup);
             let answerBlock = null;
             if (task) answerBlock = task.querySelector('.answer-block');
 
@@ -1020,11 +1103,15 @@ function renderMarkdownContent() {
             // 标记样式与自动展开行为
             if (found && found === key) {
                 btn.classList.add('is-correct');
+                setQuestionStateClass(questionBlock, 'correct');
+                if (task) task.dataset.answerState = 'correct';
                 // 选择正确后锁定本题所有选项组（在 task 内）
                 if (task) Array.from(task.querySelectorAll('.md-options')).forEach(g => setOptionsLocked(g, true));
                 else if (optionsGroup) setOptionsLocked(optionsGroup, true);
             } else {
                 btn.classList.add('is-wrong');
+                setQuestionStateClass(questionBlock, 'wrong');
+                if (task) task.dataset.answerState = 'wrong';
                 // 自动展开答案块（使用统一 helper）
                 const toggle = answerBlock.querySelector('.answer-toggle');
                 if (toggle && !toggle.classList.contains('is-open')) expandAnswerBlock(answerBlock);
@@ -1040,6 +1127,8 @@ function renderMarkdownContent() {
                     if (correctBtn) correctBtn.classList.add('is-correct');
                 }
             }
+
+            updateTaskStatsSummary();
         };
 
         Array.from(contentElement.querySelectorAll('.md-option')).forEach(btn => {

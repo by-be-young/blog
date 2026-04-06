@@ -18,6 +18,90 @@
 .archive-main {
     flex: 1;
     min-width: 0;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border: none;
+    border-radius: 0;
+    padding: 14px;
+    background:
+        linear-gradient(to bottom,
+            rgba(255, 182, 201, 0) 0%,
+            rgba(255, 182, 201, 0.2) 24%,
+            rgba(154, 215, 255, 0.28) 50%,
+            rgba(167, 243, 208, 0.2) 76%,
+            rgba(167, 243, 208, 0) 100%) padding-box,
+        linear-gradient(to bottom,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.08) 50%,
+            rgba(255, 255, 255, 0) 100%);
+    box-shadow: none;
+}
+
+.archive-main::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+    pointer-events: none;
+    z-index: 0;
+    background:
+        linear-gradient(to bottom,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.12) 50%,
+            rgba(255, 255, 255, 0) 100%);
+    backdrop-filter: blur(12px) saturate(1.06);
+    -webkit-backdrop-filter: blur(12px) saturate(1.06);
+    -webkit-mask-image: linear-gradient(to bottom,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(0, 0, 0, 0) 16%,
+            rgba(0, 0, 0, 1) 38%,
+            rgba(0, 0, 0, 1) 62%,
+            rgba(0, 0, 0, 0) 84%,
+            rgba(0, 0, 0, 0) 100%);
+    mask-image: linear-gradient(to bottom,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(0, 0, 0, 0) 16%,
+            rgba(0, 0, 0, 1) 38%,
+            rgba(0, 0, 0, 1) 62%,
+            rgba(0, 0, 0, 0) 84%,
+            rgba(0, 0, 0, 0) 100%);
+}
+
+.archive-main::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+        linear-gradient(180deg,
+            rgba(255, 182, 201, 0.34),
+            rgba(154, 215, 255, 0.42),
+            rgba(167, 243, 208, 0.34)) left center / 4px 100% no-repeat,
+        linear-gradient(180deg,
+            rgba(255, 182, 201, 0.34),
+            rgba(154, 215, 255, 0.42),
+            rgba(167, 243, 208, 0.34)) right center / 4px 100% no-repeat;
+    -webkit-mask-image: linear-gradient(to bottom,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(0, 0, 0, 0) 16%,
+            rgba(0, 0, 0, 1) 38%,
+            rgba(0, 0, 0, 1) 62%,
+            rgba(0, 0, 0, 0) 84%,
+            rgba(0, 0, 0, 0) 100%);
+    mask-image: linear-gradient(to bottom,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(0, 0, 0, 0) 16%,
+            rgba(0, 0, 0, 1) 38%,
+            rgba(0, 0, 0, 1) 62%,
+            rgba(0, 0, 0, 0) 84%,
+            rgba(0, 0, 0, 0) 100%);
+}
+
+.archive-main>* {
+    position: relative;
+    z-index: 1;
 }
 
 .archive-sidebar {
@@ -132,6 +216,22 @@
         --archive-type-col-width: 96px;
     }
 
+    .archive-main {
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        isolation: auto;
+        overflow: visible;
+    }
+
+    .archive-main::before,
+    .archive-main::after {
+        content: none !important;
+        display: none !important;
+    }
+
     /* 在小屏时隐藏侧边栏，显示悬浮球 */
     .archive-sidebar {
         display: none !important;
@@ -166,6 +266,35 @@
 .archive-timeline .timeline-item {
     position: relative;
     margin-bottom: 40px;
+}
+
+@media (min-width: 901px) {
+    .archive-timeline .timeline-item.timeline-item-enter {
+        opacity: 0;
+        transform: translateY(-14px);
+        animation: archive-timeline-enter 760ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+        animation-delay: var(--timeline-enter-delay, 0ms);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .archive-timeline .timeline-item.timeline-item-enter {
+        opacity: 1;
+        transform: none;
+        animation: none;
+    }
+}
+
+@keyframes archive-timeline-enter {
+    from {
+        opacity: 0;
+        transform: translateY(-14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .archive-timeline .timeline-dot {
@@ -243,6 +372,17 @@
     .archive-timeline .timeline-content {
         max-width: none;
         width: 100%;
+    }
+
+    /* 移动端取消桌面左偏移，避免卡片宽度溢出 */
+    .archive-timeline .timeline-content,
+    .archive-timeline .timeline-link .timeline-content {
+        margin-left: 0;
+    }
+
+    .archive-timeline {
+        padding-left: 12px;
+        padding-right: 0;
     }
 
     .archive-timeline .timeline-item {
@@ -473,7 +613,7 @@
     border-radius: 18px;
     box-shadow: var(--shadow);
     border: 1px solid rgba(0, 0, 0, 0.06);
-    overflow: hidden;
+    overflow: visible;
 }
 
 .calendar-top {
@@ -591,6 +731,7 @@
 
 .calendar-body {
     padding: 8px 12px 14px 12px;
+    overflow: visible;
 }
 
 .archive-filter-panel {
@@ -653,6 +794,7 @@
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 8px;
+    overflow: visible;
 }
 
 .cal-weekday {
@@ -740,6 +882,12 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
+    overflow: visible;
+}
+
+.cal-cell[data-tip]:hover,
+.cal-month[data-tip]:hover {
+    z-index: 40;
 }
 
 .cal-month {
@@ -864,15 +1012,28 @@
 
 .archive-page .nav-menu a {
     color: var(--archive-text);
-    background: rgba(255, 255, 255, 0.42);
-    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: transparent;
+    border: none;
+    border-radius: 0;
 }
 
 .archive-page .nav-menu a:hover,
 .archive-page .nav-menu a.active {
     color: var(--archive-text);
+}
+
+.archive-page .nav-menu a.active {
     background: linear-gradient(135deg, rgba(255, 182, 201, 0.30), rgba(154, 215, 255, 0.22), rgba(167, 243, 208, 0.24));
-    border-color: rgba(0, 0, 0, 0.08);
+    border: none;
+    border-radius: 0;
+}
+
+.archive-page .nav-menu a.active:hover {
+    background: linear-gradient(135deg, rgba(255, 182, 201, 0.30), rgba(154, 215, 255, 0.22), rgba(167, 243, 208, 0.24));
+}
+
+.archive-page .nav-menu a:hover:not(.active) {
+    background: linear-gradient(135deg, rgba(255, 182, 201, 0.30), rgba(154, 215, 255, 0.22), rgba(167, 243, 208, 0.24));
 }
 
 /* 时间轴容器：渐变描边卡片风格 */
@@ -894,8 +1055,8 @@
 .archive-page .archive-timeline .timeline-content {
     border: 3px solid transparent;
     background:
-        linear-gradient(rgba(255, 255, 255, 0.70), rgba(255, 255, 255, 0.70)) padding-box,
-        linear-gradient(135deg, rgba(255, 182, 201, 0.80), rgba(167, 243, 208, 0.78), rgba(154, 215, 255, 0.78)) border-box;
+        linear-gradient(135deg, rgba(255, 244, 248, 0.92), rgba(236, 250, 245, 0.88), rgba(236, 246, 255, 0.90)) padding-box,
+        linear-gradient(135deg, rgba(255, 182, 201, 0.88), rgba(167, 243, 208, 0.86), rgba(154, 215, 255, 0.86)) border-box;
     backdrop-filter: blur(10px);
     border-radius: 14px;
 }
@@ -918,12 +1079,59 @@
 
 /* 侧边日历卡片：渐变描边 */
 .archive-page .calendar-card {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     border: 4px solid transparent;
     background:
-        linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)) padding-box,
-        url('../assets/images/calendar.png') center/cover no-repeat padding-box,
-        var(--archive-border) border-box;
+        linear-gradient(rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.42)) padding-box,
+        linear-gradient(135deg, rgba(255, 182, 201, 0.62), rgba(167, 243, 208, 0.62), rgba(154, 215, 255, 0.62)) border-box;
     box-shadow: var(--archive-card-shadow);
+}
+
+.archive-page .calendar-card::before {
+    content: '';
+    position: absolute;
+    inset: -18px;
+    border-radius: inherit;
+    background: url('../assets/images/calendar.png') center/cover no-repeat;
+    background-size: cover;
+    opacity: 0.28;
+    pointer-events: none;
+    z-index: 0;
+    transform-origin: center center;
+    will-change: transform;
+}
+
+.archive-page .calendar-card:hover::before {
+    animation: archive-calendar-bg-sway 6.2s ease-in-out infinite;
+}
+
+.archive-page .calendar-card>* {
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes archive-calendar-bg-sway {
+    0% {
+        transform: translate3d(0, 0, 0) rotate(0deg);
+    }
+
+    25% {
+        transform: translate3d(3.4px, -2.6px, 0) rotate(0.42deg);
+    }
+
+    50% {
+        transform: translate3d(-3.2px, 2.8px, 0) rotate(-0.44deg);
+    }
+
+    75% {
+        transform: translate3d(2.8px, 2.4px, 0) rotate(0.38deg);
+    }
+
+    100% {
+        transform: translate3d(0, 0, 0) rotate(0deg);
+    }
 }
 
 .archive-page .calendar-toggle-btn.active {
@@ -997,12 +1205,13 @@
 
 /* 滚筒时间轴滚动条（马卡龙色系，局部作用域） */
 .archive-page .archive-timeline.drum {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 182, 201, 0.85) rgba(255, 255, 255, 0.35);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
 .archive-page .archive-timeline.drum::-webkit-scrollbar {
-    width: 10px;
+    width: 0;
+    height: 0;
 }
 
 .archive-page .archive-timeline.drum::-webkit-scrollbar-track {
@@ -1029,6 +1238,11 @@
 }
 
 @media (max-width: 900px) {
+
+    .archive-main {
+        padding: 10px;
+    }
+
     .archive-page .archive-timeline.drum {
         max-height: calc(100vh - 160px);
     }
@@ -1059,14 +1273,109 @@
     font-weight: 900;
     line-height: 1.02;
     padding: 16px 0 22px 0;
-    /* 马卡龙渐变文字 */
-    background: linear-gradient(90deg, rgba(255, 182, 201, 1), rgba(154, 215, 255, 0.98), rgba(167, 243, 208, 0.98));
+    /* 加深后的渐变文字 */
+    background: linear-gradient(90deg, #b83b66 0%, #2f6fa9 52%, #1f7a5e 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     /* 更强的文字阴影和投影，使标题更醒目 */
-    text-shadow: 0 18px 44px rgba(44, 62, 80, 0.22), 0 6px 16px rgba(255, 255, 255, 0.6);
+    text-shadow: 0 14px 30px rgba(44, 62, 80, 0.26), 0 4px 10px rgba(255, 255, 255, 0.32);
     filter: drop-shadow(0 14px 36px rgba(44, 62, 80, 0.14));
+}
+
+/* 时间轴中的年月分隔条（文字 + 图案） */
+.archive-timeline .timeline-separator {
+    margin: 0;
+    padding: 8px 0;
+}
+
+.archive-timeline .timeline-separator .timeline-separator-content {
+    width: min(820px, 100%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 6px 4px;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+}
+
+.archive-timeline .timeline-separator .timeline-separator-pattern {
+    color: rgba(109, 138, 191, 0.68);
+    font-size: 0.86rem;
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+}
+
+.archive-timeline .timeline-separator .timeline-separator-label {
+    color: #4c6da3;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.archive-timeline .timeline-separator-year .timeline-separator-content {
+    gap: 10px;
+}
+
+.archive-timeline .timeline-separator-year .timeline-separator-label {
+    font-size: 1.02rem;
+    background: linear-gradient(90deg, #c45a84 0%, #5688c2 52%, #3e9b80 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+.archive-timeline .timeline-separator-month .timeline-separator-content {
+    gap: 8px;
+}
+
+.archive-timeline .timeline-separator-month .timeline-separator-label {
+    font-size: 0.95rem;
+    color: #6e86ae;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.archive-timeline .timeline-separator-month .timeline-separator-pattern {
+    font-size: 0;
+    width: 56px;
+    height: 1px;
+    letter-spacing: 0;
+    background: linear-gradient(90deg, rgba(196, 90, 132, 0.28), rgba(86, 136, 194, 0.42), rgba(196, 90, 132, 0.28));
+    border-radius: 999px;
+}
+
+@media (max-width: 900px) {
+    .archive-timeline .timeline-separator {
+        padding: 4px 0;
+    }
+
+    .archive-timeline .timeline-separator .timeline-separator-content {
+        width: min(94vw, 820px);
+        gap: 6px;
+        padding: 4px 2px;
+    }
+
+    .archive-timeline .timeline-separator .timeline-separator-pattern {
+        font-size: 0.74rem;
+    }
+
+    .archive-timeline .timeline-separator-year .timeline-separator-label {
+        font-size: 0.94rem;
+    }
+
+    .archive-timeline .timeline-separator-month .timeline-separator-label {
+        font-size: 0.86rem;
+    }
+
+    .archive-timeline .timeline-separator-month .timeline-separator-pattern {
+        font-size: 0;
+        color: transparent;
+        width: 36px;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

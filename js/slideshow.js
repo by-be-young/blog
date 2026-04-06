@@ -60,7 +60,9 @@
             return order;
         }
 
-        // 清空已有结构，统一由脚本渲染 slides
+        // 保留动态背景层（如萤火虫），仅重建 slide 节点
+        const preservedOverlay = container.querySelector('.fireflies-overlay');
+        if (preservedOverlay) preservedOverlay.remove();
         container.innerHTML = '';
         IMAGES.forEach(src => {
             const d = document.createElement('div');
@@ -68,6 +70,7 @@
             d.style.backgroundImage = `url('${src}')`;
             container.appendChild(d);
         });
+        if (preservedOverlay) container.appendChild(preservedOverlay);
 
         const slides = container.querySelectorAll('.slide');
         if (!slides || slides.length === 0) return;
@@ -75,6 +78,7 @@
         const cycleDuration = INTERVAL * slides.length;
         let cachedCycle = -1;
         let cachedOrder = [];
+        let activeIndex = -1;
 
         // 根据全局 start 时间与间隔计算当前索引，按“每轮随机顺序”播放
         function update() {
@@ -89,8 +93,14 @@
             }
 
             const idx = cachedOrder[posInCycle];
-            slides.forEach(s => s.classList.remove('active'));
-            if (slides[idx]) slides[idx].classList.add('active');
+            if (typeof idx !== 'number' || idx < 0 || idx >= slides.length) return;
+            if (idx === activeIndex) return;
+
+            if (activeIndex >= 0 && slides[activeIndex]) {
+                slides[activeIndex].classList.remove('active');
+            }
+            slides[idx].classList.add('active');
+            activeIndex = idx;
         }
 
         // 首次渲染并定时刷新（每秒检查一次以保证跨页同步）
