@@ -2,7 +2,7 @@
 title: Java总复习
 date: 2026-01-04
 excerpt: Java题型总复习
-recommended: true
+recommended: false
 type: 概要笔记
 series: 二上总复习
 ---

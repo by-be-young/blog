@@ -31,7 +31,8 @@
         "type": "系统笔记",
         "series": null,
         "contentFile": "blogs/二下/操作系统/启动/ELF文件结构.md",
-        "recommended": false
+        "recommended": true,
+        "lastEditedDate": "2026-04-06"
     },
     {
         "id": 2626146186,
@@ -65,7 +66,8 @@
         "type": "系统笔记",
         "series": "操作系统理论",
         "contentFile": "blogs/二下/操作系统/启动/计算机的启动过程.md",
-        "recommended": false
+        "recommended": true,
+        "lastEditedDate": "2026-04-06"
     },
     {
         "id": 2069020613,
@@ -320,8 +322,7 @@
         "type": "系统笔记",
         "series": "计组理论",
         "contentFile": "blogs/二上/计组/链接/链接与运行.md",
-        "recommended": false,
-        "lastEditedDate": "2026-04-06"
+        "recommended": false
     },
     {
         "id": 1786809215,
@@ -389,8 +390,7 @@
         "type": "概要笔记",
         "series": "计组理论",
         "contentFile": "blogs/二上/计组/MIPS/指令系统与MIPS汇编语言.md",
-        "recommended": false,
-        "lastEditedDate": "2026-04-06"
+        "recommended": false
     },
     {
         "id": 1743834547,
@@ -424,8 +424,7 @@
         "type": "系统笔记",
         "series": "计组理论",
         "contentFile": "blogs/二上/计组/存储系统/虚拟存储器.md",
-        "recommended": false,
-        "lastEditedDate": "2026-04-06"
+        "recommended": false
     },
     {
         "id": 4102387947,
@@ -442,8 +441,7 @@
         "type": "系统笔记",
         "series": "计组理论",
         "contentFile": "blogs/二上/计组/存储系统/主存储器.md",
-        "recommended": false,
-        "lastEditedDate": "2026-04-06"
+        "recommended": false
     },
     {
         "id": 3693402797,
@@ -460,7 +458,8 @@
         "type": "概要笔记",
         "series": "二上总复习",
         "contentFile": "blogs/二上/Java/总复习/Java总复习.md",
-        "recommended": true
+        "recommended": false,
+        "lastEditedDate": "2026-04-06"
     },
     {
         "id": 3461312274,
@@ -477,7 +476,8 @@
         "type": "系统笔记",
         "series": "二上总复习",
         "contentFile": "blogs/二上/离散二/总复习/离散数学题型总复习.md",
-        "recommended": true
+        "recommended": false,
+        "lastEditedDate": "2026-04-06"
     },
     {
         "id": 1143004445,
@@ -630,7 +630,8 @@
         "type": "概要笔记",
         "series": "二上总复习",
         "contentFile": "blogs/二上/概率统计/总复习/概率统计必背公式.md",
-        "recommended": true
+        "recommended": false,
+        "lastEditedDate": "2026-04-06"
     },
     {
         "id": 3372524656,
@@ -681,8 +682,7 @@
         "type": "轻松笔记",
         "series": "计组理论",
         "contentFile": "blogs/二上/计组/存储系统/Cache.md",
-        "recommended": false,
-        "lastEditedDate": "2026-04-06"
+        "recommended": false
     },
     {
         "id": 3262314282,
@@ -699,7 +699,8 @@
         "type": "概要笔记",
         "series": "二上总复习",
         "contentFile": "blogs/二上/算法/模板/算法板子.md",
-        "recommended": true
+        "recommended": false,
+        "lastEditedDate": "2026-04-06"
     },
     {
         "id": 3054643240,
