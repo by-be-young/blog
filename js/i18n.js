@@ -1,6 +1,6 @@
 // 简单 i18n 实现
 (function () {
-    const DEFAULT_LANG = 'ja'; // 默认语言，易于修改
+    const DEFAULT_LANG = 'zh'; // 默认语言，易于修改
     const LANG_KEY = 'site_language';
 
     const translations = {
@@ -22,7 +22,7 @@
             archive_filter_all: '显示全部博客',
             archive_filter_non_learning: '只显示非学习类博客',
             categories_filter_title: '筛选相关博客',
-            series_page_title: '系列目录',
+            series_page_title: '系列一览',
             series_catalog: '目录',
             series_empty: '暂无系列内容',
             series_post_count: '{n}篇文章',

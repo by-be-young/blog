@@ -92,9 +92,9 @@ function getCurrentSiteLang() {
         }
     } catch (e) { }
     try {
-        return localStorage.getItem('site_language') || 'ja';
+        return localStorage.getItem('site_language') || 'zh';
     } catch (e) { }
-    return 'ja';
+    return 'zh';
 }
 
 function formatProfileWordCount(totalWords) {
@@ -946,7 +946,7 @@ function initSettingsModal() {
     function syncLanguageSelection() {
         const currentLang = (window.siteI18n && typeof window.siteI18n.getLang === 'function')
             ? window.siteI18n.getLang()
-            : 'ja';
+            : 'zh';
         languageInputs.forEach(input => {
             input.checked = input.value === currentLang;
         });

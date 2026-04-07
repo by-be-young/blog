@@ -29,9 +29,9 @@
             }
         } catch (e) { }
         try {
-            return localStorage.getItem('site_language') || 'ja';
+            return localStorage.getItem('site_language') || 'zh';
         } catch (e) { }
-        return 'ja';
+        return 'zh';
     }
 
     function formatProfileWordCount(totalWords) {
@@ -107,7 +107,7 @@
     // 主逻辑
     document.addEventListener('DOMContentLoaded', function () {
         // 初始加载
-        const lang = (window.siteI18n && typeof window.siteI18n.getLang === 'function') ? window.siteI18n.getLang() : 'ja';
+        const lang = (window.siteI18n && typeof window.siteI18n.getLang === 'function') ? window.siteI18n.getLang() : 'zh';
         // 加载对应语言的 about Markdown 内容
         loadMarkdownForLang(lang).then(found => {
             const mdEl = document.getElementById('markdown-content');
@@ -123,7 +123,7 @@
 
         // 监听语言切换事件
         document.addEventListener('site:languageChanged', function () {
-            const lang2 = (window.siteI18n && typeof window.siteI18n.getLang === 'function') ? window.siteI18n.getLang() : 'ja';
+            const lang2 = (window.siteI18n && typeof window.siteI18n.getLang === 'function') ? window.siteI18n.getLang() : 'zh';
             loadMarkdownForLang(lang2).then(found => {
                 const mdEl = document.getElementById('markdown-content');
                 if (!mdEl) return;

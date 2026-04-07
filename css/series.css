@@ -53,16 +53,42 @@
 }
 
 .series-card {
+    position: relative;
     border-radius: 20px;
     padding: 12px;
     border: 1px solid rgba(0, 0, 0, 0.06);
     box-shadow: 0 16px 32px rgba(44, 62, 80, 0.14);
     cursor: pointer;
     opacity: 0;
-    transform: translateY(10px);
     animation: series-enter 560ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
     animation-delay: var(--series-delay, 0ms);
-    overflow: hidden;
+    overflow: visible;
+    transform-origin: left bottom;
+    transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 280ms ease;
+}
+
+.series-card-shell {
+    transition: none;
+}
+
+.series-card:not([data-open="true"]):hover,
+.series-card:not([data-open="true"]):focus-visible {
+    transform: rotate(-2deg);
+    box-shadow: 0 20px 34px rgba(44, 62, 80, 0.2);
+}
+
+.series-card.is-restoring,
+.series-card.is-restoring:hover,
+.series-card.is-restoring:focus-visible {
+    transform: rotate(0deg);
+    box-shadow: 0 16px 32px rgba(44, 62, 80, 0.14);
+}
+
+.series-card.is-restoring::after,
+.series-card.is-restoring:hover::after,
+.series-card.is-restoring:focus-visible::after {
+    opacity: 0;
+    transform: translateX(90%);
 }
 
 .series-card:focus-visible {
@@ -293,12 +319,10 @@
 @keyframes series-enter {
     from {
         opacity: 0;
-        transform: translateY(10px);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
     }
 }
 
@@ -336,7 +360,8 @@
         gap: 14px;
         overflow-x: auto;
         overflow-y: hidden;
-        padding-bottom: 8px;
+        padding-top: 14px;
+        padding-bottom: 16px;
         scrollbar-width: thin;
     }
 
@@ -358,7 +383,7 @@
         flex: 0 0 auto;
         width: 320px;
         height: 410px;
-        transition: width 360ms cubic-bezier(0.22, 1, 0.36, 1);
+        transition: width 360ms cubic-bezier(0.22, 1, 0.36, 1), transform 280ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 280ms ease;
     }
 
     .series-card[data-open="true"] {

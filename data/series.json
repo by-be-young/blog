@@ -2,7 +2,7 @@
     {
         "id": 1704890032,
         "title": "二上总复习",
-        "coverImage": "assets/images/background/bg2.png",
+        "coverImage": "assets/images/series.png",
         "count": 7,
         "posts": [
             {
@@ -52,7 +52,7 @@
     {
         "id": 303458327,
         "title": "计组理论",
-        "coverImage": "assets/images/background/bg2.png",
+        "coverImage": "assets/images/series.png",
         "count": 5,
         "posts": [
             {
@@ -90,7 +90,7 @@
     {
         "id": 565172155,
         "title": "操作系统预备知识",
-        "coverImage": "assets/images/background/bg2.png",
+        "coverImage": "assets/images/series.png",
         "count": 4,
         "posts": [
             {
@@ -122,7 +122,7 @@
     {
         "id": 2418676405,
         "title": "操作系统理论",
-        "coverImage": "assets/images/background/bg2.png",
+        "coverImage": "assets/images/series.png",
         "count": 1,
         "posts": [
             {

@@ -82,7 +82,7 @@
                     title,
                     coverImage: (typeof item.coverImage === 'string' && item.coverImage.trim())
                         ? item.coverImage.trim()
-                        : 'assets/images/background/bg2.png',
+                        : 'assets/images/series.png',
                     posts,
                     count: Number.isFinite(Number(item.count)) ? Number(item.count) : posts.length
                 };
@@ -121,7 +121,7 @@
                 posts.sort((a, b) => new Date(b.date) - new Date(a.date));
                 return {
                     title,
-                    coverImage: 'assets/images/background/bg2.png',
+                    coverImage: 'assets/images/series.png',
                     posts,
                     count: posts.length
                 };
@@ -137,7 +137,9 @@
         const cards = Array.from(document.querySelectorAll('.series-card'));
         const listEl = document.getElementById('seriesList');
         const EXPAND_REVEAL_DELAY = 380;
+        const CLICK_RESTORE_DELAY = 260;
         const revealTimers = new WeakMap();
+        const clickRestoreTimers = new WeakMap();
 
         function isDesktopView() {
             return window.matchMedia('(min-width: 901px)').matches;
@@ -174,11 +176,21 @@
             }
         }
 
+        function clearClickRestoreTimer(card) {
+            const timer = clickRestoreTimers.get(card);
+            if (timer) {
+                clearTimeout(timer);
+                clickRestoreTimers.delete(card);
+            }
+        }
+
         function closeCard(card) {
             clearRevealTimer(card);
+            clearClickRestoreTimer(card);
             card.setAttribute('data-open', 'false');
             card.setAttribute('aria-expanded', 'false');
             card.setAttribute('data-phase', 'closed');
+            card.classList.remove('is-restoring');
         }
 
         if (listEl) {
@@ -193,6 +205,23 @@
         }
 
         cards.forEach(card => {
+            function triggerToggleAfterRestore() {
+                const isOpen = card.getAttribute('data-open') === 'true';
+                if (isOpen) {
+                    toggleCard();
+                    return;
+                }
+
+                clearClickRestoreTimer(card);
+                card.classList.add('is-restoring');
+                const timer = setTimeout(() => {
+                    card.classList.remove('is-restoring');
+                    toggleCard();
+                    clickRestoreTimers.delete(card);
+                }, CLICK_RESTORE_DELAY);
+                clickRestoreTimers.set(card, timer);
+            }
+
             function toggleCard() {
                 const isOpen = card.getAttribute('data-open') === 'true';
                 const nextOpen = !isOpen;
@@ -221,7 +250,7 @@
             card.addEventListener('click', function (event) {
                 // Keep post links clickable without toggling the card.
                 if (event.target && event.target.closest('.series-post-link')) return;
-                toggleCard();
+                triggerToggleAfterRestore();
             });
 
             card.addEventListener('keydown', function (event) {
