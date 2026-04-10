@@ -1,5 +1,6 @@
 ---
 type: 待完善
+excerpt: 2421操作系统Lab2课下实验Exercise习题总结及个人答案
 ---
 # 2.1
 

@@ -9,6 +9,11 @@ const OUTPUT_JSON = path.join(ROOT, 'data', 'blogs.json');
 const SERIES_JSON = path.join(ROOT, 'data', 'series.json');
 const ANNOUNCEMENTS_JSON = path.join(ROOT, 'data', 'announcements.json');
 const BACKGROUND_JSON = path.join(ROOT, 'data', 'background-images.json');
+const PDF_MATERIALS_JSON = path.join(ROOT, 'data', 'pdf-materials.json');
+const ENGLISH_MATERIALS_DIRS = [
+    path.join(ROOT, 'English_material'),
+    path.join(ROOT, 'English_materials')
+];
 const LEARNING_FIRST_TAGS = new Set(['二上', '二下']);
 const HOME_CATEGORY = {
     LEARNING: '学习',
@@ -172,6 +177,82 @@ async function generateBackgroundImagesManifest() {
     console.log(`[generate] Wrote ${images.length} background images -> ${toPosix(path.relative(ROOT, BACKGROUND_JSON))}`);
 }
 
+async function listPdfFiles(dir) {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    const files = [];
+
+    for (const entry of entries) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+            files.push(...(await listPdfFiles(full)));
+        } else if (entry.isFile() && entry.name.toLowerCase().endsWith('.pdf')) {
+            files.push(full);
+        }
+    }
+
+    return files;
+}
+
+async function resolveEnglishMaterialsDir() {
+    for (const dirPath of ENGLISH_MATERIALS_DIRS) {
+        try {
+            const stat = await fs.stat(dirPath);
+            if (stat.isDirectory()) {
+                return dirPath;
+            }
+        } catch (e) {
+            // keep checking candidates
+        }
+    }
+    return null;
+}
+
+async function generatePdfMaterialsManifest() {
+    const materialsDir = await resolveEnglishMaterialsDir();
+
+    if (!materialsDir) {
+        const payload = {
+            sourceDir: null,
+            generatedAt: new Date().toISOString(),
+            items: []
+        };
+        await fs.mkdir(path.dirname(PDF_MATERIALS_JSON), { recursive: true });
+        await fs.writeFile(PDF_MATERIALS_JSON, JSON.stringify(payload, null, 4) + '\n', 'utf8');
+        console.log(`[generate] No English material directory found, wrote empty list -> ${toPosix(path.relative(ROOT, PDF_MATERIALS_JSON))}`);
+        return;
+    }
+
+    const pdfFiles = await listPdfFiles(materialsDir);
+    pdfFiles.sort((a, b) => a.localeCompare(b, 'zh-CN'));
+
+    const items = [];
+    for (const pdfFile of pdfFiles) {
+        const stat = await fs.stat(pdfFile);
+        const relFromRoot = toPosix(path.relative(ROOT, pdfFile));
+        const relFromMaterials = toPosix(path.relative(materialsDir, pdfFile));
+        const title = path.basename(pdfFile, '.pdf');
+
+        items.push({
+            id: stableIdFromString(relFromRoot),
+            title,
+            path: relFromRoot,
+            relativePath: relFromMaterials,
+            size: stat.size,
+            modifiedAt: stat.mtime.toISOString()
+        });
+    }
+
+    const payload = {
+        sourceDir: toPosix(path.relative(ROOT, materialsDir)),
+        generatedAt: new Date().toISOString(),
+        items
+    };
+
+    await fs.mkdir(path.dirname(PDF_MATERIALS_JSON), { recursive: true });
+    await fs.writeFile(PDF_MATERIALS_JSON, JSON.stringify(payload, null, 4) + '\n', 'utf8');
+    console.log(`[generate] Wrote ${items.length} pdf materials -> ${toPosix(path.relative(ROOT, PDF_MATERIALS_JSON))}`);
+}
+
 async function main() {
     const runTime = new Date();
     const runDateText = formatDateYYYYMMDD(runTime);
@@ -186,6 +267,7 @@ async function main() {
 
     await appendAnnouncementIfProvided();
     await generateBackgroundImagesManifest();
+    await generatePdfMaterialsManifest();
 
     let existingBlogs = [];
     try {

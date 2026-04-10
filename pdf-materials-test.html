@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>资料整理</title>
+    <link rel="stylesheet" href="css/pdf-materials-test.css" />
+</head>
+
+<body>
+    <main class="page">
+        <header class="page-header">
+            <h1>资料整理</h1>
+        </header>
+
+        <section class="layout" aria-label="PDF 目录与预览">
+            <aside class="sidebar" aria-label="PDF 文件列表">
+                <div class="toolbar">
+                    <input id="searchInput" type="search" placeholder="搜索标题" aria-label="搜索 PDF" />
+                    <p id="metaText">正在加载目录...</p>
+                </div>
+                <ul id="pdfList" class="pdf-list" aria-live="polite"></ul>
+            </aside>
+
+            <section class="viewer" aria-label="PDF 预览区域">
+                <div class="viewer-toolbar">
+                    <h2 id="currentTitle">未选择文件</h2>
+                    <a id="openLink" href="#" target="_blank" rel="noopener noreferrer" aria-disabled="true">新标签打开</a>
+                </div>
+                <iframe id="pdfFrame" title="PDF 预览" loading="lazy"></iframe>
+                <p id="emptyHint" class="empty-hint">请选择左侧 PDF 进行预览。</p>
+            </section>
+        </section>
+    </main>
+
+    <script type="module" src="js/pdf-materials-test.js"></script>
+</body>
+
+</html>
