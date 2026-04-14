@@ -83,6 +83,36 @@ function normalizeSeries(value) {
     return '';
 }
 
+function normalizeOrder(value) {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+        return Math.trunc(value);
+    }
+
+    if (typeof value === 'string' && value.trim()) {
+        const parsed = Number(value.trim());
+        if (Number.isFinite(parsed)) {
+            return Math.trunc(parsed);
+        }
+    }
+
+    return null;
+}
+
+function compareSeriesPosts(a, b) {
+    const aHasOrder = Number.isFinite(a?.order);
+    const bHasOrder = Number.isFinite(b?.order);
+
+    if (aHasOrder && bHasOrder) {
+        if (a.order !== b.order) return a.order - b.order;
+        return new Date(b.date) - new Date(a.date);
+    }
+
+    if (aHasOrder && !bHasOrder) return -1;
+    if (!aHasOrder && bHasOrder) return 1;
+
+    return new Date(b.date) - new Date(a.date);
+}
+
 async function appendAnnouncementIfProvided() {
     const args = process.argv.slice(2).map(a => String(a)).filter(Boolean);
     const message = args.join(' ').trim();
@@ -343,6 +373,7 @@ async function main() {
         // blog type comes from front-matter `type` if provided
         const type = (typeof data.type === 'string' && data.type.trim()) ? data.type.trim() : null;
         const series = normalizeSeries(data.series);
+        const order = normalizeOrder(data.order);
 
         // support recommended flag in front-matter: accept either 'recommended' or Chinese '推荐'
         const recommended = Boolean(data.recommended) || Boolean(data['推荐']);
@@ -362,6 +393,7 @@ async function main() {
             category,
             type,
             series: series || null,
+            order,
             contentFile: relFromRoot,
             recommended
         };
@@ -394,7 +426,7 @@ async function main() {
         .map(([name, posts]) => {
             const sortedPosts = posts
                 .slice()
-                .sort((a, b) => new Date(b.date) - new Date(a.date));
+                .sort(compareSeriesPosts);
 
             return {
                 id: stableIdFromString(`series:${name}`),
@@ -405,6 +437,7 @@ async function main() {
                     id: post.id,
                     title: post.title,
                     date: post.date,
+                    order: post.order,
                     contentFile: post.contentFile
                 }))
             };

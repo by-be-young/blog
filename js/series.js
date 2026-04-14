@@ -42,6 +42,36 @@
         return '';
     }
 
+    function normalizeOrder(value) {
+        if (typeof value === 'number' && Number.isFinite(value)) {
+            return Math.trunc(value);
+        }
+
+        if (typeof value === 'string' && value.trim()) {
+            const parsed = Number(value.trim());
+            if (Number.isFinite(parsed)) {
+                return Math.trunc(parsed);
+            }
+        }
+
+        return null;
+    }
+
+    function compareSeriesPosts(a, b) {
+        const aHasOrder = Number.isFinite(a && a.order);
+        const bHasOrder = Number.isFinite(b && b.order);
+
+        if (aHasOrder && bHasOrder) {
+            if (a.order !== b.order) return a.order - b.order;
+            return new Date(b.date) - new Date(a.date);
+        }
+
+        if (aHasOrder && !bHasOrder) return -1;
+        if (!aHasOrder && bHasOrder) return 1;
+
+        return new Date(b.date) - new Date(a.date);
+    }
+
     function getLatestSeriesTimestamp(series) {
         if (!series || !Array.isArray(series.posts) || series.posts.length === 0) return 0;
         const latestDate = series.posts[0] && series.posts[0].date;
@@ -70,13 +100,14 @@
                             return {
                                 id,
                                 title: postTitle,
-                                date: typeof post.date === 'string' ? post.date : ''
+                                date: typeof post.date === 'string' ? post.date : '',
+                                order: normalizeOrder(post.order)
                             };
                         })
                         .filter(Boolean)
                     : [];
 
-                posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+                posts.sort(compareSeriesPosts);
 
                 return {
                     title,
@@ -112,13 +143,14 @@
             map.get(name).push({
                 id,
                 title: (typeof blog.title === 'string' && blog.title.trim()) ? blog.title.trim() : t('series_untitled_post', '未命名文章'),
-                date: typeof blog.date === 'string' ? blog.date : ''
+                date: typeof blog.date === 'string' ? blog.date : '',
+                order: normalizeOrder(blog.order)
             });
         });
 
         return Array.from(map.entries())
             .map(([title, posts]) => {
-                posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+                posts.sort(compareSeriesPosts);
                 return {
                     title,
                     coverImage: 'assets/images/series.png',
@@ -140,6 +172,7 @@
         const CLICK_RESTORE_DELAY = 260;
         const revealTimers = new WeakMap();
         const clickRestoreTimers = new WeakMap();
+        const touchHoverTimers = new WeakMap();
 
         function isDesktopView() {
             return window.matchMedia('(min-width: 901px)').matches;
@@ -184,9 +217,40 @@
             }
         }
 
+        function clearTouchHoverTimer(card) {
+            const timer = touchHoverTimers.get(card);
+            if (timer) {
+                clearTimeout(timer);
+                touchHoverTimers.delete(card);
+            }
+        }
+
+        function setTouchHover(card) {
+            if (!card || card.getAttribute('data-open') === 'true') return;
+            clearTouchHoverTimer(card);
+            card.classList.add('is-touch-hover');
+        }
+
+        function clearTouchHover(card, delay = 0) {
+            if (!card) return;
+            clearTouchHoverTimer(card);
+
+            if (delay > 0) {
+                const timer = setTimeout(() => {
+                    card.classList.remove('is-touch-hover');
+                    touchHoverTimers.delete(card);
+                }, delay);
+                touchHoverTimers.set(card, timer);
+                return;
+            }
+
+            card.classList.remove('is-touch-hover');
+        }
+
         function closeCard(card) {
             clearRevealTimer(card);
             clearClickRestoreTimer(card);
+            clearTouchHover(card);
             card.setAttribute('data-open', 'false');
             card.setAttribute('aria-expanded', 'false');
             card.setAttribute('data-phase', 'closed');
@@ -206,6 +270,7 @@
 
         cards.forEach(card => {
             function triggerToggleAfterRestore() {
+                clearTouchHover(card);
                 const isOpen = card.getAttribute('data-open') === 'true';
                 if (isOpen) {
                     toggleCard();
@@ -251,6 +316,26 @@
                 // Keep post links clickable without toggling the card.
                 if (event.target && event.target.closest('.series-post-link')) return;
                 triggerToggleAfterRestore();
+            });
+
+            card.addEventListener('pointerdown', function (event) {
+                if (!event || event.pointerType !== 'touch') return;
+                setTouchHover(card);
+            });
+
+            card.addEventListener('pointerup', function (event) {
+                if (!event || event.pointerType !== 'touch') return;
+                clearTouchHover(card, 120);
+            });
+
+            card.addEventListener('pointercancel', function (event) {
+                if (!event || event.pointerType !== 'touch') return;
+                clearTouchHover(card);
+            });
+
+            card.addEventListener('pointerleave', function (event) {
+                if (!event || event.pointerType !== 'touch') return;
+                clearTouchHover(card);
             });
 
             card.addEventListener('keydown', function (event) {

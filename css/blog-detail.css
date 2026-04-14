@@ -1621,7 +1621,7 @@ body.blog-detail-page.immersive-reading-active::after {
     border: none;
     /* 马卡龙黄色为主色调，对称式渐变：中间较浅但不偏白（整体略微加深） */
     background: linear-gradient(90deg, rgba(255, 225, 120, 0.22) 0%, rgba(255, 249, 220, 0.80) 50%, rgba(255, 225, 120, 0.22) 100%);
-    color: var(--detail-text);
+    color: #696969;
     padding: 14px 18px;
     margin: 1.2em 0;
     border-radius: 10px;
@@ -1632,7 +1632,21 @@ body.blog-detail-page.immersive-reading-active::after {
 }
 
 .blog-detail-page .article-content blockquote p {
-    margin: 0;
+    margin: 0.5em 0;
+    text-indent: 2em;
+}
+
+.blog-detail-page .article-content blockquote p:first-child {
+    margin-top: 0;
+}
+
+.blog-detail-page .article-content blockquote p:first-child:has(> strong:only-child) {
+    text-align: center;
+    text-indent: 0;
+}
+
+.blog-detail-page .article-content blockquote p:last-child {
+    margin-bottom: 0;
 }
 
 /* 顶部与底部细条强调（水平居中） */

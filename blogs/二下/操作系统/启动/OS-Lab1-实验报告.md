@@ -2,6 +2,7 @@
 type: 系统笔记
 excerpt: 2421操作系统Lab1课下实验实验报告
 series: 操作系统实验报告
+order: "2"
 ---
 # 思考题
 
