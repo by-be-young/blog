@@ -1654,22 +1654,29 @@ body.blog-detail-page.immersive-reading-active::after {
 .blog-detail-page .article-content blockquote:after {
     content: '';
     position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60%;
-    height: 4px;
+    width: 21px;
+    height: 21px;
+    background: transparent;
     border-radius: 2px;
-    /* 顶部/底部细条改为纯色，以增强辨识度 */
-    background: rgba(255, 210, 120, 0.95);
-    opacity: 0.95;
+    opacity: 0.9;
+    transform: none;
+    border-color: rgba(196, 154, 72, 0.82);
+    border-style: solid;
 }
 
 .blog-detail-page .article-content blockquote:before {
-    top: 8px;
+    left: 12px;
+    top: 10px;
+    bottom: auto;
+    border-width: 3.8px 0 0 3.8px;
 }
 
 .blog-detail-page .article-content blockquote:after {
-    bottom: 8px;
+    left: auto;
+    right: 12px;
+    top: auto;
+    bottom: 10px;
+    border-width: 0 3.8px 3.8px 0;
 }
 
 .blog-detail-page .article-content ul li,
