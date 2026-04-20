@@ -168,14 +168,21 @@
         "id": 2418676405,
         "title": "操作系统理论",
         "coverImage": "assets/images/background/bg2.png",
-        "count": 1,
+        "count": 2,
         "posts": [
             {
                 "id": 3791533123,
                 "title": "计算机的启动过程",
                 "date": "2026-03-30",
-                "order": null,
+                "order": 1,
                 "contentFile": "blogs/二下/操作系统/启动/计算机的启动过程.md"
+            },
+            {
+                "id": 3181173193,
+                "title": "内存管理",
+                "date": "2026-04-14",
+                "order": 2,
+                "contentFile": "blogs/二下/操作系统/内存管理/内存管理.md"
             }
         ]
     }

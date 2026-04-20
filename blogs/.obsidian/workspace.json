@@ -14,13 +14,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "文学/诗词/词/如梦令·国家植物园.md",
+                "file": "二下/操作系统/启动/计算机的启动过程.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "如梦令·国家植物园 的大纲"
+              "title": "计算机的启动过程 的大纲"
             }
           }
         ]
@@ -36,12 +36,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "文学/诗词/词/卜算子·元旦晚会.md",
+                "file": "二下/操作系统/启动/计算机的启动过程.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "卜算子·元旦晚会"
+              "title": "计算机的启动过程"
             }
           },
           {
@@ -50,16 +50,15 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "文学/诗词/词/如梦令·国家植物园.md",
+                "file": "二下/操作系统/启动/OS-Lab1-实验报告.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "如梦令·国家植物园"
+              "title": "OS-Lab1-实验报告"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -194,10 +193,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "文学/诗词/词/如梦令·国家植物园.md"
+                "file": "二下/操作系统/启动/计算机的启动过程.md"
               },
               "icon": "lucide-info",
-              "title": "如梦令·国家植物园的笔记属性"
+              "title": "计算机的启动过程的笔记属性"
             }
           }
         ],
@@ -218,29 +217,32 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "a8fdd08faccc1edf",
+  "active": "a48429dd9b66ac0b",
   "lastOpenFiles": [
+    "二下/操作系统/内存管理/内存管理.md",
+    "二下/操作系统/启动/计算机的启动过程.md",
+    "二下/操作系统/启动/ELF文件结构.md",
+    "二下/操作系统/内存管理/OS-Lab2-实验报告.md",
+    "二下/操作系统/启动/OS-Lab1-实验报告.md",
+    "27acba18013a26f933f434bbf2b16bec.jpg",
+    "二下/操作系统/内存管理/Lab2 梳理总结.md",
+    "图片/链表结构.jpg",
+    "文学/诗词/词/卜算子·元旦晚会.md",
+    "图片/内存回收.png",
+    "图片/CPU访存流程.png",
+    "文学/诗词/词/如梦令·国家植物园.md",
     "图片/飞檐.jpg",
     "图片/红墙梅影.jpg",
     "图片/桃花亭.jpg",
     "图片/鸭.jpg",
     "图片/国家植物园.jpg",
-    "文学/诗词/词/卜算子·元旦晚会.md",
-    "文学/诗词/词/如梦令·国家植物园.md",
-    "二下/操作系统/内存管理/Lab2 梳理总结.md",
-    "二下/操作系统/内存管理/内存管理.md",
-    "二下/操作系统/启动/计算机的启动过程.md",
     "二上/计组/存储系统/Cache.md",
     "二上/计组/存储系统/虚拟存储器.md",
     "图片/MIPS地址映射方法.png",
-    "二下/操作系统/内存管理/OS-Lab2-实验报告.md",
-    "图片/Pasted image 20260414190615.png",
-    "二下/操作系统/启动/OS-Lab1-实验报告.md",
     "二下/操作系统/Shell/OS-Lab0-实验报告.md",
     "二上/基物实验/总复习/基物实验.md",
     "二上/计组/存储系统/主存储器.md",
     "二下/操作系统/MOS/Lab1 复习.md",
-    "二下/操作系统/启动/ELF文件结构.md",
     "二下/操作系统/内存管理",
     "二上/算法/模板/算法板子.md",
     "二上/概率统计/总复习/概率统计必背公式.md",
@@ -253,10 +255,6 @@
     "二下/操作系统/Makefile/Makefile基础速成.md",
     "二下/操作系统/Linux/Linux 命令指南.md",
     "二下/操作系统/gcc/gcc语法速成.md",
-    "图片/hello_x86.png",
-    "图片/hello_x86_1.png",
-    "图片/hello_mips.o.png",
-    "图片/hello_mips.png",
     "二下/操作系统/启动",
     "二下/操作系统/MOS",
     "明日方舟/卫戍协议/阿戈尔",

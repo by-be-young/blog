@@ -226,6 +226,7 @@
     </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
     <script src="js/markdown.js"></script>
     <!-- KaTeX JS -->
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -315,7 +316,11 @@
 
             function openH1ById(h1Id) {
                 if (!h1Id || !h1Map.has(h1Id)) return;
-                if (activeH1Id === h1Id) return;
+                const currentH1Li = h1Map.get(h1Id);
+                const currentSubList = currentH1Li ? currentH1Li.querySelector('ul') : null;
+                // 若该分组已是当前分组且其子列表本身已展开，则无需重复操作。
+                // 手动收起后 currentSubList.dataset.open 会变为 0，此时允许重新自动展开。
+                if (activeH1Id === h1Id && (!currentSubList || currentSubList.dataset.open === '1')) return;
 
                 // 收起所有 h1 下的子列表（若存在）并将所有 h1 的 toggle 设为收起状态 ▶
                 document.querySelectorAll('.toc-h1 > .toc-sub-list').forEach(ul => {
@@ -332,6 +337,7 @@
                 if (toggle) toggle.textContent = '▼';
 
                 activeH1Id = h1Id;
+                syncActiveH2WithSubList();
             }
 
             // 目录点击平滑滚动并自动展开
@@ -343,6 +349,7 @@
                     let h1Id = null;
                     if (header.tagName.toLowerCase() === 'h1') {
                         h1Id = header.id;
+                        setActiveH2(null, null, true);
                     } else if (header.tagName.toLowerCase() === 'h2' || header.tagName.toLowerCase() === 'h3') {
                         // 找到最近的上一个h1
                         let prev = header.previousElementSibling;
@@ -429,6 +436,36 @@
 
                 moveH2IndicatorTo(activeH2Li, instant);
             }
+
+            function getCurrentH2WithinH1(h1El, offset) {
+                if (!h1El) return null;
+                let node = h1El.nextElementSibling;
+                let currentH2 = null;
+                while (node) {
+                    if (!node.tagName) {
+                        node = node.nextElementSibling;
+                        continue;
+                    }
+                    const tag = node.tagName.toLowerCase();
+                    if (tag === 'h1') break;
+                    if (tag === 'h2') {
+                        const r = node.getBoundingClientRect();
+                        if (r.top <= offset) currentH2 = node;
+                        else break;
+                    }
+                    node = node.nextElementSibling;
+                }
+                return currentH2;
+            }
+
+            function syncActiveH2WithSubList() {
+                if (!activeH2Li) return;
+                const subList = activeH2Li.closest('.toc-sub-list');
+                if (!subList) return;
+                if (subList.dataset.open !== '1') {
+                    setActiveH2(null, null, true);
+                }
+            }
             const headers = Array.from(content.querySelectorAll('h1, h2'));
             let lastH1 = null, lastH2 = null;
             const h1Map = new Map();
@@ -477,6 +514,7 @@
             document.querySelectorAll('.toc-h1 > .toc-toggle').forEach(toggle => {
                 toggle.addEventListener('click', function (e) {
                     e.stopPropagation();
+                    const h1Li = this.parentElement;
                     const ul = this.parentElement.querySelector('ul');
                     if (!ul) return;
                     const isOpen = ul.dataset.open === '1';
@@ -489,10 +527,14 @@
                     if (!isOpen) {
                         setSubListState(ul, true);
                         this.textContent = '▼';
+                        const h1Link = h1Li.querySelector('a[href^="#"]');
+                        activeH1Id = h1Link ? h1Link.getAttribute('href').slice(1) : activeH1Id;
                     } else {
                         setSubListState(ul, false);
                         this.textContent = '▶';
+                        activeH1Id = null;
                     }
+                    syncActiveH2WithSubList();
                 });
             });
             // 自动展开当前锚点所在h1，其他收起
@@ -545,13 +587,7 @@
 
                 // 更新当前可视的 h2 高亮（取最后一个 top <= offset 的 h2）
                 try {
-                    const h2s = Array.from(content.querySelectorAll('h2'));
-                    let currentH2 = null;
-                    for (let i = 0; i < h2s.length; i++) {
-                        const r = h2s[i].getBoundingClientRect();
-                        if (r.top <= offset) currentH2 = h2s[i];
-                        else break;
-                    }
+                    const currentH2 = getCurrentH2WithinH1(current, offset);
                     if (currentH2 && currentH2.id) {
                         const li = h2Map.get(currentH2.id);
                         setActiveH2(li || null, currentH2);

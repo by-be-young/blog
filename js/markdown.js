@@ -137,6 +137,405 @@ function applyRandomMacaronListMarkerColors(rootEl) {
     });
 }
 
+function ensureMermaidFullscreenViewer() {
+    if (window.__mermaidFullscreenViewer) return window.__mermaidFullscreenViewer;
+
+    let overlay = document.getElementById('mermaid-viewer-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'mermaid-viewer-overlay';
+        overlay.className = 'mermaid-viewer-overlay';
+        overlay.setAttribute('aria-hidden', 'true');
+        overlay.innerHTML = [
+            '<div class="mermaid-viewer-stage" role="dialog" aria-modal="true" aria-label="Mermaid 全屏预览">',
+            '  <div class="mermaid-viewer-toolbar">',
+            '    <button class="mermaid-viewer-close" type="button" aria-label="关闭全屏预览">&times;</button>',
+            '  </div>',
+            '  <div class="mermaid-viewer-content"></div>',
+            '</div>'
+        ].join('');
+        document.body.appendChild(overlay);
+    }
+
+    const contentEl = overlay.querySelector('.mermaid-viewer-content');
+    const closeBtn = overlay.querySelector('.mermaid-viewer-close');
+    const zoomState = {
+        scale: 1,
+        minScale: 0.4,
+        maxScale: 4,
+        baseWidth: 0,
+        baseHeight: 0,
+        svg: null
+    };
+
+    function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    function applyZoom() {
+        if (!zoomState.svg || !zoomState.baseWidth || !zoomState.baseHeight) return;
+        const w = zoomState.baseWidth * zoomState.scale;
+        const h = zoomState.baseHeight * zoomState.scale;
+        zoomState.svg.style.width = w + 'px';
+        zoomState.svg.style.height = h + 'px';
+        zoomState.svg.style.maxWidth = 'none';
+        zoomState.svg.style.maxHeight = 'none';
+    }
+
+    function resetZoom() {
+        zoomState.scale = 1;
+        zoomState.baseWidth = 0;
+        zoomState.baseHeight = 0;
+        zoomState.svg = null;
+    }
+
+    function close() {
+        overlay.classList.remove('is-open');
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('mermaid-viewer-open');
+        resetZoom();
+        if (contentEl) contentEl.innerHTML = '';
+    }
+
+    function open(diagramEl) {
+        if (!diagramEl) return false;
+        const svg = diagramEl.querySelector('svg');
+        if (!svg || !contentEl) return false;
+
+        contentEl.innerHTML = '';
+        const svgClone = svg.cloneNode(true);
+        svgClone.removeAttribute('style');
+        svgClone.removeAttribute('width');
+        svgClone.removeAttribute('height');
+        svgClone.style.width = 'auto';
+        svgClone.style.height = 'auto';
+        svgClone.style.maxWidth = '100%';
+        svgClone.style.maxHeight = '100%';
+        contentEl.appendChild(svgClone);
+
+        zoomState.svg = svgClone;
+        requestAnimationFrame(() => {
+            if (!zoomState.svg) return;
+            const rect = zoomState.svg.getBoundingClientRect();
+            zoomState.baseWidth = rect.width || 0;
+            zoomState.baseHeight = rect.height || 0;
+            zoomState.scale = 1;
+            applyZoom();
+        });
+
+        overlay.classList.add('is-open');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('mermaid-viewer-open');
+        return true;
+    }
+
+    if (!overlay.__mermaidViewerBound) {
+        overlay.__mermaidViewerBound = '1';
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) close();
+        });
+        if (contentEl) {
+            contentEl.addEventListener('wheel', (e) => {
+                if (!overlay.classList.contains('is-open')) return;
+                if (!zoomState.svg || !zoomState.baseWidth || !zoomState.baseHeight) return;
+
+                e.preventDefault();
+                const factor = e.deltaY < 0 ? 1.12 : (1 / 1.12);
+                zoomState.scale = clamp(zoomState.scale * factor, zoomState.minScale, zoomState.maxScale);
+                applyZoom();
+            }, { passive: false });
+        }
+        if (closeBtn) closeBtn.addEventListener('click', close);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && overlay.classList.contains('is-open')) close();
+        });
+    }
+
+    window.__mermaidFullscreenViewer = { open, close };
+    return window.__mermaidFullscreenViewer;
+}
+
+function renderMermaidDiagrams(rootEl) {
+    if (!rootEl) return;
+
+    function collapseBody(container, bodyEl) {
+        if (!container || !bodyEl) return;
+        if (bodyEl.__expandEndHandler) {
+            bodyEl.removeEventListener('transitionend', bodyEl.__expandEndHandler);
+            bodyEl.__expandEndHandler = null;
+        }
+        if (bodyEl.__collapseEndHandler) {
+            bodyEl.removeEventListener('transitionend', bodyEl.__collapseEndHandler);
+            bodyEl.__collapseEndHandler = null;
+        }
+
+        bodyEl.hidden = false;
+        const currentHeight = bodyEl.getBoundingClientRect().height || bodyEl.scrollHeight;
+        bodyEl.style.overflow = 'hidden';
+        bodyEl.style.transition = 'height 280ms ease, opacity 220ms ease';
+        bodyEl.style.height = currentHeight + 'px';
+        bodyEl.style.opacity = '1';
+        void bodyEl.offsetHeight;
+        requestAnimationFrame(() => {
+            container.classList.add('is-collapsed');
+            bodyEl.style.height = '0px';
+            bodyEl.style.opacity = '0';
+        });
+
+        const onEnd = (e) => {
+            if (e.propertyName !== 'height') return;
+            bodyEl.hidden = true;
+            bodyEl.style.height = '';
+            bodyEl.removeEventListener('transitionend', onEnd);
+            bodyEl.__collapseEndHandler = null;
+        };
+        bodyEl.__collapseEndHandler = onEnd;
+        bodyEl.addEventListener('transitionend', onEnd);
+    }
+
+    function expandBody(container, bodyEl) {
+        if (!container || !bodyEl) return;
+        if (bodyEl.__collapseEndHandler) {
+            bodyEl.removeEventListener('transitionend', bodyEl.__collapseEndHandler);
+            bodyEl.__collapseEndHandler = null;
+        }
+        if (bodyEl.__expandEndHandler) {
+            bodyEl.removeEventListener('transitionend', bodyEl.__expandEndHandler);
+            bodyEl.__expandEndHandler = null;
+        }
+
+        bodyEl.hidden = false;
+        bodyEl.style.overflow = 'hidden';
+        bodyEl.style.transition = 'height 280ms ease, opacity 220ms ease';
+        bodyEl.style.height = '0px';
+        bodyEl.style.opacity = '0';
+        void bodyEl.offsetHeight;
+        container.classList.remove('is-collapsed');
+
+        const targetHeight = bodyEl.scrollHeight;
+        requestAnimationFrame(() => {
+            bodyEl.style.height = targetHeight + 'px';
+            bodyEl.style.opacity = '1';
+        });
+
+        const onEnd = (e) => {
+            if (e.propertyName !== 'height') return;
+            bodyEl.style.height = '';
+            bodyEl.removeEventListener('transitionend', onEnd);
+            bodyEl.__expandEndHandler = null;
+        };
+        bodyEl.__expandEndHandler = onEnd;
+        bodyEl.addEventListener('transitionend', onEnd);
+    }
+
+    function updateViewButton(btn, isCodeMode) {
+        if (!btn) return;
+        const icon = btn.querySelector('i');
+        const label = btn.querySelector('.mermaid-view-label');
+        if (isCodeMode) {
+            if (icon) icon.className = 'far fa-image';
+            if (label) label.textContent = '图片';
+            btn.setAttribute('aria-label', '显示图片');
+        } else {
+            if (icon) icon.className = 'fas fa-code';
+            if (label) label.textContent = '代码';
+            btn.setAttribute('aria-label', '显示代码');
+        }
+    }
+
+    const mermaidCodeBlocks = Array.from(rootEl.querySelectorAll('pre > code.language-mermaid, pre > code.lang-mermaid')).filter(codeEl => {
+        // Skip source-view code blocks inside already-enhanced Mermaid cards.
+        return !codeEl.closest('.mermaid-block');
+    });
+
+    mermaidCodeBlocks.forEach(codeEl => {
+        const preEl = codeEl.parentElement;
+        if (!preEl || !preEl.parentElement) return;
+
+        const source = (codeEl.textContent || '').trim();
+
+        const block = document.createElement('div');
+        block.className = 'codeblock mermaid-block';
+
+        const header = document.createElement('div');
+        header.className = 'codeblock__header';
+
+        const langEl = document.createElement('div');
+        langEl.className = 'codeblock__lang';
+        langEl.textContent = 'MERMAID';
+
+        const actions = document.createElement('div');
+        actions.className = 'codeblock__actions';
+
+        const btnCopy = document.createElement('button');
+        btnCopy.type = 'button';
+        btnCopy.className = 'codeblock__btn mermaid-copy-btn';
+        btnCopy.innerHTML = '<i class="far fa-copy"></i><span class="code-copy-label">复制</span>';
+
+        const btnView = document.createElement('button');
+        btnView.type = 'button';
+        btnView.className = 'codeblock__btn mermaid-view-btn';
+        btnView.innerHTML = '<i class="fas fa-code"></i><span class="mermaid-view-label">代码</span>';
+        updateViewButton(btnView, false);
+
+        const btnFullscreen = document.createElement('button');
+        btnFullscreen.type = 'button';
+        btnFullscreen.className = 'codeblock__btn mermaid-full-btn';
+        btnFullscreen.setAttribute('aria-label', '全屏');
+        btnFullscreen.innerHTML = '<i class="fas fa-expand"></i><span class="mermaid-full-label">全屏</span>';
+
+        const btnToggle = document.createElement('button');
+        btnToggle.type = 'button';
+        btnToggle.className = 'codeblock__btn mermaid-toggle-btn';
+        btnToggle.innerHTML = '<i class="fas fa-chevron-up"></i><span class="code-toggle-label">收起</span>';
+
+        actions.appendChild(btnCopy);
+        actions.appendChild(btnView);
+        actions.appendChild(btnFullscreen);
+        actions.appendChild(btnToggle);
+
+        header.appendChild(langEl);
+        header.appendChild(actions);
+
+        const body = document.createElement('div');
+        body.className = 'codeblock__body mermaid-block__body';
+
+        const diagramWrap = document.createElement('div');
+        diagramWrap.className = 'mermaid-block__diagram-wrap';
+        const diagram = document.createElement('div');
+        diagram.className = 'mermaid mermaid-block__diagram';
+        diagram.textContent = source;
+        diagramWrap.appendChild(diagram);
+
+        const sourceWrap = document.createElement('div');
+        sourceWrap.className = 'mermaid-block__source';
+        sourceWrap.hidden = true;
+        const sourcePre = document.createElement('pre');
+        const sourceCode = document.createElement('code');
+        sourceCode.className = 'language-mermaid';
+        sourceCode.textContent = source;
+        sourcePre.appendChild(sourceCode);
+        sourceWrap.appendChild(sourcePre);
+
+        body.appendChild(diagramWrap);
+        body.appendChild(sourceWrap);
+
+        block.appendChild(header);
+        block.appendChild(body);
+
+        preEl.parentElement.replaceChild(block, preEl);
+
+        let lastToggleAt = 0;
+
+        btnCopy.addEventListener('click', async () => {
+            const ok = await copyTextToClipboard(source);
+            if (!ok) return;
+
+            btnCopy.classList.add('is-copied');
+            const label = btnCopy.querySelector('.code-copy-label');
+            if (label) label.textContent = '已复制';
+            window.setTimeout(() => {
+                btnCopy.classList.remove('is-copied');
+                const s = btnCopy.querySelector('.code-copy-label');
+                if (s) s.textContent = '复制';
+            }, 900);
+        });
+
+        btnView.addEventListener('click', () => {
+            const isCodeMode = block.classList.toggle('is-source-mode');
+            sourceWrap.hidden = !isCodeMode;
+            diagramWrap.hidden = isCodeMode;
+            updateViewButton(btnView, isCodeMode);
+            if (!isCodeMode && diagram.getAttribute('data-mermaid-rendered') !== '1' && diagram.getAttribute('data-mermaid-rendering') !== '1') {
+                renderMermaidDiagrams(rootEl);
+            }
+        });
+
+        btnFullscreen.addEventListener('click', () => {
+            const viewer = ensureMermaidFullscreenViewer();
+            const opened = viewer.open(diagram);
+            if (!opened && diagram.getAttribute('data-mermaid-rendering') !== '1') {
+                renderMermaidDiagrams(rootEl);
+                setTimeout(() => {
+                    const v = ensureMermaidFullscreenViewer();
+                    v.open(diagram);
+                }, 120);
+            }
+        });
+
+        btnToggle.addEventListener('click', () => {
+            const now = Date.now();
+            if (now - lastToggleAt < 200) return;
+            lastToggleAt = now;
+
+            const willCollapse = !block.classList.contains('is-collapsed');
+            if (willCollapse) collapseBody(block, body);
+            else expandBody(block, body);
+
+            const icon = btnToggle.querySelector('i');
+            const label = btnToggle.querySelector('.code-toggle-label');
+            if (willCollapse) {
+                if (icon) icon.className = 'fas fa-chevron-down';
+                if (label) label.textContent = '展开';
+                btnToggle.setAttribute('aria-label', '展开');
+            } else {
+                if (icon) icon.className = 'fas fa-chevron-up';
+                if (label) label.textContent = '收起';
+                btnToggle.setAttribute('aria-label', '收起');
+            }
+        });
+    });
+
+    const mermaidNodes = Array.from(rootEl.querySelectorAll('.mermaid-block__diagram:not([data-mermaid-rendered="1"]):not([data-mermaid-rendering="1"])'));
+    if (!mermaidNodes.length) return;
+
+    mermaidNodes.forEach(node => node.setAttribute('data-mermaid-rendering', '1'));
+
+    if (!window.mermaid) {
+        const currentRetry = Number(rootEl.dataset.mermaidRetryCount || '0');
+        if (currentRetry < 5) {
+            rootEl.dataset.mermaidRetryCount = String(currentRetry + 1);
+            setTimeout(() => renderMermaidDiagrams(rootEl), 120);
+        }
+        return;
+    }
+
+    rootEl.dataset.mermaidRetryCount = '0';
+
+    try {
+        if (!window.__mermaidInitialized) {
+            window.mermaid.initialize({
+                startOnLoad: false,
+                securityLevel: 'loose',
+                theme: 'default'
+            });
+            window.__mermaidInitialized = true;
+        }
+
+        if (typeof window.mermaid.run === 'function') {
+            const result = window.mermaid.run({ nodes: mermaidNodes });
+            Promise.resolve(result).then(() => {
+                mermaidNodes.forEach(node => {
+                    node.setAttribute('data-mermaid-rendered', '1');
+                    node.removeAttribute('data-mermaid-rendering');
+                });
+            }).catch((err) => {
+                mermaidNodes.forEach(node => node.removeAttribute('data-mermaid-rendering'));
+                console.warn('mermaid run error', err);
+            });
+        } else if (typeof window.mermaid.init === 'function') {
+            window.mermaid.init(undefined, mermaidNodes);
+            mermaidNodes.forEach(node => {
+                node.setAttribute('data-mermaid-rendered', '1');
+                node.removeAttribute('data-mermaid-rendering');
+            });
+        }
+    } catch (e) {
+        mermaidNodes.forEach(node => node.removeAttribute('data-mermaid-rendering'));
+        console.warn('mermaid render error', e);
+    }
+}
+
 function setupBlogDetailImageViewer(rootEl) {
     if (!rootEl) return;
     if (!document.body || !document.body.classList.contains('blog-detail-page')) return;
@@ -812,6 +1211,7 @@ function renderMarkdownContent() {
 
     // Ensure asset URLs (especially images) resolve correctly onGitHub Pages
     rewriteMarkdownAssetUrls(contentElement);
+    renderMermaidDiagrams(contentElement);
     setupBlogDetailImageViewer(contentElement);
     applyRandomMacaronListMarkerColors(contentElement);
 
@@ -826,7 +1226,11 @@ function renderMarkdownContent() {
     } catch (e) { }
 
     // 高亮代码块
-    if (window.hljs) { document.querySelectorAll('pre code').forEach(block => { window.hljs.highlightElement(block); }); }
+    if (window.hljs) {
+        contentElement.querySelectorAll('pre code:not(.language-mermaid):not(.lang-mermaid)').forEach(block => {
+            window.hljs.highlightElement(block);
+        });
+    }
 
     enhanceCodeBlocks(contentElement);
     try { if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') window.siteI18n.applyTo(contentElement); } catch (e) { }
@@ -1407,7 +1811,7 @@ function enhanceCodeBlocks(rootEl) {
         try {
             const lang = (window.siteI18n && typeof window.siteI18n.getLang === 'function') ? window.siteI18n.getLang() : 'zh';
             const map = (window.siteI18n && window.siteI18n.translations) ? (window.siteI18n.translations[lang] || {}) : {};
-            document.querySelectorAll('.codeblock').forEach(container => {
+            document.querySelectorAll('.codeblock:not(.mermaid-block)').forEach(container => {
                 const btns = container.querySelectorAll('.codeblock__btn');
                 const btnCopyEl = btns[0];
                 const btnToggleEl = btns[1];

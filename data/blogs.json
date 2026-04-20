@@ -15,8 +15,7 @@
         "series": null,
         "order": null,
         "contentFile": "blogs/文学/诗词/词/如梦令·国家植物园.md",
-        "recommended": false,
-        "lastEditedDate": "2026-04-15"
+        "recommended": false
     },
     {
         "id": 3181173193,
@@ -31,10 +30,11 @@
         ],
         "category": "学习",
         "type": "待完善",
-        "series": null,
-        "order": null,
+        "series": "操作系统理论",
+        "order": 2,
         "contentFile": "blogs/二下/操作系统/内存管理/内存管理.md",
-        "recommended": false
+        "recommended": false,
+        "lastEditedDate": "2026-04-18"
     },
     {
         "id": 3927684149,
@@ -140,9 +140,10 @@
         "category": "学习",
         "type": "系统笔记",
         "series": "操作系统理论",
-        "order": null,
+        "order": 1,
         "contentFile": "blogs/二下/操作系统/启动/计算机的启动过程.md",
-        "recommended": true
+        "recommended": true,
+        "lastEditedDate": "2026-04-18"
     },
     {
         "id": 2069020613,

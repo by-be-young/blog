@@ -424,10 +424,17 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
     content: '● ';
 }
 
-/* marked 生成的列表项常包裹单个 p，压平该场景以避免出现额外换行 */
-.blog-detail .article-content li>p:first-child:last-child {
+/* marked 常把列表项内容包成 p；统一压平，避免 "1." 与正文被拆成两行 */
+.blog-detail .article-content li>p {
     display: inline;
     margin: 0;
+    padding: 0;
+}
+
+/* 多段落列表项：除首段外仍允许块级换行显示 */
+.blog-detail .article-content li>p+p {
+    display: block;
+    margin-top: 0.45em;
 }
 
 .blog-detail .article-content blockquote {
@@ -439,6 +446,65 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
     font-style: normal;
     font-size: 1.05rem;
     line-height: 2.1;
+}
+
+.blog-detail .article-content .mermaid-block {
+    border-color: rgba(45, 140, 240, 0.2);
+}
+
+.blog-detail .article-content .mermaid-block .codeblock__header {
+    background: linear-gradient(180deg, rgba(219, 247, 255, 0.95) 0%, rgba(216, 255, 247, 0.92) 100%);
+}
+
+.blog-detail .article-content .mermaid-block__body {
+    padding: 0;
+}
+
+.blog-detail .article-content .mermaid-block__diagram-wrap,
+.blog-detail .article-content .mermaid-block__source {
+    max-height: 520px;
+    overflow: auto;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.blog-detail .article-content .mermaid-block__diagram-wrap {
+    padding: 12px;
+}
+
+.blog-detail .article-content .mermaid-block__source {
+    padding: 0;
+}
+
+.blog-detail .article-content .mermaid-block__source pre {
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: rgba(167, 243, 208, 0.22);
+    padding: 14px 16px;
+}
+
+.blog-detail .article-content .mermaid-block .mermaid {
+    margin: 0;
+    border: 1px solid rgba(45, 140, 240, 0.14);
+    border-radius: 10px;
+    background: #fff;
+    padding: 8px;
+}
+
+.blog-detail .article-content .mermaid-block .mermaid svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+}
+
+@media (max-width: 720px) {
+
+    .blog-detail .article-content .mermaid-block__diagram-wrap,
+    .blog-detail .article-content .mermaid-block__source {
+        max-height: 360px;
+    }
 }
 
 /* 博客详情页美化 */
@@ -657,6 +723,93 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
         0 14px 30px rgba(0, 0, 0, 0.16);
 }
 
+.mermaid-viewer-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1310;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(16, 20, 28, 0.84);
+    backdrop-filter: blur(3px);
+    padding: clamp(14px, 3.8vw, 42px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 260ms ease, visibility 260ms ease;
+}
+
+.mermaid-viewer-overlay.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.mermaid-viewer-stage {
+    position: relative;
+    width: min(98vw, 1760px);
+    height: min(96vh, 1120px);
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.42);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.mermaid-viewer-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(24, 49, 58, 0.12);
+    background: linear-gradient(180deg, rgba(219, 247, 255, 0.9) 0%, rgba(216, 255, 247, 0.88) 100%);
+}
+
+.mermaid-viewer-close {
+    width: 42px;
+    height: 36px;
+    border: none;
+    border-radius: 999px;
+    background: rgba(32, 38, 48, 0.12);
+    color: #22303a;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 160ms ease, transform 120ms ease;
+}
+
+.mermaid-viewer-close:hover {
+    background: rgba(32, 38, 48, 0.2);
+}
+
+.mermaid-viewer-close:active {
+    transform: scale(0.96);
+}
+
+.mermaid-viewer-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: #f8fbff;
+}
+
+.mermaid-viewer-content svg {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    margin: 0 auto;
+}
+
+body.mermaid-viewer-open {
+    overflow: hidden;
+}
+
 .image-viewer-overlay {
     position: fixed;
     inset: 0;
@@ -851,6 +1004,16 @@ body.image-viewer-open {
         height: 32px;
         font-size: 20px;
     }
+
+    .mermaid-viewer-stage {
+        width: 96vw;
+        height: 90vh;
+        border-radius: 12px;
+    }
+
+    .mermaid-viewer-content {
+        padding: 10px;
+    }
 }
 
 /* 代码块样式（浅色主题）：使用 highlight.js 的浅色高亮样式，保留可读性与轻微马卡龙风格 */
@@ -949,7 +1112,9 @@ body.image-viewer-open {
     }
 
     .blog-detail .article-content .codeblock__btn .code-copy-label,
-    .blog-detail .article-content .codeblock__btn .code-toggle-label {
+    .blog-detail .article-content .codeblock__btn .code-toggle-label,
+    .blog-detail .article-content .codeblock__btn .mermaid-view-label,
+    .blog-detail .article-content .codeblock__btn .mermaid-full-label {
         display: none;
     }
 }
@@ -1005,14 +1170,12 @@ body.image-viewer-open {
 
 .blog-detail .article-content :not(pre)>code {
     font-size: 1.02rem;
-    border-radius: 6px;
-    background: transparent;
+    border-radius: 0;
+    background: none;
     color: #18313a;
-    border: 1px solid rgba(24, 49, 58, 0.14);
-    padding: 2px 6px;
-    box-shadow:
-        inset 0 1px 3px rgba(24, 49, 58, 0.12),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.34);
+    border: none;
+    padding: 0;
+    box-shadow: none;
     /* 行内代码也使用 Comic Mono 字体 */
     font-family: 'Comic Mono', 'Comic Sans MS', 'Comic Neue', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
@@ -1028,14 +1191,13 @@ body.image-viewer-open {
 
 /* Markdown 表格样式：避免挤压/溢出导致“看不见” */
 .blog-detail .article-content table {
-    /* 保证表格至少与正文容器等宽：当内容小于容器时拉宽；当内容更宽时可横向滚动 */
-    width: 100%;
-    min-width: 100%;
-    max-width: none;
-    table-layout: fixed;
-    /* 强制列按宽度分配，确保表格占满容器宽度 */
+    /* 表格按内容宽度显示并在正文中居中；超宽时可横向滚动 */
+    width: fit-content;
+    min-width: 0;
+    max-width: 100%;
+    table-layout: auto;
     border-collapse: collapse;
-    margin: 16px 0;
+    margin: 16px auto;
     display: block;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
