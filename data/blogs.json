@@ -33,8 +33,7 @@
         "series": "操作系统理论",
         "order": 2,
         "contentFile": "blogs/二下/操作系统/内存管理/内存管理.md",
-        "recommended": false,
-        "lastEditedDate": "2026-04-18"
+        "recommended": false
     },
     {
         "id": 3927684149,
@@ -88,7 +87,8 @@
         "series": "操作系统实验报告",
         "order": 2,
         "contentFile": "blogs/二下/操作系统/启动/OS-Lab1-实验报告.md",
-        "recommended": false
+        "recommended": false,
+        "lastEditedDate": "2026-04-21"
     },
     {
         "id": 3948969099,
@@ -142,8 +142,7 @@
         "series": "操作系统理论",
         "order": 1,
         "contentFile": "blogs/二下/操作系统/启动/计算机的启动过程.md",
-        "recommended": true,
-        "lastEditedDate": "2026-04-18"
+        "recommended": true
     },
     {
         "id": 2069020613,

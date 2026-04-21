@@ -14,13 +14,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "二下/操作系统/启动/计算机的启动过程.md",
+                "file": "二下/操作系统/启动/OS-Lab1-实验报告.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "计算机的启动过程 的大纲"
+              "title": "OS-Lab1-实验报告 的大纲"
             }
           }
         ]
@@ -58,7 +58,8 @@
               "title": "OS-Lab1-实验报告"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -193,10 +194,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "二下/操作系统/启动/计算机的启动过程.md"
+                "file": "二下/操作系统/启动/OS-Lab1-实验报告.md"
               },
               "icon": "lucide-info",
-              "title": "计算机的启动过程的笔记属性"
+              "title": "OS-Lab1-实验报告的笔记属性"
             }
           }
         ],
@@ -217,10 +218,10 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "a48429dd9b66ac0b",
+  "active": "112fa5997729accc",
   "lastOpenFiles": [
-    "二下/操作系统/内存管理/内存管理.md",
     "二下/操作系统/启动/计算机的启动过程.md",
+    "二下/操作系统/内存管理/内存管理.md",
     "二下/操作系统/启动/ELF文件结构.md",
     "二下/操作系统/内存管理/OS-Lab2-实验报告.md",
     "二下/操作系统/启动/OS-Lab1-实验报告.md",

@@ -1,6 +1,6 @@
 {
     "sourceDir": "English_materials",
-    "generatedAt": "2026-04-18T05:25:22.949Z",
+    "generatedAt": "2026-04-21T07:46:36.126Z",
     "items": [
         {
             "id": 1784150937,
@@ -11,12 +11,28 @@
             "modifiedAt": "2026-04-10T14:45:09.949Z"
         },
         {
+            "id": 3439534298,
+            "title": "列举连接词",
+            "path": "English_materials/列举连接词.pdf",
+            "relativePath": "列举连接词.pdf",
+            "size": 96954,
+            "modifiedAt": "2026-04-21T07:45:41.059Z"
+        },
+        {
             "id": 2603400854,
             "title": "强调句及表示强调的句型",
             "path": "English_materials/强调句及表示强调的句型.pdf",
             "relativePath": "强调句及表示强调的句型.pdf",
             "size": 123934,
             "modifiedAt": "2026-04-10T14:59:22.033Z"
+        },
+        {
+            "id": 752079150,
+            "title": "引出观点常见句型",
+            "path": "English_materials/引出观点常见句型.pdf",
+            "relativePath": "引出观点常见句型.pdf",
+            "size": 95868,
+            "modifiedAt": "2026-04-21T07:40:02.416Z"
         }
     ]
 }
