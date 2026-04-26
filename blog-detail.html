@@ -99,6 +99,10 @@
                             rel="noopener noreferrer">CC BY-NC-SA 4.0 许可协议</a>。
                         转载请注明来源BeYoung~
                     </p>
+                    <p class="license-blog-link-line">
+                        <span class="license-label">博客链接</span>
+                        <a id="article-permalink" href="#" target="_blank" rel="noopener noreferrer"></a>
+                    </p>
                 </section>
 
                 <footer class="article-footer">
@@ -745,6 +749,14 @@
                     // 若无参数，默认显示第一个
                     if (!blog) blog = blogs[0];
                     if (!blog) return;
+
+                    // 设置结尾框中的博客永久链接（使用仅包含 id 的规范链接）
+                    const permalinkEl = document.getElementById('article-permalink');
+                    if (permalinkEl) {
+                        const permalink = new URL('blog-detail.html?id=' + encodeURIComponent(String(blog.id)), window.location.href).toString();
+                        permalinkEl.href = permalink;
+                        permalinkEl.textContent = permalink;
+                    }
 
                     // 设置标题
                     const titleEl = document.getElementById('article-title');

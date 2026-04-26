@@ -14,13 +14,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "二下/操作系统/启动/OS-Lab1-实验报告.md",
+                "file": "二下/操作系统/进程管理/进程管理.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "OS-Lab1-实验报告 的大纲"
+              "title": "进程管理 的大纲"
             }
           }
         ]
@@ -36,30 +36,44 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "二下/操作系统/启动/计算机的启动过程.md",
+                "file": "二下/操作系统/进程管理/Lab3 梳理总结.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "计算机的启动过程"
+              "title": "Lab3 梳理总结"
             }
           },
           {
-            "id": "112fa5997729accc",
+            "id": "fd398006cb1acbfa",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "二下/操作系统/启动/OS-Lab1-实验报告.md",
+                "file": "二下/操作系统/内存管理/内存管理.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "OS-Lab1-实验报告"
+              "title": "内存管理"
+            }
+          },
+          {
+            "id": "b8d9d338f518e0e4",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "二下/操作系统/进程管理/进程管理.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "进程管理"
             }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -194,10 +208,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "二下/操作系统/启动/OS-Lab1-实验报告.md"
+                "file": "二下/操作系统/进程管理/进程管理.md"
               },
               "icon": "lucide-info",
-              "title": "OS-Lab1-实验报告的笔记属性"
+              "title": "进程管理的笔记属性"
             }
           }
         ],
@@ -218,16 +232,23 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "112fa5997729accc",
+  "active": "b8d9d338f518e0e4",
   "lastOpenFiles": [
-    "二下/操作系统/启动/计算机的启动过程.md",
     "二下/操作系统/内存管理/内存管理.md",
+    "二下/操作系统/进程管理/Lab3 梳理总结.md",
+    "图片/内存管理题图-物理转逻辑.png",
+    "二下/操作系统/进程管理/进程管理.md",
+    "二下/操作系统/内存管理/Lab2 梳理总结.md",
+    "语言/日语/文法/接续词.md",
+    "图片/链表结构.jpg",
+    "27acba18013a26f933f434bbf2b16bec.jpg",
+    "语言/日语/文法",
+    "语言/日语",
+    "二下/操作系统/进程管理",
+    "二下/操作系统/启动/计算机的启动过程.md",
+    "二下/操作系统/启动/OS-Lab1-实验报告.md",
     "二下/操作系统/启动/ELF文件结构.md",
     "二下/操作系统/内存管理/OS-Lab2-实验报告.md",
-    "二下/操作系统/启动/OS-Lab1-实验报告.md",
-    "27acba18013a26f933f434bbf2b16bec.jpg",
-    "二下/操作系统/内存管理/Lab2 梳理总结.md",
-    "图片/链表结构.jpg",
     "文学/诗词/词/卜算子·元旦晚会.md",
     "图片/内存回收.png",
     "图片/CPU访存流程.png",
@@ -239,7 +260,6 @@
     "图片/国家植物园.jpg",
     "二上/计组/存储系统/Cache.md",
     "二上/计组/存储系统/虚拟存储器.md",
-    "图片/MIPS地址映射方法.png",
     "二下/操作系统/Shell/OS-Lab0-实验报告.md",
     "二上/基物实验/总复习/基物实验.md",
     "二上/计组/存储系统/主存储器.md",
@@ -253,17 +273,11 @@
     "二上/计组/链接/链接与运行.md",
     "二上/计组/总复习/计组总复习.md",
     "二上/算法/模板/算法选择题速查.md",
-    "二下/操作系统/Makefile/Makefile基础速成.md",
-    "二下/操作系统/Linux/Linux 命令指南.md",
-    "二下/操作系统/gcc/gcc语法速成.md",
     "二下/操作系统/启动",
     "二下/操作系统/MOS",
     "明日方舟/卫戍协议/阿戈尔",
     "明日方舟/卫戍协议",
     "图片",
-    "未命名.base",
-    "二下/操作系统/实验报告",
-    "二下/操作系统/Makefile",
-    "未命名 1.base"
+    "未命名.base"
   ]
 }
