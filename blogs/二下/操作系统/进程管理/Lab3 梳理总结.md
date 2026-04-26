@@ -141,3 +141,19 @@ static void load_icode(struct Env *e, const void *binary, size_t size) {
 
 # 3.7
 
+```C
+struct Env *env_create(const void *binary, size_t size, int priority) {
+    struct Env *e;
+    int r = env_alloc(&e, 0);
+    if (r < 0) {
+        panic("env_alloc failed: %d", r);
+    }
+    
+    e->env_pri = priority;
+    e->env_status = ENV_RUNNABLE;
+    load_icode(e, binary, size);
+    TAILQ_INSERT_HEAD(&env_sched_list, e, env_sched_link);
+    
+    return e;
+}
+```

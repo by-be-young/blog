@@ -14,13 +14,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "二下/操作系统/进程管理/进程管理.md",
+                "file": "二下/操作系统/内存管理/内存管理.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "进程管理 的大纲"
+              "title": "内存管理 的大纲"
             }
           }
         ]
@@ -73,7 +73,7 @@
             }
           }
         ],
-        "currentTab": 2
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -208,10 +208,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "二下/操作系统/进程管理/进程管理.md"
+                "file": "二下/操作系统/内存管理/内存管理.md"
               },
               "icon": "lucide-info",
-              "title": "进程管理的笔记属性"
+              "title": "内存管理的笔记属性"
             }
           }
         ],
@@ -232,12 +232,12 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "b8d9d338f518e0e4",
+  "active": "fd398006cb1acbfa",
   "lastOpenFiles": [
-    "二下/操作系统/内存管理/内存管理.md",
     "二下/操作系统/进程管理/Lab3 梳理总结.md",
-    "图片/内存管理题图-物理转逻辑.png",
+    "二下/操作系统/内存管理/内存管理.md",
     "二下/操作系统/进程管理/进程管理.md",
+    "图片/内存管理题图-物理转逻辑.png",
     "二下/操作系统/内存管理/Lab2 梳理总结.md",
     "语言/日语/文法/接续词.md",
     "图片/链表结构.jpg",
