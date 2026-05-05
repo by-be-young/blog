@@ -103,7 +103,7 @@
     flex: 0 0 300px;
     position: sticky;
     top: 50vh;
-    transform: translateY(-8%);
+    transform: translateY(-50%);
 }
 
 /* Floating quick-links filter (small screens): 隐藏侧边筛选，显示悬浮球并支持模态展开 */
@@ -333,6 +333,18 @@
     min-width: 0;
     /* 预留高度，避免切换到卡片很少的分类时页面高度骤降引发“跳顶” */
     min-height: calc(100vh - 140px);
+    max-height: calc(100vh - 140px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.quick-links-main::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
 }
 
 .quick-links-grid {
@@ -495,5 +507,19 @@
 
     .quick-links-main {
         width: 100%;
+    }
+}
+
+@media (min-width: 761px) {
+    .quick-links-sidebar {
+        position: fixed;
+        left: max(20px, calc((100vw - 1200px) / 2));
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 5;
+    }
+
+    .quick-links-layout {
+        padding-left: 322px;
     }
 }

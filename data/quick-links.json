@@ -5,24 +5,29 @@
             "label": "友链",
             "items": [
                 {
-                    "title": "Connor大佬的博客",
+                    "title": "Connor大佬",
                     "url": "https://connorz.site/",
-                    "image": "assets/images/background/bg1.png"
+                    "image": "assets/images/快速链接/connor.png"
                 },
                 {
-                    "title": "Rainel学长的博客",
+                    "title": "Rainel学长",
                     "url": "https://rainel.site/",
-                    "image": "assets/images/background/bg1.png"
+                    "image": "assets/images/快速链接/rainel.png"
                 },
                 {
-                    "title": "写了详细OS的学长的博客",
+                    "title": "OldJoy学长（写了详细OS实验报告）",
                     "url": "https://www.oldjoy.top/",
-                    "image": "assets/images/background/bg1.png"
+                    "image": "assets/images/快速链接/oldjoy.png"
                 },
                 {
-                    "title": "Hyggge学长的博客",
+                    "title": "Hyggge学长",
                     "url": "https://hyggge.github.io/",
-                    "image": "assets/images/background/bg1.png"
+                    "image": "assets/images/快速链接/hyggge.png"
+                },
+                {
+                    "title": "杨导",
+                    "url": "https://yanna-zy.github.io/",
+                    "image": "assets/images/快速链接/yangdao.png"
                 }
             ]
         },
@@ -57,9 +62,9 @@
                     "image": "assets/images/background/bg1.png"
                 },
                 {
-                    "title": "明日方舟答题网站",
+                    "title": "明日方舟趣味答题网站",
                     "url": "https://by-be-young.github.io/arknights_test/",
-                    "image": "assets/images/background/bg1.png"
+                    "image": "assets/images/快速链接/博士业务能力考核.png"
                 }
             ]
         },

@@ -144,10 +144,7 @@ static void load_icode(struct Env *e, const void *binary, size_t size) {
 ```C
 struct Env *env_create(const void *binary, size_t size, int priority) {
     struct Env *e;
-    int r = env_alloc(&e, 0);
-    if (r < 0) {
-        panic("env_alloc failed: %d", r);
-    }
+    env_alloc(&e, 0);
     
     e->env_pri = priority;
     e->env_status = ENV_RUNNABLE;
@@ -155,5 +152,109 @@ struct Env *env_create(const void *binary, size_t size, int priority) {
     TAILQ_INSERT_HEAD(&env_sched_list, e, env_sched_link);
     
     return e;
+}
+```
+
+# 3.8
+
+```C
+void env_run(struct Env *e) {
+    assert(e->env_status == ENV_RUNNABLE);
+#ifdef MOS_PRE_ENV_RUN
+    MOS_PRE_ENV_RUN_STMT
+#endif
+    
+    if (curenv) {
+        curenv->env_tf = *((struct Trapframe *)KSTACKTOP - 1);
+    }
+    
+    curenv = e;
+    curenv->env_runs++;
+    
+    cur_pgdir = curenv->env_pgdir;
+    
+    env_pop_tf(&curenv->env_tf, curenv->env_asid);
+}
+```
+
+# 3.9
+
+```assembly
+#include <asm/asm.h>
+#include <stackframe.h>
+
+.section .text.tlb_miss_entry
+tlb_miss_entry:
+        j       exc_gen_entry
+
+.section .text.exc_gen_entry
+exc_gen_entry:
+        SAVE_ALL
+        mfc0    t0, CP0_STATUS
+        and     t0, t0, ~(STATUS_UM | STATUS_EXL | STATUS_IE)
+        mtc0    t0, CP0_STATUS
+        mfc0    t0, CP0_CAUSE
+        andi    t0, t0, 0x7c
+        lw      t0, exception_handlers(t0)
+        jr      t0
+```
+
+# 3.10
+
+```lds
+OUTPUT_ARCH(mips)
+ENTRY(_start)
+
+SECTIONS {
+        . = 0x80000000;
+        .tlb_miss_entry : { *(.text.tlb_miss_entry) }
+        
+        . = 0x80000180;
+        .exc_gen_entry : { *(.text.exc_gen_entry) }
+        
+        . = 0x80020000;
+        .text : { *(.text) }
+        .data : { *(.data) }
+        bss_start = .;
+        .bss : { *(.bss) }
+        bss_end = .;
+        . = 0x80400000;
+        end = . ;
+}
+```
+
+# 3.11
+
+```C
+.macro RESET_KCLOCK
+        li      t0, TIMER_INTERVAL
+        mtc0    t0, CP0_COMPARE
+        mtc0    zero, CP0_COUNT
+.endm
+```
+
+# 3.12
+
+```C
+void schedule(int yield) {
+    static int count = 0;
+    struct Env *e = curenv;
+    
+    if (yield || count == 0 || e == NULL || e->env_status != ENV_RUNNABLE) {
+        if (e != NULL && e->env_status == ENV_RUNNABLE) {
+            TAILQ_REMOVE(&env_sched_list, e, env_sched_link);
+            TAILQ_INSERT_TAIL(&env_sched_list, e, env_sched_link);
+        }
+        
+        e = TAILQ_FIRST(&env_sched_list);
+        if (e == NULL) {
+            panic("schedule: no runnable envs\n");
+        }
+        
+        count = e->env_pri;
+    }
+    
+    count--;
+    env_run(e);
 }
 ```
