@@ -1,4 +1,10 @@
-/* 基础样式 */
+/* ==================================================
+   SECTION: 基础变量 & 全局样式
+   - 变量 (colors / macaron palette)
+   - 全局 reset 与通用排版
+   - 字体加载 (@font-face)
+   目的：删除文件中散落的小注释，改用大注释分区
+   ================================================== */
 :root {
     --webfont-name: '仓耳今楷01';
 }
@@ -22,14 +28,18 @@
 }
 
 body {
-    /* 正文字体：仓耳今楷01（若本地/网络未引入则回退到常用字体） */
     font-family: '仓耳今楷01', 'CangErJinKai01', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
     color: #333;
     background-color: #f8f9fa;
 }
 
-/* 页面切换过渡：进入淡入、离开淡出（由 main.js 控制 class 切换） */
+/* ==================================================
+   SECTION: 页面过渡 & 无障碍偏好
+   - 包含页面进入/离开过渡的样式（由 `main.js` 控制 class）
+   - 当用户开启 prefers-reduced-motion 时取消动画
+   ================================================== */
+
 body.page-transition-enter {
     opacity: 0;
     will-change: opacity;
@@ -74,13 +84,11 @@ body.page-transition-leaving {
     color: var(--selection-text-color);
 }
 
-/* 如果你已将字体文件放到 `assets/fonts/`，下面的 @font-face 会优先加载本地图形字体。 */
 @font-face {
     font-family: '仓耳今楷01';
     font-weight: normal;
     font-style: normal;
     font-display: swap;
-    /* 相对路径：从 css/style.css 到 fonts 目录为 ../fonts/ */
     src: local('仓耳今楷01'),
         url('../fonts/仓耳今楷01-W04.ttf') format('truetype');
 }
@@ -110,50 +118,31 @@ body.page-transition-leaving {
             #9ad7ff 70%,
             #ffb6c9 100%);
     background-size: 220% 100%;
-    transform: scaleX(0);
-    transform-origin: left center;
     opacity: 0;
+    transform: scaleX(0);
+    transform-origin: center;
     pointer-events: none;
-    z-index: 2;
 }
 
-body.page-transition-enter:not(.page-transition-ready) .navbar::after {
-    opacity: 1;
-    animation: nav-macaron-progress-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
+body.page-transition-enter:not(.page-transition-ready) .navbar::after,
 body.page-transition-leaving .navbar::after {
     opacity: 1;
-    animation: nav-macaron-progress-leave 260ms linear both;
+    transform: scaleX(1);
+    animation: navbar-glow 5s linear infinite;
 }
 
-@keyframes nav-macaron-progress-enter {
+@keyframes navbar-glow {
     0% {
-        transform: scaleX(0);
-        background-position: 0% 50%;
+        background-position: 0 50%;
     }
 
     100% {
-        transform: scaleX(0.72);
-        background-position: 70% 50%;
-    }
-}
-
-@keyframes nav-macaron-progress-leave {
-    0% {
-        transform: scaleX(0.5);
-        background-position: 35% 50%;
-    }
-
-    100% {
-        transform: scaleX(1);
-        background-position: 100% 50%;
+        background-position: 220% 50%;
     }
 }
 
 .nav-container {
     max-width: 1200px;
-    /* 恢复原始最大宽度，避免变宽 */
     margin: 0 auto;
     padding: 12px 16px;
     display: flex;
@@ -184,7 +173,6 @@ body.page-transition-leaving .navbar::after {
     color: var(--primary-color);
 }
 
-/* 小屏显示的导航头像（默认隐藏，大屏隐藏，小屏显示） */
 .nav-avatar {
     display: none;
     align-items: center;
@@ -206,7 +194,9 @@ body.page-transition-leaving .navbar::after {
     margin-left: auto;
 }
 
-/* 恢复基础导航链接样式 */
+/* ==================================================
+   NAV: 导航链接样式
+   ================================================== */
 .nav-menu a {
     text-decoration: none;
     color: var(--dark-color);
@@ -239,7 +229,6 @@ body.page-transition-leaving .navbar::after {
     align-items: center;
 }
 
-/* About 页面：个人信息卡片使用透明底色且不显示背景图 */
 .about-page .profile-card {
     background: transparent !important;
     background-image: none !important;
@@ -261,14 +250,19 @@ body.page-transition-leaving .navbar::after {
     letter-spacing: 0.4px;
 }
 
-/* 语言选择器：与搜索按钮风格一致的马卡龙胶囊 */
+/* ==================================================
+   SECTION: 导航 - 语言选择 / 搜索 / 菜单
+   ================================================== */
 .nav-lang-wrap {
     display: inline-flex;
     align-items: center;
 }
 
 
-/* duplicate view-more block removed (kept earlier definition) */
+/* ==================================================
+    SECTION: 公告横幅 / 悬浮按钮 / 模态窗口
+    - announcement banner, FABs, announcement modal, settings modal
+    ================================================== */
 
 .nav-lang-select {
     -webkit-appearance: none;
@@ -292,10 +286,8 @@ body.page-transition-leaving .navbar::after {
 
 .nav-search-btn {
     margin-left: 0;
-    /* 与语言选择器靠近 */
 }
 
-/* 自定义语言下拉样式 */
 .nav-lang {
     position: relative;
 }
@@ -330,7 +322,6 @@ body.page-transition-leaving .navbar::after {
     z-index: 1200;
 }
 
-/* Ensure search panel can appear above language dropdown on all pages */
 .search-panel {
     z-index: 1305;
 }
@@ -347,7 +338,9 @@ body.page-transition-leaving .navbar::after {
     background: linear-gradient(90deg, rgba(255, 182, 201, 0.15), rgba(167, 243, 208, 0.12));
 }
 
-/* 英雄区域 */
+/* ==================================================
+   SECTION: 英雄区域 / 幻灯片 (slideshow)
+   ================================================== */
 .hero-section {
     height: 100vh;
     position: relative;
@@ -381,7 +374,6 @@ body.page-transition-leaving .navbar::after {
     opacity: 1;
 }
 
-/* 归档/分类/链接页：萤火虫动态背景 */
 .archive-page .slideshow .fireflies-overlay,
 .categories-page .slideshow .fireflies-overlay,
 .quick-links-page .slideshow .fireflies-overlay,
@@ -455,18 +447,18 @@ body.page-transition-leaving .navbar::after {
     }
 }
 
-/* 首页公告栏（位于博客卡片区上方） */
+/* ==================================================
+    SECTION: Announcement Banner (首页公告栏)
+    ================================================== */
 
 .announcement-banner {
     display: none;
     align-items: center;
     justify-content: space-between;
     gap: 14px;
-    /* 增加高度与内距，让横幅更醒目 */
     padding: 16px 18px;
     margin: 16px 0 32px;
     border-radius: 12px;
-    /* 双层马卡龙渐变：内层黄系为主，外层保持柔和描边，色深与首页卡片一致 */
     background:
         linear-gradient(135deg,
             rgba(255, 232, 130, 0.94) 0%,
@@ -476,7 +468,6 @@ body.page-transition-leaving .navbar::after {
             rgba(255, 224, 126, 0.90),
             rgba(206, 238, 140, 0.90),
             rgba(255, 214, 138, 0.90)) border-box;
-    /* 保持与博客卡片相同的边框宽度，但使用透明边框以展示 border-box 渐变 */
     border: var(--card-border-w) solid transparent;
     box-shadow: var(--shadow);
 }
@@ -487,7 +478,6 @@ body.page-transition-leaving .navbar::after {
 
 .announcement-banner .announcement-left {
     display: flex;
-    /* 使用横向布局以便靠中对齐图标与文本容器 */
     display: flex;
     flex-direction: row;
     gap: 8px;
@@ -520,7 +510,6 @@ body.page-transition-leaving .navbar::after {
     color: rgba(0, 0, 0, 0.72);
     line-height: 1.7;
     max-width: 100%;
-    /* 改为多行显示；通过隐藏内部滚动，让滚轮事件继续作用于页面以避免卡顿 */
     max-height: 120px;
     overflow: hidden;
     white-space: normal;
@@ -561,7 +550,6 @@ body.page-transition-leaving .navbar::after {
     flex: 1 1 auto;
 }
 
-/* 提高横幅最小高度以便卡片更高视觉更醒目 */
 .announcement-banner {
     min-height: 92px;
 }
@@ -591,12 +579,10 @@ body.page-transition-leaving .navbar::after {
     overflow: hidden;
 }
 
-/* 滚动内部容器：用于平滑 CSS 动画滚动（由 JS 将内容复制一份并添加动画） */
 .announcement-banner .announcement-scroll-inner {
     display: block;
 }
 
-/* 动画时优化告知浏览器 */
 .announcement-banner .announcement-scroll-inner {
     will-change: transform;
 }
@@ -606,10 +592,10 @@ body.page-transition-leaving .navbar::after {
     height: 1px;
     margin: 10px 0;
     background: rgba(0, 0, 0, 0.06);
-    border-radius: 1px;
-}
-
-.announcement-banner .announcement-icon {
+    border-radius: 12px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -698,7 +684,6 @@ body.page-transition-leaving .navbar::after {
     }
 }
 
-/* 隐藏首页横幅内部滚动条 */
 .announcement-banner .announcement-message::-webkit-scrollbar {
     width: 0;
     height: 0;
@@ -1977,7 +1962,9 @@ body.display-modal-open {
     }
 }
 
-/* 内容区域 */
+/* ==================================================
+   SECTION: 内容区 & 布局 (container / content-wrapper)
+   ================================================== */
 .content-section {
     position: relative;
     background: transparent;
@@ -1997,13 +1984,14 @@ body.display-modal-open {
     gap: 40px;
 }
 
-/* About 页面专有：让左侧栏更宽，右侧相应变窄（不影响其它页面） */
 .about-page .content-wrapper {
     grid-template-columns: 360px 1fr;
-    /* 左侧变宽为360px，可按需调整 */
+
 }
 
-/* 侧边栏 */
+/* ==================================================
+   SECTION: 侧边栏 (sidebar / profile-card / widgets)
+   ================================================== */
 .sidebar {
     position: relative;
 }
@@ -2041,7 +2029,6 @@ body.display-modal-open {
     object-fit: cover;
 }
 
-/* Profile details: label/value rows, interests and contact popup */
 .profile-info {
     margin-top: 12px;
     display: flex;
@@ -2141,7 +2128,6 @@ body.display-modal-open {
 
 .contact-popup {
     position: fixed;
-    /* use fixed so we can place it under the clicked button */
     top: 0;
     left: 0;
     transform: translate3d(0, 0, 0);
@@ -2150,7 +2136,6 @@ body.display-modal-open {
     padding: 10px 12px;
     box-shadow: 0 8px 26px rgba(0, 0, 0, 0.08);
     display: block;
-    /* keep in flow but hidden by visibility/opacity */
     z-index: 1200;
     min-width: 160px;
     text-align: center;
@@ -2211,7 +2196,6 @@ body.display-modal-open {
     color: #7a2732;
 }
 
-/* Distinct single-color macaron backgrounds for each label */
 .profile-label--school {
     background: rgba(255, 110, 143, 0.8);
 }
@@ -2228,7 +2212,6 @@ body.display-modal-open {
     background: rgba(255, 184, 77, 0.8);
 }
 
-/* Right-side text color matches left label background */
 .profile-label--school+.profile-value {
     color: #ff6e8f;
 }
@@ -2246,7 +2229,6 @@ body.display-modal-open {
 }
 
 
-/* 首页专用：侧栏使用相对宽度（最大为页面的30%，并设置最小值），主栏自适应 */
 .home .content-wrapper {
     grid-template-columns: 30% 1fr;
 }
@@ -2254,7 +2236,6 @@ body.display-modal-open {
 .home .profile-card {
     width: 100%;
     max-width: none;
-    /* 不透明马卡龙渐变背景，避免半透明导致页面内容透出 */
     background: linear-gradient(135deg, #ffd6e0 0%, #c8f7dc 50%, #e7e7ff 100%);
     color: var(--home-text);
     border: 1px solid rgba(0, 0, 0, 0.06);
@@ -2354,7 +2335,6 @@ body.display-modal-open {
     transform: translateY(-3px);
 }
 
-/* 博客网格 */
 .blog-grid {
     display: grid;
     gap: 30px;
@@ -2362,7 +2342,9 @@ body.display-modal-open {
     align-items: start;
 }
 
-/* 最近更新 卡片（占满整行，与公告横幅等宽） */
+/* ==================================================
+    SECTION: 最近更新卡片 (recent updates card)
+    ================================================== */
 .recent-updates-card {
     display: flex;
     flex-direction: column;
@@ -2513,7 +2495,6 @@ body.display-modal-open {
     --card-merge-bg: rgba(244, 250, 255, 0.92);
 }
 
-/* 最近更新右侧图片中的 type/tag 与普通博客卡片保持一致 */
 .home .recent-updates-card .recent-thumb .tags {
     position: absolute;
     top: 12px;
@@ -2590,7 +2571,9 @@ body.display-modal-open {
     background: rgba(255, 210, 166, 0.95);
 }
 
-/* 推荐博客标题卡片（与最近更新等宽） */
+/* ==================================================
+    SECTION: 推荐博客卡片 (recommended blogs card)
+    ================================================== */
 .recommended-blogs-card {
     display: flex;
     align-items: center;
@@ -2650,7 +2633,6 @@ body.display-modal-open {
         linear-gradient(135deg, var(--macaron-pink), var(--macaron-mint), var(--macaron-lavender)) border-box;
 }
 
-/* 小屏适配 */
 @media (max-width: 720px) {
     .recent-updates-card .recent-updates-header {
         min-height: 68px;
@@ -2795,7 +2777,6 @@ body.display-modal-open {
 
 /* 粉色 */
 
-/* 小屏幕时稍微缩小宽度 */
 @media (max-width: 640px) {
     .post-nav-left {
         margin-top: 10px;
@@ -2810,7 +2791,9 @@ body.display-modal-open {
     }
 }
 
-/* 博客卡片悬浮：斜向流光线条向右滑动 */
+/* ==================================================
+    SECTION: 博客卡片 (card visuals & hover shine)
+    ================================================== */
 .blog-card::before {
     content: '';
     position: absolute;
@@ -2990,7 +2973,9 @@ body.display-modal-open {
     border-top: 1px solid #eee;
 }
 
-/* 首页（马卡龙配色 + 卡片渐变描边）：仅对 index.html 生效 */
+/* ==================================================
+    SECTION: 首页 (home) - 马卡龙配色与卡片样式
+    ================================================== */
 .home {
     --primary-color: #7bc7ff;
     --secondary-color: #7ee0c2;
@@ -3403,7 +3388,6 @@ body.display-modal-open {
     /* 悬停时稍深 */
 }
 
-/* 移动端适配：减小标签字号和内边距 */
 @media (max-width: 599px) {
     .home .blog-card .tags {
         top: 10px;
@@ -3418,7 +3402,9 @@ body.display-modal-open {
     }
 }
 
-/* 全局马卡龙滚动条样式 —— 与归档页一致 */
+/* ==================================================
+    SECTION: 全局滚动条 (macaron scrollbar style)
+    ================================================== */
 :root {
     --macaron-scroll-thumb-start: rgba(255, 182, 201, 0.95);
     --macaron-scroll-thumb-mid: rgba(154, 215, 255, 0.90);
@@ -3505,8 +3491,6 @@ body::-webkit-scrollbar-thumb:hover,
 .categories-wheel::-webkit-scrollbar-thumb:hover {
     background-image: linear-gradient(135deg, rgba(255, 182, 201, 1), rgba(154, 215, 255, 0.98), rgba(167, 243, 208, 1));
 }
-
-/* View more button: kept earlier definition; duplicate removed */
 
 /* 文章宽屏模式 */
 .blog-article.wide-mode {
@@ -3627,7 +3611,9 @@ body.hide-scrollbar::-webkit-scrollbar {
     display: none;
 }
 
-/* 博客详情页目录与返回顶部按钮样式 */
+/* ==================================================
+   SECTION: 博客详情 (blog-detail layout / TOC / back-to-top)
+   ================================================== */
 .blog-detail .container {
     display: flex;
     gap: 32px;
@@ -3714,9 +3700,9 @@ body.hide-scrollbar::-webkit-scrollbar {
 }
 
 
-/* h3提醒框样式 */
-
-/* h3样式与h2几乎一致，仅颜色为橙色 */
+/* ==================================================
+    SECTION: 文章标题样式 (h1-h4 / h3 提示框)
+    ================================================== */
 .blog-detail .article-content h3 {
     color: #ff9900;
     font-size: 1.5rem;
@@ -3939,7 +3925,9 @@ body.hide-scrollbar::-webkit-scrollbar {
     font-family: 'Times New Roman', 'KaiTi', '楷体', STKaiti, serif;
 }
 
-/* 博客详情页 Markdown 图片样式 */
+/* ==================================================
+    SECTION: 博客详情 - Markdown 图片样式
+    ================================================== */
 .blog-detail .article-content img {
     display: block;
     box-sizing: border-box;
@@ -3963,7 +3951,10 @@ body.hide-scrollbar::-webkit-scrollbar {
         0 10px 22px rgba(0, 0, 0, 0.12);
 }
 
-/* 代码块样式（浅色主题）：使用 highlight.js 的浅色高亮样式，保留可读性与轻微马卡龙风格 */
+/* ==================================================
+    SECTION: 代码块 & 代码高亮 (pre / code / codeblock)
+    - 视觉不影响语法高亮，仅美化容器
+    ================================================== */
 .blog-detail .article-content pre {
     /* 单一马卡龙薄荷色背景（可换为 --detail-peach / --detail-pink 等） */
     background: rgba(167, 243, 208, 0.22);
@@ -4111,7 +4102,9 @@ body.hide-scrollbar::-webkit-scrollbar {
     padding: 0;
 }
 
-/* Markdown 表格样式：避免挤压/溢出导致“看不见” */
+/* ==================================================
+    SECTION: Markdown 表格样式
+    ================================================== */
 .blog-detail .article-content table {
     /* 保证表格至少与正文容器等宽：当内容小于容器时拉宽；当内容更宽时可横向滚动 */
     width: 100%;
@@ -4180,11 +4173,11 @@ body.hide-scrollbar::-webkit-scrollbar {
     /* 更深且更饱和的紫行色 */
 }
 
-/* =============================
-   详情页马卡龙主题（仅 blog-detail.html 生效）
-   注意：不覆盖任何代码块 pre/code 背景色
-   ============================= */
-
+/* ==================================================
+    SECTION: 详情页马卡龙主题 (blog-detail-page variables)
+    - 仅在 blog-detail.html 生效
+    - 不覆盖 pre/code 的语法高亮背景
+    ================================================== */
 .blog-detail-page {
     --primary-color: #55c8ff;
     --secondary-color: #a7f3d0;
@@ -4616,7 +4609,6 @@ body {
     background-color: #f8f9fa;
 }
 
-/* 如果你已将字体文件放到 `assets/fonts/`，下面的 @font-face 会优先加载本地图形字体。 */
 @font-face {
     font-family: '仓耳今楷01';
     font-weight: normal;
@@ -5949,8 +5941,9 @@ body::-webkit-scrollbar-thumb:hover,
     background-image: linear-gradient(135deg, rgba(255, 182, 201, 1), rgba(154, 215, 255, 0.98), rgba(167, 243, 208, 1));
 }
 
-/* 浮动设置容器 */
-/* floating controls */
+/* ==================================================
+    SECTION: 浮动控件 (floating controls / back-to-top / FABs)
+    ================================================== */
 #floating-controls {
     position: fixed;
     right: 32px;
@@ -6273,85 +6266,505 @@ body.offcanvas-open {
     }
 }
 
-/* 首页个人信息行：默认只显示值，悬浮时标签滑入并顶开内容 */
-.home #home-profile-card .profile-row {
+/* 首页个人信息卡：参考图式的分区排版，保留原有配色、背景和数据 */
+.home .content-wrapper {
+    grid-template-columns: 360px 1fr;
+}
+
+.home .profile-card {
+    width: 100%;
+    max-width: none;
+    position: sticky;
+    top: 80px;
+    padding: 18px;
+    border-radius: 22px;
+    overflow: hidden;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    border: var(--card-border-w) solid transparent;
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3)) padding-box,
+        url('../assets/images/information.jpg') center/cover no-repeat padding-box,
+        linear-gradient(135deg, var(--macaron-pink), var(--macaron-mint), var(--macaron-lavender)) border-box;
+    box-shadow: 0 18px 42px rgba(18, 24, 38, 0.16);
+    backdrop-filter: blur(10px);
+    isolation: isolate;
+}
+
+.home .profile-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 70%);
+    border-radius: 0 0 0 100%;
+    pointer-events: none;
+}
+
+.home .profile-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 36%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0) 45%);
+    pointer-events: none;
+}
+
+.home #home-profile-card>* {
     position: relative;
+    z-index: 1;
+}
+
+.home #home-profile-card .profile-card-sheen {
+    position: absolute;
+    inset: auto -36px -40px auto;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 219, 235, 0.18), rgba(255, 219, 235, 0) 68%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.home #home-profile-card .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.home #home-profile-card .profile-avatar {
+    width: 88px;
+    height: 88px;
+    margin: 0;
+    border-radius: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.24);
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.16);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.home #home-profile-card .profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.home #home-profile-card .profile-header-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.home #home-profile-card .name {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    color: #fff9d8;
+    text-shadow: 0 1px 2px rgba(47, 25, 10, 0.42);
+    font-size: 1.72rem;
+    line-height: 1.1;
+}
+
+.home #home-profile-card .date-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    margin-bottom: 4px;
+}
+
+.home #home-profile-card .play-icon {
+    width: 0;
+    height: 0;
+    border-left: 8px solid #aaff00;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+}
+
+.home #home-profile-card .date-label {
+    font-size: 0.72rem;
+    color: #aaff00;
+}
+
+.home #home-profile-card .date-value {
+    font-size: 0.78rem;
+    color: #17324f;
+    font-weight: 700;
+}
+
+.home #home-profile-card .profile-divider {
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+}
+
+.home #home-profile-card .level-section {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.home #home-profile-card .profile-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
     overflow: hidden;
     min-height: 40px;
+    margin: 0;
 }
 
-.home #home-profile-card .profile-label {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 86px;
-    min-width: 86px;
-    z-index: 2;
-    opacity: 0;
-    transform: translateX(-100%);
-    border-radius: 8px 0 0 8px;
-    pointer-events: none;
-    transition:
-        opacity 0.2s ease,
-        transform 0.3s cubic-bezier(0.2, 0.72, 0.2, 1);
+.home #home-profile-card .level-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.home #home-profile-card .profile-value {
-    width: 100%;
-    margin-left: 0;
+.home #home-profile-card .level-icon {
+    width: 18px;
+    height: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #4d79a8;
+    font-size: 14px;
+}
+
+.home #home-profile-card .level-text {
+    font-size: 0.86rem;
+    color: #325b7b;
+}
+
+.home #home-profile-card .level-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fffdf5;
+}
+
+.home #home-profile-card .specialty-section {
+    padding: 0;
+}
+
+.home #home-profile-card .specialty-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(255, 250, 240, 0.88);
+    box-shadow: inset 0 0 0 1px rgba(80, 120, 160, 0.08);
+}
+
+.home #home-profile-card .specialty-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(255, 219, 235, 0.86);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #7a3550;
+    flex-shrink: 0;
+}
+
+.home #home-profile-card .specialty-icon svg {
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+}
+
+.home #home-profile-card .specialty-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.home #home-profile-card .specialty-title {
+    font-size: 0.74rem;
+    color: #325b7b;
+    margin-bottom: 2px;
+}
+
+.home #home-profile-card .specialty-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #17324f;
+}
+
+.home #home-profile-card .stats--compact {
+    margin: 0;
+    padding: 12px 0;
+    border: 0;
+    background: rgba(255, 250, 240, 0.9);
+    border-radius: 14px;
+    display: flex;
+    justify-content: space-around;
+    gap: 8px;
+}
+
+.home #home-profile-card .stat {
     text-align: center;
-    border-radius: 8px;
+}
+
+.home #home-profile-card .stat-link {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 10px;
+    color: inherit;
+    text-decoration: none;
+}
+
+.home #home-profile-card .count {
+    font-size: 1.6rem;
+    line-height: 1;
+    color: #17324f;
+}
+
+.home #home-profile-card .stat:nth-child(2) .count {
+    color: #325b7b;
+}
+
+.home #home-profile-card .stat:nth-child(3) .count {
+    color: #7a3550;
+}
+
+.home #home-profile-card .label {
+    font-size: 0.78rem;
+    color: #325b7b;
+}
+
+.home #home-profile-card .profile-bottom {
+    display: flex;
+    flex-direction: column;
+}
+
+.home #home-profile-card .interests-label {
+    font-size: 0.74rem;
+    color: #325b7b;
+    margin-bottom: 8px;
+    background: transparent;
+    padding: 0;
+}
+
+.home #home-profile-card .interests-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.home #home-profile-card .interest {
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 0.84rem;
+    color: #17324f;
+    background: rgba(255, 250, 240, 0.9);
+    box-shadow: inset 0 0 0 1px rgba(80, 120, 160, 0.08);
+}
+
+.home #home-profile-card .profile-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.home #home-profile-card .build-title {
+    font-size: 0.74rem;
+    color: #325b7b;
+    margin: 0;
+}
+
+.home #home-profile-card .contact-bars {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.home #home-profile-card .build-item {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    border-radius: 10px;
+    border: 0;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+}
+
+.home #home-profile-card .build-item.green {
+    background: rgba(255, 250, 240, 0.9);
+    box-shadow: inset 0 0 0 1px rgba(91, 127, 49, 0.16);
+}
+
+.home #home-profile-card .build-item.blue {
+    background: rgba(255, 250, 240, 0.9);
+    box-shadow: inset 0 0 0 1px rgba(29, 138, 90, 0.16);
+}
+
+.home #home-profile-card .build-item.contact-card--purple {
+    background: rgba(255, 250, 240, 0.9);
+    box-shadow: inset 0 0 0 1px rgba(91, 99, 200, 0.16);
+}
+
+.home #home-profile-card .build-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.10);
+}
+
+.home #home-profile-card .build-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.home #home-profile-card .build-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: currentColor;
+}
+
+.home #home-profile-card .contact-icon i {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.home #home-profile-card .contact-icon.github {
+    color: #2d63bf;
+}
+
+.home #home-profile-card .contact-icon.wechat {
+    color: #1b8d63;
+}
+
+.home #home-profile-card .contact-icon.qq {
+    color: #5b63c8;
+}
+
+.home #home-profile-card .build-name {
+    font-size: 0.8rem;
+    color: #17324f;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    transition:
-        width 0.3s cubic-bezier(0.2, 0.72, 0.2, 1),
-        margin-left 0.3s cubic-bezier(0.2, 0.72, 0.2, 1),
-        border-radius 0.3s cubic-bezier(0.2, 0.72, 0.2, 1);
 }
 
-.home #home-profile-card .profile-row:hover .profile-label,
-.home #home-profile-card .profile-row:focus-within .profile-label {
-    opacity: 1;
-    transform: translateX(0);
+.home #home-profile-card .build-item .build-left,
+.home #home-profile-card .build-item .build-icon {
+    color: #17324f;
 }
 
-.home #home-profile-card .profile-row:hover .profile-value,
-.home #home-profile-card .profile-row:focus-within .profile-value {
-    margin-left: 86px;
-    width: calc(100% - 86px);
-    border-radius: 0 8px 8px 0;
+.home #home-profile-card .build-item .build-icon i {
+    color: currentColor;
 }
 
-@media (hover: none),
-(pointer: coarse) {
+.home #home-profile-card .build-item.green .build-icon {
+    color: #2d63bf;
+}
+
+.home #home-profile-card .build-item.blue .build-icon {
+    color: #1b8d63;
+}
+
+.home #home-profile-card .build-item.contact-card--purple .build-icon {
+    color: #5b63c8;
+}
+
+.home #home-profile-card .build-item:hover {
+    box-shadow: 0 10px 24px rgba(21, 50, 79, 0.16);
+}
+
+@media (hover: hover) {
+    .home .profile-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 22px 46px rgba(18, 24, 38, 0.18);
+    }
+}
+
+@media (max-width: 720px) {
+    .home .content-wrapper {
+        grid-template-columns: 1fr;
+    }
+
+    .home .profile-card {
+        top: 0;
+        padding: 16px;
+    }
+
+    .home #home-profile-card .profile-header {
+        align-items: flex-start;
+    }
+
+    .home #home-profile-card .profile-avatar {
+        width: 76px;
+        height: 76px;
+    }
+
+    .home #home-profile-card .name {
+        font-size: 1.5rem;
+    }
+
     .home #home-profile-card .profile-row {
-        min-height: 0;
+        gap: 12px;
     }
 
-    .home #home-profile-card .profile-label {
-        position: static;
-        width: 86px;
-        min-width: 86px;
-        opacity: 1;
+    .home #home-profile-card .level-value {
+        font-size: 1.08rem;
+    }
+
+    .home #home-profile-card .specialty-row {
+        padding: 10px;
+    }
+
+    .home #home-profile-card .specialty-value {
+        font-size: 0.96rem;
+    }
+
+    .home #home-profile-card .stats--compact {
+        padding: 10px 0;
+        gap: 6px;
+    }
+
+    .home #home-profile-card .count {
+        font-size: 1.35rem;
+    }
+
+    .home #home-profile-card .interests-list {
+        gap: 8px;
+    }
+
+    .home #home-profile-card .interest {
+        padding: 6px 10px;
+    }
+
+    .home #home-profile-card .contact-bars {
+        flex-direction: column;
+    }
+
+    .home #home-profile-card .build-item {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .home .profile-card,
+    .home .profile-card:hover {
         transform: none;
-        border-radius: 8px 0 0 8px;
-        pointer-events: auto;
-    }
-
-    .home #home-profile-card .profile-value {
-        width: auto;
-        margin-left: 0;
-        border-radius: 0 8px 8px 0;
-        justify-content: flex-start;
-        text-align: left;
-        white-space: normal;
-        overflow: visible;
-        text-overflow: clip;
     }
 }
 

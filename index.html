@@ -345,42 +345,63 @@
                     <!-- 左侧个人信息卡片 -->
                     <aside class="sidebar" id="sidebar">
                         <div class="profile-card" id="home-profile-card">
-                            <div class="avatar">
-                                <img src="assets/avatar.png" alt="头像">
-                            </div>
-                            <h2 class="name" data-i18n="profile_name"></h2>
+                            <div class="profile-card-sheen" aria-hidden="true"></div>
 
-                            <div class="profile-info">
-                                <div class="profile-row">
-                                    <span class="profile-label profile-label--school" data-i18n="label_school"></span>
-                                    <span class="profile-value" data-i18n="school_name"></span>
+                            <div class="profile-header">
+                                <div class="avatar profile-avatar">
+                                    <img src="assets/avatar.png" alt="头像">
                                 </div>
-                                <div class="profile-row">
-                                    <span class="profile-label profile-label--degree" data-i18n="label_degree"></span>
-                                    <span class="profile-value" data-i18n="degree_name"></span>
-                                </div>
-                                <div class="profile-row">
-                                    <span class="profile-label profile-label--grade" data-i18n="label_grade"></span>
-                                    <span class="profile-value" data-i18n="grade_value"></span>
-                                </div>
-                                <div class="profile-row">
-                                    <span class="profile-label profile-label--department"
-                                        data-i18n="label_department"></span>
-                                    <span class="profile-value" data-i18n="department_value"></span>
+                                <div class="profile-header-info">
+                                    <h2 class="name" data-i18n="profile_name"></h2>
+                                    <div class="date-row">
+                                        <div class="play-icon"></div>
+                                        <span class="date-label">学校</span>
+                                        <span class="date-value" data-i18n="school_name"></span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="profile-interests">
-                                <div class="interests-label" data-i18n="label_interests"></div>
-                                <div class="interests-list">
-                                    <span class="interest" data-i18n="interest_game"></span>
-                                    <span class="interest" data-i18n="interest_literature"></span>
-                                    <span class="interest" data-i18n="interest_jpop"></span>
-                                    <span class="interest" data-i18n="interest_language"></span>
+                            <div class="profile-divider"></div>
+
+                            <div class="level-section">
+                                <div class="profile-row">
+                                    <div class="level-item">
+                                        <div class="level-icon hex">⬡</div>
+                                        <span class="level-text" data-i18n="label_grade"></span>
+                                    </div>
+                                    <span class="level-value" data-i18n="grade_value"></span>
+                                </div>
+                                <div class="profile-row">
+                                    <div class="level-item">
+                                        <div class="level-icon eye">◉</div>
+                                        <span class="level-text" data-i18n="label_degree"></span>
+                                    </div>
+                                    <span class="level-value" data-i18n="degree_name"></span>
                                 </div>
                             </div>
 
-                            <div class="stats">
+                            <div class="profile-divider"></div>
+
+                            <div class="specialty-section">
+                                <div class="specialty-row">
+                                    <div class="specialty-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24">
+                                            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                                            <path d="M2 17l10 5 10-5" />
+                                            <path d="M2 12l10 5 10-5" />
+                                            <line x1="12" y1="12" x2="12" y2="22" />
+                                        </svg>
+                                    </div>
+                                    <div class="specialty-info">
+                                        <div class="specialty-title" data-i18n="specialty_title"></div>
+                                        <div class="specialty-value" data-i18n="specialty_name"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="profile-divider"></div>
+
+                            <div class="stats stats--compact">
                                 <div class="stat">
                                     <a class="stat-link" href="archive.html">
                                         <span class="count" id="article-count">0</span>
@@ -401,15 +422,51 @@
                                 </div>
                             </div>
 
-                            <div class="social-links contact-links">
-                                <a href="#" id="github-link" class="contact-btn" aria-label="GitHub"><i
-                                        class="fab fa-github"></i><span class="sr-only"
-                                        data-i18n="contact_github"></span></a>
-                                <button class="contact-btn" id="wechat-btn" aria-label="WeChat"><i
-                                        class="fab fa-weixin"></i><span class="sr-only"
-                                        data-i18n="contact_wechat"></span></button>
-                                <button class="contact-btn" id="qq-btn" aria-label="QQ"><i class="fab fa-qq"></i><span
-                                        class="sr-only" data-i18n="contact_qq"></span></button>
+                            <div class="profile-divider"></div>
+
+                            <div class="profile-bottom">
+                                <div class="interests-label" data-i18n="label_interests"></div>
+                                <div class="interests-list">
+                                    <span class="interest" data-i18n="interest_game"></span>
+                                    <span class="interest" data-i18n="interest_literature"></span>
+                                    <span class="interest" data-i18n="interest_jpop"></span>
+                                    <span class="interest" data-i18n="interest_language"></span>
+                                </div>
+                            </div>
+
+                            <div class="profile-divider"></div>
+
+                            <div class="profile-footer">
+                                <div class="build-title" data-i18n="contact">联系方式</div>
+                                <div class="build-bars contact-bars">
+                                    <a href="#" id="github-link" class="build-item green contact-card"
+                                        aria-label="GitHub">
+                                        <div class="build-left">
+                                            <div class="build-icon contact-icon github" aria-hidden="true">
+                                                <i class="fab fa-github"></i>
+                                            </div>
+                                            <span class="build-name">GitHub</span>
+                                        </div>
+                                    </a>
+                                    <button type="button" class="build-item blue contact-card" id="wechat-btn"
+                                        aria-label="WeChat">
+                                        <div class="build-left">
+                                            <div class="build-icon contact-icon wechat" aria-hidden="true">
+                                                <i class="fab fa-weixin"></i>
+                                            </div>
+                                            <span class="build-name" data-i18n="contact_wechat">微信</span>
+                                        </div>
+                                    </button>
+                                    <button type="button" class="build-item contact-card contact-card--purple"
+                                        id="qq-btn" aria-label="QQ">
+                                        <div class="build-left">
+                                            <div class="build-icon contact-icon qq" aria-hidden="true">
+                                                <i class="fab fa-qq"></i>
+                                            </div>
+                                            <span class="build-name" data-i18n="contact_qq">QQ</span>
+                                        </div>
+                                    </button>
+                                </div>
                                 <div class="contact-popup" id="contact-popup">
                                     <div class="contact-item"><strong data-i18n="contact_wechat">WeChat</strong>: <span
                                             id="contact-wechat" style="display:none">w19979258352</span></div>
