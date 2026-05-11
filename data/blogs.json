@@ -1,5 +1,60 @@
 [
     {
+        "id": 2902201859,
+        "title": "系统调用",
+        "excerpt": "操作系统系统调用理论知识点梳理",
+        "date": "2026-05-11",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "操作系统",
+            "系统调用"
+        ],
+        "category": "学习",
+        "type": "系统笔记",
+        "series": "操作系统理论",
+        "order": 4,
+        "contentFile": "blogs/二下/操作系统/系统调用/系统调用.md",
+        "recommended": false,
+        "lastEditedDate": "2026-05-11"
+    },
+    {
+        "id": 650786542,
+        "title": "OS-Lab4-实验报告",
+        "excerpt": "2421操作系统Lab4课下实验实验报告",
+        "date": "2026-05-11",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "操作系统",
+            "系统调用"
+        ],
+        "category": "学习",
+        "type": "概要笔记",
+        "series": "操作系统实验报告",
+        "order": null,
+        "contentFile": "blogs/二下/操作系统/系统调用/OS-Lab4-实验报告.md",
+        "recommended": false
+    },
+    {
+        "id": 96682018,
+        "title": "Lab4 梳理总结",
+        "excerpt": "LEAF(msyscall)",
+        "date": "2026-05-10",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "操作系统",
+            "系统调用"
+        ],
+        "category": "学习",
+        "type": null,
+        "series": null,
+        "order": null,
+        "contentFile": "blogs/二下/操作系统/系统调用/Lab4 梳理总结.md",
+        "recommended": false
+    },
+    {
         "id": 2929353253,
         "title": "活用形",
         "excerpt": "日语活用形基本内容介绍",
@@ -69,8 +124,7 @@
         "series": null,
         "order": null,
         "contentFile": "blogs/二下/操作系统/进程管理/进程管理.md",
-        "recommended": false,
-        "lastEditedDate": "2026-05-04"
+        "recommended": false
     },
     {
         "id": 3111316559,
@@ -88,8 +142,7 @@
         "series": null,
         "order": null,
         "contentFile": "blogs/二下/操作系统/进程管理/Lab3 梳理总结.md",
-        "recommended": false,
-        "lastEditedDate": "2026-05-04"
+        "recommended": false
     },
     {
         "id": 1476750254,
@@ -125,8 +178,7 @@
         "series": "操作系统理论",
         "order": 2,
         "contentFile": "blogs/二下/操作系统/内存管理/内存管理.md",
-        "recommended": false,
-        "lastEditedDate": "2026-05-04"
+        "recommended": false
     },
     {
         "id": 3927684149,
@@ -486,8 +538,7 @@
         "series": null,
         "order": null,
         "contentFile": "blogs/明日方舟/干员杂谈/干员测评/望.md",
-        "recommended": false,
-        "lastEditedDate": "2026-05-04"
+        "recommended": false
     },
     {
         "id": 464226462,
@@ -901,8 +952,7 @@
         "series": "二上总复习",
         "order": null,
         "contentFile": "blogs/二上/算法/模板/算法板子.md",
-        "recommended": false,
-        "lastEditedDate": "2026-05-04"
+        "recommended": false
     },
     {
         "id": 3054643240,

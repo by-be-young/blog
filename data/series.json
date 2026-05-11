@@ -57,6 +57,49 @@
         ]
     },
     {
+        "id": 2371870112,
+        "title": "操作系统实验报告",
+        "coverImage": "assets/images/background/bg2.png",
+        "count": 5,
+        "posts": [
+            {
+                "id": 3948969099,
+                "title": "OS-Lab0-实验报告",
+                "date": "2026-04-09",
+                "order": 1,
+                "contentFile": "blogs/二下/操作系统/Shell/OS-Lab0-实验报告.md"
+            },
+            {
+                "id": 1701666555,
+                "title": "OS-Lab1-实验报告",
+                "date": "2026-04-09",
+                "order": 2,
+                "contentFile": "blogs/二下/操作系统/启动/OS-Lab1-实验报告.md"
+            },
+            {
+                "id": 2586613327,
+                "title": "OS-Lab3-实验报告",
+                "date": "2026-04-30",
+                "order": 3,
+                "contentFile": "blogs/二下/操作系统/进程管理/OS-Lab3-实验报告.md"
+            },
+            {
+                "id": 2424337759,
+                "title": "OS-Lab2-实验报告",
+                "date": "2026-04-09",
+                "order": 3,
+                "contentFile": "blogs/二下/操作系统/内存管理/OS-Lab2-实验报告.md"
+            },
+            {
+                "id": 650786542,
+                "title": "OS-Lab4-实验报告",
+                "date": "2026-05-11",
+                "order": null,
+                "contentFile": "blogs/二下/操作系统/系统调用/OS-Lab4-实验报告.md"
+            }
+        ]
+    },
+    {
         "id": 303458327,
         "title": "计组理论",
         "coverImage": "assets/images/background/bg2.png",
@@ -100,42 +143,6 @@
         ]
     },
     {
-        "id": 2371870112,
-        "title": "操作系统实验报告",
-        "coverImage": "assets/images/background/bg2.png",
-        "count": 4,
-        "posts": [
-            {
-                "id": 3948969099,
-                "title": "OS-Lab0-实验报告",
-                "date": "2026-04-09",
-                "order": 1,
-                "contentFile": "blogs/二下/操作系统/Shell/OS-Lab0-实验报告.md"
-            },
-            {
-                "id": 1701666555,
-                "title": "OS-Lab1-实验报告",
-                "date": "2026-04-09",
-                "order": 2,
-                "contentFile": "blogs/二下/操作系统/启动/OS-Lab1-实验报告.md"
-            },
-            {
-                "id": 2586613327,
-                "title": "OS-Lab3-实验报告",
-                "date": "2026-04-30",
-                "order": 3,
-                "contentFile": "blogs/二下/操作系统/进程管理/OS-Lab3-实验报告.md"
-            },
-            {
-                "id": 2424337759,
-                "title": "OS-Lab2-实验报告",
-                "date": "2026-04-09",
-                "order": 3,
-                "contentFile": "blogs/二下/操作系统/内存管理/OS-Lab2-实验报告.md"
-            }
-        ]
-    },
-    {
         "id": 565172155,
         "title": "操作系统预备知识",
         "coverImage": "assets/images/background/bg2.png",
@@ -175,7 +182,7 @@
         "id": 2418676405,
         "title": "操作系统理论",
         "coverImage": "assets/images/background/bg2.png",
-        "count": 2,
+        "count": 3,
         "posts": [
             {
                 "id": 3791533123,
@@ -190,6 +197,13 @@
                 "date": "2026-04-14",
                 "order": 2,
                 "contentFile": "blogs/二下/操作系统/内存管理/内存管理.md"
+            },
+            {
+                "id": 2902201859,
+                "title": "系统调用",
+                "date": "2026-05-11",
+                "order": 4,
+                "contentFile": "blogs/二下/操作系统/系统调用/系统调用.md"
             }
         ]
     }
