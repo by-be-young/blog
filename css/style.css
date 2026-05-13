@@ -938,6 +938,10 @@ body.page-transition-leaving .navbar::after {
 
 .announcement-modal .announcement-banner--modal.announcement-banner--recent {
     background-size: 240% 240%, 240% 240%;
+    /* 更改为偏橙色的马卡龙渐变，并保留原有的流动与呼吸动画效果 */
+    background:
+        linear-gradient(135deg, rgba(255, 217, 179, 0.96), rgba(255, 183, 128, 0.96), rgba(255, 231, 176, 0.96)),
+        linear-gradient(135deg, rgba(255, 204, 153, 0.90), rgba(255, 179, 102, 0.88), rgba(255, 205, 140, 0.90));
     will-change: background-position, transform, box-shadow;
     animation:
         announcement-recent-gradient-flow 2.8s linear infinite,
@@ -6981,4 +6985,81 @@ body.offcanvas-open {
         overflow: visible;
         transform: none;
     }
+}
+
+/* 近期公告：横幅（首页）整体偏橙色马卡龙风格覆盖 */
+.announcement-banner.announcement-banner--recent {
+    background:
+        linear-gradient(135deg, rgba(255, 235, 210, 0.96) 0%, rgba(255, 205, 160, 0.96) 50%, rgba(255, 225, 180, 0.96) 100%) padding-box,
+        linear-gradient(135deg, rgba(255, 210, 160, 0.92), rgba(255, 180, 110, 0.92), rgba(255, 210, 140, 0.92)) border-box;
+    border: var(--card-border-w) solid transparent;
+    color: #5a2d08;
+}
+
+.announcement-banner.announcement-banner--recent .announcement-kicker {
+    color: #8b3b00;
+}
+
+.announcement-banner.announcement-banner--recent .announcement-message {
+    color: rgba(0, 0, 0, 0.72);
+}
+
+.announcement-banner.announcement-banner--recent .announcement-message .ann-line--headline {
+    color: #6b2b4a;
+}
+
+.announcement-banner.announcement-banner--recent .announcement-message .ann-line--section {
+    color: #ff7a4a;
+}
+
+.announcement-banner.announcement-banner--recent .announcement-btn {
+    background: linear-gradient(135deg, rgba(255, 210, 170, 1), rgba(255, 185, 120, 1));
+    color: #6b2b4a;
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+/* 浮动按钮：近期提示使用偏橙色马卡龙风格 */
+.announcement-fab.announcement-fab--recent-attention {
+    background:
+        linear-gradient(135deg, rgba(255, 220, 170, 0.98) 0%, rgba(255, 190, 120, 0.98) 50%, rgba(255, 225, 160, 0.98) 100%) padding-box,
+        linear-gradient(135deg, rgba(255, 200, 140, 0.92), rgba(255, 170, 100, 0.92), rgba(255, 200, 130, 0.92)) border-box;
+    color: #7b4a00;
+    box-shadow: 0 12px 30px rgba(255, 165, 64, 0.12);
+}
+
+.announcement-fab.announcement-fab--recent-attention i {
+    color: #7b4a00;
+}
+
+/* 弹窗内的分隔符改为双横线（并居中） */
+.announcement-modal .announcement-scroll-sep,
+.announcement-modal .announcement-banner--modal .announcement-scroll-sep {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 22px;
+    padding: 0;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+}
+
+.announcement-modal .announcement-scroll-sep::before,
+.announcement-modal .announcement-scroll-sep::after {
+    content: '';
+    display: block;
+    width: 60%;
+    height: 2px;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 2px;
+}
+
+.announcement-modal .announcement-scroll-sep::before {
+    transform: translateY(-4px);
+}
+
+.announcement-modal .announcement-scroll-sep::after {
+    transform: translateY(4px);
 }

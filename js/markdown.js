@@ -1029,6 +1029,7 @@ function renderMarkdownContent() {
     // 先将自定义块转换为 HTML 片段或占位符，随后再抽取数学表达式
     // questionsHtml 用于保存被解析后的 question HTML（保持内部 Markdown 能被 marked 处理）
     const questionsHtml = [];
+    const optionsHtml = [];
     // helper: process a chunk for [question] and [options], returning transformed string
     function processInnerForQuestionsAndOptions(innerText) {
         if (!innerText) return '';
@@ -1043,7 +1044,9 @@ function renderMarkdownContent() {
 
         // then handle options
         const step2 = step1.replace(/\[options\]([\s\S]*?)\[\\options\]/g, function (_, optInner) {
-            return buildOptionsHtml(optInner);
+            const idx = optionsHtml.length;
+            optionsHtml.push(buildOptionsHtml(optInner));
+            return `@@OPTION_${idx}@@`;
         });
         return step2;
     }
@@ -1172,6 +1175,12 @@ function renderMarkdownContent() {
         return `\n<div class="md-question">${inner}</div>\n`;
     });
 
+    // 还原 options 占位符为已生成的 HTML，避免其内部内容再次经过全局数学抽取
+    html = html.replace(/@@OPTION_(\d+)@@/g, (_, num) => {
+        const i = parseInt(num, 10);
+        return optionsHtml[i] || '';
+    });
+
     // （task 已在 markdown 预处理阶段替换为 .md-task 包裹，故此处无需还原）
 
     // 还原数学占位符为占位 DOM 元素，用于后续 KaTeX 渲染
@@ -1188,6 +1197,57 @@ function renderMarkdownContent() {
         });
 
     contentElement.innerHTML = html;
+
+    function annotateTaskLabels(root) {
+        if (!root) return;
+
+        const blocks = Array.from(root.children).filter(el => el && el.matches && el.matches('h1, h2, h3, .md-task'));
+        if (!blocks.length) return;
+
+        let h1Index = 0;
+        let h2Index = 0;
+        let h3Index = 0;
+        const taskGroups = new Map();
+
+        blocks.forEach(el => {
+            const tag = (el.tagName || '').toLowerCase();
+            if (tag === 'h1') {
+                h1Index += 1;
+                h2Index = 0;
+                h3Index = 0;
+                return;
+            }
+            if (tag === 'h2') {
+                if (h1Index === 0) return;
+                h2Index += 1;
+                h3Index = 0;
+                return;
+            }
+            if (tag === 'h3') {
+                if (h1Index === 0) return;
+                h3Index += 1;
+                return;
+            }
+
+            if (el.classList && el.classList.contains('md-task')) {
+                const key = [h1Index, h2Index, h3Index].join('-');
+                if (!taskGroups.has(key)) taskGroups.set(key, []);
+                taskGroups.get(key).push(el);
+            }
+        });
+
+        taskGroups.forEach((tasks, key) => {
+            const prefix = key.split('-').map(num => parseInt(num, 10)).filter(num => Number.isFinite(num) && num > 0).join('-');
+            tasks.forEach((task, index) => {
+                task.dataset.taskLabel = prefix;
+                task.dataset.taskSuffix = tasks.length > 1 ? ` （${index + 1}）` : '';
+                task.dataset.taskIndex = String(index + 1);
+                task.dataset.taskTotal = String(tasks.length);
+            });
+        });
+    }
+
+    annotateTaskLabels(contentElement);
 
     // 使用 KaTeX API 对占位元素逐个渲染（若 KaTeX 可用）
     try {

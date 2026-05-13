@@ -4,6 +4,10 @@
     gap: 32px;
 }
 
+.blog-detail {
+    --h3-heading-color: #ff8f9e;
+}
+
 .blog-toc {
     position: sticky;
     top: 100px;
@@ -114,18 +118,89 @@
     font-size: 1rem;
 }
 
+.toc-h2>.toc-sub-list {
+    padding-left: 10px;
+}
+
+.toc-h3>a {
+    color: var(--h3-heading-color);
+    margin-left: 24px;
+    font-size: 0.95rem;
+    display: inline-block;
+}
+
+.toc-h3>a:hover {
+    color: var(--h3-heading-color);
+}
+
+.toc-h3 {
+    position: relative;
+}
+
+.toc-h3>a {
+    position: relative;
+    z-index: 1;
+}
+
+.toc-h3.is-active>a {
+    padding-left: 0;
+}
+
+.toc-h3.is-active>a::before {
+    display: none;
+}
+
+/* 浮动的源石虫图标（由JS控制位置） */
+.toc-bug {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0;
+    transition: left 260ms cubic-bezier(.2, .9, .2, 1), top 260ms cubic-bezier(.2, .9, .2, 1), opacity 160ms ease, transform 600ms ease;
+    transform-origin: center center;
+}
+
+.toc-bug img {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* 闲置时轻微浮动效果 */
+@keyframes toc-bug-float {
+    0% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-4px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+.toc-bug.idle {
+    animation: toc-bug-float 3s ease-in-out infinite;
+}
+
 /* 高亮当前所在章节的 TOC h2 项：稍微加深底色作为提示 */
 .toc-h2 {
     position: relative;
 }
 
 /* 在 li 上使用伪元素绘制高亮背景，避免改变 a 的布局与内边距，从而保持换行和位置不变 */
-.toc-h2.is-active::before {
+.toc-h2.is-active>a::before {
     content: '';
     position: absolute;
     /* 将高亮左侧向左延伸 12px，以便与 h1 项目左侧对齐（h2 的 a 有 margin-left:12px） */
     left: -12px;
-    right: 0;
+    right: -2px;
     /* 向上/下扩展以增加高亮区域高度，但不改变文本布局 */
     top: -4px;
     bottom: -4px;
@@ -134,7 +209,7 @@
     z-index: 0;
 }
 
-.toc-list.has-animated-h2-indicator .toc-h2.is-active::before {
+.toc-list.has-animated-h2-indicator .toc-h2.is-active>a::before {
     opacity: 0;
 }
 
@@ -148,11 +223,11 @@
 
 /* h3样式与h2几乎一致，仅颜色为橙色 */
 .blog-detail .article-content h3 {
-    color: #ff9900;
+    color: var(--h3-heading-color);
     font-size: 1.5rem;
     font-weight: 700;
     margin: 1.2em 0 0.8em 0;
-    border-left: 4px solid #ff9900;
+    border-left: 4px solid var(--h3-heading-color);
     padding: 8px 12px;
     background: linear-gradient(90deg, rgba(255, 251, 230, 0.9) 0%, rgba(255, 251, 230, 0.6) 60%);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -171,6 +246,11 @@
 .toc-list a:hover {
     text-decoration: underline;
     color: #b620e0;
+}
+
+/* 放在通用 hover 规则之后，确保 h3 目录项悬停时不变色 */
+.toc-list .toc-h3>a:hover {
+    color: var(--h3-heading-color);
 }
 
 #back-to-top {
@@ -297,6 +377,14 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
 }
 
 /* 博客详情页内容层级美化 */
+.blog-detail .article-content.practice-mode> :not(h1):not(h2):not(h3):not(.md-task) {
+    display: none !important;
+}
+
+.blog-detail .article-content.practice-mode>.md-task {
+    display: block !important;
+}
+
 .blog-detail .article-content h1 {
     color: #2d8cf0;
     font-size: 2.3rem;
@@ -1774,8 +1862,8 @@ body.blog-detail-page.immersive-reading-active::after {
 }
 
 .blog-detail-page .article-content h3 {
-    color: var(--detail-peach);
-    border-left: 4px solid var(--detail-peach);
+    color: var(--h3-heading-color);
+    border-left: 4px solid var(--h3-heading-color);
     background: linear-gradient(90deg, rgba(255, 210, 166, 0.12) 0%, rgba(255, 182, 201, 0.04) 60%);
     padding-left: 10px;
 }
@@ -1958,9 +2046,9 @@ body.blog-detail-page.immersive-reading-active::after {
 }
 
 .blog-detail-page .article-content h3 {
-    color: #ff8f9e;
+    color: var(--h3-heading-color);
     /* 更明显的粉橙 */
-    border-left-color: #ff8f9e;
+    border-left-color: var(--h3-heading-color);
     background: linear-gradient(90deg, rgba(255, 210, 166, 0.16) 0%, rgba(255, 182, 201, 0.06) 60%);
 }
 
@@ -2175,12 +2263,13 @@ body.blog-detail-page.immersive-reading-active::after {
 }
 
 .article-content .md-task::before {
-    content: "例题";
+    content: "例题" attr(data-task-label) attr(data-task-suffix);
     position: absolute;
     top: 10px;
     left: 38px;
     display: inline-flex;
     align-items: center;
+    white-space: nowrap;
     padding: 0;
     border-radius: 0;
     font-size: 1.1rem;

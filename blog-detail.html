@@ -199,6 +199,10 @@
                                     <span data-i18n="display_exercise_collapse">全部收起答案</span>
                                 </label>
                                 <label class="display-option-item">
+                                    <input type="radio" name="display-exercise" value="practice">
+                                    <span data-i18n="display_exercise_practice">练习模式</span>
+                                </label>
+                                <label class="display-option-item">
                                     <input type="radio" name="display-exercise" value="expand">
                                     <span data-i18n="display_exercise_expand">全部展开答案</span>
                                 </label>
@@ -244,9 +248,26 @@
             const tocProgressEl = document.getElementById('toc-progress');
             const articleContentEl = document.getElementById('markdown-content');
             const TOC_SUBLIST_ANIM_MS = 220;
+            const TOC_SCROLL_LOCK_MIN_MS = 650;
+            const TOC_SCROLL_LOCK_MAX_MS = 2200;
+
+            function clamp(value, min, max) {
+                return Math.max(min, Math.min(max, value));
+            }
 
             function setSubListState(ul, open, instant = false) {
                 if (!ul) return;
+                const hasState = ul.dataset.open === '1' || ul.dataset.open === '0';
+                const wasOpen = ul.dataset.open === '1';
+                if (hasState && wasOpen === !!open) {
+                    if (open) {
+                        ul.style.display = 'block';
+                        ul.style.maxHeight = 'none';
+                        ul.style.opacity = '1';
+                        ul.style.overflow = 'visible';
+                    }
+                    return;
+                }
                 if (ul.__tocAnimTimer) {
                     clearTimeout(ul.__tocAnimTimer);
                     ul.__tocAnimTimer = null;
@@ -317,6 +338,7 @@
 
             let activeH1Id = null;
             let lastUrlH1Id = null;
+            let tocAutoSyncLockUntil = 0;
 
             function openH1ById(h1Id) {
                 if (!h1Id || !h1Map.has(h1Id)) return;
@@ -354,6 +376,7 @@
                     if (header.tagName.toLowerCase() === 'h1') {
                         h1Id = header.id;
                         setActiveH2(null, null, true);
+                        setActiveH3(null, null);
                     } else if (header.tagName.toLowerCase() === 'h2' || header.tagName.toLowerCase() === 'h3') {
                         // 找到最近的上一个h1
                         let prev = header.previousElementSibling;
@@ -366,6 +389,18 @@
                         }
                     }
                     openH1ById(h1Id);
+                    if (header.tagName.toLowerCase() === 'h2') {
+                        const h2Li = h2Map.get(header.id);
+                        setActiveH2(h2Li || null, header, true);
+                        setActiveH3(null, null);
+                    } else if (header.tagName.toLowerCase() === 'h3') {
+                        const parentH2 = getParentH2ForHeading(header);
+                        const h2Li = parentH2 && parentH2.id ? h2Map.get(parentH2.id) : null;
+                        setActiveH2(h2Li || null, parentH2 || null, true);
+                        const h3Li = h3Map.get(header.id);
+                        setActiveH3(h3Li || null, header);
+                    }
+                    refreshActiveH2IndicatorSoon();
                     // 平滑滚动到header本身，考虑顶部导航栏高度，避免锚点跳转副作用
                     const nav = document.querySelector('.navbar');
                     const navHeight = nav ? nav.offsetHeight : 0;
@@ -374,8 +409,14 @@
                     window.__scrollingToTOC = true;
                     // 取消hash跳转副作用
                     const y = header.getBoundingClientRect().top + window.scrollY - navHeight - 10;
+                    const distance = Math.abs(y - window.scrollY);
+                    // 长距离平滑滚动时临时锁定自动目录跟随，避免滚动中反复切换目录状态
+                    const lockMs = clamp(Math.round(distance * 0.9), TOC_SCROLL_LOCK_MIN_MS, TOC_SCROLL_LOCK_MAX_MS);
+                    tocAutoSyncLockUntil = Date.now() + lockMs;
                     window.scrollTo({ top: y, behavior: 'smooth' });
-                    setTimeout(() => { window.__scrollingToTOC = false; }, 400);
+                    setTimeout(() => {
+                        window.__scrollingToTOC = false;
+                    }, lockMs);
 
                     // 更新URL hash但不触发浏览器锚点跳转
                     try {
@@ -395,7 +436,49 @@
             h2Indicator.className = 'toc-h2-active-indicator';
             tocList.appendChild(h2Indicator);
 
+            // 浮动的源石虫图标（用于动态移动）
+            const tocBug = document.createElement('div');
+            tocBug.id = 'toc-bug';
+            tocBug.className = 'toc-bug';
+            const bugImg = document.createElement('img');
+            bugImg.src = 'assets/images/task/correct.png';
+            bugImg.alt = '';
+            tocBug.appendChild(bugImg);
+            tocList.appendChild(tocBug);
+
             let activeH2Li = null;
+            let activeH3Li = null;
+
+            function getRelativeOffset(el, ancestor) {
+                let top = 0;
+                let left = 0;
+                let node = el;
+                while (node && node !== ancestor) {
+                    top += node.offsetTop || 0;
+                    left += node.offsetLeft || 0;
+                    node = node.offsetParent;
+                }
+                if (node !== ancestor) return null;
+                return { top, left };
+            }
+
+            function getH2IndicatorReachWidth(anchorRect, listRect) {
+                const leftInList = anchorRect.left - listRect.left;
+                const rightPadding = 2;
+                const reach = listRect.width - leftInList - rightPadding;
+                return Math.max(0, Math.round(reach));
+            }
+
+            function refreshActiveH2IndicatorSoon() {
+                requestAnimationFrame(() => {
+                    moveH2IndicatorTo(activeH2Li, true);
+                    moveTocBugTo(activeH3Li, true);
+                });
+                setTimeout(() => {
+                    moveH2IndicatorTo(activeH2Li, true);
+                    moveTocBugTo(activeH3Li, true);
+                }, TOC_SUBLIST_ANIM_MS + 60);
+            }
 
             function moveH2IndicatorTo(li, instant = false) {
                 if (!h2Indicator) return;
@@ -404,12 +487,44 @@
                     return;
                 }
 
+                // 目标项不可见或不在当前可展开路径时，直接隐藏指示器
+                if (!li.isConnected || !tocList.contains(li) || li.getClientRects().length === 0) {
+                    h2Indicator.style.opacity = '0';
+                    return;
+                }
+                const ownerSubList = li.closest('.toc-sub-list');
+                if (ownerSubList && ownerSubList.dataset.open !== '1') {
+                    h2Indicator.style.opacity = '0';
+                    return;
+                }
+
+                const anchor = li.querySelector(':scope > a');
+                if (!anchor) {
+                    h2Indicator.style.opacity = '0';
+                    return;
+                }
+                if (anchor.getClientRects().length === 0) {
+                    h2Indicator.style.opacity = '0';
+                    return;
+                }
+
+                const relative = getRelativeOffset(anchor, tocList);
+                if (!relative) {
+                    h2Indicator.style.opacity = '0';
+                    return;
+                }
+
                 const listRect = tocList.getBoundingClientRect();
-                const liRect = li.getBoundingClientRect();
-                const top = liRect.top - listRect.top + tocList.scrollTop - 4;
-                const left = liRect.left - listRect.left + tocList.scrollLeft - 12;
-                const width = liRect.width + 12;
-                const height = liRect.height + 8;
+                const anchorRect = anchor.getBoundingClientRect();
+                const top = relative.top - 4;
+                const left = relative.left - 12;
+                const width = getH2IndicatorReachWidth(anchorRect, listRect) + 12;
+                const height = anchorRect.height + 8;
+
+                if (!Number.isFinite(top) || !Number.isFinite(left) || !Number.isFinite(width) || !Number.isFinite(height)) {
+                    h2Indicator.style.opacity = '0';
+                    return;
+                }
 
                 if (instant) {
                     h2Indicator.style.transition = 'none';
@@ -430,21 +545,101 @@
                 }
             }
 
+            // 将浮动图标定位到指定的 h3 列表项附近
+            function moveTocBugTo(li, instant = false) {
+                const bug = document.getElementById('toc-bug');
+                if (!bug) return;
+                if (!li) {
+                    bug.style.opacity = '0';
+                    return;
+                }
+
+                if (!li.isConnected || !tocList.contains(li) || li.getClientRects().length === 0) {
+                    bug.style.opacity = '0';
+                    return;
+                }
+
+                const anchor = li.querySelector(':scope > a');
+                if (!anchor || anchor.getClientRects().length === 0) {
+                    bug.style.opacity = '0';
+                    return;
+                }
+
+                const relative = getRelativeOffset(anchor, tocList);
+                if (!relative) {
+                    bug.style.opacity = '0';
+                    return;
+                }
+
+                const anchorRect = anchor.getBoundingClientRect();
+                const bugWidth = 18;
+                const bugHeight = 18;
+                const left = Math.round(relative.left - bugWidth - 10);
+                const top = Math.round(relative.top + (anchorRect.height - bugHeight) / 2);
+
+                if (!Number.isFinite(left) || !Number.isFinite(top)) {
+                    bug.style.opacity = '0';
+                    return;
+                }
+
+                if (instant) bug.style.transition = 'none';
+                else bug.style.transition = '';
+
+                bug.style.left = `${left}px`;
+                bug.style.top = `${top}px`;
+                bug.style.width = `${bugWidth}px`;
+                bug.style.height = `${bugHeight}px`;
+                bug.style.opacity = '1';
+
+                if (instant) {
+                    requestAnimationFrame(() => { bug.style.transition = ''; });
+                }
+            }
+
             function setActiveH2(li, headingEl, instant = false) {
+                const nextLi = li || null;
+                const nextHeading = headingEl || null;
+                const currentHeading = content.querySelector('h2.is-toc-active');
+                if (activeH2Li === nextLi && currentHeading === nextHeading) {
+                    moveH2IndicatorTo(activeH2Li, true);
+                    return;
+                }
+
                 document.querySelectorAll('.toc-h2.is-active').forEach(el => el.classList.remove('is-active'));
                 content.querySelectorAll('h2.is-toc-active').forEach(h => h.classList.remove('is-toc-active'));
 
-                activeH2Li = li || null;
-                if (li) li.classList.add('is-active');
-                if (headingEl) headingEl.classList.add('is-toc-active');
+                activeH2Li = nextLi;
+                if (nextLi) nextLi.classList.add('is-active');
+                if (nextHeading) nextHeading.classList.add('is-toc-active');
 
+                setH3SubListOpenForH2Li(activeH2Li, instant);
                 moveH2IndicatorTo(activeH2Li, instant);
+            }
+
+            function setActiveH3(li, headingEl, instant = false) {
+                const nextLi = li || null;
+                const nextHeading = headingEl || null;
+                const currentHeading = content.querySelector('h3.is-toc-active');
+                if (activeH3Li === nextLi && currentHeading === nextHeading) {
+                    moveTocBugTo(activeH3Li, true);
+                    return;
+                }
+
+                document.querySelectorAll('.toc-h3.is-active').forEach(el => el.classList.remove('is-active'));
+                content.querySelectorAll('h3.is-toc-active').forEach(h => h.classList.remove('is-toc-active'));
+
+                activeH3Li = nextLi;
+                if (nextLi) nextLi.classList.add('is-active');
+                if (nextHeading) nextHeading.classList.add('is-toc-active');
+
+                moveTocBugTo(activeH3Li, instant);
             }
 
             function getCurrentH2WithinH1(h1El, offset) {
                 if (!h1El) return null;
                 let node = h1El.nextElementSibling;
                 let currentH2 = null;
+                const activationOffset = offset - 6;
                 while (node) {
                     if (!node.tagName) {
                         node = node.nextElementSibling;
@@ -454,12 +649,79 @@
                     if (tag === 'h1') break;
                     if (tag === 'h2') {
                         const r = node.getBoundingClientRect();
-                        if (r.top <= offset) currentH2 = node;
+                        if (r.top <= activationOffset) currentH2 = node;
                         else break;
                     }
                     node = node.nextElementSibling;
                 }
                 return currentH2;
+            }
+
+            function getCurrentH3WithinH2(h2El, offset) {
+                if (!h2El) return null;
+                let node = h2El.nextElementSibling;
+                let currentH3 = null;
+                const activationOffset = offset - 6;
+                while (node) {
+                    if (!node.tagName) {
+                        node = node.nextElementSibling;
+                        continue;
+                    }
+                    const tag = node.tagName.toLowerCase();
+                    if (tag === 'h1' || tag === 'h2') break;
+                    if (tag === 'h3') {
+                        const r = node.getBoundingClientRect();
+                        if (r.top <= activationOffset) currentH3 = node;
+                        else break;
+                    }
+                    node = node.nextElementSibling;
+                }
+                return currentH3;
+            }
+
+            function isNearNextH2Top(h1El, offset) {
+                if (!h1El) return false;
+                const activationOffset = offset - 6;
+                const transitionBand = 28;
+                let node = h1El.nextElementSibling;
+                while (node) {
+                    if (!node.tagName) {
+                        node = node.nextElementSibling;
+                        continue;
+                    }
+                    const tag = node.tagName.toLowerCase();
+                    if (tag === 'h1') break;
+                    if (tag === 'h2') {
+                        const top = node.getBoundingClientRect().top;
+                        if (top > activationOffset) {
+                            return (top - activationOffset) <= transitionBand;
+                        }
+                    }
+                    node = node.nextElementSibling;
+                }
+                return false;
+            }
+
+            function getParentH2ForHeading(headingEl) {
+                if (!headingEl) return null;
+                if (headingEl.tagName && headingEl.tagName.toLowerCase() === 'h2') return headingEl;
+                let prev = headingEl.previousElementSibling;
+                while (prev) {
+                    if (prev.tagName) {
+                        const tag = prev.tagName.toLowerCase();
+                        if (tag === 'h2') return prev;
+                        if (tag === 'h1') break;
+                    }
+                    prev = prev.previousElementSibling;
+                }
+                return null;
+            }
+
+            function setH3SubListOpenForH2Li(targetH2Li, instant = false) {
+                document.querySelectorAll('.toc-h2 > .toc-sub-list').forEach(ul => {
+                    const shouldOpen = !!targetH2Li && ul.parentElement === targetH2Li;
+                    setSubListState(ul, shouldOpen, instant);
+                });
             }
 
             function syncActiveH2WithSubList() {
@@ -468,12 +730,15 @@
                 if (!subList) return;
                 if (subList.dataset.open !== '1') {
                     setActiveH2(null, null, true);
+                    setActiveH3(null, null);
                 }
             }
-            const headers = Array.from(content.querySelectorAll('h1, h2'));
+            const headers = Array.from(content.querySelectorAll('h1, h2, h3'));
             let lastH1 = null, lastH2 = null;
             const h1Map = new Map();
             const h2Map = new Map();
+            const h3Map = new Map();
+            const h3ParentH2IdMap = new Map();
             headers.forEach((header, idx) => {
                 if (!header.id) header.id = 'toc-h-' + idx;
                 const tag = header.tagName.toLowerCase();
@@ -505,13 +770,34 @@
                     lastH2.querySelector('a').addEventListener('click', function (e) {
                         scrollToHeaderAndExpand(e, header.id);
                     });
+                } else if (tag === 'h3') {
+                    if (!lastH2) return;
+                    let ul = lastH2.querySelector('ul');
+                    if (!ul) {
+                        ul = document.createElement('ul');
+                        ul.className = 'toc-sub-list toc-h3-sub-list';
+                        lastH2.appendChild(ul);
+                    }
+                    const h3Li = document.createElement('li');
+                    h3Li.className = 'toc-h3';
+                    h3Li.innerHTML = `<a href="#${header.id}">${header.textContent}</a>`;
+                    ul.appendChild(h3Li);
+                    h3Map.set(header.id, h3Li);
+
+                    const parentLink = lastH2.querySelector('a[href^="#"]');
+                    const parentH2Id = parentLink ? parentLink.getAttribute('href').slice(1) : null;
+                    if (parentH2Id) h3ParentH2IdMap.set(header.id, parentH2Id);
+
+                    h3Li.querySelector('a').addEventListener('click', function (e) {
+                        scrollToHeaderAndExpand(e, header.id);
+                    });
                 }
             });
 
             tocList.appendChild(h2Indicator);
             moveH2IndicatorTo(null, true);
-            // 默认收起所有h1下的ul
-            document.querySelectorAll('.toc-h1 > .toc-sub-list').forEach(ul => {
+            // 默认收起所有 h1/h2 下的子列表
+            document.querySelectorAll('.toc-h1 > .toc-sub-list, .toc-h2 > .toc-sub-list').forEach(ul => {
                 setSubListState(ul, false, true);
             });
             // h1折叠/展开事件
@@ -561,6 +847,17 @@
                             }
                         }
                         openH1ById(h1Id);
+                        if (target.tagName.toLowerCase() === 'h2') {
+                            setActiveH2(h2Map.get(target.id) || null, target, true);
+                            setActiveH3(null, null);
+                        } else if (target.tagName.toLowerCase() === 'h3') {
+                            const parentH2Id = h3ParentH2IdMap.get(target.id);
+                            const parentH2 = parentH2Id ? document.getElementById(parentH2Id) : getParentH2ForHeading(target);
+                            const h2Li = parentH2 && parentH2.id ? h2Map.get(parentH2.id) : null;
+                            setActiveH2(h2Li || null, parentH2 || null, true);
+                            setActiveH3(h3Map.get(target.id) || null, target);
+                        }
+                        refreshActiveH2IndicatorSoon();
                     }
                 }
             }
@@ -568,6 +865,7 @@
             window.addEventListener('scroll', function () {
                 updateTocProgress();
                 if (window.__scrollingToTOC) return;
+                if (Date.now() < tocAutoSyncLockUntil) return;
 
                 // 找到当前可视区域的h1
                 const h1s = Array.from(content.querySelectorAll('h1'));
@@ -591,12 +889,24 @@
 
                 // 更新当前可视的 h2 高亮（取最后一个 top <= offset 的 h2）
                 try {
-                    const currentH2 = getCurrentH2WithinH1(current, offset);
-                    if (currentH2 && currentH2.id) {
-                        const li = h2Map.get(currentH2.id);
-                        setActiveH2(li || null, currentH2);
+                    if (isNearNextH2Top(current, offset)) {
+                        setActiveH2(null, null, true);
+                        setActiveH3(null, null);
                     } else {
-                        setActiveH2(null, null);
+                        const currentH2 = getCurrentH2WithinH1(current, offset);
+                        if (currentH2 && currentH2.id) {
+                            const li = h2Map.get(currentH2.id);
+                            setActiveH2(li || null, currentH2);
+                            const currentH3 = getCurrentH3WithinH2(currentH2, offset);
+                            if (currentH3 && currentH3.id) {
+                                setActiveH3(h3Map.get(currentH3.id) || null, currentH3);
+                            } else {
+                                setActiveH3(null, null);
+                            }
+                        } else {
+                            setActiveH2(null, null);
+                            setActiveH3(null, null);
+                        }
                     }
                 } catch (e) { }
 
@@ -610,9 +920,14 @@
                     }
                 }
             });
-            window.addEventListener('resize', updateTocProgress);
+            window.addEventListener('resize', function () {
+                updateTocProgress();
+                moveH2IndicatorTo(activeH2Li, true);
+                moveTocBugTo(activeH3Li, true);
+            });
             tocList.addEventListener('scroll', function () {
                 moveH2IndicatorTo(activeH2Li, true);
+                moveTocBugTo(activeH3Li, true);
             });
             // hash变化时自动展开
             window.addEventListener('hashchange', function () {
@@ -623,8 +938,16 @@
                     if (target && target.tagName.toLowerCase() === 'h2') {
                         const li = h2Map.get(target.id);
                         setActiveH2(li || null, target);
+                        setActiveH3(null, null);
+                    } else if (target && target.tagName.toLowerCase() === 'h3') {
+                        const parentH2Id = h3ParentH2IdMap.get(target.id);
+                        const parentH2 = parentH2Id ? document.getElementById(parentH2Id) : getParentH2ForHeading(target);
+                        const li = parentH2 && parentH2.id ? h2Map.get(parentH2.id) : null;
+                        setActiveH2(li || null, parentH2 || null);
+                        setActiveH3(h3Map.get(target.id) || null, target);
                     } else {
                         setActiveH2(null, null);
+                        setActiveH3(null, null);
                     }
                 } catch (e) { }
             });
@@ -636,6 +959,13 @@
                     const t = document.querySelector(location.hash);
                     if (t && t.tagName.toLowerCase() === 'h2' && h2Map.has(t.id)) {
                         setActiveH2(h2Map.get(t.id), t, true);
+                        setActiveH3(null, null);
+                    } else if (t && t.tagName.toLowerCase() === 'h3') {
+                        const parentH2Id = h3ParentH2IdMap.get(t.id);
+                        const parentH2 = parentH2Id ? document.getElementById(parentH2Id) : getParentH2ForHeading(t);
+                        const li = parentH2 && parentH2.id ? h2Map.get(parentH2.id) : null;
+                        setActiveH2(li || null, parentH2 || null, true);
+                        setActiveH3(h3Map.get(t.id) || null, t);
                     }
                 }
             } catch (e) { }
@@ -1160,9 +1490,16 @@
                     const exerciseMode = exerciseEl ? exerciseEl.value : 'collapse';
                     const codeMode = codeEl ? codeEl.value : 'expand';
 
+                    if (markdownContent) {
+                        markdownContent.classList.toggle('practice-mode', exerciseMode === 'practice');
+                    }
+
                     if (exerciseMode === 'hide') {
                         setAllAnswersExpanded(false);
                         setAllExercisesVisible(false);
+                    } else if (exerciseMode === 'practice') {
+                        setAllExercisesVisible(true);
+                        setAllAnswersExpanded(false);
                     } else if (exerciseMode === 'expand') {
                         setAllExercisesVisible(true);
                         setAllAnswersExpanded(true);
