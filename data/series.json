@@ -182,7 +182,7 @@
         "id": 2418676405,
         "title": "操作系统理论",
         "coverImage": "assets/images/background/bg2.png",
-        "count": 3,
+        "count": 2,
         "posts": [
             {
                 "id": 3791533123,
@@ -197,13 +197,21 @@
                 "date": "2026-04-14",
                 "order": 2,
                 "contentFile": "blogs/二下/操作系统/内存管理/内存管理.md"
-            },
+            }
+        ]
+    },
+    {
+        "id": 3506496604,
+        "title": "操作系统实验详解",
+        "coverImage": "assets/images/background/bg2.png",
+        "count": 1,
+        "posts": [
             {
-                "id": 2902201859,
-                "title": "系统调用",
-                "date": "2026-05-11",
+                "id": 3061188461,
+                "title": "系统调用-MOS实验",
+                "date": "2026-05-19",
                 "order": 4,
-                "contentFile": "blogs/二下/操作系统/系统调用/系统调用.md"
+                "contentFile": "blogs/二下/操作系统/系统调用/系统调用-MOS实验.md"
             }
         ]
     }

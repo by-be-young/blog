@@ -1,9 +1,9 @@
 [
     {
-        "id": 2902201859,
-        "title": "系统调用",
-        "excerpt": "操作系统系统调用理论知识点梳理",
-        "date": "2026-05-11",
+        "id": 3061188461,
+        "title": "系统调用-MOS实验",
+        "excerpt": "操作系统系统调用MOS具体实现方法，暨2421 Lab4梳理总结",
+        "date": "2026-05-19",
         "image": "assets/images/blog_bg.png",
         "tags": [
             "二下",
@@ -12,11 +12,10 @@
         ],
         "category": "学习",
         "type": "系统笔记",
-        "series": "操作系统理论",
+        "series": "操作系统实验详解",
         "order": 4,
-        "contentFile": "blogs/二下/操作系统/系统调用/系统调用.md",
-        "recommended": false,
-        "lastEditedDate": "2026-05-11"
+        "contentFile": "blogs/二下/操作系统/系统调用/系统调用-MOS实验.md",
+        "recommended": false
     },
     {
         "id": 650786542,
@@ -111,7 +110,7 @@
     {
         "id": 3553447011,
         "title": "进程管理",
-        "excerpt": "进程管理理论知识点，以及lab3相关解释。",
+        "excerpt": "进程管理理论知识点",
         "date": "2026-04-21",
         "image": "assets/images/blog_bg.png",
         "tags": [

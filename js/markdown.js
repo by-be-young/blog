@@ -1087,6 +1087,58 @@ function renderMarkdownContent() {
     // 拼接为带答案占位符的受保护 Markdown（答案占位符为 @@ANSWERN_i@@）
     let combinedProtected = '';
     const answersHtml = []; // 每项为 { answerHtml, analysisHtml, answerRaw }
+
+    function extractAnswerKeys(rawText) {
+        const raw = (rawText || '').toString().trim();
+        if (!raw) return [];
+
+        const compact = raw.replace(/[\s,，;；、/|·\-\.\)）\:]*/g, '');
+        if (compact && /^[A-G]+$/i.test(compact)) {
+            const keys = [];
+            compact.toUpperCase().split('').forEach(key => {
+                if (!keys.includes(key)) keys.push(key);
+            });
+            return keys;
+        }
+
+        return [];
+    }
+
+    function resolveAnswerMeta(rawText) {
+        const raw = (rawText || '').toString();
+        const extractedKeys = extractAnswerKeys(raw);
+        if (extractedKeys.length) {
+            return {
+                keys: extractedKeys,
+                mode: extractedKeys.length > 1 ? 'multi' : 'single'
+            };
+        }
+
+        const rawTrim = raw.trim();
+        let letter = '';
+        const singleLetter = rawTrim.match(/^([A-Ga-g])\s*[\)\.]?\s*$/);
+        if (singleLetter) {
+            letter = singleLetter[1].toUpperCase();
+        } else {
+            const kw = raw.match(/(?:答案|结论|Answer)[:：\s]*([A-Ga-g])/i);
+            if (kw) letter = kw[1].toUpperCase();
+            else {
+                const firstLine = raw.split(/\r?\n/)[0] || '';
+                const m2 = firstLine.match(/^\s*([A-Ga-g])[\)）\.：:\-]?/);
+                if (m2) letter = m2[1].toUpperCase();
+                else {
+                    const m3 = raw.match(/([^A-Za-z0-9]|^)([A-Ga-g])([^A-Za-z0-9]|$)/);
+                    if (m3) letter = m3[2].toUpperCase();
+                }
+            }
+        }
+
+        return {
+            keys: letter ? [letter] : [],
+            mode: 'single'
+        };
+    }
+
     for (let i = 0; i < segments.length; i++) {
         const seg = segments[i];
         if (seg.type === 'text') {
@@ -1137,35 +1189,17 @@ function renderMarkdownContent() {
         const i = parseInt(num, 10);
         const obj = answersHtml[i] || { answerHtml: '', analysisHtml: '', answerRaw: '' };
         const contentId = `answer-content-${i}`;
-        const toggleId = `answer-toggle-${i}`;
+        const submitId = `answer-submit-${i}`;
+        const answerMeta = resolveAnswerMeta(obj.answerRaw || '');
+        const answerKeys = answerMeta.keys || [];
+        const isMultiChoice = answerMeta.mode === 'multi';
+        const answerKeysAttr = answerKeys.join(',');
+        const actionHtml = isMultiChoice
+            ? `\n  <div class="answer-actions">\n    <span class="answer-type-badge" data-i18n="multi_choice_label" aria-hidden="true">多选题</span>\n    <button id="${submitId}" class="answer-submit" type="button" aria-expanded="false" aria-controls="${contentId}">\n      <span class="answer-submit-label" data-i18n="submit_answer">提交答案</span>\n      <span class="answer-submit-icon" aria-hidden="true">√</span>\n    </button>\n  </div>`
+            : `\n  <button id="${submitId}" class="answer-toggle" type="button" aria-expanded="false" aria-controls="${contentId}">\n    <svg class="answer-toggle-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">\n      <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>\n    </svg>\n  </button>`;
 
-        // 更可靠地从原始 answerRaw 中解析正确字母（优先常见格式：单字母、以“答案/结论”开头或行首字母）
-        let letter = '';
-        const raw = (obj.answerRaw || '').toString();
-        const rawTrim = raw.trim();
-        // 1) 如果整段仅为单个字母（或带点/右括号），直接使用
-        const singleLetter = rawTrim.match(/^([A-Ga-g])\s*[\)\.]?\s*$/);
-        if (singleLetter) {
-            letter = singleLetter[1].toUpperCase();
-        } else {
-            // 2) 查找明确关键词后的字母：答案、结论、Answer
-            const kw = raw.match(/(?:答案|结论|Answer)[:：\s]*([A-Ga-g])/i);
-            if (kw) letter = kw[1].toUpperCase();
-            else {
-                // 3) 首行以字母开头的形式
-                const firstLine = raw.split(/\r?\n/)[0] || '';
-                const m2 = firstLine.match(/^\s*([A-Ga-g])[\)）\.：:\-]?/);
-                if (m2) letter = m2[1].toUpperCase();
-                else {
-                    // 4) 最后回退：首次出现的独立字母（谨慎匹配边界）
-                    const m3 = raw.match(/([^A-Za-z0-9]|^)([A-Ga-g])([^A-Za-z0-9]|$)/);
-                    if (m3) letter = m3[2].toUpperCase();
-                }
-            }
-        }
-
-        // 将 answerHtml 与 analysisHtml 放入一个容器，保存正确字母在 data-answer
-        return `\n<div class="answer-block" data-answer="${letter}">\n  <div id="${contentId}" class="answer-content" hidden>\n    <div class="answer-inner">\n      <div class="answer-header"><strong>答案</strong>: <span class="answer-letter">${obj.answerHtml || ''}</span></div>\n      <div class="answer-analysis">${obj.analysisHtml || ''}</div>\n    </div>\n  </div>\n  <button id="${toggleId}" class="answer-toggle" type="button" aria-expanded="false" aria-controls="${contentId}">\n    <svg class="answer-toggle-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">\n      <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>\n    </svg>\n  </button>\n</div>\n`;
+        // 将 answerHtml 与 analysisHtml 放入一个容器，保存正确答案字母在 data-answer-keys
+        return `\n<div class="answer-block${isMultiChoice ? ' is-multiple' : ''}" data-answer="${answerKeys[0] || ''}" data-answer-keys="${answerKeysAttr}" data-answer-mode="${answerMeta.mode}">${actionHtml}\n  <div id="${contentId}" class="answer-content" hidden>\n    <div class="answer-inner">\n      <div class="answer-header"><strong data-i18n="answer_label">答案</strong>: <span class="answer-letter">${obj.answerHtml || ''}</span></div>\n      <div class="answer-analysis">${obj.analysisHtml || ''}</div>\n    </div>\n  </div>\n</div>\n`;
     });
 
     // 还原 question 占位符为解析后的 HTML
@@ -1247,7 +1281,18 @@ function renderMarkdownContent() {
         });
     }
 
+    function refreshExerciseLabels(root) {
+        const container = root && (root.nodeType === 1) ? root : contentElement;
+        const lang = (window.siteI18n && typeof window.siteI18n.getLang === 'function') ? window.siteI18n.getLang() : 'zh';
+        const map = (window.siteI18n && window.siteI18n.translations) ? (window.siteI18n.translations[lang] || window.siteI18n.translations.zh || {}) : {};
+        const exerciseLabel = map.exercise_label || '例题';
+        Array.from(container.querySelectorAll('.md-task')).forEach(task => {
+            task.dataset.taskLabelText = exerciseLabel;
+        });
+    }
+
     annotateTaskLabels(contentElement);
+    refreshExerciseLabels(contentElement);
 
     // 使用 KaTeX API 对占位元素逐个渲染（若 KaTeX 可用）
     try {
@@ -1396,6 +1441,50 @@ function renderMarkdownContent() {
         });
     }
 
+    function getAnswerKeysFromBlock(answerBlock) {
+        if (!answerBlock) return [];
+        const answerKeysAttr = (answerBlock.getAttribute('data-answer-keys') || '').trim();
+        if (answerKeysAttr) {
+            return answerKeysAttr.split(',').map(key => key.trim().toUpperCase()).filter(Boolean);
+        }
+
+        const answerAttr = (answerBlock.getAttribute('data-answer') || '').trim().toUpperCase();
+        if (!answerAttr) return [];
+        if (answerAttr.indexOf(',') !== -1) {
+            return answerAttr.split(',').map(key => key.trim().toUpperCase()).filter(Boolean);
+        }
+        const single = answerAttr.replace(/[^A-G]/g, '').charAt(0);
+        return single ? [single] : [];
+    }
+
+    function getOptionScopeForAnswerBlock(answerBlock) {
+        if (!answerBlock) return { task: null, optionsGroups: [], buttons: [] };
+
+        const task = answerBlock.closest && answerBlock.closest('.md-task') ? answerBlock.closest('.md-task') : null;
+        if (task) {
+            return {
+                task: task,
+                optionsGroups: Array.from(task.querySelectorAll('.md-options')),
+                buttons: Array.from(task.querySelectorAll('.md-option'))
+            };
+        }
+
+        const optionsGroups = findOptionsGroupsForAnswerBlock(answerBlock) || [];
+        const buttons = [];
+        optionsGroups.forEach(group => {
+            buttons.push(...Array.from(group.querySelectorAll('.md-option')));
+        });
+        return { task: null, optionsGroups: optionsGroups, buttons: buttons };
+    }
+
+    function setOptionSelected(btn, selected) {
+        if (!btn) return;
+        btn.classList.toggle('is-selected', !!selected);
+        try {
+            btn.setAttribute('aria-pressed', selected ? 'true' : 'false');
+        } catch (e) { }
+    }
+
     (function bindAnswerToggles() {
         const toggles = Array.from(contentElement.querySelectorAll('.answer-block .answer-toggle'));
         toggles.forEach(btn => {
@@ -1423,6 +1512,65 @@ function renderMarkdownContent() {
                 const expanded = btn.classList.toggle('is-open');
                 if (expanded) expandAnswerBlock(answerBlock);
                 else collapseAnswerBlock(answerBlock);
+            });
+        });
+    })();
+
+    (function bindMultiChoiceSubmits() {
+        const setQuestionStateClass = (questionEl, state) => {
+            if (!questionEl || !questionEl.classList) return;
+            questionEl.classList.remove('is-question-correct', 'is-question-wrong');
+            if (state === 'correct') questionEl.classList.add('is-question-correct');
+            if (state === 'wrong') questionEl.classList.add('is-question-wrong');
+        };
+
+        const submits = Array.from(contentElement.querySelectorAll('.answer-block .answer-submit'));
+        submits.forEach(btn => {
+            const answerBlock = btn.closest('.answer-block');
+            if (!answerBlock || answerBlock.getAttribute('data-answer-mode') !== 'multi') return;
+
+            const scope = getOptionScopeForAnswerBlock(answerBlock);
+            if (scope.optionsGroups && scope.optionsGroups.length) {
+                scope.optionsGroups.forEach(group => group.classList.add('is-multi-choice'));
+            }
+            if (scope.task) scope.task.classList.add('is-multiple-choice');
+
+            btn.addEventListener('click', () => {
+                const freshScope = getOptionScopeForAnswerBlock(answerBlock);
+                const answerKeys = getAnswerKeysFromBlock(answerBlock);
+                const correctSet = new Set(answerKeys);
+                const selectedButtons = freshScope.buttons.filter(optionBtn => optionBtn.classList.contains('is-selected'));
+                const selectedKeys = selectedButtons
+                    .map(optionBtn => (optionBtn.getAttribute('data-key') || '').toUpperCase().trim())
+                    .filter(Boolean);
+                const selectedSet = new Set(selectedKeys);
+                const isCorrect = correctSet.size > 0 && selectedSet.size === correctSet.size && Array.from(selectedSet).every(key => correctSet.has(key));
+
+                const allButtons = freshScope.buttons.length ? freshScope.buttons : Array.from(contentElement.querySelectorAll('.md-option'));
+                allButtons.forEach(optionBtn => {
+                    const key = (optionBtn.getAttribute('data-key') || '').toUpperCase().trim();
+                    const isSelected = optionBtn.classList.contains('is-selected');
+                    const shouldBeCorrect = correctSet.has(key);
+                    optionBtn.classList.remove('is-correct', 'is-wrong');
+                    if (isSelected && shouldBeCorrect) optionBtn.classList.add('is-correct');
+                    else if (isSelected && !shouldBeCorrect) optionBtn.classList.add('is-wrong');
+                    else if (shouldBeCorrect) optionBtn.classList.add('is-correct');
+                });
+
+                const questionBlock = freshScope.task ? freshScope.task.querySelector('.md-question') : null;
+                setQuestionStateClass(questionBlock, isCorrect ? 'correct' : 'wrong');
+                if (freshScope.task) freshScope.task.dataset.answerState = isCorrect ? 'correct' : 'wrong';
+
+                if (freshScope.optionsGroups && freshScope.optionsGroups.length) {
+                    freshScope.optionsGroups.forEach(group => setOptionsLocked(group, true));
+                }
+
+                expandAnswerBlock(answerBlock);
+                btn.classList.add('is-submitted');
+                btn.setAttribute('aria-disabled', 'true');
+                btn.disabled = true;
+                btn.textContent = '已提交';
+                updateTaskStatsSummary();
             });
         });
     })();
@@ -1461,13 +1609,13 @@ function renderMarkdownContent() {
             const hasRate = answered > 0;
             const html =
                 '<span class="md-task-stats-main">' +
-                '<span class="md-task-stats-label">答对数：</span><span class="md-task-stats-value">' + correct + '</span>' +
-                '<span class="md-task-stats-label">/总答题数：</span><span class="md-task-stats-value">' + answered + '</span>' +
-                '<span class="md-task-stats-label">/总题数：</span><span class="md-task-stats-value">' + total + '</span>' +
+                '<span class="md-task-stats-label" data-i18n="stats_correct_count">答对数：</span><span class="md-task-stats-value">' + correct + '</span>' +
+                '<span class="md-task-stats-label" data-i18n="stats_answered_count">/总答题数：</span><span class="md-task-stats-value">' + answered + '</span>' +
+                '<span class="md-task-stats-label" data-i18n="stats_total_count">/总题数：</span><span class="md-task-stats-value">' + total + '</span>' +
                 '</span>' +
                 (hasRate
                     ? ('<span class="md-task-stats-rate">' +
-                        '<span class="md-task-stats-label">正确率：</span><span class="md-task-stats-value">' + rate + '%</span>' +
+                        '<span class="md-task-stats-label" data-i18n="stats_accuracy">正确率：</span><span class="md-task-stats-value">' + rate + '%</span>' +
                         '</span>')
                     : '');
 
@@ -1477,12 +1625,23 @@ function renderMarkdownContent() {
                 if (task && task.classList) {
                     task.classList.toggle('is-rate-hidden', !hasRate);
                 }
+                try { if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') window.siteI18n.applyTo(statsEl); } catch (e) { }
             });
         };
 
         render();
         return render;
     })();
+
+    try {
+        document.addEventListener('site:languageChanged', function () {
+            try {
+                refreshExerciseLabels(contentElement);
+                if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') window.siteI18n.applyTo(contentElement);
+                updateTaskStatsSummary();
+            } catch (e) { }
+        });
+    } catch (e) { }
 
     // 绑定选项点击交互（基于 .md-option）
     (function bindOptionClicks() {
@@ -1515,12 +1674,6 @@ function renderMarkdownContent() {
             const optionsGroup = btn.closest('.md-options');
             if (optionsGroup && optionsGroup.classList.contains('is-locked')) return;
 
-            // 防止重复标记
-            if (btn.classList.contains('is-correct') || btn.classList.contains('is-wrong')) return;
-
-            const key = (btn.getAttribute('data-key') || '').toUpperCase();
-            if (!key) return;
-
             // 首先尝试在同一 `.md-task` 容器内找到关联的 answer-block（保证 task 作用域）
             const task = btn.closest && btn.closest('.md-task') ? btn.closest('.md-task') : null;
             const questionBlock = findQuestionForOption(btn, task, optionsGroup);
@@ -1546,9 +1699,21 @@ function renderMarkdownContent() {
             if (!answerBlock) return;
 
             const contentEl = answerBlock.querySelector('.answer-content');
+            const answerKeys = getAnswerKeysFromBlock(answerBlock);
+            const isMultiChoice = answerBlock.getAttribute('data-answer-mode') === 'multi' || answerKeys.length > 1;
+            const key = (btn.getAttribute('data-key') || '').toUpperCase();
+            if (!key) return;
+
+            if (isMultiChoice) {
+                setOptionSelected(btn, !btn.classList.contains('is-selected'));
+                return;
+            }
+
+            // 防止重复标记
+            if (btn.classList.contains('is-correct') || btn.classList.contains('is-wrong')) return;
 
             // 优先使用 data-answer（由解析器在生成占位时写入），否则回退到从文本中解析
-            let found = (answerBlock.getAttribute('data-answer') || '').toUpperCase().replace(/[^A-G]/g, '').charAt(0) || null;
+            let found = answerKeys[0] || (answerBlock.getAttribute('data-answer') || '').toUpperCase().replace(/[^A-G]/g, '').charAt(0) || null;
             if (!found) {
                 const text = (contentEl && contentEl.textContent) ? contentEl.textContent : '';
                 // 尝试从文本中解析正确选项（A-G）
