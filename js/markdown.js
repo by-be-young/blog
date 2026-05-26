@@ -1294,6 +1294,128 @@ function renderMarkdownContent() {
     annotateTaskLabels(contentElement);
     refreshExerciseLabels(contentElement);
 
+    // 为 h1/h2/h3 生成稳定且唯一的 id，并把 [[#标题]] 语法替换为指向对应标题的锚点链接（支持一级到三级标题）
+    (function assignHeadingIdsAndLinkifyRefs(root) {
+        if (!root) return;
+
+        function slugify(text) {
+            return String(text || '')
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9\-\u4e00-\u9fff]/g, '')
+                .replace(/\-+/g, '-')
+                .replace(/^\-|\-$/g, '');
+        }
+
+        const map = new Map();
+        const used = new Map();
+        Array.from(root.querySelectorAll('h1, h2, h3')).forEach(h => {
+            try {
+                const text = (h.textContent || '').trim();
+                if (!text) return;
+                let id = h.id && String(h.id).trim();
+                if (!id) id = slugify(text) || 'heading';
+                // ensure unique
+                const base = id;
+                let c = used.get(base) || 0;
+                while (document.getElementById(id)) { c += 1; id = base + '-' + c; }
+                used.set(base, c);
+                h.id = id;
+                // store map by exact text and by normalized text
+                map.set(text, id);
+                map.set(slugify(text), id);
+            } catch (e) { }
+        });
+
+        // Replace occurrences like [[#辅助函数——映射相关]] in text nodes
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+        const textNodes = [];
+        while (walker.nextNode()) textNodes.push(walker.currentNode);
+
+        const pattern = /\[\[#([^\]\n]+)\]\]/g;
+        textNodes.forEach(node => {
+            const parentTag = node.parentElement && node.parentElement.tagName ? node.parentElement.tagName.toLowerCase() : '';
+            if (parentTag === 'a' || parentTag === 'code' || parentTag === 'pre' || parentTag === 'textarea') return;
+            const txt = node.nodeValue || '';
+            if (!txt || txt.indexOf('[#') === -1) return;
+            let m; let lastIndex = 0; const parts = [];
+            while ((m = pattern.exec(txt)) !== null) {
+                const before = txt.slice(lastIndex, m.index);
+                if (before) parts.push(document.createTextNode(before));
+                const title = (m[1] || '').trim();
+                let targetId = map.get(title) || map.get(slugify(title)) || null;
+                if (targetId) {
+                    const a = document.createElement('a');
+                    a.setAttribute('href', '#' + targetId);
+                    a.className = 'internal-ref';
+                    a.textContent = title;
+                    parts.push(a);
+                } else {
+                    // fallback: leave original text if not found
+                    parts.push(document.createTextNode(m[0]));
+                }
+                lastIndex = m.index + m[0].length;
+            }
+            if (lastIndex === 0) return; // no matches replaced
+            const tail = txt.slice(lastIndex);
+            if (tail) parts.push(document.createTextNode(tail));
+            const frag = document.createDocumentFragment();
+            parts.forEach(p => frag.appendChild(p));
+            node.parentNode.replaceChild(frag, node);
+        });
+    })(contentElement);
+
+    // 拦截内部引用链接点击，优先触发 TOC 中对应项的点击以复用已有平滑滚动/展开逻辑；回退到自定义平滑滚动并考虑导航栏高度
+    (function bindInternalRefClicks() {
+        function findTocAnchorForId(id) {
+            if (!id) return null;
+            try {
+                if (window.CSS && typeof window.CSS.escape === 'function') {
+                    return document.querySelector('#toc-list a[href="#' + CSS.escape(id) + '"]');
+                }
+                // fallback: simple selector (may fail for special chars)
+                return document.querySelector('#toc-list a[href="#' + id.replace(/"/g, '\\"') + '"]');
+            } catch (e) { return null; }
+        }
+
+        document.addEventListener('click', function (e) {
+            try {
+                const a = e.target && e.target.closest ? e.target.closest('a.internal-ref[href^="#"]') : null;
+                if (!a) return;
+                // ignore modified clicks
+                if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                e.preventDefault();
+                e.stopPropagation();
+
+                const href = (a.getAttribute('href') || '').trim();
+                if (!href || href.charAt(0) !== '#') return;
+                const id = href.slice(1);
+
+                const tocAnchor = findTocAnchorForId(id);
+                if (tocAnchor) {
+                    try { tocAnchor.click(); return; } catch (e) { /* fall through */ }
+                }
+
+                // fallback smooth scroll with navbar offset
+                const header = document.getElementById(id);
+                if (!header) return;
+                const nav = document.querySelector('.navbar');
+                const navHeight = nav ? nav.offsetHeight : 0;
+                const y = header.getBoundingClientRect().top + window.scrollY - navHeight - 10;
+                // prevent recursive scroll handlers
+                if (window.__scrollingToTOC) return;
+                window.__scrollingToTOC = true;
+                const distance = Math.abs(y - window.scrollY);
+                const lockMs = Math.max(650, Math.min(2200, Math.round(distance * 0.9)));
+                window.scrollTo({ top: y, behavior: 'smooth' });
+                setTimeout(() => { window.__scrollingToTOC = false; }, lockMs);
+                try { history.replaceState(null, '', '#' + id); } catch (e) { }
+            } catch (e) { }
+        }, true);
+    })();
+
     // 使用 KaTeX API 对占位元素逐个渲染（若 KaTeX 可用）
     try {
         if (window.katex && typeof window.katex.render === 'function') {

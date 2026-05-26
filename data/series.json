@@ -182,7 +182,7 @@
         "id": 2418676405,
         "title": "操作系统理论",
         "coverImage": "assets/images/background/bg2.png",
-        "count": 2,
+        "count": 3,
         "posts": [
             {
                 "id": 3791533123,
@@ -197,6 +197,13 @@
                 "date": "2026-04-14",
                 "order": 2,
                 "contentFile": "blogs/二下/操作系统/内存管理/内存管理.md"
+            },
+            {
+                "id": 717874525,
+                "title": "文件管理",
+                "date": "2026-05-21",
+                "order": 5,
+                "contentFile": "blogs/二下/操作系统/文件管理/文件管理.md"
             }
         ]
     },

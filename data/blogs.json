@@ -1,5 +1,77 @@
 [
     {
+        "id": 3639231539,
+        "title": "文件管理-MOS实验",
+        "excerpt": "我们要实现的无非是六个系统调用：创建、打开、关闭、读取、写入、删除。",
+        "date": "2026-05-26",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "操作系统",
+            "文件管理"
+        ],
+        "category": "学习",
+        "type": null,
+        "series": null,
+        "order": null,
+        "contentFile": "blogs/二下/操作系统/文件管理/文件管理-MOS实验.md",
+        "recommended": false
+    },
+    {
+        "id": 3091347152,
+        "title": "Lab5 梳理总结",
+        "excerpt": "int sys_write_dev(u_int va, u_int pa, u_int len) {",
+        "date": "2026-05-26",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "操作系统",
+            "文件管理"
+        ],
+        "category": "学习",
+        "type": null,
+        "series": null,
+        "order": null,
+        "contentFile": "blogs/二下/操作系统/文件管理/Lab5 梳理总结.md",
+        "recommended": false
+    },
+    {
+        "id": 603333991,
+        "title": "内存管理-MOS实验",
+        "excerpt": "操作系统内存管理MOS具体实现方法，暨2421 Lab4梳理总结",
+        "date": "2026-05-21",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "操作系统",
+            "内存管理"
+        ],
+        "category": "学习",
+        "type": "系统笔记",
+        "series": null,
+        "order": null,
+        "contentFile": "blogs/二下/操作系统/内存管理/内存管理-MOS实验.md",
+        "recommended": false
+    },
+    {
+        "id": 717874525,
+        "title": "文件管理",
+        "excerpt": "操作系统文件管理理论知识点",
+        "date": "2026-05-21",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "操作系统",
+            "文件管理"
+        ],
+        "category": "学习",
+        "type": "系统笔记",
+        "series": "操作系统理论",
+        "order": 5,
+        "contentFile": "blogs/二下/操作系统/文件管理/文件管理.md",
+        "recommended": false
+    },
+    {
         "id": 3061188461,
         "title": "系统调用-MOS实验",
         "excerpt": "操作系统系统调用MOS具体实现方法，暨2421 Lab4梳理总结",
@@ -15,7 +87,8 @@
         "series": "操作系统实验详解",
         "order": 4,
         "contentFile": "blogs/二下/操作系统/系统调用/系统调用-MOS实验.md",
-        "recommended": false
+        "recommended": false,
+        "lastEditedDate": "2026-05-26"
     },
     {
         "id": 650786542,
@@ -33,24 +106,6 @@
         "series": "操作系统实验报告",
         "order": null,
         "contentFile": "blogs/二下/操作系统/系统调用/OS-Lab4-实验报告.md",
-        "recommended": false
-    },
-    {
-        "id": 96682018,
-        "title": "Lab4 梳理总结",
-        "excerpt": "LEAF(msyscall)",
-        "date": "2026-05-10",
-        "image": "assets/images/blog_bg.png",
-        "tags": [
-            "二下",
-            "操作系统",
-            "系统调用"
-        ],
-        "category": "学习",
-        "type": null,
-        "series": null,
-        "order": null,
-        "contentFile": "blogs/二下/操作系统/系统调用/Lab4 梳理总结.md",
         "recommended": false
     },
     {
