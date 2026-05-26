@@ -119,6 +119,15 @@
                 style="display:none;"><i class="fas fa-download"></i></button>
             <button id="display-manage-btn" class="floating-btn sub-btn" data-i18n-title="display_manage"
                 aria-hidden="true" style="display:none;"><i class="fas fa-eye"></i></button>
+            <button id="return-from-ref-btn" class="floating-btn sub-btn" data-i18n-title="back_to_previous"
+                aria-hidden="true" style="display:none;">
+                <svg class="return-from-ref-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M10 7L5 12l5 5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"
+                        stroke-linejoin="round"></path>
+                    <path d="M6 12h8.5a4.5 4.5 0 1 1 0 9H13" fill="none" stroke="currentColor" stroke-width="2.4"
+                        stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+            </button>
             <button id="settings-btn" class="floating-btn control-btn" data-i18n-title="settings" aria-haspopup="true"
                 aria-expanded="false"><i class="fas fa-cog"></i></button>
             <!-- 返回顶部按钮（仅图标，文字通过 tooltip 显示） -->
@@ -990,6 +999,49 @@
             });
             // floating settings initialized after DOMContentLoaded (defined below)
         }
+
+        function initReturnFromRef() {
+            const btn = document.getElementById('return-from-ref-btn');
+            if (!btn) return;
+
+            const state = window.__internalRefBackState || { scrollY: 0, hash: '', available: false };
+            window.__internalRefBackState = state;
+
+            function hide() {
+                state.available = false;
+                btn.style.display = 'none';
+                btn.classList.remove('is-visible');
+                btn.setAttribute('aria-hidden', 'true');
+            }
+
+            function show() {
+                if (!state.available) return;
+                btn.style.display = 'inline-flex';
+                btn.classList.add('is-visible');
+                btn.style.opacity = '1';
+                btn.style.transform = 'translateX(0)';
+                btn.setAttribute('aria-hidden', 'false');
+            }
+
+            hide();
+
+            btn.addEventListener('click', function () {
+                if (!state.available) return;
+                const targetY = Number.isFinite(Number(state.scrollY)) ? Number(state.scrollY) : 0;
+                const targetHash = typeof state.hash === 'string' ? state.hash : '';
+                hide();
+                window.scrollTo({ top: targetY, behavior: 'smooth' });
+                try {
+                    if (targetHash) history.replaceState(null, '', targetHash);
+                    else history.replaceState(null, '', window.location.pathname + window.location.search);
+                } catch (e) { }
+            });
+
+            window.addEventListener('internal-ref:back-state-change', function () {
+                if (state.available) show();
+                else hide();
+            });
+        }
         // 动态加载 markdown 文件内容
         function getQueryParam(name) {
             const url = new URL(window.location.href);
@@ -1405,6 +1457,7 @@
                 const wideBtn = document.getElementById('wide-read-btn');
                 const exportBtn = document.getElementById('export-md-btn');
                 const displayBtn = document.getElementById('display-manage-btn');
+                const returnBtn = document.getElementById('return-from-ref-btn');
                 const container = document.getElementById('floating-controls');
                 const exportModal = document.getElementById('exportModal');
                 const exportModalClose = document.getElementById('exportModalClose');
@@ -1415,7 +1468,7 @@
                 const markdownContent = document.getElementById('markdown-content');
                 const toc = document.getElementById('blog-toc');
                 const article = document.querySelector('.blog-article');
-                if (!settingsBtn || !wideBtn || !exportBtn || !displayBtn || !container) return;
+                if (!settingsBtn || !wideBtn || !exportBtn || !displayBtn || !returnBtn || !container) return;
 
                 if (exportModal) {
                     try { exportModal.inert = true; } catch (e) { }
@@ -1536,6 +1589,13 @@
                         wideBtn.style.display = 'inline-flex';
                         exportBtn.style.display = 'inline-flex';
                         displayBtn.style.display = 'inline-flex';
+                        if (returnBtn && window.__internalRefBackState && window.__internalRefBackState.available) {
+                            returnBtn.style.display = 'inline-flex';
+                            returnBtn.classList.add('is-visible');
+                            returnBtn.style.opacity = '1';
+                            returnBtn.style.transform = 'translateX(0)';
+                            returnBtn.setAttribute('aria-hidden', 'false');
+                        }
                         wideBtn.setAttribute('aria-hidden', 'false');
                         exportBtn.setAttribute('aria-hidden', 'false');
                         displayBtn.setAttribute('aria-hidden', 'false');
@@ -1544,17 +1604,30 @@
                             wideBtn.style.opacity = '1'; wideBtn.style.transform = 'translateX(0)';
                             exportBtn.style.opacity = '1'; exportBtn.style.transform = 'translateX(0)';
                             displayBtn.style.opacity = '1'; displayBtn.style.transform = 'translateX(0)';
+                            if (returnBtn && returnBtn.style.display !== 'none') {
+                                returnBtn.style.opacity = '1';
+                                returnBtn.style.transform = 'translateX(0)';
+                            }
                         });
                     } else {
                         // animate out then hide
                         wideBtn.style.opacity = '0'; wideBtn.style.transform = 'translateX(8px)';
                         exportBtn.style.opacity = '0'; exportBtn.style.transform = 'translateX(8px)';
                         displayBtn.style.opacity = '0'; displayBtn.style.transform = 'translateX(8px)';
+                        if (returnBtn && (!window.__internalRefBackState || !window.__internalRefBackState.available)) {
+                            returnBtn.style.opacity = '0';
+                            returnBtn.style.transform = 'translateX(8px)';
+                        }
                         setTimeout(() => {
                             if (!subVisible) {
                                 wideBtn.style.display = 'none';
                                 exportBtn.style.display = 'none';
                                 displayBtn.style.display = 'none';
+                                if (returnBtn && (!window.__internalRefBackState || !window.__internalRefBackState.available)) {
+                                    returnBtn.style.display = 'none';
+                                    returnBtn.classList.remove('is-visible');
+                                    returnBtn.setAttribute('aria-hidden', 'true');
+                                }
                                 wideBtn.setAttribute('aria-hidden', 'true');
                                 exportBtn.setAttribute('aria-hidden', 'true');
                                 displayBtn.setAttribute('aria-hidden', 'true');
@@ -1776,6 +1849,7 @@
                 }
             }
             // call now to wire handlers
+            initReturnFromRef();
             initFloatingSettings();
 
             // 将目录高度设置为与详情页右侧搜索面板一致的高度，

@@ -5977,6 +5977,12 @@ body::-webkit-scrollbar-thumb:hover,
     transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
+.floating-btn svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+}
+
 .floating-btn:active {
     transform: translateY(1px);
 }
@@ -5995,6 +6001,11 @@ body::-webkit-scrollbar-thumb:hover,
     transition: transform 0.18s ease, opacity 0.18s ease;
     display: none;
     /* JS 控制显示 */
+}
+
+.sub-btn.is-visible {
+    opacity: 1;
+    transform: translateX(0);
 }
 
 /* 文章宽屏模式 */

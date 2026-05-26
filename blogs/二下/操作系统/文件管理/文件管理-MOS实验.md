@@ -70,7 +70,7 @@ remove() → fsipc_remove() → IPC → serve_remove() → file_remove()
 ```C
 struct Super {
     uint32_t s_magic;   // 魔数，具体值可以随便，但保证统一
-    uint32_t s_nblocks; // 磁盘块总数，其实就是1024，写死（硬编码）也没问题
+    uint32_t s_nblocks; // 磁盘块总数，其实就是1024，本实验中写死（硬编码）也没问题
     struct File s_root; // 根目录的文件控制块（见下文说明）
 };
 ```
@@ -192,6 +192,7 @@ int block_is_free(u_int blockno) {
 ### `free_block`：释放并标记磁盘块为空闲
 
 ```C
+// Exercise 5.4
 void free_block(u_int blockno) {
     if (blockno == 0 || blockno >= super->s_nblocks) {
         return;
@@ -208,13 +209,59 @@ void free_block(u_int blockno) {
 
 Boot 块绝对不能被释放掉！所以一开始必须检查 `blockno` 是否为 0。
 
-解除映射的相关辅助函数见下节【 [[#辅助函数——映射相关]] 】。
+写回磁盘的相关函数见后面小节【 [[#写回磁盘]] 】。
+
+解除映射的相关辅助函数见后面小节【 [[#辅助函数——映射相关]] 】。
 
 > 写回位图到磁盘中时，计算了 `blockno` 所在的磁盘块号。
 > 
 > 但其实，由于 `blockno` 最大才 1024，而 `BLOCK_SIZE_BIT` 为 `4096 * 8`，所以 `blockno / BLOCK_SIZE_BIT` 必定为 0。
 > 
 > 而前两个块（0 号块和 1 号块）是 Boot 块和 Super 块，所以需要加 2。
+
+### `alloc_block`：分配空闲块
+
+分配空闲块，并建立映射。
+
+```C
+int alloc_block(void) {
+    int r, bno;
+    
+    if ((r = alloc_block_num()) < 0) {
+        return r;
+    }
+    bno = r;
+
+    if ((r = map_block(bno)) < 0) {
+        free_block(bno);	// 正常情况不会分配失败，但如果失败了则放弃分配，释放回去
+        return r;
+    }
+
+    return bno;
+}
+```
+
+其中 `alloc_block_num` 这个更底层的函数的逻辑为：
+
+向上遍历数据块（非 Boot 块、Super 块、位图块），如果找到了空闲块则标记为非空闲，并返回该块的编号。
+
+```C
+int alloc_block_num(void) {
+    int blockno;
+    // 整数向上取整常用方法计算位图块数
+    u_int nbitmap = (super->s_nblocks + BLOCK_SIZE_BIT - 1) / BLOCK_SIZE_BIT;
+    
+    for (blockno = nbitmap + 2; blockno < super->s_nblocks; blockno++) {
+        if (bitmap[blockno / 32] & (1 << (blockno % 32))) {
+            bitmap[blockno / 32] &= ~(1 << (blockno % 32));
+            write_block(blockno / BLOCK_SIZE_BIT + 2);	// 一旦修改了位图，立刻写回磁盘
+            return blockno;
+        }
+    }
+    
+    return -E_NO_DISK;
+}
+```
 
 ## 辅助函数——映射相关
 
@@ -351,7 +398,9 @@ int dirty_block(u_int blockno) {
 
 注意，最后 `syscall_mem_map` 的参数中，`src` 进程和虚拟地址、`dst` 进程和虚拟地址都是 `0` 和 `va`，表示的就是其实不改变映射，只是修改权限位。
 
-## 写回（换出）磁盘
+## 写回（换出）、读入（换入）磁盘
+
+### `write_block`：写回磁盘
 
 先检查是否有映射，再写回磁盘。
 
@@ -368,3 +417,92 @@ void write_block(u_int blockno) {
 ```
 
 其中函数 `ide_write` 后续再说明用法。
+
+### `read_block`： 读取磁盘
+
+注意，如果想要换入已经建立映射的磁盘，这个操作是多余的。所以必须检查这个磁盘块是否被映射到了虚拟地址，如果已经有映射，则**不再换入**。
+
+```C
+int read_block(u_int blockno, void **blk, u_int *isnew) {
+    if (super && blockno >= super->s_nblocks) {
+        user_panic("reading non-existent block %08x\n", blockno);
+    }
+
+    if (bitmap && block_is_free(blockno)) {
+        user_panic("reading free block %08x\n", blockno);
+    }
+
+    void *va = disk_addr(blockno);
+
+    if (block_is_mapped(blockno)) {
+        if (isnew) {
+            *isnew = 0;
+        }
+    } else {
+        if (isnew) {
+            *isnew = 1;
+        }
+        try(syscall_mem_alloc(0, va, PTE_D));
+        ide_read(0, blockno * SECT2BLK, va, SECT2BLK);
+    }
+
+    if (blk) {
+        *blk = va;
+    }
+    return 0;
+}
+```
+
+其中函数 `ide_read` 后续再说明用法。
+
+实际上，`read_block` 和 `write_block` 一样，也只应该有一个参数 `blockno` 即可。但是这里多了两个参数，其实是起到返回值的作用。
+
+如果原先该磁盘块没有被映射，`isnew` 就被返回为 1，否则为 0；而 `blk` 则是被返回为磁盘的虚拟地址 `va`。
+
+> 对于指针返回值，照例是要检查是否空指针的。如果是空指针 `NULL`，表示不需要该返回值。
+> 
+> 为什么可以通过类似 `if (isnew)` 的方式判断？因为在 C 语言中，`NULL` 就是 `0`。
+
+## 根据 FCB 查找磁盘块
+
+### `file_block_walk`：根据 FCB 中逻辑块号查找磁盘块
+
+**参数说明**：一个 FCB 的指针 `f` 和一个逻辑块号 `filebno` 。另外，还有个参数 `alloc`，如果为 1，表示当间接块不存在时，创建一个间接块。`ppdiskbno` 实际上是用来接收返回值的。
+
+其中这个逻辑块号指的是在这个文件内部的第几个磁盘块。由于一个文件可以占多个磁盘块，而这些磁盘块并不一定在磁盘中连续，所以需要将**逻辑块号转为真实的磁盘块号**。
+
+在前面【 [[#文件控制块（FCB）]] 】中讲过，可以通过**直接块和间接块**来由逻辑块号找到磁盘块号。所以需要让 `filebno` 与 `NDIRECT`（本实验中为 10）进行比较，选择不同的方法。
+
+```C
+int file_block_walk(struct File *f, u_int filebno, uint32_t **ppdiskbno, u_int alloc) {
+    int r;
+    uint32_t *ptr;
+    uint32_t *blk;
+
+    if (filebno < NDIRECT) {
+        ptr = &f->f_direct[filebno];
+    } else if (filebno < NINDIRECT) {
+        if (f->f_indirect == 0) {
+            if (alloc == 0) {
+                return -E_NOT_FOUND;
+            }
+
+            if ((r = alloc_block()) < 0) {
+                return r;
+            }
+            f->f_indirect = r;
+            dirty_fcb(f);
+        }
+
+        if ((r = read_block(f->f_indirect, (void **)&blk, 0)) < 0) {
+            return r;
+        }
+        ptr = blk + filebno;
+    } else {
+        return -E_INVAL;
+    }
+
+    *ppdiskbno = ptr;
+    return 0;
+}
+```

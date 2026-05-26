@@ -1393,6 +1393,15 @@ function renderMarkdownContent() {
                 if (!href || href.charAt(0) !== '#') return;
                 const id = href.slice(1);
 
+                const backState = window.__internalRefBackState || {};
+                backState.scrollY = window.scrollY || 0;
+                backState.hash = window.location.pathname + window.location.search + window.location.hash;
+                backState.available = true;
+                window.__internalRefBackState = backState;
+                try {
+                    window.dispatchEvent(new Event('internal-ref:back-state-change'));
+                } catch (err) { }
+
                 const tocAnchor = findTocAnchorForId(id);
                 if (tocAnchor) {
                     try { tocAnchor.click(); return; } catch (e) { /* fall through */ }
