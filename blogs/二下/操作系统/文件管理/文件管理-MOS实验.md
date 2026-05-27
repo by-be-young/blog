@@ -1,3 +1,9 @@
+---
+type: 待完善
+excerpt: 操作系统文件管理MOS具体实现方法，暨2421 Lab5梳理总结
+series: 操作系统实验详解
+order: "5"
+---
 # 六大系统调用概览
 
 我们要实现的无非是六个系统调用：创建、打开、关闭、读取、写入、删除。
@@ -138,7 +144,7 @@ struct File {
 > 
 > 接着一样地找到 `code.c`。
 
-# 磁盘操作
+# 磁盘操作（文件管理服务进程）
 
 这里主要涉及的文件为 `fs/fs.c`，功能是让文件管理服务进程与磁盘进行交互，使磁盘与内存之间进行换入和换出操作。
 
@@ -156,7 +162,7 @@ struct File {
 
 > 其实这个在 Cache 中就有类似的设计，如果上学期的 CO 有一定掌握度，这里肯定没有阻碍。
 > 
-> 如果不记得了，后面【 [[#辅助函数——页面是否被写过]] 】一节会细讲。
+> 如果不记得了，后面【 [[#辅助函数——磁盘是否被写过]] 】一节会细讲。
 
 ## 辅助函数——空闲块相关
 
@@ -209,7 +215,7 @@ void free_block(u_int blockno) {
 
 Boot 块绝对不能被释放掉！所以一开始必须检查 `blockno` 是否为 0。
 
-写回磁盘的相关函数见后面小节【 [[#写回磁盘]] 】。
+写回磁盘的相关函数见后面小节【 [[#`write_block`：写回磁盘]] 】。
 
 解除映射的相关辅助函数见后面小节【 [[#辅助函数——映射相关]] 】。
 
@@ -278,6 +284,10 @@ void *disk_addr(u_int blockno) {
 
 也就是说，从 `DISKMAP` 这个基地址开始，一个一个往上堆即可。
 
+> 我们并没有实现逆向操作的函数，即没能通过虚拟地址得到磁盘块号。
+> 
+> 但从理论上来说并不困难，大可以另写一个函数实现。
+
 ### `va_is_mapped`： 检查虚拟地址是否有映射
 
 ```C
@@ -343,7 +353,7 @@ void unmap_block(u_int blockno) {
 
 > 但其实，这么写逻辑非常混乱，而且也没有真正判断是否失败。如果磁盘块没有映射，`va` 将被赋值为空指针 `NULL`，然后并没有返回或报错。
 
-## 辅助函数——页面是否被写过
+## 辅助函数——磁盘是否被写过
 
 注意我们使用的权限位是软件权限位 `PTE_DIRTY` 而不是硬件权限位 `PTE_D`。
 
@@ -463,9 +473,9 @@ int read_block(u_int blockno, void **blk, u_int *isnew) {
 > 
 > 为什么可以通过类似 `if (isnew)` 的方式判断？因为在 C 语言中，`NULL` 就是 `0`。
 
-## 根据 FCB 查找磁盘块
+## 辅助函数——根据 FCB 查找磁盘块
 
-### `file_block_walk`：根据 FCB 中逻辑块号查找磁盘块
+### `file_block_walk`：根据 FCB 中逻辑块号获得磁盘块指针
 
 **参数说明**：一个 FCB 的指针 `f` 和一个逻辑块号 `filebno` 。另外，还有个参数 `alloc`，如果为 1，表示当间接块不存在时，创建一个间接块。`ppdiskbno` 实际上是用来接收返回值的。
 
@@ -506,3 +516,643 @@ int file_block_walk(struct File *f, u_int filebno, uint32_t **ppdiskbno, u_int a
     return 0;
 }
 ```
+
+其中 `dirty_fcb` 函数这里不再细讲，可以自行查看源码。
+
+> **为什么 `read_block` 不会读到垃圾数据？**
+> 
+> 我当时在考虑，为什么在 `alloc_block` 之后，立刻就调用了 `read_block` 而不用先整理间接块内的数据。
+> 
+> 其实，回头查看这两个函数的具体实现【 [[#`alloc_block`：分配空闲块]] 】【 [[#`read_block`： 读取磁盘]] 】，就能发现，`alloc_block` 函数在分配空闲磁盘块后，会调用 `map_block` 函数为其对应的虚拟地址分配物理页面。
+> 
+> 而 `read_block` 函数则**不会**对**已经建立映射**的虚拟地址进行**读磁盘块**的操作的！
+> 
+> 所以这行只是针对以下情况才会真正读磁盘块：间接块存在，但没有读入内存。
+
+### `file_map_block`：根据 FCB 中逻辑块号获得磁盘块号
+
+实际上，上面 `file_block_walk` 只是这个函数实现的具体一步罢了。
+
+```C
+int file_map_block(struct File *f, u_int filebno, u_int *diskbno, u_int alloc) {
+    int r;
+    uint32_t *ptr;
+
+    if ((r = file_block_walk(f, filebno, &ptr, alloc)) < 0) {
+        return r;
+    }
+
+    if (*ptr == 0) {
+        if (alloc == 0) {
+            return -E_NOT_FOUND;
+        }
+
+        if ((r = alloc_block()) < 0) {
+            return r;
+        }
+        *ptr = r;
+    }
+
+    *diskbno = *ptr;
+    return 0;
+}
+```
+
+### `file_get_block`：根据 FCB 中逻辑块号获得虚拟地址【!】
+
+这个函数又是上面 `file_map_block` 的更高级的函数。
+
+这个函数才是其他地方会经常调用的函数！因为：我们的一切用户读写操作都是基于用户空间的虚拟地址来的，获取磁盘块指针、磁盘块号什么的根本就不能直接拿来用！
+
+```C
+int file_get_block(struct File *f, u_int filebno, void **blk) {
+    int r;
+    u_int diskbno;
+    u_int isnew;
+
+    if ((r = file_map_block(f, filebno, &diskbno, 1)) < 0) {
+        return r;
+    }
+
+    if ((r = read_block(diskbno, blk, &isnew)) < 0) {
+        return r;
+    }
+    return 0;
+}
+```
+
+## 释放磁盘块
+
+### `file_clear_block`：释放文件中的某个块
+
+这个函数的作用是将文件中的某个逻辑块实际意义上释放。
+
+因此，我们需要的前置知识有：【 [[#辅助函数——空闲块相关]] 】、【 [[#辅助函数——根据 FCB 查找磁盘块]] 】。
+
+```C
+int file_clear_block(struct File *f, u_int filebno) {
+    int r;
+    uint32_t *ptr;
+
+    if ((r = file_block_walk(f, filebno, &ptr, 0)) < 0) {
+        return r;
+    }
+
+    if (*ptr) {
+        free_block(*ptr);
+        *ptr = 0;
+    }
+
+    return 0;
+}
+```
+
+# 文件系统服务（文件管理服务进程）
+
+这里仍然是 `fs/fs.c` 中的函数。之所以单独再划分出一章来整理，是因为我认为这些函数更加高级，更多地关注 FCB 的结构以及文件的路径，而更少地关注磁盘块。
+
+> 当然，这只是我自己的划分方式，实际上差别并不大。
+
+## 辅助函数——查找文件
+
+### `dir_lookup`：在目录中查找文件
+
+根据目录的 FCB 和文件名查找文件，返回文件的 FCB。
+
+因此我们需要：由 FCB 得到磁盘块；遍历磁盘块寻找文件。
+
+需要的前置知识有：【 [[#辅助函数——根据 FCB 查找磁盘块]] 】、【 [[#目录文件]] 】
+
+```C
+// Exercise 5.8
+int dir_lookup(struct File *dir, char *name, struct File **file) {
+    u_int nblock = dir->f_size / BLOCK_SIZE;
+
+    for (int i = 0; i < nblock; i++) {
+        void *blk;
+        try(file_get_block(dir, i, &blk));
+
+        struct File *files = (struct File *)blk;
+
+        for (struct File *f = files; f < files + FILE2BLK; ++f) { // FILE2BLK即为一个磁盘块中文件的数量，即4096/256 = 16
+            if (strcmp(name, f->f_name) == 0) {
+                *file = f;
+                // 一开始，f->f_dir为空，所以在查找时就顺便写进去
+                f->f_dir = dir;
+                return 0;
+            }
+        }
+    }
+
+    return -E_NOT_FOUND;
+}
+```
+
+### `walk_path`：通过路径查找文件【!】
+
+为了简化逻辑，我们实验中的 `path` 只有绝对路径，一定从根目录开始。
+
+可获得的“返回值”有三个：
+
+1.  `pdir`：目录的 FCB；
+2. `pfile`：文件的 FCB；
+3. `lastelem`：如果目录能找到，但是文件找不到时，文件的名字。
+
+```C
+int walk_path(char *path, struct File **pdir, struct File **pfile, char *lastelem) {
+    char *p;
+    char name[MAXNAMELEN];
+    struct File *dir, *file;
+    int r;
+
+	// 一定从根目录开始。
+    path = skip_slash(path); // 跳过斜杠
+    file = &super->s_root;
+    dir = 0;
+    name[0] = 0;
+
+    if (pdir) {
+        *pdir = 0;
+    }
+
+    *pfile = 0;
+
+    while (*path != '\0') {
+        dir = file;
+        p = path;
+
+        while ( *path != '/' && *path != '\0') {
+            path++;
+        }
+
+        if (path - p >= MAXNAMELEN) {
+            return -E_BAD_PATH;
+        }
+
+        memcpy(name, p, path - p);
+        name[path - p] = '\0';
+        path = skip_slash(path);
+        
+        if (dir->f_type != FTYPE_DIR) {
+            return -E_NOT_FOUND;
+        }
+
+        if ((r = dir_lookup(dir, name, &file)) < 0) {
+            if (r == -E_NOT_FOUND && *path == '\0') {
+                if (pdir) {
+                    *pdir = dir;
+                }
+
+                if (lastelem) {
+                    strcpy(lastelem, name);
+                }
+
+                *pfile = 0;
+            }
+
+            return r;
+        }
+    }
+
+    if (pdir) {
+        *pdir = dir;
+    }
+
+    *pfile = file;
+    return 0;
+}
+```
+
+## 辅助函数——分配新文件
+
+### `dir_alloc_file`：分配新文件控制块
+
+给定目录的 FCB，返回一个新的 FCB。
+
+```C
+int dir_alloc_file(struct File *dir, struct File **file) {
+    int r;
+    u_int nblock, i, j;
+    void *blk;
+    struct File *f;
+
+    nblock = dir->f_size / BLOCK_SIZE;
+	// 下面的写法其实和dir_lookup函数中的for循环写法是等价的
+    for (i = 0; i < nblock; i++) {
+        if ((r = file_get_block(dir, i, &blk)) < 0) {
+            return r;
+        }
+
+        f = blk;
+		
+        for (j = 0; j < FILE2BLK; j++) {
+            if (f[j].f_name[0] == '\0') { // 找一个空的FCB
+                *file = &f[j];
+                return 0;
+            }
+        }
+    }
+
+    dir->f_size += BLOCK_SIZE; // 需要加上一整个磁盘块
+    dirty_fcb(dir);
+    if ((r = file_get_block(dir, i, &blk)) < 0) {
+        return r;
+    }
+    f = blk;
+    *file = &f[0];
+
+    return 0;
+}
+```
+
+## 打开文件
+
+需要的前置知识：【 [[#辅助函数——查找文件]] 】
+
+### `file_open`：根据路径获取文件 FCB
+
+实际上是微缩版的 `walk_path`。不需要获取其目录的 FCB 什么的。
+
+```C
+int file_open(char *path, struct File **file) {
+    return walk_path(path, 0, file, 0);
+}
+```
+
+## 创建文件
+
+需要的前置知识：【 [[#辅助函数——分配新文件]] 】、【 [[#辅助函数——查找文件]] 】
+
+### `file_create`：创建对应路径下的新文件
+
+给的参数为路径即可。这个路径是带有文件名的，而这个文件名应该不存在才对。
+
+```C
+int file_create(char *path, struct File **file) {
+    char name[MAXNAMELEN];
+    int r;
+    struct File *dir, *f;
+
+    if ((r = walk_path(path, &dir, &f, name)) == 0) {
+        return -E_FILE_EXISTS;
+    }
+
+    if (r != -E_NOT_FOUND || dir == 0) {
+        return r;
+    }
+
+    if (dir_alloc_file(dir, &f) < 0) {
+        return r;
+    }
+
+    strcpy(f->f_name, name);
+    f->f_size = 0;
+    f->f_type = FTYPE_REG;
+    for (int i = 0; i < NDIRECT; i++) {
+        f->f_direct[i] = 0;
+    }
+    f->f_indirect = 0;
+    f->f_dir = dir;
+
+    dirty_fcb(f);
+    if (f->f_dir) {
+        file_flush(f->f_dir);
+    }
+    *file = f;
+    return 0;
+}
+```
+
+其中 `file_flush` 函数这里不再细讲，作用是将文件中的脏块全部写回磁盘。
+
+## 调整文件大小
+
+由于缩小文件大小时会有多余的磁盘块需要释放，因此需要前置知识：【 [[#释放磁盘块]] 】
+
+### `file_truncate`：根据 FCB 缩小文件大小
+
+参数有：文件的 FCB、需要调整到的新大小。
+
+```C
+void file_truncate(struct File *f, u_int newsize) {
+    u_int bno, old_nblocks, new_nblocks;
+
+    old_nblocks = ROUND(f->f_size, BLOCK_SIZE) / BLOCK_SIZE;
+    new_nblocks = ROUND(newsize, BLOCK_SIZE) / BLOCK_SIZE;
+
+    if (newsize == 0) {
+        new_nblocks = 0;
+    }
+
+    if (new_nblocks <= NDIRECT) {
+        for (bno = new_nblocks; bno < old_nblocks; bno++) {
+            panic_on(file_clear_block(f, bno));
+        }
+        if (f->f_indirect) {
+            free_block(f->f_indirect);
+            f->f_indirect = 0;
+        }
+    } else {
+        for (bno = new_nblocks; bno < old_nblocks; bno++) {
+            panic_on(file_clear_block(f, bno));
+        }
+    }
+    f->f_size = newsize;
+    dirty_fcb(f);
+}
+```
+
+### `file_set_size`：根据 FCB 调整文件大小
+
+由于文件的扩大非常简单，只需调整 `f->f_size` 这一个字段就够了，所以无需单独写一个扩大的函数。将扩大和缩小合在一起就形成了这个函数。
+
+```C
+int file_set_size(struct File *f, u_int newsize) {
+    if (f->f_size > newsize) {
+        file_truncate(f, newsize);
+    } else {
+        f->f_size = newsize;
+        dirty_fcb(f);
+    }
+
+    return 0;
+}
+```
+
+## 关闭文件
+
+### `file_close`：根据 FCB 关闭文件
+
+先将脏块全部写回磁盘，然后取消虚拟地址到磁盘块的映射。
+
+因此前置知识包括：【 [[#`file_get_block`：根据 FCB 中逻辑块号获得虚拟地址【!】]] 】、【 [[#`unmap_block`：解除映射]] 】。
+
+```C
+void file_close(struct File *f) {
+    file_flush(f);
+    
+    if (f->f_type == FTYPE_REG) {	// 其实目录文件也应该写回，但是我们实验代码有bug
+        u_int nblock = (f->f_size + BLOCK_SIZE - 1) / BLOCK_SIZE;
+        
+        for (int i = 0; i < nblock; i++) {
+            u_int diskbno;
+            
+            if (file_map_block(f, i, &diskbno, 0) < 0) {
+                debugf("file_close: file_map_block failed\n");
+                break;
+            }
+            
+            unmap_block(diskbno);
+        }
+    }
+}
+```
+
+## 删除文件
+
+### `file_remove`：根据路径删除文件
+
+这个函数的参数是文件的路径。因此需要前置知识【 [[#`walk_path`：通过路径查找文件【!】]] 】；
+
+删除文件的部分底层逻辑是让文件的大小改为 0，因此需要前置知识【 [[#`file_truncate`：根据 FCB 缩小文件大小]] 】。
+
+```C
+int file_remove(char *path) {
+    int r;
+    struct File *f;
+
+    if ((r = walk_path(path, 0, &f, 0)) < 0) {
+        return r;
+    }
+
+    file_truncate(f, 0);
+    f->f_name[0] = '\0';
+
+    dirty_fcb(f);
+    if (f->f_dir) {
+        file_flush(f->f_dir);
+    }
+
+    return 0;
+}
+```
+
+# 进程通信
+
+## 相关数据结构
+
+### 打开的文件信息
+
+定义在 `fs/serv.c` 中：
+
+```C
+struct Open {
+    struct File *o_file;      // 指向需要打开的文件的FCB
+    u_int o_fileid;           // 文件ID（在opentab中的索引）
+    int o_mode;               // 打开模式（O_RDONLY, O_WRONLY等）
+    struct Filefd *o_ff;      // 指向Filefd结构的指针
+};
+
+struct Open opentab[MAXOPEN];	// 共1024个Open结构体可被分配
+```
+
+实际上，每个 `Open` 结构体和其对应的 `Filefd` 结构体（即 `o_ff` 字段）是线性对应的，在后续小节【 [[#`serve_init`：初始化文件服务]] 】会分析源码。
+
+`opentab` 叫做**打开文件表**。
+
+### 文件状态信息
+
+定义在 `user/include/fd.h` 中：
+
+```C
+struct Fd {
+	u_int fd_dev_id;
+	u_int fd_offset;
+	u_int fd_omode;
+};
+
+struct Filefd {
+	struct Fd f_fd;
+	u_int f_fileid;
+	struct File f_file;
+};
+```
+
+也就是说实际上 `Filefd` 这个结构体总共有 5 个字段。
+
+1. `f_fd.fd_dev_id`：这个字段固定为字符 `f`。这里先不管。
+2. `f_fd.fd_offset`：由于每个文件都需要通过指针来读取里面的内容，这个字段用于存储**指针**在文件中的**位置**。
+3. `f_fd.fd_omode`：**打开模式**，这里应该要和 `Open` 中的 `o_mode` 字段保持一致。
+4. `f_fileid`：**文件 ID**，也应该和 `Open` 中的 `o_fileid` 保持一致。
+5. `f_file`：**文件的 FCB**。注意！这里不是 FCB 的指针，而是 FCB 的**副本**！因此不是和 `Open` 的 `o_file` 字段一致，而是和 `o_file` 指向的 FCB 的**内容一致**，但不是同一个东西。
+
+所以可以看到这个结构体有很多副本，一定要小心副本和本体的一致性。
+
+> `Filefd` 是 `Fd` 的一种扩展关系，或说是“继承”关系。
+> 
+> 在 Lab 6 中，会有管道、Console 这两种设备，也会有对应的结构体继承 `Fd`。此时 `fd_dev_id` 的作用就体现出来了：其实就是标识设备类型。
+> 
+> 这会在什么时候用到呢？假如你要把一个 `struct Fd *` 类型的指针强制类型转换为 `struct Filefd *` 类型，就需要检查 `fd_dev_id` 字段是否是 `f`，如果不是则不允许转换，以免造成错误。
+
+## 接收请求（文件管理服务进程）
+
+在 `fs/serv.c` 的末尾有一个 `main` 函数，其实就是通过 `main` 函数建立起服务的。
+
+```C
+int main() {
+    user_assert(sizeof(struct File) == FILE_STRUCT_SIZE);
+  
+    debugf("FS is running\n");
+  
+    serve_init();
+    fs_init();
+  
+    serve();
+    return 0;
+}
+```
+
+我们按顺序看：
+
+### `serve_init`：初始化文件服务
+
+根据 `Open` 与 `Fileid` 的线性对应关系，从基地址 `FILEVA` 开始为**打开文件表**分配虚拟地址。
+
+```C
+void serve_init(void) {
+    int i;
+    u_int va = FILEVA;
+
+    for (i = 0; i < MAXOPEN; i++) {
+        opentab[i].o_fileid = i;
+        opentab[i].o_ff = (struct Filefd *)va;
+        va += BLOCK_SIZE;
+    }
+}
+```
+
+### `fs_init`：初始化文件系统
+
+将超级块、位图块读入内存。具体实现不再赘述，可以自行在 `fs/fs.c` 中查看。
+
+```C
+void fs_init(void) {
+    read_super();
+    check_write_block();
+    read_bitmap();
+}
+```
+
+### `serve`：接收请求并分配服务
+
+首先我们需要知道可以请求的**服务类型**有哪些。这个和系统调用的分发表是极度类似的，而且同样可以扩展，因此题目往往从这里入手，新添服务。
+
+```C
+void *serve_table[MAX_FSREQNO] = {
+    [FSREQ_OPEN] = serve_open,
+    [FSREQ_MAP] = serve_map,
+    [FSREQ_SET_SIZE] = serve_set_size,
+    [FSREQ_CLOSE] = serve_close,
+    [FSREQ_DIRTY] = serve_dirty,
+    [FSREQ_REMOVE] = serve_remove,
+    [FSREQ_SYNC] = serve_sync,
+};
+```
+
+系统将通过用户进程发送的 IPC 获取请求的服务类型，然后再根据这个服务类型跳转到对应的函数进行执行。具体代码如下：
+
+```C
+void serve(void) {
+    u_int req, whom, perm;
+    void (*func)(u_int, u_int);
+
+    for (;;) {	// 死循环以不断尝试接收IPC
+        perm = 0;
+        req = ipc_recv(&whom, (void *)REQVA, &perm); // req获得请求类型
+
+        if (!(perm & PTE_V)) { // 无效则跳过
+            debugf("Invalid request from %08x: no argument page\n", whom);
+            continue;
+        }
+
+        if (req < 0 || req >= MAX_FSREQNO) { // 请求类型无效则跳过
+            debugf("Invalid request code %d from %08x\n", req, whom);
+            panic_on(syscall_mem_unmap(0, (void *)REQVA));
+            continue;
+        }
+
+        func = serve_table[req];
+        func(whom, REQVA);
+
+        panic_on(syscall_mem_unmap(0, (void *)REQVA));
+    }
+}
+```
+
+## 发送请求（用户进程）
+
+### 概览
+
+在 `user/lib/fsipc.c` 中，有一系列发送请求的函数，命名统一为 `fsipc_xxx`。
+
+共性部分用伪代码表示：
+
+```C
+int fsipc_xxx(auto au, ......) {
+	struct Fsreq_xxx *req;
+	req = (struct Fsreq_xxx *)fsipcbuf;
+	req->xx = xx;	// 写入某些字段……
+	req->yy = yy;	// 写入某些字段……
+	return fsipc(FSREQ_XXX, req, x, y);
+}
+```
+
+其中，`Fsreq_xxx` 是一种数据结构，不同的请求数据结构自然不同。也就是说，将请求时需要发送的参数通过结构体包裹起来，以方便发给**文件管理服务进程**。
+
+既然不同的请求数据结构不同，所以要将共同的模板 `fsipcbuf` 转换为对应的结构体指针类型。
+
+> 这个模板其实相当于就是一张白纸，先给你分配了一张纸，你才能随意填写你想写的信息。
+> 
+> 实际上，这张纸的大小为一个页（`PAGE_SIZE`）。
+
+### `fsipc`：发送请求
+
+先来看一下参数：
+
+1. `type`：**请求类型**。
+2. `fsreq`：**发送的数据**。即上面讲到的对应的结构体。
+3. `dstva`：如果文件管理服务进程将返回一个页面，告诉它要与**哪个虚拟地址**建立映射。（如果不会返回一个页面，这个参数直接传 0 即可）。
+
+`perm` 实际上是返回值。
+
+```C
+static int fsipc(u_int type, void *fsreq, void *dstva, u_int *perm) {
+    u_int whom;
+    ipc_send(envs[1].env_id, type, fsreq, PTE_D);	// 发送请求
+    return ipc_recv(&whom, dstva, perm);	// 接收返回的消息
+}
+```
+
+【待完善：具体的请求函数】
+
+## 服务并返回消息（文件管理服务进程）
+
+### 概览
+
+又回到 `fs/serv.c`（因为又回到文件管理服务进程了），里面很多 `serv_xxx` 命名的函数。
+
+这些函数将调用【 [[#磁盘操作（文件管理服务进程）]] 】、【 [[#文件系统服务（文件管理服务进程）]] 】中讲的函数进行真正的服务操作，然后通过 `ipc_send` 返回用户进程所需要的数据。
+
+【待完善：具体的服务函数】
+
+# 用户程序接口
+
+接口装在了两个文件中：`user/lib/fd.c`、`user/lib/file.c`。
+
+分成不同文件的意义在于：我们总共有三个资源（设备）：文件、控制台、管道。这三者都可以调用的接口放在 `fd.c` 中，而只能由文件调用的接口放在 `file.c` 中。
+
+因此，实质上两个文件的接口没有层级区别，都是平等的，且是最高级的接口。即使这些接口之间也有互相调用的地方，但都是可以在正常编写程序的时候**直接使用的、封装完整的**函数。
+
+## 概览
+
+这些函数最后都会 `return fsipc_xxx()`。

@@ -882,7 +882,18 @@ function renderMarkdownContent() {
     const contentElement = document.getElementById('markdown-content');
     if (!contentElement) return;
     const rawMarkdown = stripFrontMatter(contentElement.textContent || '');
-    const markdown = transformObsidianImageEmbeds(rawMarkdown);
+    const internalRefPlaceholders = [];
+
+    function stashInternalRefs(markdownText) {
+        if (!markdownText) return '';
+        return markdownText.replace(/\[\[#([^\]\n]+)\]\]/g, function (match, inner) {
+            const idx = internalRefPlaceholders.length;
+            internalRefPlaceholders.push({ raw: String(inner || '').trim() });
+            return `@@INTERNALREF_${idx}@@`;
+        });
+    }
+
+    const markdown = transformObsidianImageEmbeds(stashInternalRefs(rawMarkdown));
 
     // 全局数学占位集合（会被各个段落共享）
     const displayMathBlocks = [];
@@ -1298,6 +1309,61 @@ function renderMarkdownContent() {
     (function assignHeadingIdsAndLinkifyRefs(root) {
         if (!root) return;
 
+        const STAR_SUFFIX_RE = /(?:【\s*[!！]\s*】|\[\s*[!！]\s*\]|［\s*[!！]\s*］)\s*$/;
+
+        function stripStarSuffix(text) {
+            return String(text || '').replace(STAR_SUFFIX_RE, '').trim();
+        }
+
+        function hasStarSuffix(text) {
+            return STAR_SUFFIX_RE.test(String(text || ''));
+        }
+
+        function normalizeInternalRefText(text) {
+            return stripStarSuffix(String(text || '').replace(/`+/g, '').trim());
+        }
+
+        function resolveRefTarget(rawTitle) {
+            const title = String(rawTitle || '').trim();
+            const normalizedTitle = normalizeInternalRefText(title);
+            return {
+                rawTitle: title,
+                normalizedTitle: normalizedTitle,
+                targetId: map.get(title) || map.get(slugify(title)) || map.get(normalizedTitle) || map.get(slugify(normalizedTitle)) || null
+            };
+        }
+
+        function decorateHeadingStar(heading, cleanText) {
+            if (!heading || heading.dataset.starDecorated === '1') return;
+
+            // 优先只改末尾文本节点，尽量保留标题内现有内联结构。
+            const nodes = Array.from(heading.childNodes || []);
+            let updated = false;
+            for (let i = nodes.length - 1; i >= 0; i--) {
+                const n = nodes[i];
+                if (n && n.nodeType === Node.TEXT_NODE) {
+                    const next = String(n.nodeValue || '').replace(STAR_SUFFIX_RE, '').replace(/\s+$/, '');
+                    if (next !== String(n.nodeValue || '')) {
+                        n.nodeValue = next;
+                        updated = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!updated) {
+                heading.textContent = cleanText;
+            }
+
+            const star = document.createElement('span');
+            star.className = 'heading-star-marker';
+            star.setAttribute('aria-hidden', 'true');
+            star.textContent = '★';
+            heading.appendChild(star);
+            heading.dataset.starDecorated = '1';
+            heading.dataset.starMarked = '1';
+        }
+
         function slugify(text) {
             return String(text || '')
                 .trim()
@@ -1313,44 +1379,86 @@ function renderMarkdownContent() {
         const used = new Map();
         Array.from(root.querySelectorAll('h1, h2, h3')).forEach(h => {
             try {
-                const text = (h.textContent || '').trim();
-                if (!text) return;
+                const rawText = (h.textContent || '').trim();
+                if (!rawText) return;
+                const cleanText = stripStarSuffix(rawText) || rawText;
+                h.dataset.headingPlainText = cleanText;
+
+                if (hasStarSuffix(rawText)) {
+                    decorateHeadingStar(h, cleanText);
+                }
+
                 let id = h.id && String(h.id).trim();
-                if (!id) id = slugify(text) || 'heading';
+                if (!id) id = slugify(cleanText) || 'heading';
                 // ensure unique
                 const base = id;
                 let c = used.get(base) || 0;
                 while (document.getElementById(id)) { c += 1; id = base + '-' + c; }
                 used.set(base, c);
                 h.id = id;
-                // store map by exact text and by normalized text
-                map.set(text, id);
-                map.set(slugify(text), id);
+                // 支持带标记与去标记标题两种写法
+                map.set(rawText, id);
+                map.set(cleanText, id);
+                map.set(slugify(rawText), id);
+                map.set(slugify(cleanText), id);
+                map.set(normalizeInternalRefText(rawText), id);
+                map.set(slugify(normalizeInternalRefText(rawText)), id);
             } catch (e) { }
         });
 
-        // Replace occurrences like [[#辅助函数——映射相关]] in text nodes
+        // Replace internal-ref placeholders first; they were stashed before markdown parsing to avoid inline-code splitting.
         const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
         const textNodes = [];
         while (walker.nextNode()) textNodes.push(walker.currentNode);
 
+        const placeholderPattern = /@@INTERNALREF_(\d+)@@/g;
         const pattern = /\[\[#([^\]\n]+)\]\]/g;
         textNodes.forEach(node => {
             const parentTag = node.parentElement && node.parentElement.tagName ? node.parentElement.tagName.toLowerCase() : '';
             if (parentTag === 'a' || parentTag === 'code' || parentTag === 'pre' || parentTag === 'textarea') return;
             const txt = node.nodeValue || '';
-            if (!txt || txt.indexOf('[#') === -1) return;
+            if (!txt || (txt.indexOf('[#') === -1 && txt.indexOf('@@INTERNALREF_') === -1)) return;
             let m; let lastIndex = 0; const parts = [];
+
+            placeholderPattern.lastIndex = 0;
+            while ((m = placeholderPattern.exec(txt)) !== null) {
+                const before = txt.slice(lastIndex, m.index);
+                if (before) parts.push(document.createTextNode(before));
+
+                const idx = parseInt(m[1], 10);
+                const ref = internalRefPlaceholders[idx] || { raw: '' };
+                const resolved = resolveRefTarget(ref.raw);
+                if (resolved.targetId) {
+                    const a = document.createElement('a');
+                    a.setAttribute('href', '#' + resolved.targetId);
+                    a.className = 'internal-ref';
+                    a.textContent = resolved.normalizedTitle || ref.raw;
+                    parts.push(a);
+                } else {
+                    parts.push(document.createTextNode(`[[#${ref.raw}]]`));
+                }
+                lastIndex = m.index + m[0].length;
+            }
+
+            if (parts.length) {
+                const tail = txt.slice(lastIndex);
+                if (tail) parts.push(document.createTextNode(tail));
+                const frag = document.createDocumentFragment();
+                parts.forEach(p => frag.appendChild(p));
+                node.parentNode.replaceChild(frag, node);
+                return;
+            }
+
+            lastIndex = 0;
             while ((m = pattern.exec(txt)) !== null) {
                 const before = txt.slice(lastIndex, m.index);
                 if (before) parts.push(document.createTextNode(before));
-                const title = (m[1] || '').trim();
-                let targetId = map.get(title) || map.get(slugify(title)) || null;
-                if (targetId) {
+                const resolved = resolveRefTarget((m[1] || '').trim());
+                if (resolved.targetId) {
                     const a = document.createElement('a');
-                    a.setAttribute('href', '#' + targetId);
+                    a.setAttribute('href', '#' + resolved.targetId);
                     a.className = 'internal-ref';
-                    a.textContent = title;
+                    a.textContent = resolved.normalizedTitle || resolved.rawTitle;
                     parts.push(a);
                 } else {
                     // fallback: leave original text if not found

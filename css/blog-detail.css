@@ -62,7 +62,16 @@
     flex: 1 1 auto;
     max-height: none;
     overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     position: relative;
+}
+
+.toc-list::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
 }
 
 .toc-h2-active-indicator {
@@ -241,6 +250,55 @@
 .toc-list a {
     text-decoration: none;
     transition: color 0.2s;
+}
+
+.toc-item-label {
+    min-width: 0;
+}
+
+.toc-h1,
+.toc-h2,
+.toc-h3 {
+    position: relative;
+}
+
+.toc-list a.has-star-marker {
+    display: inline-block;
+    padding-right: 22px;
+}
+
+.toc-star-marker {
+    position: absolute;
+    right: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #f3b51a;
+    font-size: 0.95em;
+    line-height: 1;
+    text-shadow: 0 0 8px rgba(243, 181, 26, 0.28);
+}
+
+.heading-star-marker {
+    display: inline-block;
+    margin-left: 0.5em;
+    color: #f3b51a;
+    font-size: 1.28em;
+    line-height: 1;
+    vertical-align: -0.08em;
+    transform-origin: center;
+    animation: headingStarSpin 8s linear infinite;
+    text-shadow: 0 0 10px rgba(243, 181, 26, 0.28);
+}
+
+@keyframes headingStarSpin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .toc-list a:hover {

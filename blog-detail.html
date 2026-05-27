@@ -457,6 +457,44 @@
 
             let activeH2Li = null;
             let activeH3Li = null;
+            let tocCenterPending = false;
+            let tocCenterTargetLi = null;
+
+            function scheduleCenterTocItem(li, instant = false) {
+                if (!tocList || !li || !li.isConnected) return;
+                tocCenterTargetLi = li;
+                if (tocCenterPending) return;
+                tocCenterPending = true;
+
+                requestAnimationFrame(() => {
+                    tocCenterPending = false;
+                    const target = tocCenterTargetLi;
+                    if (!target || !target.isConnected) return;
+
+                    const anchor = target.querySelector(':scope > a');
+                    const targetEl = (anchor && anchor.getClientRects().length > 0) ? anchor : target;
+                    if (!targetEl || targetEl.getClientRects().length === 0) return;
+
+                    const containerHeight = tocList.clientHeight || 0;
+                    if (containerHeight <= 0) return;
+
+                    const containerRect = tocList.getBoundingClientRect();
+                    const itemRect = targetEl.getBoundingClientRect();
+                    const itemTopInList = itemRect.top - containerRect.top + tocList.scrollTop;
+                    const desiredTop = itemTopInList - (containerHeight - itemRect.height) / 2;
+                    const maxTop = Math.max(0, tocList.scrollHeight - containerHeight);
+                    const nextTop = Math.max(0, Math.min(desiredTop, maxTop));
+
+                    const currentTop = tocList.scrollTop;
+                    if (Math.abs(currentTop - nextTop) < 2) return;
+
+                    if (instant) {
+                        tocList.scrollTop = nextTop;
+                    } else {
+                        tocList.scrollTo({ top: nextTop, behavior: 'smooth' });
+                    }
+                });
+            }
 
             function getRelativeOffset(el, ancestor) {
                 let top = 0;
@@ -611,6 +649,7 @@
                 const currentHeading = content.querySelector('h2.is-toc-active');
                 if (activeH2Li === nextLi && currentHeading === nextHeading) {
                     moveH2IndicatorTo(activeH2Li, true);
+                    if (activeH2Li) scheduleCenterTocItem(activeH2Li, instant);
                     return;
                 }
 
@@ -623,6 +662,7 @@
 
                 setH3SubListOpenForH2Li(activeH2Li, instant);
                 moveH2IndicatorTo(activeH2Li, instant);
+                if (activeH2Li) scheduleCenterTocItem(activeH2Li, instant);
             }
 
             function setActiveH3(li, headingEl, instant = false) {
@@ -631,6 +671,7 @@
                 const currentHeading = content.querySelector('h3.is-toc-active');
                 if (activeH3Li === nextLi && currentHeading === nextHeading) {
                     moveTocBugTo(activeH3Li, true);
+                    if (activeH3Li) scheduleCenterTocItem(activeH3Li, instant);
                     return;
                 }
 
@@ -642,6 +683,7 @@
                 if (nextHeading) nextHeading.classList.add('is-toc-active');
 
                 moveTocBugTo(activeH3Li, instant);
+                if (activeH3Li) scheduleCenterTocItem(activeH3Li, instant);
             }
 
             function getCurrentH2WithinH1(h1El, offset) {
@@ -733,6 +775,40 @@
                 });
             }
 
+            function parseHeadingLabelWithStar(rawText) {
+                const txt = String(rawText || '').trim();
+                const re = /(?:【\s*[!！]\s*】|\[\s*[!！]\s*\]|［\s*[!！]\s*］)\s*$/;
+                return {
+                    text: txt.replace(re, '').trim(),
+                    star: re.test(txt)
+                };
+            }
+
+            function createTocAnchor(header) {
+                const plain = header && header.dataset ? (header.dataset.headingPlainText || '') : '';
+                const marked = header && header.dataset ? (header.dataset.starMarked === '1') : false;
+                const meta = marked
+                    ? { text: plain || ((header && header.textContent) || '').replace(/★\s*$/, '').trim(), star: true }
+                    : parseHeadingLabelWithStar(plain || (header && header.textContent));
+                const a = document.createElement('a');
+                a.setAttribute('href', '#' + header.id);
+
+                const label = document.createElement('span');
+                label.className = 'toc-item-label';
+                label.textContent = meta.text || (header && header.textContent) || '';
+                a.appendChild(label);
+
+                if (meta.star) {
+                    a.classList.add('has-star-marker');
+                    const star = document.createElement('span');
+                    star.className = 'toc-star-marker';
+                    star.setAttribute('aria-hidden', 'true');
+                    star.textContent = '★';
+                    a.appendChild(star);
+                }
+                return a;
+            }
+
             function syncActiveH2WithSubList() {
                 if (!activeH2Li) return;
                 const subList = activeH2Li.closest('.toc-sub-list');
@@ -754,7 +830,12 @@
                 if (tag === 'h1') {
                     lastH1 = document.createElement('li');
                     lastH1.className = 'toc-h1';
-                    lastH1.innerHTML = `<span class=\"toc-toggle\" title=\"展开/收起\">▶</span><a href=\"#${header.id}\">${header.textContent}</a>`;
+                    const toggle = document.createElement('span');
+                    toggle.className = 'toc-toggle';
+                    toggle.title = '展开/收起';
+                    toggle.textContent = '▶';
+                    lastH1.appendChild(toggle);
+                    lastH1.appendChild(createTocAnchor(header));
                     tocList.appendChild(lastH1);
                     h1Map.set(header.id, lastH1);
                     lastH2 = null;
@@ -772,7 +853,7 @@
                     }
                     lastH2 = document.createElement('li');
                     lastH2.className = 'toc-h2';
-                    lastH2.innerHTML = `<a href=\"#${header.id}\">${header.textContent}</a>`;
+                    lastH2.appendChild(createTocAnchor(header));
                     ul.appendChild(lastH2);
                     h2Map.set(header.id, lastH2);
                     // h2目录点击
@@ -789,7 +870,7 @@
                     }
                     const h3Li = document.createElement('li');
                     h3Li.className = 'toc-h3';
-                    h3Li.innerHTML = `<a href="#${header.id}">${header.textContent}</a>`;
+                    h3Li.appendChild(createTocAnchor(header));
                     ul.appendChild(h3Li);
                     h3Map.set(header.id, h3Li);
 
