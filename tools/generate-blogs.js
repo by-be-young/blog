@@ -83,6 +83,43 @@ function normalizeSeries(value) {
     return '';
 }
 
+function normalizeChapter(value) {
+    if (typeof value === 'string' && value.trim()) {
+        return value.trim();
+    }
+
+    return '';
+}
+
+function parseChapter(value) {
+    const raw = normalizeChapter(value);
+    if (!raw) {
+        return {
+            raw: '',
+            order: Number.POSITIVE_INFINITY,
+            title: '',
+            hasChapter: false
+        };
+    }
+
+    const match = raw.match(/^(\d+)\s*-\s*(.+)$/);
+    if (match) {
+        return {
+            raw,
+            order: Number(match[1]),
+            title: match[2].trim(),
+            hasChapter: true
+        };
+    }
+
+    return {
+        raw,
+        order: Number.POSITIVE_INFINITY,
+        title: raw,
+        hasChapter: true
+    };
+}
+
 function normalizeOrder(value) {
     if (typeof value === 'number' && Number.isFinite(value)) {
         return Math.trunc(value);
@@ -99,6 +136,16 @@ function normalizeOrder(value) {
 }
 
 function compareSeriesPosts(a, b) {
+    const aChapter = parseChapter(a?.chapter);
+    const bChapter = parseChapter(b?.chapter);
+
+    if (aChapter.hasChapter || bChapter.hasChapter) {
+        if (aChapter.hasChapter && !bChapter.hasChapter) return -1;
+        if (!aChapter.hasChapter && bChapter.hasChapter) return 1;
+        if (aChapter.order !== bChapter.order) return aChapter.order - bChapter.order;
+        if (aChapter.title !== bChapter.title) return aChapter.title.localeCompare(bChapter.title, 'zh-CN');
+    }
+
     const aHasOrder = Number.isFinite(a?.order);
     const bHasOrder = Number.isFinite(b?.order);
 
@@ -374,6 +421,7 @@ async function main() {
         const type = (typeof data.type === 'string' && data.type.trim()) ? data.type.trim() : null;
         const series = normalizeSeries(data.series);
         const order = normalizeOrder(data.order);
+        const chapter = normalizeChapter(data.chapter);
 
         // support recommended flag in front-matter: accept either 'recommended' or Chinese '推荐'
         const recommended = Boolean(data.recommended) || Boolean(data['推荐']);
@@ -394,6 +442,7 @@ async function main() {
             type,
             series: series || null,
             order,
+            chapter: chapter || null,
             contentFile: relFromRoot,
             recommended
         };
@@ -438,6 +487,7 @@ async function main() {
                     title: post.title,
                     date: post.date,
                     order: post.order,
+                    chapter: post.chapter,
                     contentFile: post.contentFile
                 }))
             };

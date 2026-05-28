@@ -1,8 +1,27 @@
 [
     {
+        "id": 2542583234,
+        "title": "OS-Lab5-实验报告",
+        "excerpt": "2421操作系统Lab5课下实验实验报告",
+        "date": "2026-05-28",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "操作系统",
+            "文件管理"
+        ],
+        "category": "学习",
+        "type": "概要笔记",
+        "series": "操作系统",
+        "order": 6,
+        "chapter": "4-实验报告",
+        "contentFile": "blogs/二下/操作系统/文件管理/OS-Lab5-实验报告.md",
+        "recommended": false
+    },
+    {
         "id": 3639231539,
         "title": "文件管理-MOS实验",
-        "excerpt": "我们要实现的无非是六个系统调用：创建、打开、关闭、读取、写入、删除。",
+        "excerpt": "操作系统文件管理MOS具体实现方法，暨2421 Lab5梳理总结",
         "date": "2026-05-26",
         "image": "assets/images/blog_bg.png",
         "tags": [
@@ -11,9 +30,10 @@
             "文件管理"
         ],
         "category": "学习",
-        "type": null,
-        "series": null,
-        "order": null,
+        "type": "待完善",
+        "series": "操作系统",
+        "order": 5,
+        "chapter": "3-实验",
         "contentFile": "blogs/二下/操作系统/文件管理/文件管理-MOS实验.md",
         "recommended": false
     },
@@ -32,13 +52,14 @@
         "type": null,
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二下/操作系统/文件管理/Lab5 梳理总结.md",
         "recommended": false
     },
     {
         "id": 603333991,
         "title": "内存管理-MOS实验",
-        "excerpt": "操作系统内存管理MOS具体实现方法，暨2421 Lab4梳理总结",
+        "excerpt": "操作系统内存管理MOS具体实现方法，暨2421 Lab2梳理总结",
         "date": "2026-05-21",
         "image": "assets/images/blog_bg.png",
         "tags": [
@@ -48,10 +69,12 @@
         ],
         "category": "学习",
         "type": "系统笔记",
-        "series": null,
-        "order": null,
+        "series": "操作系统",
+        "order": 3,
+        "chapter": "3-实验",
         "contentFile": "blogs/二下/操作系统/内存管理/内存管理-MOS实验.md",
-        "recommended": false
+        "recommended": false,
+        "lastEditedDate": "2026-05-28"
     },
     {
         "id": 717874525,
@@ -66,8 +89,9 @@
         ],
         "category": "学习",
         "type": "系统笔记",
-        "series": "操作系统理论",
+        "series": "操作系统",
         "order": 5,
+        "chapter": "2-理论",
         "contentFile": "blogs/二下/操作系统/文件管理/文件管理.md",
         "recommended": false
     },
@@ -84,11 +108,11 @@
         ],
         "category": "学习",
         "type": "系统笔记",
-        "series": "操作系统实验详解",
+        "series": "操作系统",
         "order": 4,
+        "chapter": "3-实验",
         "contentFile": "blogs/二下/操作系统/系统调用/系统调用-MOS实验.md",
-        "recommended": false,
-        "lastEditedDate": "2026-05-26"
+        "recommended": true
     },
     {
         "id": 650786542,
@@ -103,8 +127,9 @@
         ],
         "category": "学习",
         "type": "概要笔记",
-        "series": "操作系统实验报告",
-        "order": null,
+        "series": "操作系统",
+        "order": 5,
+        "chapter": "4-实验报告",
         "contentFile": "blogs/二下/操作系统/系统调用/OS-Lab4-实验报告.md",
         "recommended": false
     },
@@ -123,6 +148,7 @@
         "type": "系统笔记",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/语言/日语/文法/活用形.md",
         "recommended": false
     },
@@ -139,8 +165,9 @@
         ],
         "category": "学习",
         "type": "待完善",
-        "series": "操作系统实验报告",
-        "order": 3,
+        "series": "操作系统",
+        "order": 4,
+        "chapter": "4-实验报告",
         "contentFile": "blogs/二下/操作系统/进程管理/OS-Lab3-实验报告.md",
         "recommended": false
     },
@@ -159,6 +186,7 @@
         "type": "概要笔记",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/语言/日语/文法/接续词.md",
         "recommended": false
     },
@@ -175,10 +203,12 @@
         ],
         "category": "学习",
         "type": "待完善",
-        "series": null,
-        "order": null,
+        "series": "操作系统",
+        "order": 4,
+        "chapter": "2-理论",
         "contentFile": "blogs/二下/操作系统/进程管理/进程管理.md",
-        "recommended": false
+        "recommended": false,
+        "lastEditedDate": "2026-05-28"
     },
     {
         "id": 3111316559,
@@ -195,6 +225,7 @@
         "type": "待完善",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二下/操作系统/进程管理/Lab3 梳理总结.md",
         "recommended": false
     },
@@ -213,6 +244,7 @@
         "type": "落笔生花",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/文学/诗词/词/如梦令·国家植物园.md",
         "recommended": false
     },
@@ -229,10 +261,12 @@
         ],
         "category": "学习",
         "type": "待完善",
-        "series": "操作系统理论",
-        "order": 2,
+        "series": "操作系统",
+        "order": 3,
+        "chapter": "2-理论",
         "contentFile": "blogs/二下/操作系统/内存管理/内存管理.md",
-        "recommended": false
+        "recommended": false,
+        "lastEditedDate": "2026-05-28"
     },
     {
         "id": 3927684149,
@@ -249,6 +283,7 @@
         "type": "待完善",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二下/操作系统/内存管理/Lab2 梳理总结.md",
         "recommended": false
     },
@@ -265,8 +300,9 @@
         ],
         "category": "学习",
         "type": "待完善",
-        "series": "操作系统实验报告",
+        "series": "操作系统",
         "order": 3,
+        "chapter": "4-实验报告",
         "contentFile": "blogs/二下/操作系统/内存管理/OS-Lab2-实验报告.md",
         "recommended": false
     },
@@ -283,8 +319,9 @@
         ],
         "category": "学习",
         "type": "系统笔记",
-        "series": "操作系统实验报告",
+        "series": "操作系统",
         "order": 2,
+        "chapter": "4-实验报告",
         "contentFile": "blogs/二下/操作系统/启动/OS-Lab1-实验报告.md",
         "recommended": false
     },
@@ -301,8 +338,9 @@
         ],
         "category": "学习",
         "type": "系统笔记",
-        "series": "操作系统实验报告",
+        "series": "操作系统",
         "order": 1,
+        "chapter": "4-实验报告",
         "contentFile": "blogs/二下/操作系统/Shell/OS-Lab0-实验报告.md",
         "recommended": false
     },
@@ -319,10 +357,12 @@
         ],
         "category": "学习",
         "type": "系统笔记",
-        "series": null,
-        "order": null,
+        "series": "操作系统",
+        "order": 2,
+        "chapter": "2-理论",
         "contentFile": "blogs/二下/操作系统/启动/ELF文件结构.md",
-        "recommended": true
+        "recommended": true,
+        "lastEditedDate": "2026-05-28"
     },
     {
         "id": 3791533123,
@@ -337,8 +377,9 @@
         ],
         "category": "学习",
         "type": "系统笔记",
-        "series": "操作系统理论",
+        "series": "操作系统",
         "order": 1,
+        "chapter": "2-理论",
         "contentFile": "blogs/二下/操作系统/启动/计算机的启动过程.md",
         "recommended": true
     },
@@ -357,6 +398,7 @@
         "type": "待完善",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二下/操作系统/MOS/Lab1 复习.md",
         "recommended": false
     },
@@ -375,6 +417,7 @@
         "type": "纸上行舟",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/明日方舟/卫戍协议/阿戈尔/阿戈尔盟约底层逻辑及运营思路.md",
         "recommended": false
     },
@@ -393,6 +436,7 @@
         "type": "落笔生花",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/文学/诗词/词/江城子·樱.md",
         "recommended": false
     },
@@ -409,8 +453,9 @@
         ],
         "category": "学习",
         "type": "轻松笔记",
-        "series": "操作系统预备知识",
+        "series": "操作系统",
         "order": null,
+        "chapter": "1-预备知识",
         "contentFile": "blogs/二下/操作系统/Makefile/Makefile基础速成.md",
         "recommended": false
     },
@@ -429,6 +474,7 @@
         "type": "系统笔记",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二下/操作系统/Shell/Lab0 Pre-Exam复习.md",
         "recommended": false
     },
@@ -445,8 +491,9 @@
         ],
         "category": "学习",
         "type": "轻松笔记",
-        "series": "操作系统预备知识",
+        "series": "操作系统",
         "order": null,
+        "chapter": "1-预备知识",
         "contentFile": "blogs/二下/操作系统/gcc/gcc语法速成.md",
         "recommended": false
     },
@@ -463,8 +510,9 @@
         ],
         "category": "学习",
         "type": "轻松笔记",
-        "series": "操作系统预备知识",
+        "series": "操作系统",
         "order": null,
+        "chapter": "1-预备知识",
         "contentFile": "blogs/二下/操作系统/Linux/Linux 命令指南.md",
         "recommended": false
     },
@@ -483,6 +531,7 @@
         "type": "随心所记",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/语言/意大利语/发音规则/意大利语自然拼读攻略.md",
         "recommended": false
     },
@@ -499,8 +548,9 @@
         ],
         "category": "学习",
         "type": "轻松笔记",
-        "series": "操作系统预备知识",
+        "series": "操作系统",
         "order": null,
+        "chapter": "1-预备知识",
         "contentFile": "blogs/二下/操作系统/Shell/C语言无痛转型Shell脚本.md",
         "recommended": false
     },
@@ -519,6 +569,7 @@
         "type": "纸上行舟",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/终末地/游戏工具/基质/基质刷取指南.md",
         "recommended": false
     },
@@ -537,6 +588,7 @@
         "type": "纸上行舟",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/终末地/游戏机制/数值计算/终末地数值计算方法.md",
         "recommended": false
     },
@@ -555,6 +607,7 @@
         "type": "落音缤纷",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/音乐/J-POP/ヨルシカ/千鳥.md",
         "recommended": false
     },
@@ -573,6 +626,7 @@
         "type": "纸上行舟",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/终末地/游戏工具/装备/装备精锻较好适配速查.md",
         "recommended": false
     },
@@ -591,6 +645,7 @@
         "type": "纸上行舟",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/明日方舟/干员杂谈/干员测评/望.md",
         "recommended": false
     },
@@ -609,6 +664,7 @@
         "type": "系统笔记",
         "series": "计组理论",
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二上/计组/链接/链接与运行.md",
         "recommended": false
     },
@@ -627,6 +683,7 @@
         "type": "概要笔记",
         "series": "二上总复习",
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二上/计组/总复习/计组总复习.md",
         "recommended": false
     },
@@ -645,6 +702,7 @@
         "type": "随心所记",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二上/二上总结/考试总结/二上考试情况总结.md",
         "recommended": false
     },
@@ -663,6 +721,7 @@
         "type": "纸上行舟",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/明日方舟/干员杂谈/元素体系/元素体系——朝阳or败笔？.md",
         "recommended": false
     },
@@ -681,6 +740,7 @@
         "type": "概要笔记",
         "series": "计组理论",
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二上/计组/MIPS/指令系统与MIPS汇编语言.md",
         "recommended": false
     },
@@ -699,6 +759,7 @@
         "type": "系统笔记",
         "series": "二上总复习",
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二上/基物实验/总复习/基物实验.md",
         "recommended": false
     },
@@ -717,6 +778,7 @@
         "type": "系统笔记",
         "series": "计组理论",
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二上/计组/存储系统/虚拟存储器.md",
         "recommended": false
     },
@@ -735,6 +797,7 @@
         "type": "系统笔记",
         "series": "计组理论",
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二上/计组/存储系统/主存储器.md",
         "recommended": false
     },
@@ -753,6 +816,7 @@
         "type": "概要笔记",
         "series": "二上总复习",
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二上/Java/总复习/Java总复习.md",
         "recommended": false
     },
@@ -771,6 +835,7 @@
         "type": "系统笔记",
         "series": "二上总复习",
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二上/离散二/总复习/离散数学题型总复习.md",
         "recommended": false
     },
@@ -789,6 +854,7 @@
         "type": "概要笔记",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二上/离散二/图论/穿程问题.md",
         "recommended": false
     },
@@ -807,6 +873,7 @@
         "type": "待完善",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二上/离散二/图论/二分图的匹配问题.md",
         "recommended": false
     },
@@ -825,6 +892,7 @@
         "type": "概要笔记",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二上/离散二/图论/树.md",
         "recommended": false
     },
@@ -843,6 +911,7 @@
         "type": "轻松笔记",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二上/离散二/图论/通路问题.md",
         "recommended": false
     },
@@ -861,6 +930,7 @@
         "type": "概要笔记",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二上/离散二/图论/图的矩阵表示.md",
         "recommended": false
     },
@@ -879,6 +949,7 @@
         "type": "轻松笔记",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二上/离散二/图论/图论基本概念.md",
         "recommended": false
     },
@@ -897,6 +968,7 @@
         "type": "待完善",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二上/Java/总复习/Java串讲.md",
         "recommended": false
     },
@@ -915,6 +987,7 @@
         "type": "概要笔记",
         "series": "二上总复习",
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二上/算法/模板/算法选择题速查.md",
         "recommended": false
     },
@@ -933,6 +1006,7 @@
         "type": "概要笔记",
         "series": "二上总复习",
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二上/概率统计/总复习/概率统计必背公式.md",
         "recommended": false
     },
@@ -951,6 +1025,7 @@
         "type": "轻松笔记",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二上/算法/图/并查集.md",
         "recommended": false
     },
@@ -969,6 +1044,7 @@
         "type": "落笔生花",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/文学/诗词/词/卜算子·元旦晚会.md",
         "recommended": false
     },
@@ -987,6 +1063,7 @@
         "type": "轻松笔记",
         "series": "计组理论",
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二上/计组/存储系统/Cache.md",
         "recommended": false
     },
@@ -1005,6 +1082,7 @@
         "type": "概要笔记",
         "series": "二上总复习",
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/二上/算法/模板/算法板子.md",
         "recommended": false
     },
@@ -1023,6 +1101,7 @@
         "type": "落笔生花",
         "series": null,
         "order": null,
+        "chapter": null,
         "contentFile": "blogs/文学/诗词/词/行香子·初雪.md",
         "recommended": false
     }

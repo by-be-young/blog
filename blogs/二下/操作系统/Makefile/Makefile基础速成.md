@@ -2,7 +2,8 @@
 type: 轻松笔记
 excerpt: Makefile语法格式基础
 date: 2026-03-18
-series: 操作系统预备知识
+series: 操作系统
+chapter: 1-预备知识
 ---
 # 什么是 Makefile？
 

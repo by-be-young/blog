@@ -1281,8 +1281,79 @@
                             const simEl = document.getElementById('post-similar');
                             if (!prevEl || !nextEl || !simEl) return;
 
-                            // 按日期升序排序（旧 -> 新）
-                            const sorted = Array.isArray(blogs) ? blogs.slice().sort((a, b) => new Date(a.date) - new Date(b.date)) : [];
+                            function normalizeSeriesName(value) {
+                                return (typeof value === 'string' && value.trim()) ? value.trim() : '';
+                            }
+
+                            function normalizeOrder(value) {
+                                if (typeof value === 'number' && Number.isFinite(value)) return Math.trunc(value);
+                                if (typeof value === 'string' && value.trim()) {
+                                    const parsed = Number(value.trim());
+                                    if (Number.isFinite(parsed)) return Math.trunc(parsed);
+                                }
+                                return null;
+                            }
+
+                            function normalizeChapter(value) {
+                                return (typeof value === 'string' && value.trim()) ? value.trim() : '';
+                            }
+
+                            function parseChapter(value) {
+                                const raw = normalizeChapter(value);
+                                if (!raw) {
+                                    return { raw: '', order: Number.POSITIVE_INFINITY, title: '未分章', hasChapter: false };
+                                }
+
+                                const match = raw.match(/^(\d+)\s*-\s*(.+)$/);
+                                if (match) {
+                                    return { raw, order: Number(match[1]), title: match[2].trim(), hasChapter: true };
+                                }
+
+                                return { raw, order: Number.POSITIVE_INFINITY, title: raw, hasChapter: true };
+                            }
+
+                            function compareSeriesPosts(a, b) {
+                                const aChapter = parseChapter(a && a.chapter);
+                                const bChapter = parseChapter(b && b.chapter);
+
+                                if (aChapter.hasChapter || bChapter.hasChapter) {
+                                    if (aChapter.hasChapter && !bChapter.hasChapter) return -1;
+                                    if (!aChapter.hasChapter && bChapter.hasChapter) return 1;
+                                    if (aChapter.order !== bChapter.order) return aChapter.order - bChapter.order;
+                                    if (aChapter.title !== bChapter.title) return aChapter.title.localeCompare(bChapter.title, 'zh-CN');
+                                }
+
+                                const aHasOrder = Number.isFinite(a && a.__seriesOrder);
+                                const bHasOrder = Number.isFinite(b && b.__seriesOrder);
+
+                                if (aHasOrder && bHasOrder) {
+                                    if (a.__seriesOrder !== b.__seriesOrder) return a.__seriesOrder - b.__seriesOrder;
+                                    return new Date(b.date) - new Date(a.date);
+                                }
+
+                                if (aHasOrder && !bHasOrder) return -1;
+                                if (!aHasOrder && bHasOrder) return 1;
+
+                                return new Date(b.date) - new Date(a.date);
+                            }
+
+                            const currentSeries = normalizeSeriesName(blog.series);
+                            let sorted = [];
+
+                            if (currentSeries) {
+                                // 属于系列：仅显示同系列的上/下篇，不显示“类似”按钮。
+                                sorted = Array.isArray(blogs)
+                                    ? blogs
+                                        .filter(b => normalizeSeriesName(b && b.series) === currentSeries)
+                                        .map(b => ({ ...b, __seriesOrder: normalizeOrder(b && b.order), chapter: normalizeChapter(b && b.chapter) }))
+                                        .sort(compareSeriesPosts)
+                                    : [];
+                                simEl.style.display = 'none';
+                            } else {
+                                // 非系列文章：保持原逻辑（全站时间顺序 + 类似文章）。
+                                sorted = Array.isArray(blogs) ? blogs.slice().sort((a, b) => new Date(a.date) - new Date(b.date)) : [];
+                            }
+
                             const curIdx = sorted.findIndex(b => String(b.id) === String(blog.id));
                             if (curIdx === -1) {
                                 prevEl.style.display = 'none'; nextEl.style.display = 'none'; simEl.style.display = 'none';
@@ -1294,43 +1365,55 @@
 
                             if (prev) {
                                 prevEl.href = 'blog-detail.html?id=' + prev.id;
-                                prevEl.target = '_blank';
-                                prevEl.rel = 'noopener noreferrer';
+                                if (currentSeries) {
+                                    prevEl.removeAttribute('target');
+                                    prevEl.removeAttribute('rel');
+                                } else {
+                                    prevEl.target = '_blank';
+                                    prevEl.rel = 'noopener noreferrer';
+                                }
                                 prevEl.querySelector('.post-nav-title').textContent = prev.title || '';
                                 prevEl.style.display = 'flex';
                             } else prevEl.style.display = 'none';
 
                             if (next) {
                                 nextEl.href = 'blog-detail.html?id=' + next.id;
-                                nextEl.target = '_blank';
-                                nextEl.rel = 'noopener noreferrer';
+                                if (currentSeries) {
+                                    nextEl.removeAttribute('target');
+                                    nextEl.removeAttribute('rel');
+                                } else {
+                                    nextEl.target = '_blank';
+                                    nextEl.rel = 'noopener noreferrer';
+                                }
                                 nextEl.querySelector('.post-nav-title').textContent = next.title || '';
                                 nextEl.style.display = 'flex';
                             } else nextEl.style.display = 'none';
 
-                            // 相似博客优先级：同(领域,科目,主题) -> 同科目不同主题 -> 同领域不同科目
-                            function tag(b, i) { return (b.tags && b.tags[i] !== undefined) ? b.tags[i] : null; }
-                            const cur0 = tag(blog, 0), cur1 = tag(blog, 1), cur2 = tag(blog, 2);
-                            let similar = null;
+                            if (!currentSeries) {
+                                // 相似博客优先级：同(领域,科目,主题) -> 同科目不同主题 -> 同领域不同科目
+                                function tag(b, i) { return (b.tags && b.tags[i] !== undefined) ? b.tags[i] : null; }
+                                const cur0 = tag(blog, 0), cur1 = tag(blog, 1), cur2 = tag(blog, 2);
+                                let similar = null;
 
-                            if (cur0 !== null && cur1 !== null && cur2 !== null) {
-                                similar = blogs.find(b => String(b.id) !== String(blog.id) && tag(b, 0) === cur0 && tag(b, 1) === cur1 && tag(b, 2) === cur2);
-                            }
-                            if (!similar && cur1 !== null) {
-                                similar = blogs.find(b => String(b.id) !== String(blog.id) && tag(b, 1) === cur1 && tag(b, 2) !== cur2);
-                            }
-                            if (!similar && cur0 !== null) {
-                                similar = blogs.find(b => String(b.id) !== String(blog.id) && tag(b, 0) === cur0 && tag(b, 1) !== cur1);
-                            }
+                                if (cur0 !== null && cur1 !== null && cur2 !== null) {
+                                    similar = blogs.find(b => String(b.id) !== String(blog.id) && tag(b, 0) === cur0 && tag(b, 1) === cur1 && tag(b, 2) === cur2);
+                                }
+                                if (!similar && cur1 !== null) {
+                                    similar = blogs.find(b => String(b.id) !== String(blog.id) && tag(b, 1) === cur1 && tag(b, 2) !== cur2);
+                                }
+                                if (!similar && cur0 !== null) {
+                                    similar = blogs.find(b => String(b.id) !== String(blog.id) && tag(b, 0) === cur0 && tag(b, 1) !== cur1);
+                                }
 
-                            if (similar) {
-                                simEl.href = 'blog-detail.html?id=' + similar.id;
-                                simEl.target = '_blank';
-                                simEl.rel = 'noopener noreferrer';
-                                simEl.querySelector('.post-nav-title').textContent = similar.title || '';
-                                simEl.style.display = 'flex';
-                            } else {
-                                simEl.style.display = 'none';
+                                if (similar) {
+                                    simEl.href = 'blog-detail.html?id=' + similar.id;
+                                    simEl.target = '_blank';
+                                    simEl.rel = 'noopener noreferrer';
+                                    simEl.querySelector('.post-nav-title').textContent = similar.title || '';
+                                    simEl.style.display = 'flex';
+                                } else {
+                                    simEl.style.display = 'none';
+                                }
                             }
 
                             // 应用语言资源到导航标签

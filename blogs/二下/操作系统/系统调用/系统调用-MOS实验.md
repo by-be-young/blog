@@ -1,9 +1,10 @@
 ---
 type: 系统笔记
-series: 操作系统实验详解
+series: 操作系统
 order: "4"
 excerpt: 操作系统系统调用MOS具体实现方法，暨2421 Lab4梳理总结
 recommended: true
+chapter: 3-实验
 ---
 # 说在前面
 

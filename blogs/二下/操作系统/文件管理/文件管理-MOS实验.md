@@ -1,8 +1,9 @@
 ---
 type: 待完善
 excerpt: 操作系统文件管理MOS具体实现方法，暨2421 Lab5梳理总结
-series: 操作系统实验详解
+series: 操作系统
 order: "5"
+chapter: 3-实验
 ---
 # 六大系统调用概览
 

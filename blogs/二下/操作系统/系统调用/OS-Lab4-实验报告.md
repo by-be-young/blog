@@ -1,7 +1,9 @@
 ---
 type: 概要笔记
-series: 操作系统实验报告
+series: 操作系统
 excerpt: 2421操作系统Lab4课下实验实验报告
+order: "5"
+chapter: 4-实验报告
 ---
 # 思考题
 

@@ -1,6 +1,9 @@
 ---
 type: 系统笔记
 excerpt: 操作系统内存管理MOS具体实现方法，暨2421 Lab2梳理总结
+series: 操作系统
+chapter: 3-实验
+order: "3"
 ---
 # 概览
 
