@@ -16,7 +16,8 @@
         "order": 6,
         "chapter": "4-实验报告",
         "contentFile": "blogs/二下/操作系统/文件管理/OS-Lab5-实验报告.md",
-        "recommended": false
+        "recommended": false,
+        "lastEditedDate": "2026-05-28"
     },
     {
         "id": 3639231539,
@@ -73,8 +74,7 @@
         "order": 3,
         "chapter": "3-实验",
         "contentFile": "blogs/二下/操作系统/内存管理/内存管理-MOS实验.md",
-        "recommended": false,
-        "lastEditedDate": "2026-05-28"
+        "recommended": false
     },
     {
         "id": 717874525,
@@ -265,8 +265,7 @@
         "order": 3,
         "chapter": "2-理论",
         "contentFile": "blogs/二下/操作系统/内存管理/内存管理.md",
-        "recommended": false,
-        "lastEditedDate": "2026-05-28"
+        "recommended": false
     },
     {
         "id": 3927684149,
@@ -361,8 +360,7 @@
         "order": 2,
         "chapter": "2-理论",
         "contentFile": "blogs/二下/操作系统/启动/ELF文件结构.md",
-        "recommended": true,
-        "lastEditedDate": "2026-05-28"
+        "recommended": true
     },
     {
         "id": 3791533123,
