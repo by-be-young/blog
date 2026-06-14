@@ -3,7 +3,7 @@
         "id": 2569373497,
         "title": "操作系统",
         "coverImage": "assets/images/background/bg2.png",
-        "count": 18,
+        "count": 21,
         "posts": [
             {
                 "id": 3125593710,
@@ -38,6 +38,14 @@
                 "contentFile": "blogs/二下/操作系统/Shell/C语言无痛转型Shell脚本.md"
             },
             {
+                "id": 3016619292,
+                "title": "操作系统概述",
+                "date": "2026-06-12",
+                "order": 0,
+                "chapter": "2-理论",
+                "contentFile": "blogs/二下/操作系统/概述/操作系统概述.md"
+            },
+            {
                 "id": 3791533123,
                 "title": "计算机的启动过程",
                 "date": "2026-03-30",
@@ -70,10 +78,26 @@
                 "contentFile": "blogs/二下/操作系统/进程管理/进程管理.md"
             },
             {
+                "id": 2362776188,
+                "title": "IO管理",
+                "date": "2026-06-13",
+                "order": 5,
+                "chapter": "2-理论",
+                "contentFile": "blogs/二下/操作系统/设备管理/IO管理.md"
+            },
+            {
+                "id": 2348406839,
+                "title": "磁盘管理",
+                "date": "2026-06-13",
+                "order": 6,
+                "chapter": "2-理论",
+                "contentFile": "blogs/二下/操作系统/设备管理/磁盘管理.md"
+            },
+            {
                 "id": 717874525,
                 "title": "文件管理",
                 "date": "2026-05-21",
-                "order": 5,
+                "order": 7,
                 "chapter": "2-理论",
                 "contentFile": "blogs/二下/操作系统/文件管理/文件管理.md"
             },

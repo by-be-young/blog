@@ -820,6 +820,17 @@ static void duppage(u_int envid, u_int vpn) {
 - 选项 D 是私有可写页面的处理方式（实际 fork 采用 COW 而非立即拷贝）。[\analysis]
 [\task]
 
+[task]
+[question]
+在页式虚拟存储系统中，使用 fork 创建的子进程总是和父进程共享相同的代码和数据页，因此子进程和父进程之间可通过全局变量实现数据传递。（）
+[\question]
+[options]A 正确[\options]
+[options]B 错误[\options]
+[answer]B[\answer]
+[analysis]
+Fork 创建子进程时，采用**写时复制（COW，即 Copy‑on‑Write）** 技术，子进程与父进程在创建时共享相同的物理页（包括代码段和数据段），且页表项标记为只读。当某个进程试图修改全局变量时，会触发页错误，系统为该进程分配新的物理页并复制数据，此后两个进程的数据页各自独立。因此，父子进程**不能**通过全局变量实现数据传递（进程间通信需用 IPC 机制）。该说法错误。[\analysis]
+[\task]
+
 ---
 
 - **如何设计能让写入时产生异常？**
