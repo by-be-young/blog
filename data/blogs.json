@@ -1,5 +1,290 @@
 [
     {
+        "id": 931232330,
+        "title": "并发控制",
+        "excerpt": "数据库并发控制相关知识点，包裹事务管理、调度、封锁等内容",
+        "date": "2026-06-18",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "数据库",
+            "概念"
+        ],
+        "category": "学习",
+        "type": "概要笔记",
+        "series": "数据库",
+        "order": 10,
+        "chapter": "1-知识点",
+        "contentFile": "blogs/二下/数据库/概念/并发控制.md",
+        "recommended": false
+    },
+    {
+        "id": 4273152219,
+        "title": "数据库安全性",
+        "excerpt": "数据库安全性相关知识点，包括存取控制、权限控制、角色等",
+        "date": "2026-06-18",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "数据库",
+            "概念"
+        ],
+        "category": "学习",
+        "type": "概要笔记",
+        "series": "数据库",
+        "order": 9,
+        "chapter": "1-知识点",
+        "contentFile": "blogs/二下/数据库/概念/数据库安全性.md",
+        "recommended": false
+    },
+    {
+        "id": 1346946396,
+        "title": "数据库编程",
+        "excerpt": "数据库编程相关知识点，包括存储过程、游标ORM等",
+        "date": "2026-06-18",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "数据库",
+            "概念"
+        ],
+        "category": "学习",
+        "type": "概要笔记",
+        "series": "数据库",
+        "order": 6,
+        "chapter": "1-知识点",
+        "contentFile": "blogs/二下/数据库/概念/数据库编程.md",
+        "recommended": false
+    },
+    {
+        "id": 2884984423,
+        "title": "数据库概述",
+        "excerpt": "数据库概述，包括四大基本概念和数据库结构等。",
+        "date": "2026-06-18",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "数据库",
+            "概念"
+        ],
+        "category": "学习",
+        "type": "待完善",
+        "series": "数据库",
+        "order": 1,
+        "chapter": "1-知识点",
+        "contentFile": "blogs/二下/数据库/概念/数据库概述.md",
+        "recommended": false
+    },
+    {
+        "id": 108113389,
+        "title": "数据库恢复技术",
+        "excerpt": "数据库恢复技术相关知识点，包括故障、恢复等内容",
+        "date": "2026-06-18",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "数据库",
+            "概念"
+        ],
+        "category": "学习",
+        "type": "概要笔记",
+        "series": "数据库",
+        "order": 11,
+        "chapter": "1-知识点",
+        "contentFile": "blogs/二下/数据库/概念/数据库恢复技术.md",
+        "recommended": false
+    },
+    {
+        "id": 958481110,
+        "title": "数据库设计",
+        "excerpt": "数据库设计相关知识点，包括数据库设计方法、过程以及需求分析等",
+        "date": "2026-06-18",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "数据库",
+            "概念"
+        ],
+        "category": "学习",
+        "type": "概要笔记",
+        "series": "数据库",
+        "order": 13,
+        "chapter": "1-预备知识",
+        "contentFile": "blogs/二下/数据库/概念/数据库设计.md",
+        "recommended": false
+    },
+    {
+        "id": 2940351753,
+        "title": "索引",
+        "excerpt": "数据库索引相关知识点，包括B+数索引、散列索引、聚簇索引、联合索引等内容",
+        "date": "2026-06-18",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "数据库",
+            "概念"
+        ],
+        "category": "学习",
+        "type": "概要笔记",
+        "series": "数据库",
+        "order": 7,
+        "chapter": "1-知识点",
+        "contentFile": "blogs/二下/数据库/概念/索引.md",
+        "recommended": false
+    },
+    {
+        "id": 3415476682,
+        "title": "完整性约束",
+        "excerpt": "数据库完整性约束相关知识点，包括三大完整性约束、违约反应、触发器等内容",
+        "date": "2026-06-18",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "数据库",
+            "概念"
+        ],
+        "category": "学习",
+        "type": "概要笔记",
+        "series": "数据库",
+        "order": 8,
+        "chapter": "1-知识点",
+        "contentFile": "blogs/二下/数据库/概念/完整性约束.md",
+        "recommended": false
+    },
+    {
+        "id": 2487883457,
+        "title": "规范化理论",
+        "excerpt": "数据库规范化理论相关知识点，包括函数依赖、范式、模式分解等内容。",
+        "date": "2026-06-18",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "数据库",
+            "规范化理论"
+        ],
+        "category": "学习",
+        "type": "概要笔记",
+        "series": "数据库",
+        "order": 12,
+        "chapter": "1-知识点",
+        "contentFile": "blogs/二下/数据库/规范化理论/规范化理论.md",
+        "recommended": false
+    },
+    {
+        "id": 371986926,
+        "title": "规范化理论题型",
+        "excerpt": "数据库规范化理论常见题型及其解题方法",
+        "date": "2026-06-18",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "数据库",
+            "规范化理论"
+        ],
+        "category": "学习",
+        "type": "专题笔记",
+        "series": "数据库",
+        "order": 2,
+        "chapter": "2-专题",
+        "contentFile": "blogs/二下/数据库/规范化理论/规范化理论题型.md",
+        "recommended": false
+    },
+    {
+        "id": 3790911186,
+        "title": "概念模型",
+        "excerpt": "数据库概念模型相关知识点，包括ER图的绘制方法等",
+        "date": "2026-06-18",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "数据库",
+            "数据模型"
+        ],
+        "category": "学习",
+        "type": "待完善",
+        "series": "数据库",
+        "order": 2,
+        "chapter": "1-知识点",
+        "contentFile": "blogs/二下/数据库/数据模型/概念模型.md",
+        "recommended": false
+    },
+    {
+        "id": 689308970,
+        "title": "关系代数",
+        "excerpt": "数据库关系代数相关知识点",
+        "date": "2026-06-18",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "数据库",
+            "数据模型"
+        ],
+        "category": "学习",
+        "type": "概要笔记",
+        "series": "数据库",
+        "order": 4,
+        "chapter": "1-知识点",
+        "contentFile": "blogs/二下/数据库/数据模型/关系代数.md",
+        "recommended": false
+    },
+    {
+        "id": 712846297,
+        "title": "逻辑模型",
+        "excerpt": "数据库逻辑模型相关知识点，包括ER模型想关系模型转化的规则等",
+        "date": "2026-06-18",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "数据库",
+            "数据模型"
+        ],
+        "category": "学习",
+        "type": "待完善",
+        "series": "数据库",
+        "order": 3,
+        "chapter": "1-知识点",
+        "contentFile": "blogs/二下/数据库/数据模型/逻辑模型.md",
+        "recommended": false
+    },
+    {
+        "id": 3650314132,
+        "title": "关系运算转SQL",
+        "excerpt": "数据库关系运算转SQL语言的方法专题",
+        "date": "2026-06-18",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "数据库",
+            "SQL"
+        ],
+        "category": "学习",
+        "type": "专题笔记",
+        "series": "数据库",
+        "order": 1,
+        "chapter": "2-专题",
+        "contentFile": "blogs/二下/数据库/SQL/关系运算转SQL.md",
+        "recommended": false
+    },
+    {
+        "id": 3971314386,
+        "title": "SQL语言",
+        "excerpt": "数据库SQL语言语法速成",
+        "date": "2026-06-18",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "数据库",
+            "SQL"
+        ],
+        "category": "学习",
+        "type": "概要笔记",
+        "series": "数据库",
+        "order": 5,
+        "chapter": "1-知识点",
+        "contentFile": "blogs/二下/数据库/SQL/SQL语言.md",
+        "recommended": false
+    },
+    {
         "id": 2348406839,
         "title": "磁盘管理",
         "excerpt": "操作系统磁盘管理理论知识点",
@@ -17,7 +302,7 @@
         "chapter": "2-理论",
         "contentFile": "blogs/二下/操作系统/设备管理/磁盘管理.md",
         "recommended": false,
-        "lastEditedDate": "2026-06-14"
+        "lastEditedDate": "2026-06-18"
     },
     {
         "id": 2362776188,
@@ -36,13 +321,12 @@
         "order": 5,
         "chapter": "2-理论",
         "contentFile": "blogs/二下/操作系统/设备管理/IO管理.md",
-        "recommended": false,
-        "lastEditedDate": "2026-06-14"
+        "recommended": false
     },
     {
         "id": 3016619292,
         "title": "操作系统概述",
-        "excerpt": "1. 并发",
+        "excerpt": "操作系统概述，包括特征、发展历程、中断与异常、系统调用等",
         "date": "2026-06-12",
         "image": "assets/images/blog_bg.png",
         "tags": [
@@ -56,8 +340,7 @@
         "order": 0,
         "chapter": "2-理论",
         "contentFile": "blogs/二下/操作系统/概述/操作系统概述.md",
-        "recommended": false,
-        "lastEditedDate": "2026-06-14"
+        "recommended": false
     },
     {
         "id": 2460752249,
@@ -76,25 +359,6 @@
         "order": null,
         "chapter": null,
         "contentFile": "blogs/二下/操作系统/设备管理/OS-Lab6-实验报告.md",
-        "recommended": false
-    },
-    {
-        "id": 2302249568,
-        "title": "操作系统总复习",
-        "excerpt": "把用户提交的作业成批送入计算机，由作业调度程序自动选择作业运行，在没有人工参与的情况下，顺序执行一系列的程序。",
-        "date": "2026-06-12",
-        "image": "assets/images/blog_bg.png",
-        "tags": [
-            "二下",
-            "操作系统",
-            "总复习"
-        ],
-        "category": "学习",
-        "type": null,
-        "series": null,
-        "order": null,
-        "chapter": null,
-        "contentFile": "blogs/二下/操作系统/总复习/操作系统总复习.md",
         "recommended": false
     },
     {
@@ -191,7 +455,7 @@
         "chapter": "2-理论",
         "contentFile": "blogs/二下/操作系统/文件管理/文件管理.md",
         "recommended": false,
-        "lastEditedDate": "2026-06-14"
+        "lastEditedDate": "2026-06-18"
     },
     {
         "id": 3061188461,
@@ -210,8 +474,7 @@
         "order": 4,
         "chapter": "3-实验",
         "contentFile": "blogs/二下/操作系统/系统调用/系统调用-MOS实验.md",
-        "recommended": true,
-        "lastEditedDate": "2026-06-14"
+        "recommended": true
     },
     {
         "id": 650786542,
@@ -306,8 +569,7 @@
         "order": 4,
         "chapter": "2-理论",
         "contentFile": "blogs/二下/操作系统/进程管理/进程管理.md",
-        "recommended": false,
-        "lastEditedDate": "2026-06-14"
+        "recommended": false
     },
     {
         "id": 3111316559,
@@ -364,8 +626,7 @@
         "order": 3,
         "chapter": "2-理论",
         "contentFile": "blogs/二下/操作系统/内存管理/内存管理.md",
-        "recommended": false,
-        "lastEditedDate": "2026-06-14"
+        "recommended": false
     },
     {
         "id": 3927684149,
@@ -479,8 +740,7 @@
         "order": 1,
         "chapter": "2-理论",
         "contentFile": "blogs/二下/操作系统/启动/计算机的启动过程.md",
-        "recommended": true,
-        "lastEditedDate": "2026-06-14"
+        "recommended": true
     },
     {
         "id": 2069020613,

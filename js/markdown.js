@@ -1246,48 +1246,99 @@ function renderMarkdownContent() {
     function annotateTaskLabels(root) {
         if (!root) return;
 
-        const blocks = Array.from(root.children).filter(el => el && el.matches && el.matches('h1, h2, h3, .md-task'));
-        if (!blocks.length) return;
+        const allChildren = Array.from(root.children);
+        if (!allChildren.length) return;
 
         let h1Index = 0;
         let h2Index = 0;
         let h3Index = 0;
-        const taskGroups = new Map();
+        const taskInfos = []; // { element, fullKey, depth }
+        let separatorDepth = 0;  // consecutive --- count, clamped to 0-2
+        let inheritedDepth = 0;  // depth inherited from preceding task
 
-        blocks.forEach(el => {
-            const tag = (el.tagName || '').toLowerCase();
+        allChildren.forEach(el => {
+            if (!el || !el.tagName) return;
+            const tag = el.tagName.toLowerCase();
+
+            if (tag === 'hr') {
+                separatorDepth = Math.min(separatorDepth + 1, 2);
+                return;
+            }
+
             if (tag === 'h1') {
                 h1Index += 1;
                 h2Index = 0;
                 h3Index = 0;
+                separatorDepth = 0;
+                inheritedDepth = 0;
                 return;
             }
             if (tag === 'h2') {
                 if (h1Index === 0) return;
                 h2Index += 1;
                 h3Index = 0;
+                separatorDepth = 0;
+                inheritedDepth = 0;
                 return;
             }
             if (tag === 'h3') {
                 if (h1Index === 0) return;
                 h3Index += 1;
+                separatorDepth = 0;
+                inheritedDepth = 0;
                 return;
             }
 
             if (el.classList && el.classList.contains('md-task')) {
-                const key = [h1Index, h2Index, h3Index].join('-');
-                if (!taskGroups.has(key)) taskGroups.set(key, []);
-                taskGroups.get(key).push(el);
+                const depth = Math.max(separatorDepth, inheritedDepth);
+                taskInfos.push({
+                    element: el,
+                    fullKey: [h1Index, h2Index, h3Index].join('-'),
+                    depth: depth
+                });
+                separatorDepth = 0;
+                inheritedDepth = depth;
+                return;
             }
+
+            // Any other element (paragraphs, lists, etc.) breaks the chain.
+            separatorDepth = 0;
+            inheritedDepth = 0;
         });
 
-        taskGroups.forEach((tasks, key) => {
-            const prefix = key.split('-').map(num => parseInt(num, 10)).filter(num => Number.isFinite(num) && num > 0).join('-');
-            tasks.forEach((task, index) => {
-                task.dataset.taskLabel = prefix;
-                task.dataset.taskSuffix = tasks.length > 1 ? ` （${index + 1}）` : '';
-                task.dataset.taskIndex = String(index + 1);
-                task.dataset.taskTotal = String(tasks.length);
+        // Compute display key for a task, stripping last N levels (depth 0-2).
+        // The h1 level is never stripped.
+        function getDisplayKey(fullKey, depth) {
+            const parts = fullKey.split('-').map(Number);
+            if (depth > 0) {
+                let stripped = 0;
+                for (let i = parts.length - 1; i >= 0 && stripped < depth; i--) {
+                    if (parts[i] > 0) {
+                        if (i === 0) break; // never strip h1
+                        parts[i] = 0;
+                        stripped++;
+                    }
+                }
+            }
+            return parts.filter(num => num > 0).join('-');
+        }
+
+        // Group tasks by display key to assign suffixes
+        const displayKeyGroups = new Map();
+        taskInfos.forEach(info => {
+            const displayKey = getDisplayKey(info.fullKey, info.depth);
+            if (!displayKeyGroups.has(displayKey)) {
+                displayKeyGroups.set(displayKey, []);
+            }
+            displayKeyGroups.get(displayKey).push(info);
+        });
+
+        displayKeyGroups.forEach((group, key) => {
+            group.forEach((info, index) => {
+                info.element.dataset.taskLabel = key;
+                info.element.dataset.taskSuffix = group.length > 1 ? ` （${index + 1}）` : '';
+                info.element.dataset.taskIndex = String(index + 1);
+                info.element.dataset.taskTotal = String(group.length);
             });
         });
     }

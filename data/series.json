@@ -176,6 +176,134 @@
         ]
     },
     {
+        "id": 759974573,
+        "title": "数据库",
+        "coverImage": "assets/images/background/bg2.png",
+        "count": 15,
+        "posts": [
+            {
+                "id": 958481110,
+                "title": "数据库设计",
+                "date": "2026-06-18",
+                "order": 13,
+                "chapter": "1-预备知识",
+                "contentFile": "blogs/二下/数据库/概念/数据库设计.md"
+            },
+            {
+                "id": 2884984423,
+                "title": "数据库概述",
+                "date": "2026-06-18",
+                "order": 1,
+                "chapter": "1-知识点",
+                "contentFile": "blogs/二下/数据库/概念/数据库概述.md"
+            },
+            {
+                "id": 3790911186,
+                "title": "概念模型",
+                "date": "2026-06-18",
+                "order": 2,
+                "chapter": "1-知识点",
+                "contentFile": "blogs/二下/数据库/数据模型/概念模型.md"
+            },
+            {
+                "id": 712846297,
+                "title": "逻辑模型",
+                "date": "2026-06-18",
+                "order": 3,
+                "chapter": "1-知识点",
+                "contentFile": "blogs/二下/数据库/数据模型/逻辑模型.md"
+            },
+            {
+                "id": 689308970,
+                "title": "关系代数",
+                "date": "2026-06-18",
+                "order": 4,
+                "chapter": "1-知识点",
+                "contentFile": "blogs/二下/数据库/数据模型/关系代数.md"
+            },
+            {
+                "id": 3971314386,
+                "title": "SQL语言",
+                "date": "2026-06-18",
+                "order": 5,
+                "chapter": "1-知识点",
+                "contentFile": "blogs/二下/数据库/SQL/SQL语言.md"
+            },
+            {
+                "id": 1346946396,
+                "title": "数据库编程",
+                "date": "2026-06-18",
+                "order": 6,
+                "chapter": "1-知识点",
+                "contentFile": "blogs/二下/数据库/概念/数据库编程.md"
+            },
+            {
+                "id": 2940351753,
+                "title": "索引",
+                "date": "2026-06-18",
+                "order": 7,
+                "chapter": "1-知识点",
+                "contentFile": "blogs/二下/数据库/概念/索引.md"
+            },
+            {
+                "id": 3415476682,
+                "title": "完整性约束",
+                "date": "2026-06-18",
+                "order": 8,
+                "chapter": "1-知识点",
+                "contentFile": "blogs/二下/数据库/概念/完整性约束.md"
+            },
+            {
+                "id": 4273152219,
+                "title": "数据库安全性",
+                "date": "2026-06-18",
+                "order": 9,
+                "chapter": "1-知识点",
+                "contentFile": "blogs/二下/数据库/概念/数据库安全性.md"
+            },
+            {
+                "id": 931232330,
+                "title": "并发控制",
+                "date": "2026-06-18",
+                "order": 10,
+                "chapter": "1-知识点",
+                "contentFile": "blogs/二下/数据库/概念/并发控制.md"
+            },
+            {
+                "id": 108113389,
+                "title": "数据库恢复技术",
+                "date": "2026-06-18",
+                "order": 11,
+                "chapter": "1-知识点",
+                "contentFile": "blogs/二下/数据库/概念/数据库恢复技术.md"
+            },
+            {
+                "id": 2487883457,
+                "title": "规范化理论",
+                "date": "2026-06-18",
+                "order": 12,
+                "chapter": "1-知识点",
+                "contentFile": "blogs/二下/数据库/规范化理论/规范化理论.md"
+            },
+            {
+                "id": 3650314132,
+                "title": "关系运算转SQL",
+                "date": "2026-06-18",
+                "order": 1,
+                "chapter": "2-专题",
+                "contentFile": "blogs/二下/数据库/SQL/关系运算转SQL.md"
+            },
+            {
+                "id": 371986926,
+                "title": "规范化理论题型",
+                "date": "2026-06-18",
+                "order": 2,
+                "chapter": "2-专题",
+                "contentFile": "blogs/二下/数据库/规范化理论/规范化理论题型.md"
+            }
+        ]
+    },
+    {
         "id": 1704890032,
         "title": "二上总复习",
         "coverImage": "assets/images/background/bg2.png",
