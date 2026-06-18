@@ -109,14 +109,15 @@
         "type": "概要笔记",
         "series": "数据库",
         "order": 13,
-        "chapter": "1-预备知识",
+        "chapter": "1-知识点",
         "contentFile": "blogs/二下/数据库/概念/数据库设计.md",
-        "recommended": false
+        "recommended": false,
+        "lastEditedDate": "2026-06-19"
     },
     {
         "id": 2940351753,
         "title": "索引",
-        "excerpt": "数据库索引相关知识点，包括B+数索引、散列索引、聚簇索引、联合索引等内容",
+        "excerpt": "数据库索引相关知识点，包括B+树索引、散列索引、聚簇索引、联合索引等内容",
         "date": "2026-06-18",
         "image": "assets/images/blog_bg.png",
         "tags": [
@@ -130,7 +131,8 @@
         "order": 7,
         "chapter": "1-知识点",
         "contentFile": "blogs/二下/数据库/概念/索引.md",
-        "recommended": false
+        "recommended": false,
+        "lastEditedDate": "2026-06-19"
     },
     {
         "id": 3415476682,
@@ -301,8 +303,7 @@
         "order": 6,
         "chapter": "2-理论",
         "contentFile": "blogs/二下/操作系统/设备管理/磁盘管理.md",
-        "recommended": false,
-        "lastEditedDate": "2026-06-18"
+        "recommended": false
     },
     {
         "id": 2362776188,
@@ -321,7 +322,8 @@
         "order": 5,
         "chapter": "2-理论",
         "contentFile": "blogs/二下/操作系统/设备管理/IO管理.md",
-        "recommended": false
+        "recommended": false,
+        "lastEditedDate": "2026-06-19"
     },
     {
         "id": 3016619292,
@@ -454,8 +456,7 @@
         "order": 7,
         "chapter": "2-理论",
         "contentFile": "blogs/二下/操作系统/文件管理/文件管理.md",
-        "recommended": false,
-        "lastEditedDate": "2026-06-18"
+        "recommended": false
     },
     {
         "id": 3061188461,
