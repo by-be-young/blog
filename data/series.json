@@ -179,7 +179,7 @@
         "id": 759974573,
         "title": "数据库",
         "coverImage": "assets/images/background/bg2.png",
-        "count": 15,
+        "count": 16,
         "posts": [
             {
                 "id": 2884984423,
@@ -300,6 +300,14 @@
                 "order": 2,
                 "chapter": "2-专题",
                 "contentFile": "blogs/二下/数据库/规范化理论/规范化理论题型.md"
+            },
+            {
+                "id": 3561676072,
+                "title": "数据库选择、简答题速成",
+                "date": "2026-06-20",
+                "order": 1,
+                "chapter": "3-总复习",
+                "contentFile": "blogs/二下/数据库/总复习/数据库选择、简答题速成.md"
             }
         ]
     },

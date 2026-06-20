@@ -519,11 +519,11 @@
             function refreshActiveH2IndicatorSoon() {
                 requestAnimationFrame(() => {
                     moveH2IndicatorTo(activeH2Li, true);
-                    moveTocBugTo(activeH3Li, true);
+                    moveTocBugTo(activeH3Li);
                 });
                 setTimeout(() => {
                     moveH2IndicatorTo(activeH2Li, true);
-                    moveTocBugTo(activeH3Li, true);
+                    moveTocBugTo(activeH3Li);
                 }, TOC_SUBLIST_ANIM_MS + 60);
             }
 
@@ -592,8 +592,8 @@
                 }
             }
 
-            // 将浮动图标定位到指定的 h3 列表项附近
-            function moveTocBugTo(li, instant = false) {
+            // 将浮动图标定位到指定的 h3 列表项附近（始终带过渡动画）
+            function moveTocBugTo(li) {
                 const bug = document.getElementById('toc-bug');
                 if (!bug) return;
                 if (!li) {
@@ -629,18 +629,11 @@
                     return;
                 }
 
-                if (instant) bug.style.transition = 'none';
-                else bug.style.transition = '';
-
                 bug.style.left = `${left}px`;
                 bug.style.top = `${top}px`;
                 bug.style.width = `${bugWidth}px`;
                 bug.style.height = `${bugHeight}px`;
                 bug.style.opacity = '1';
-
-                if (instant) {
-                    requestAnimationFrame(() => { bug.style.transition = ''; });
-                }
             }
 
             function setActiveH2(li, headingEl, instant = false) {
@@ -670,7 +663,7 @@
                 const nextHeading = headingEl || null;
                 const currentHeading = content.querySelector('h3.is-toc-active');
                 if (activeH3Li === nextLi && currentHeading === nextHeading) {
-                    moveTocBugTo(activeH3Li, true);
+                    moveTocBugTo(activeH3Li);
                     if (activeH3Li) scheduleCenterTocItem(activeH3Li, instant);
                     return;
                 }
@@ -682,7 +675,7 @@
                 if (nextLi) nextLi.classList.add('is-active');
                 if (nextHeading) nextHeading.classList.add('is-toc-active');
 
-                moveTocBugTo(activeH3Li, instant);
+                moveTocBugTo(activeH3Li);
                 if (activeH3Li) scheduleCenterTocItem(activeH3Li, instant);
             }
 
@@ -1013,11 +1006,11 @@
             window.addEventListener('resize', function () {
                 updateTocProgress();
                 moveH2IndicatorTo(activeH2Li, true);
-                moveTocBugTo(activeH3Li, true);
+                moveTocBugTo(activeH3Li);
             });
             tocList.addEventListener('scroll', function () {
                 moveH2IndicatorTo(activeH2Li, true);
-                moveTocBugTo(activeH3Li, true);
+                moveTocBugTo(activeH3Li);
             });
             // hash变化时自动展开
             window.addEventListener('hashchange', function () {

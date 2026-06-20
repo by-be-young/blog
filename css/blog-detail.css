@@ -1826,6 +1826,13 @@ body.blog-detail-page.immersive-reading-active::after {
     width: 100%;
 }
 
+.article-content .answer-actions-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
 .article-content .answer-type-badge {
     display: inline-flex;
     align-items: center;
