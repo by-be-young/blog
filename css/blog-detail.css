@@ -573,6 +573,7 @@ body.toc-compact-mode .blog-toc:not(.in-overlay) {
 .blog-detail .article-content ol {
     padding-left: 1.6em;
     list-style-position: outside;
+    list-style-type: decimal;
 }
 
 .blog-detail .article-content ul li,
@@ -2481,6 +2482,15 @@ body.blog-detail-page.immersive-reading-active::after {
 
     .article-content .md-task .md-task-stats.is-rate-hidden {
         display: none;
+    }
+
+    /* 移动端隐藏例题题干左侧的图标（question/correct/wrong），防止题干宽度过窄 */
+    .article-content .md-question::before {
+        display: none;
+    }
+
+    .article-content .md-question {
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 

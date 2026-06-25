@@ -1,5 +1,25 @@
 [
     {
+        "id": 2408489894,
+        "title": "军事理论重点",
+        "excerpt": "2026年军事理论重点内容",
+        "date": "2026-06-25",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "军事理论",
+            "总复习"
+        ],
+        "category": "学习",
+        "type": "概要笔记",
+        "series": null,
+        "order": null,
+        "chapter": null,
+        "contentFile": "blogs/二下/军事理论/总复习/军事理论重点.md",
+        "recommended": false,
+        "lastEditedDate": "2026-06-25"
+    },
+    {
         "id": 359085758,
         "title": "人工智能总复习",
         "excerpt": "人工智能知识点期末总复习，内容（包括例题）由AI参考课件和串讲PPT生成",
@@ -16,8 +36,7 @@
         "order": null,
         "chapter": null,
         "contentFile": "blogs/二下/人工智能/总复习/人工智能总复习.md",
-        "recommended": false,
-        "lastEditedDate": "2026-06-20"
+        "recommended": false
     },
     {
         "id": 3561676072,

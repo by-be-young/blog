@@ -86,6 +86,22 @@ function rewriteMarkdownAssetUrls(rootEl) {
     });
 }
 
+// 规范化有序列表缩进：去掉有序列表标记（即"1." "2."等）前的 1-3 个空格/制表符，
+// 避免因缩进导致 marked 将其解析为普通段落而非有序列表项。
+// 跳过围栏代码块，保留 4+ 缩进的（即缩进代码块）。
+function normalizeOrderedListIndentation(md) {
+    if (!md || typeof md !== 'string') return md || '';
+    const blocks = [];
+    let idx = 0;
+    const protected = md.replace(/```[\s\S]*?```/g, function (m) {
+        const key = '@@CODELIST_' + (idx++) + '@@';
+        blocks.push(m);
+        return key;
+    });
+    const result = protected.replace(/^[ \t]{1,3}(\d+[\.\)])/gm, '$1');
+    return result.replace(/@@CODELIST_(\d+)@@/g, function (_, n) { return blocks[parseInt(n, 10)] || ''; });
+}
+
 function transformObsidianImageEmbeds(markdown) {
     if (typeof markdown !== 'string' || !markdown) return markdown || '';
 
@@ -893,7 +909,7 @@ function renderMarkdownContent() {
         });
     }
 
-    const markdown = transformObsidianImageEmbeds(stashInternalRefs(rawMarkdown));
+    const markdown = transformObsidianImageEmbeds(normalizeOrderedListIndentation(stashInternalRefs(rawMarkdown)));
 
     // 全局数学占位集合（会被各个段落共享）
     const displayMathBlocks = [];
