@@ -3,7 +3,7 @@
         "id": 2569373497,
         "title": "操作系统",
         "coverImage": "assets/images/background/bg2.png",
-        "count": 21,
+        "count": 23,
         "posts": [
             {
                 "id": 3125593710,
@@ -172,6 +172,22 @@
                 "order": 6,
                 "chapter": "4-实验报告",
                 "contentFile": "blogs/二下/操作系统/文件管理/OS-Lab5-实验报告.md"
+            },
+            {
+                "id": 2460752249,
+                "title": "OS-Lab6-实验报告",
+                "date": "2026-06-12",
+                "order": 7,
+                "chapter": "4-实验报告",
+                "contentFile": "blogs/二下/操作系统/设备管理/OS-Lab6-实验报告.md"
+            },
+            {
+                "id": 24465226,
+                "title": "挑战性任务-文件管理-实验报告",
+                "date": "2026-06-29",
+                "order": 8,
+                "chapter": "4-实验报告",
+                "contentFile": "blogs/二下/操作系统/文件管理/挑战性任务-文件管理-实验报告.md"
             }
         ]
     },

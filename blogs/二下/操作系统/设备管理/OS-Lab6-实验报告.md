@@ -1,3 +1,10 @@
+---
+excerpt: 2421操作系统Lab6课下实验实验报告
+type: 系统笔记
+series: 操作系统
+order: "7"
+chapter: 4-实验报告
+---
 # 思考题
 
 ## Thinking 6.1

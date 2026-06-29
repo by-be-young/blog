@@ -1,5 +1,5 @@
 ---
-type: 概要笔记
+type: 系统笔记
 series: 操作系统
 excerpt: 2421操作系统Lab5课下实验实验报告
 order: "6"

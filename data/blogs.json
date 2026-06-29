@@ -1,5 +1,24 @@
 [
     {
+        "id": 24465226,
+        "title": "挑战性任务-文件管理-实验报告",
+        "excerpt": "2421操作系统挑战性任务-文件系统实验报告",
+        "date": "2026-06-29",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "操作系统",
+            "文件管理"
+        ],
+        "category": "学习",
+        "type": "系统笔记",
+        "series": "操作系统",
+        "order": 8,
+        "chapter": "4-实验报告",
+        "contentFile": "blogs/二下/操作系统/文件管理/挑战性任务-文件管理-实验报告.md",
+        "recommended": false
+    },
+    {
         "id": 2408489894,
         "title": "军事理论重点",
         "excerpt": "2026年军事理论重点内容",
@@ -17,7 +36,7 @@
         "chapter": null,
         "contentFile": "blogs/二下/军事理论/总复习/军事理论重点.md",
         "recommended": false,
-        "lastEditedDate": "2026-06-25"
+        "lastEditedDate": "2026-06-29"
     },
     {
         "id": 359085758,
@@ -402,7 +421,7 @@
     {
         "id": 2460752249,
         "title": "OS-Lab6-实验报告",
-        "excerpt": "> 示例代码中，父进程操作管道的写端，子进程操作管道的读端。如果现在想让父进程作为“读者”，代码应当如何修改？",
+        "excerpt": "2421操作系统Lab6课下实验实验报告",
         "date": "2026-06-12",
         "image": "assets/images/blog_bg.png",
         "tags": [
@@ -411,12 +430,13 @@
             "设备管理"
         ],
         "category": "学习",
-        "type": null,
-        "series": null,
-        "order": null,
-        "chapter": null,
+        "type": "系统笔记",
+        "series": "操作系统",
+        "order": 7,
+        "chapter": "4-实验报告",
         "contentFile": "blogs/二下/操作系统/设备管理/OS-Lab6-实验报告.md",
-        "recommended": false
+        "recommended": false,
+        "lastEditedDate": "2026-06-29"
     },
     {
         "id": 2542583234,
@@ -430,12 +450,13 @@
             "文件管理"
         ],
         "category": "学习",
-        "type": "概要笔记",
+        "type": "系统笔记",
         "series": "操作系统",
         "order": 6,
         "chapter": "4-实验报告",
         "contentFile": "blogs/二下/操作系统/文件管理/OS-Lab5-实验报告.md",
-        "recommended": false
+        "recommended": false,
+        "lastEditedDate": "2026-06-29"
     },
     {
         "id": 3639231539,
