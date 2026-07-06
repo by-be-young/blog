@@ -2400,4 +2400,7 @@
             renderMarkdownContent();
         }
     }
+
+    // 暴露渲染函数供外部调用（例如 about.js 和 blog-detail.html 中的内联脚本）
+    window.renderMarkdownContent = renderMarkdownContent;
 })();
