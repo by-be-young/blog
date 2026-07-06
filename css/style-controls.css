@@ -1,0 +1,1632 @@
+/* ==================================================
+   SECTION: 悬浮球 (FAB) — 公告、设置、音乐
+   ================================================== */
+
+.announcement-fab {
+    position: fixed;
+    left: 22px;
+    bottom: 22px;
+    z-index: 980;
+    width: 56px;
+    height: 56px;
+    border: var(--card-border-w) solid transparent;
+    border-radius: 50%;
+    background:
+        linear-gradient(135deg,
+            rgba(255, 232, 130, 0.96) 0%,
+            rgba(210, 242, 146, 0.96) 50%,
+            rgba(255, 220, 148, 0.96) 100%) padding-box,
+        linear-gradient(135deg,
+            rgba(255, 224, 126, 0.92),
+            rgba(206, 238, 140, 0.92),
+            rgba(255, 214, 138, 0.92)) border-box;
+    color: var(--macaron-yellow-strong, #b57b00);
+    box-shadow: var(--shadow);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    cursor: pointer;
+    transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+
+.announcement-fab:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(181, 138, 0, 0.20);
+}
+
+.announcement-fab:active {
+    transform: translateY(0);
+}
+
+/* 公告 FAB 的“注意”动画（晃动） */
+.announcement-fab.announcement-fab--recent-attention i {
+    display: inline-block;
+    transform-origin: 50% 12%;
+    will-change: transform;
+    animation: announcement-fab-attention-shake 4s ease-in-out infinite;
+}
+
+@keyframes announcement-fab-attention-shake {
+
+    0%,
+    72%,
+    100% {
+        transform: rotate(0deg) scale(1);
+    }
+
+    75% {
+        transform: rotate(-14deg) scale(1.04);
+    }
+
+    78% {
+        transform: rotate(13deg) scale(1.04);
+    }
+
+    81% {
+        transform: rotate(-11deg) scale(1.03);
+    }
+
+    84% {
+        transform: rotate(10deg) scale(1.03);
+    }
+
+    87% {
+        transform: rotate(-7deg) scale(1.02);
+    }
+
+    90% {
+        transform: rotate(0deg) scale(1);
+    }
+}
+
+/* 近期公告的 FAB 使用偏橙色马卡龙 */
+.announcement-fab.announcement-fab--recent-attention {
+    background:
+        linear-gradient(135deg, rgba(255, 220, 170, 0.98) 0%, rgba(255, 190, 120, 0.98) 50%, rgba(255, 225, 160, 0.98) 100%) padding-box,
+        linear-gradient(135deg, rgba(255, 200, 140, 0.92), rgba(255, 170, 100, 0.92), rgba(255, 200, 130, 0.92)) border-box;
+    color: #7b4a00;
+    box-shadow: 0 12px 30px rgba(255, 165, 64, 0.12);
+}
+
+.announcement-fab.announcement-fab--recent-attention i {
+    color: #7b4a00;
+}
+
+/* 设置 FAB */
+.settings-fab {
+    position: fixed;
+    left: 22px;
+    bottom: 88px;
+    z-index: 980;
+    width: 56px;
+    height: 56px;
+    border: var(--card-border-w) solid transparent;
+    border-radius: 50%;
+    background:
+        linear-gradient(135deg,
+            rgba(255, 232, 130, 0.96) 0%,
+            rgba(210, 242, 146, 0.96) 50%,
+            rgba(255, 220, 148, 0.96) 100%) padding-box,
+        linear-gradient(135deg,
+            rgba(255, 224, 126, 0.92),
+            rgba(206, 238, 140, 0.92),
+            rgba(255, 214, 138, 0.92)) border-box;
+    color: var(--macaron-yellow-strong, #b57b00);
+    box-shadow: var(--shadow);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    cursor: pointer;
+    transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+
+.settings-fab:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(181, 138, 0, 0.20);
+}
+
+.settings-fab:active {
+    transform: translateY(0);
+}
+
+/* 音乐 FAB（默认隐藏，由 JS 控制 .is-visible） */
+.music-fab {
+    position: fixed;
+    left: 22px;
+    bottom: 154px;
+    z-index: 980;
+    width: 56px;
+    height: 56px;
+    border: var(--card-border-w) solid transparent;
+    border-radius: 50%;
+    background:
+        linear-gradient(135deg,
+            rgba(255, 232, 130, 0.96) 0%,
+            rgba(210, 242, 146, 0.96) 50%,
+            rgba(255, 220, 148, 0.96) 100%) padding-box,
+        linear-gradient(135deg,
+            rgba(255, 224, 126, 0.92),
+            rgba(206, 238, 140, 0.92),
+            rgba(255, 214, 138, 0.92)) border-box;
+    color: var(--macaron-yellow-strong, #b57b00);
+    box-shadow: var(--shadow);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(8px);
+    transition: transform 0.18s ease, box-shadow 0.14s ease, opacity 0.18s ease, visibility 0.18s ease;
+}
+
+.music-fab.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.music-fab.is-paused {
+    color: #7b5b00;
+}
+
+.music-fab:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(181, 138, 0, 0.20);
+}
+
+.music-fab:active {
+    transform: translateY(0);
+}
+
+
+/* ==================================================
+   SECTION: 公告弹窗 (Announcement Modal)
+   ================================================== */
+
+.announcement-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.28s ease, visibility 0.28s ease;
+}
+
+.announcement-modal.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+/* 弹窗卡片 */
+.announcement-modal-card {
+    position: relative;
+    width: min(900px, calc(100vw - 28px));
+    max-height: min(82vh, 720px);
+    padding: 18px;
+    border-radius: 14px;
+    background: transparent;
+    backdrop-filter: none;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.18);
+    overflow: auto;
+    transform-origin: left bottom;
+    transform: translate(-22px, 22px) scale(0.76);
+    opacity: 0;
+    filter: grayscale(1) saturate(0.2);
+    transition: transform 0.32s cubic-bezier(0.2, 0.7, 0.25, 1),
+        opacity 0.28s ease,
+        filter 0.28s ease;
+    will-change: transform, opacity, filter;
+}
+
+.announcement-modal.is-open .announcement-modal-card {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+    filter: grayscale(0) saturate(1);
+}
+
+.announcement-modal-close {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    z-index: 10;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.86);
+    color: rgba(0, 0, 0, 0.65);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.12s ease, background-color 0.12s ease;
+}
+
+.announcement-modal-close:hover {
+    transform: rotate(90deg);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+/* 弹窗内的横幅（复用 .announcement-banner） */
+.announcement-modal .announcement-banner--modal {
+    display: flex;
+    margin: 0;
+    min-height: 190px;
+}
+
+.announcement-modal .announcement-banner--modal .announcement-message {
+    min-height: 130px;
+    max-height: 360px;
+}
+
+/* 近期公告弹窗的特殊动画（橙色渐变流动 + 脉动） */
+.announcement-modal .announcement-banner--modal.announcement-banner--recent {
+    background-size: 240% 240%, 240% 240%;
+    background:
+        linear-gradient(135deg, rgba(255, 217, 179, 0.96), rgba(255, 183, 128, 0.96), rgba(255, 231, 176, 0.96)),
+        linear-gradient(135deg, rgba(255, 204, 153, 0.90), rgba(255, 179, 102, 0.88), rgba(255, 205, 140, 0.90));
+    will-change: background-position, transform, box-shadow;
+    animation:
+        announcement-recent-gradient-flow 2.8s linear infinite,
+        announcement-recent-attention-pulse 1.35s ease-in-out infinite;
+}
+
+.announcement-modal .announcement-banner--modal.announcement-banner--recent .announcement-icon {
+    will-change: transform;
+    animation: announcement-recent-icon-pop 0.9s ease-in-out infinite;
+}
+
+@keyframes announcement-recent-gradient-flow {
+    0% {
+        background-position: 0% 45%, 100% 55%;
+    }
+
+    50% {
+        background-position: 100% 55%, 0% 45%;
+    }
+
+    100% {
+        background-position: 0% 45%, 100% 55%;
+    }
+}
+
+@keyframes announcement-recent-attention-pulse {
+    0% {
+        transform: translateY(0);
+        box-shadow: var(--shadow);
+    }
+
+    50% {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 22px rgba(181, 138, 0, 0.22);
+    }
+
+    100% {
+        transform: translateY(0);
+        box-shadow: var(--shadow);
+    }
+}
+
+@keyframes announcement-recent-icon-pop {
+    0% {
+        transform: scale(1) rotate(0deg);
+    }
+
+    45% {
+        transform: scale(1.08) rotate(-5deg);
+    }
+
+    100% {
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+/* 弹窗内分隔符（双横线） */
+.announcement-modal .announcement-scroll-sep,
+.announcement-modal .announcement-banner--modal .announcement-scroll-sep {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 22px;
+    padding: 0;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+}
+
+.announcement-modal .announcement-scroll-sep::before,
+.announcement-modal .announcement-scroll-sep::after {
+    content: '';
+    display: block;
+    width: 60%;
+    height: 2px;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 2px;
+}
+
+.announcement-modal .announcement-scroll-sep::before {
+    transform: translateY(-4px);
+}
+
+.announcement-modal .announcement-scroll-sep::after {
+    transform: translateY(4px);
+}
+
+/* 弹窗打开时禁止页面滚动 */
+body.announcement-modal-open {
+    overflow: hidden;
+}
+
+
+/* ==================================================
+   SECTION: 设置弹窗 (Settings Modal)
+   ================================================== */
+
+.settings-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.28s ease, visibility 0.28s ease;
+}
+
+.settings-modal[aria-hidden="true"],
+.settings-modal[aria-hidden="true"] *,
+.announcement-modal[aria-hidden="true"],
+.announcement-modal[aria-hidden="true"] * {
+    pointer-events: none !important;
+    cursor: auto !important;
+}
+
+.settings-modal.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.settings-modal-card {
+    position: relative;
+    width: min(900px, calc(100vw - 28px));
+    max-height: min(82vh, 720px);
+    padding: 18px;
+    border-radius: 14px;
+    background: transparent;
+    backdrop-filter: none;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.18);
+    overflow: auto;
+    transform-origin: left bottom;
+    transform: translate(-22px, 22px) scale(0.76);
+    opacity: 0;
+    filter: grayscale(1) saturate(0.2);
+    transition: transform 0.32s cubic-bezier(0.2, 0.7, 0.25, 1),
+        opacity 0.28s ease,
+        filter 0.28s ease;
+    will-change: transform, opacity, filter;
+}
+
+.settings-modal.is-open .settings-modal-card {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+    filter: grayscale(0) saturate(1);
+}
+
+.settings-modal-close {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.86);
+    color: rgba(0, 0, 0, 0.65);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.12s ease, background-color 0.12s ease;
+}
+
+.settings-modal-close:hover {
+    transform: rotate(90deg);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+/* 设置弹窗内容布局 */
+.settings-modal-content {
+    display: flex;
+    min-height: 400px;
+    background:
+        linear-gradient(135deg,
+            rgba(255, 232, 130, 0.94) 0%,
+            rgba(210, 242, 146, 0.94) 50%,
+            rgba(255, 220, 148, 0.94) 100%) padding-box,
+        linear-gradient(135deg,
+            rgba(255, 224, 126, 0.90),
+            rgba(206, 238, 140, 0.90),
+            rgba(255, 214, 138, 0.90)) border-box;
+    border: var(--card-border-w) solid transparent;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.settings-sidebar {
+    width: 150px;
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    padding-right: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-tab {
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    text-align: left;
+}
+
+.settings-tab.active {
+    background: rgba(255, 255, 255, 0.4);
+    color: #b57b00;
+}
+
+.settings-tab:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.settings-panel {
+    flex: 1;
+    padding-left: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: height 0.24s ease;
+}
+
+.settings-section {
+    display: block;
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: none;
+}
+
+.settings-section.active {
+    position: relative;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.settings-section h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* 语言选项 */
+.language-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.language-note {
+    margin: -6px 0 14px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px dashed rgba(181, 123, 0, 0.35);
+    background: rgba(255, 255, 255, 0.22);
+    color: rgba(76, 57, 0, 0.92);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.language-options label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.language-options label:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px);
+}
+
+.language-options label input[type="radio"] {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.language-options label input[type="radio"]:checked {
+    background: #b57b00;
+    border-color: #b57b00;
+    box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.9);
+}
+
+.language-options label:has(input[type="radio"]:checked) {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.6);
+    color: #b57b00;
+    font-weight: 600;
+}
+
+.language-options label:has(input[type="radio"]:disabled) {
+    cursor: default;
+}
+
+.language-options label:has(input[type="radio"]:disabled):hover {
+    transform: none;
+}
+
+/* 音乐设置 */
+.music-hint {
+    margin: -6px 0 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px dashed rgba(181, 123, 0, 0.35);
+    background: rgba(255, 255, 255, 0.22);
+    color: rgba(76, 57, 0, 0.92);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.music-original-note {
+    margin: 0 0 14px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(181, 123, 0, 0.45);
+    background: linear-gradient(135deg, rgba(255, 237, 171, 0.56), rgba(255, 221, 144, 0.46));
+    color: #7b5b00;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.music-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.music-track {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.14);
+    transition: all 0.2s ease;
+}
+
+.music-track:hover {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.55);
+    transform: translateY(-1px);
+}
+
+.music-track label {
+    flex-shrink: 0;
+    font-weight: 600;
+    color: rgba(52, 52, 52, 0.9);
+}
+
+.music-track select {
+    flex: 1;
+    min-width: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding: 9px 36px 9px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.88)) padding-box,
+        linear-gradient(135deg, rgba(255, 224, 126, 0.48), rgba(206, 238, 140, 0.48), rgba(255, 214, 138, 0.48)) border-box;
+    color: #3a3a3a;
+    font-size: 14px;
+    line-height: 1.3;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    background-image:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.88)),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat, no-repeat;
+    background-position: 0 0, right 12px center;
+    background-size: 100% 100%, 14px;
+}
+
+.music-track select:hover {
+    border-color: rgba(181, 123, 0, 0.4);
+}
+
+.music-track select:focus {
+    outline: none;
+    border-color: rgba(181, 123, 0, 0.55);
+    box-shadow: 0 0 0 3px rgba(181, 123, 0, 0.16);
+}
+
+.music-track select option {
+    background: #fff9e8;
+    color: #4a3d1a;
+}
+
+.music-track select option:checked {
+    background: #ffe7a6;
+    color: #7b5b00;
+}
+
+.music-playback {
+    display: flex;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.music-btn {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.84)) padding-box,
+        linear-gradient(135deg, rgba(255, 224, 126, 0.52), rgba(206, 238, 140, 0.52), rgba(255, 214, 138, 0.52)) border-box;
+    color: #6e5100;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.music-btn:hover {
+    transform: translateY(-1px);
+    border-color: rgba(181, 123, 0, 0.45);
+    box-shadow: 0 8px 20px rgba(181, 123, 0, 0.18);
+}
+
+.music-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(181, 123, 0, 0.2);
+}
+
+.music-volume {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.music-volume label {
+    flex-shrink: 0;
+    font-weight: 600;
+    color: rgba(52, 52, 52, 0.9);
+}
+
+.music-progress {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.music-progress label {
+    flex-shrink: 0;
+    font-weight: 600;
+    color: rgba(52, 52, 52, 0.9);
+}
+
+#volume-slider,
+#progress-slider {
+    flex: 1;
+    height: 6px;
+    appearance: none;
+    -webkit-appearance: none;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(181, 123, 0, 0.5), rgba(255, 255, 255, 0.9));
+    outline: none;
+}
+
+#volume-slider::-webkit-slider-thumb,
+#progress-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    background: #b57b00;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+}
+
+#volume-slider::-moz-range-thumb,
+#progress-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    background: #b57b00;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+}
+
+#volume-slider::-moz-range-track,
+#progress-slider::-moz-range-track {
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(181, 123, 0, 0.5), rgba(255, 255, 255, 0.9));
+}
+
+#volume-value,
+#progress-value {
+    min-width: 42px;
+    text-align: right;
+    color: #7b5b00;
+    font-weight: 600;
+}
+
+#progress-value {
+    min-width: 110px;
+    font-variant-numeric: tabular-nums;
+}
+
+body.settings-modal-open {
+    overflow: hidden;
+}
+
+
+/* ==================================================
+   SECTION: 公告横幅 (Announcement Banner) — 首页及弹窗内复用
+   ================================================== */
+
+.announcement-banner {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 16px 18px;
+    margin: 16px 0 32px;
+    border-radius: 12px;
+    background:
+        linear-gradient(135deg,
+            rgba(255, 232, 130, 0.94) 0%,
+            rgba(210, 242, 146, 0.94) 50%,
+            rgba(255, 220, 148, 0.94) 100%) padding-box,
+        linear-gradient(135deg,
+            rgba(255, 224, 126, 0.90),
+            rgba(206, 238, 140, 0.90),
+            rgba(255, 214, 138, 0.90)) border-box;
+    border: var(--card-border-w) solid transparent;
+    box-shadow: var(--shadow);
+}
+
+.announcement-banner.is-visible {
+    display: flex;
+}
+
+.announcement-banner .announcement-left {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    min-width: 0;
+    height: 100%;
+    align-items: center;
+}
+
+.announcement-banner .announcement-left>div>div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.announcement-banner .announcement-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    color: var(--macaron-yellow-strong, #b57b00);
+}
+
+.announcement-banner .announcement-date {
+    font-size: 0.92rem;
+    color: rgba(0, 0, 0, 0.55);
+}
+
+.announcement-banner .announcement-message {
+    color: rgba(0, 0, 0, 0.72);
+    line-height: 1.7;
+    max-width: 100%;
+    max-height: 120px;
+    overflow: hidden;
+    white-space: normal;
+}
+
+.announcement-banner .announcement-message .ann-line {
+    display: block;
+}
+
+.announcement-banner .announcement-message .ann-line--blank {
+    line-height: 1;
+    min-height: 0.8em;
+}
+
+.announcement-banner .announcement-message .ann-line--headline {
+    text-align: center;
+    font-size: 1.16em;
+    font-weight: 900;
+    color: #6b2b4a;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.08em;
+}
+
+.announcement-banner .announcement-message .ann-line--section {
+    color: #ff6f91;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+}
+
+.announcement-banner .announcement-message .ann-line--section::after {
+    content: "～～～～～～～～～～～～～～～～～～";
+    color: #ff97ad;
+    letter-spacing: -0.08em;
+    white-space: nowrap;
+    overflow: hidden;
+    flex: 1 1 auto;
+}
+
+.announcement-banner {
+    min-height: 92px;
+}
+
+.announcement-banner .announcement-message {
+    white-space: normal;
+    min-height: 70px;
+}
+
+.announcement-banner .announcement-message.announcement-message--split {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.announcement-banner .announcement-message .announcement-fixed-line {
+    flex: 0 0 auto;
+}
+
+.announcement-banner .announcement-message .announcement-fixed-line .ann-line {
+    margin-bottom: 0;
+}
+
+.announcement-banner .announcement-message .announcement-scroll-viewport {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.announcement-banner .announcement-scroll-inner {
+    display: block;
+    will-change: transform;
+}
+
+.announcement-banner .announcement-scroll-sep {
+    width: 100%;
+    height: 1px;
+    margin: 10px 0;
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 12px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background: linear-gradient(135deg,
+            rgba(255, 226, 132, 0.30),
+            rgba(208, 239, 144, 0.22),
+            rgba(255, 216, 142, 0.26));
+    color: var(--macaron-yellow-strong, #b57b00);
+    font-size: 22px;
+    box-shadow: 0 8px 22px rgba(181, 138, 0, 0.10);
+}
+
+.announcement-banner .announcement-btn {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: var(--macaron-accent, #ffd6e8);
+    color: #6b2b4a;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+}
+
+.announcement-banner .announcement-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(107, 43, 74, 0.12);
+}
+
+.announcement-banner .announcement-btn:active {
+    transform: translateY(0);
+    opacity: 0.9;
+}
+
+/* 近期公告横幅（偏橙色） */
+.announcement-banner.announcement-banner--recent {
+    background:
+        linear-gradient(135deg, rgba(255, 235, 210, 0.96) 0%, rgba(255, 205, 160, 0.96) 50%, rgba(255, 225, 180, 0.96) 100%) padding-box,
+        linear-gradient(135deg, rgba(255, 210, 160, 0.92), rgba(255, 180, 110, 0.92), rgba(255, 210, 140, 0.92)) border-box;
+    border: var(--card-border-w) solid transparent;
+    color: #5a2d08;
+}
+
+.announcement-banner.announcement-banner--recent .announcement-kicker {
+    color: #8b3b00;
+}
+
+.announcement-banner.announcement-banner--recent .announcement-message {
+    color: rgba(0, 0, 0, 0.72);
+}
+
+.announcement-banner.announcement-banner--recent .announcement-message .ann-line--headline {
+    color: #6b2b4a;
+}
+
+.announcement-banner.announcement-banner--recent .announcement-message .ann-line--section {
+    color: #ff7a4a;
+}
+
+.announcement-banner.announcement-banner--recent .announcement-btn {
+    background: linear-gradient(135deg, rgba(255, 210, 170, 1), rgba(255, 185, 120, 1));
+    color: #6b2b4a;
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+/* 隐藏滚动条（但保留滚动） */
+.announcement-banner .announcement-message::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.announcement-banner .announcement-message {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+
+/* ==================================================
+   SECTION: 响应式适配（针对悬浮球和弹窗）
+   ================================================== */
+
+@media (max-width: 720px) {
+    .announcement-banner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .announcement-banner .announcement-message {
+        white-space: normal;
+    }
+
+    .announcement-fab {
+        left: 14px;
+        bottom: 14px;
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+
+    .music-fab {
+        left: 14px;
+        bottom: 134px;
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+
+    .announcement-modal {
+        align-items: flex-end;
+        padding: 10px;
+    }
+
+    .announcement-modal-card {
+        width: 100%;
+        max-height: 86vh;
+        padding: 14px;
+        border-radius: 12px;
+    }
+
+    .announcement-modal .announcement-banner--modal {
+        min-height: 220px;
+    }
+
+    .announcement-modal .announcement-banner--modal .announcement-message {
+        min-height: 150px;
+        max-height: 50vh;
+    }
+
+    /* 设置弹窗移动端适配 */
+    .settings-modal {
+        align-items: center;
+        justify-content: center;
+        padding: 12px;
+        overflow: hidden;
+    }
+
+    .settings-modal-card {
+        width: min(680px, 100%);
+        height: min(86vh, 720px);
+        max-height: none;
+        padding: 12px;
+        border-radius: 14px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transform-origin: center bottom;
+        transform: translateY(24px) scale(0.96);
+    }
+
+    .settings-modal-content {
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        padding: 14px;
+        gap: 14px;
+        overflow: hidden;
+    }
+
+    .settings-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        padding-right: 0;
+        padding-bottom: 12px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .settings-tab {
+        margin-bottom: 0;
+        text-align: center;
+        padding: 10px 12px;
+    }
+
+    .settings-panel {
+        padding-left: 0;
+        min-height: 0;
+        height: auto !important;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .settings-section {
+        min-height: 0;
+    }
+
+    .settings-section.active {
+        max-height: 100%;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .settings-section h3 {
+        margin-bottom: 14px;
+    }
+
+    .language-note,
+    .music-hint,
+    .music-original-note {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .music-track,
+    .music-volume,
+    .music-progress {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .music-playback {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    #volume-value,
+    #progress-value {
+        min-width: 0;
+        text-align: left;
+    }
+}
+
+@media (max-width: 460px) {
+    .settings-panel {
+        min-height: 0;
+    }
+
+    .settings-modal-card {
+        height: min(88vh, 760px);
+    }
+
+    .music-playback {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* 减少动画偏好（无障碍） */
+@media (prefers-reduced-motion: reduce) {
+    .announcement-fab.announcement-fab--recent-attention i {
+        animation: none;
+    }
+
+    .announcement-modal .announcement-banner--modal.announcement-banner--recent {
+        animation: none;
+    }
+
+    .announcement-modal .announcement-banner--modal.announcement-banner--recent .announcement-icon {
+        animation: none;
+    }
+
+    /* 其他已定义的 reduce 保持 */
+}
+
+/* ==================================================
+   SECTION: 导出弹窗 (Export Modal)
+   ================================================== */
+
+.export-modal {
+    z-index: 1210;
+}
+
+.export-modal-card {
+    width: min(620px, calc(100vw - 28px));
+    max-height: min(82vh, 700px);
+}
+
+.export-modal-content {
+    min-height: 0;
+    display: block;
+}
+
+.export-section {
+    position: relative;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.export-section h3 {
+    margin: 0 0 14px;
+    color: #b57b00;
+}
+
+.export-option-group {
+    margin-bottom: 16px;
+}
+
+.export-option-label {
+    margin: 0 0 8px;
+    font-weight: 700;
+    color: #6f5300;
+}
+
+.export-option-list {
+    display: grid;
+    gap: 8px;
+}
+
+.export-option-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid rgba(181, 123, 0, 0.22);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.34);
+    cursor: pointer;
+    transition: background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.export-option-item:hover {
+    border-color: rgba(181, 123, 0, 0.4);
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.export-option-item input[type="radio"] {
+    accent-color: #b57b00;
+}
+
+.export-actions {
+    margin-top: 4px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.export-confirm-btn {
+    min-width: 136px;
+}
+
+body.export-modal-open {
+    overflow: hidden;
+}
+
+
+/* ==================================================
+   SECTION: 显示弹窗 (Display Modal)
+   ================================================== */
+
+.display-modal {
+    z-index: 1210;
+}
+
+.display-modal-card {
+    width: min(620px, calc(100vw - 28px));
+    max-height: min(82vh, 700px);
+}
+
+.display-modal-content {
+    min-height: 0;
+    display: block;
+}
+
+.display-section {
+    position: relative;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.display-section h3 {
+    margin: 0 0 14px;
+    color: #b57b00;
+}
+
+.display-option-group {
+    margin-bottom: 16px;
+}
+
+.display-option-label {
+    margin: 0 0 8px;
+    font-weight: 700;
+    color: #6f5300;
+}
+
+.display-option-list {
+    display: grid;
+    gap: 8px;
+}
+
+.display-option-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid rgba(181, 123, 0, 0.22);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.34);
+    cursor: pointer;
+    transition: background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.display-option-item:hover {
+    border-color: rgba(181, 123, 0, 0.4);
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.display-option-item input[type="radio"] {
+    accent-color: #b57b00;
+}
+
+.display-actions {
+    margin-top: 4px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.display-confirm-btn {
+    min-width: 136px;
+}
+
+body.display-modal-open {
+    overflow: hidden;
+}
+
+
+/* ==================================================
+   SECTION: 部署提示弹窗 (Deployment Notice Modal)
+   ================================================== */
+
+.deployment-notice-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1400;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(12px, 4vw, 20px);
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.deployment-notice-modal.is-open {
+    display: flex;
+}
+
+.deployment-notice-card {
+    position: relative;
+    box-sizing: border-box;
+    width: min(560px, 100%);
+    max-width: 100%;
+    border: var(--card-border-w) solid transparent;
+    border-radius: 16px;
+    padding: 26px 24px 22px;
+    background:
+        linear-gradient(135deg,
+            rgba(255, 232, 130, 0.96) 0%,
+            rgba(210, 242, 146, 0.96) 50%,
+            rgba(255, 220, 148, 0.96) 100%) padding-box,
+        linear-gradient(135deg,
+            rgba(255, 224, 126, 0.92),
+            rgba(206, 238, 140, 0.92),
+            rgba(255, 214, 138, 0.92)) border-box;
+    box-shadow: var(--shadow);
+}
+
+.deployment-notice-title {
+    margin: 0 34px 10px 0;
+    font-size: 1.4rem;
+    color: #7b5b00;
+}
+
+.deployment-notice-text {
+    margin: 0 0 14px;
+    line-height: 1.8;
+    color: rgba(44, 62, 80, 0.9);
+    overflow-wrap: anywhere;
+}
+
+.deployment-notice-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    max-width: 100%;
+    white-space: normal;
+    word-break: break-word;
+    border-radius: 999px;
+    text-decoration: none;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.78);
+    color: #6b2b4a;
+    font-weight: 700;
+}
+
+.deployment-notice-link:hover {
+    background: rgba(255, 255, 255, 0.92);
+}
+
+.deployment-notice-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.82);
+    color: rgba(0, 0, 0, 0.65);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.12s ease, background-color 0.12s ease;
+}
+
+.deployment-notice-close:hover {
+    transform: rotate(90deg);
+    background: rgba(255, 255, 255, 0.94);
+}
+
+
+/* ==================================================
+   SECTION: 联系方式弹出卡片 & 复制提示 (Contact Popup & Toast)
+   ================================================== */
+
+.contact-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    transform: translate3d(0, 0, 0);
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 10px;
+    padding: 10px 12px;
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.08);
+    display: block;
+    z-index: 1200;
+    min-width: 160px;
+    text-align: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.12s ease, transform 0.12s ease;
+    pointer-events: none;
+}
+
+.contact-popup.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.contact-popup .contact-item {
+    padding: 6px 0;
+    color: var(--detail-text);
+}
+
+.contact-popup .number-line {
+    font-weight: 700;
+    color: var(--detail-text);
+    font-size: 1rem;
+}
+
+.contact-copy-toast {
+    position: fixed;
+    top: calc(60px + 12px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-12px);
+    z-index: 2100;
+    min-width: 180px;
+    max-width: min(92vw, 480px);
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: linear-gradient(135deg, rgba(255, 182, 201, 0.95), rgba(154, 215, 255, 0.95), rgba(167, 243, 208, 0.95));
+    box-shadow: 0 12px 28px rgba(44, 62, 80, 0.18);
+    color: #1f2f40;
+    font-weight: 700;
+    font-size: 1.06rem;
+    text-align: center;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 260ms ease, transform 260ms ease, visibility 260ms ease;
+}
+
+.contact-copy-toast.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.contact-copy-toast.is-error {
+    background: linear-gradient(135deg, rgba(255, 208, 208, 0.96), rgba(255, 236, 200, 0.96));
+    color: #7a2732;
+}
+
+
+/* ==================================================
+   SECTION: 响应式适配（仅针对上述弹窗）
+   ================================================== */
+
+@media (max-width: 768px) {
+    .export-modal-card {
+        width: min(620px, 100%);
+        height: auto;
+        max-height: min(86vh, 720px);
+    }
+
+    .display-modal-card {
+        width: min(620px, 100%);
+        height: auto;
+        max-height: min(86vh, 720px);
+    }
+
+    .export-modal-content {
+        padding: 14px;
+    }
+
+    .display-modal-content {
+        padding: 14px;
+    }
+
+    .export-option-item {
+        align-items: flex-start;
+    }
+
+    .display-option-item {
+        align-items: flex-start;
+    }
+
+    .export-actions {
+        justify-content: stretch;
+    }
+
+    .display-actions {
+        justify-content: stretch;
+    }
+
+    .export-confirm-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .display-confirm-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 460px) {
+    .export-option-item {
+        padding: 10px;
+        font-size: 0.95rem;
+    }
+
+    .display-option-item {
+        padding: 10px;
+        font-size: 0.95rem;
+    }
+}

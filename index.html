@@ -4,65 +4,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ============================================================
+    部署通知脚本：检测到 GitHub Pages 环境时，显示“部署成功”弹窗
+    使用 localStorage 记录状态，避免重复弹出
+    ============================================================ -->
     <script>
         (function () {
             function runNotice() {
+                // 仅在 github.io 域名下生效
                 var host = (window.location && window.location.hostname ? window.location.hostname : '').toLowerCase();
                 if (!host.includes('github.io')) return;
 
+                // 检查是否已经显示过该通知
                 var storageKey = 'homeDeploymentNoticeShown_v1';
-                try { if (window.localStorage && window.localStorage.getItem(storageKey) === '1') return; } catch (e) { }
+                try {
+                    if (window.localStorage && window.localStorage.getItem(storageKey) === '1') return;
+                } catch (e) { /* 忽略 localStorage 错误 */ }
 
+                // 构建弹窗 DOM
                 var modal = document.createElement('div');
                 modal.className = 'deployment-notice-modal is-open';
                 modal.setAttribute('aria-hidden', 'false');
 
                 var targetUrl = 'http://be-young.top';
                 modal.innerHTML = `
-        <div class="deployment-notice-card" role="dialog" aria-modal="true" aria-labelledby="deployment-notice-title">
-            <button class="deployment-notice-close" aria-label="关闭提示">
-                <i class="fas fa-times" aria-hidden="true"></i>
-            </button>
-            <h3 class="deployment-notice-title" id="deployment-notice-title">部署成功</h3>
-            <p class="deployment-notice-text">该博客已经成功部署到服务器！点击链接即可跳转。感谢支持！</p>
-            <a class="deployment-notice-link" href="${targetUrl}">点击这里跳转</a>
-        </div>
-    `;
+                        <div class="deployment-notice-card" role="dialog" aria-modal="true" aria-labelledby="deployment-notice-title">
+                            <button class="deployment-notice-close" aria-label="关闭提示">
+                                <i class="fas fa-times" aria-hidden="true"></i>
+                            </button>
+                            <h3 class="deployment-notice-title" id="deployment-notice-title">部署成功</h3>
+                            <p class="deployment-notice-text">该博客已经成功部署到服务器！点击链接即可跳转。感谢支持！</p>
+                            <a class="deployment-notice-link" href="${targetUrl}">点击这里跳转</a>
+                        </div>
+                    `;
 
+                // 关闭弹窗并移除 DOM
                 function closeNotice() {
                     modal.classList.remove('is-open');
                     modal.setAttribute('aria-hidden', 'true');
                     setTimeout(function () {
-                        try { if (modal && modal.parentNode) modal.parentNode.removeChild(modal); } catch (e) { }
+                        try {
+                            if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
+                        } catch (e) { /* 忽略移除错误 */ }
                     }, 120);
                 }
 
+                // 点击背景关闭
                 modal.addEventListener('click', function (e) {
                     if (e.target === modal) closeNotice();
                 });
 
-                // close button
+                // 关闭按钮事件
                 try {
                     var closeBtn = modal.querySelector('.deployment-notice-close');
                     if (closeBtn) closeBtn.addEventListener('click', closeNotice);
-                } catch (e) { }
+                } catch (e) { /* 忽略查询错误 */ }
 
-                // append when body exists
+                // 将弹窗添加到页面
                 try {
                     if (document.body) document.body.appendChild(modal);
                     else document.addEventListener('DOMContentLoaded', function () { document.body.appendChild(modal); }, { once: true });
-                } catch (e) { }
+                } catch (e) { /* 忽略添加错误 */ }
 
+                // 记录已显示状态，并在页面卸载时清除（允许下次访问重新显示）
                 try {
                     if (window.localStorage) {
                         window.localStorage.setItem(storageKey, '1');
                         window.addEventListener('beforeunload', function () {
-                            try { window.localStorage.removeItem(storageKey); } catch (e) { }
+                            try { window.localStorage.removeItem(storageKey); } catch (e) { /* 忽略 */ }
                         }, { once: true });
                     }
-                } catch (e) { }
+                } catch (e) { /* 忽略存储错误 */ }
             }
 
+            // 等待 DOM 就绪后执行
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', runNotice);
             } else {
@@ -70,212 +86,35 @@
             }
         })();
     </script>
+
     <title>白恙 BeYoung</title>
     <link rel="icon" href="assets/avatar.png" type="image/png">
 
-
-    <!-- 预加载自托管字体（加速首次渲染并与 font-display: swap 配合） -->
+    <!-- ============================================================
+    预加载自托管字体（加速首屏渲染，配合 font-display: swap）
+    ============================================================ -->
     <link rel="preload" href="fonts/%E4%BB%93%E8%80%B3%E4%BB%8A%E6%A5%B701-W04.ttf" as="font" type="font/ttf"
         crossorigin>
 
-    <!-- 关键 CSS（Critical CSS）: 仅包含首屏所需样式，体积要小，保证快速首屏渲染 -->
-    <style>
-        /* Critical CSS - minimal for nav + hero + basic layout */
-        @font-face {
-            font-family: '仓耳今楷01';
-            src: url('fonts/%E4%BB%93%E8%80%B3%E4%BB%8A%E6%A5%B701-W04.ttf') format('truetype');
-            font-display: swap
-        }
-
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-            font-family: '仓耳今楷01', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-            color: #222;
-            background: #fff
-        }
-
-        .navbar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            position: fixed;
-            top: 0;
-            z-index: 10;
-            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06)
-        }
-
-        .nav-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px
-        }
-
-        .nav-avatar img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: block
-        }
-
-        .nav-menu {
-            display: flex;
-            gap: 12px;
-            list-style: none;
-            margin: 0;
-            padding: 0
-        }
-
-        .nav-menu a {
-            color: inherit;
-            text-decoration: none
-        }
-
-        .hero-section {
-            height: 50vh;
-            min-height: 280px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #222;
-            background-color: #f7f7f7;
-            background-size: cover;
-            background-position: center
-        }
-
-        .welcome-text {
-            font-size: 3.5rem;
-            margin: 0 0 1rem 0;
-        }
-
-        .subtitle {
-            font-size: 1.5rem;
-            opacity: 0.9;
-        }
-
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 16px
-        }
-
-        .content-section {
-            background: #fff
-        }
-
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0
-        }
-
-        img {
-            max-width: 100%;
-            height: auto;
-            display: block
-        }
-
-        .site-footer {
-            position: relative;
-            z-index: 20;
-            text-align: center;
-            padding: 24px 16px 28px;
-            color: #666;
-            font-size: 0.95rem;
-            background: rgba(255, 255, 255, 0.62);
-            backdrop-filter: blur(12px) saturate(1.05);
-            -webkit-backdrop-filter: blur(12px) saturate(1.05);
-            border-top: 1px solid rgba(255, 255, 255, 0.45);
-        }
-
-        .home-footer {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            padding-left: clamp(76px, 8vw, 120px);
-            padding-right: clamp(76px, 8vw, 120px);
-        }
-
-        .footer-center {
-            flex: 0 0 auto;
-        }
-
-        .footer-stats {
-            flex: 1 1 0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: #777;
-            font-size: 0.9rem;
-            white-space: nowrap;
-        }
-
-        .footer-stats-left {
-            justify-content: flex-start;
-        }
-
-        .footer-stats-right {
-            justify-content: flex-end;
-        }
-
-        .footer-stat-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .footer-stat-number {
-            font-weight: 600;
-            color: #555;
-        }
-
-        #busuanzi_container_site_uv,
-        #busuanzi_container_site_pv {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .site-footer a {
-            color: inherit;
-            text-decoration: none;
-        }
-
-        .site-footer a:hover {
-            text-decoration: underline;
-        }
-
-        @media (max-width: 768px) {
-            .home-footer {
-                justify-content: center;
-                padding-left: 16px;
-                padding-right: 16px;
-            }
-
-            .home-footer .footer-stats {
-                display: none;
-            }
-        }
-    </style>
-
-    <!-- 异步加载其余（非关键）样式：使用 preload+onload 技术，提供 noscript 回退 -->
+    <!-- ============================================================
+    异步加载非关键样式：使用 preload + onload 技术，
+    并提供 noscript 回退方案
+    ============================================================ -->
     <link rel="preload" href="css/style.css" as="style" onload="this.rel='stylesheet'">
+    <link rel="preload" href="css/style-home.css" as="style" onload="this.rel='stylesheet'">
+    <link rel="preload" href="css/style-controls.css" as="style" onload="this.rel='stylesheet'">
+    <link rel="preload" href="css/style-profile.css" as="style" onload="this.rel='stylesheet'">
     <link rel="preload" href="css/butterfly.css" as="style" onload="this.rel='stylesheet'">
     <link rel="preload" href="css/responsive.css" as="style" onload="this.rel='stylesheet'">
     <link rel="preload" href="css/search.css" as="style" onload="this.rel='stylesheet'">
-    <!-- 引入外部图标库与 KaTeX 样式，通过 preload 异步加载（降低阻塞） -->
+
+    <!-- 外部图标库与 KaTeX 样式 -->
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style"
         crossorigin onload="this.rel='stylesheet'">
     <link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" as="style"
         onload="this.rel='stylesheet'">
+
+    <!-- 无 JavaScript 时的回退样式 -->
     <noscript>
         <link rel="stylesheet" href="css/style.css">
         <link rel="stylesheet" href="css/butterfly.css">
@@ -285,16 +124,22 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     </noscript>
 
-    <!-- KaTeX JS 与 i18n 使用 defer，确保不阻塞 DOM 解析 -->
+    <!-- ============================================================
+    KaTeX 与 i18n 脚本：使用 defer 避免阻塞 DOM 解析
+    ============================================================ -->
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
     <script src="js/i18n.js" defer></script>
 </head>
 
 <body class="home">
-    <!-- 导航栏 -->
+
+    <!-- ============================================================
+    导航栏
+    ============================================================ -->
     <nav class="navbar">
         <div class="nav-container">
+            <!-- 品牌区 -->
             <div class="nav-brand">
                 <a class="nav-avatar" href="about.html" aria-label="profile">
                     <img src="assets/avatar.png" alt="头像">
@@ -303,6 +148,8 @@
                     <span data-i18n="brand"></span>
                 </a>
             </div>
+
+            <!-- 主导航菜单 -->
             <ul class="nav-menu">
                 <li><a href="index.html" class="active"><i class="fas fa-home"></i> <span data-i18n="home"></span></a>
                 </li>
@@ -311,6 +158,8 @@
                 <li><a href="series.html"><i class="fas fa-layer-group"></i> <span data-i18n="series"></span></a></li>
                 <li><a href="quick-links.html"><i class="fas fa-link"></i> <span data-i18n="quicklinks"></span></a></li>
             </ul>
+
+            <!-- 右侧操作区 -->
             <div class="nav-actions">
                 <button class="nav-search-btn" aria-label="search"><i class="fas fa-search"></i> <span
                         data-i18n="search"></span></button>
@@ -321,9 +170,12 @@
         </div>
     </nav>
 
-    <!-- 主页面 -->
+    <!-- ============================================================
+    主内容区域
+    ============================================================ -->
     <main>
-        <!-- 顶部背景（固定为第二张图） -->
+
+        <!-- ===== 顶部 Hero 区域（固定背景图） ===== -->
         <section class="hero-section">
             <div class="slideshow" aria-hidden="true">
                 <div class="slide active" style="background-image: url('assets/images/background/bg2.png');"></div>
@@ -338,15 +190,17 @@
             </div>
         </section>
 
-        <!-- 博客内容区 -->
+        <!-- ===== 博客内容区 ===== -->
         <section class="content-section">
             <div class="container">
                 <div class="content-wrapper">
+
                     <!-- 左侧个人信息卡片 -->
                     <aside class="sidebar" id="sidebar">
                         <div class="profile-card" id="home-profile-card">
                             <div class="profile-card-sheen" aria-hidden="true"></div>
 
+                            <!-- 头像与姓名 -->
                             <div class="profile-header">
                                 <div class="avatar profile-avatar">
                                     <img src="assets/avatar.png" alt="头像">
@@ -363,6 +217,7 @@
 
                             <div class="profile-divider"></div>
 
+                            <!-- 年级与学历 -->
                             <div class="level-section">
                                 <div class="profile-row">
                                     <div class="level-item">
@@ -382,6 +237,7 @@
 
                             <div class="profile-divider"></div>
 
+                            <!-- 专业方向 -->
                             <div class="specialty-section">
                                 <div class="specialty-row">
                                     <div class="specialty-icon" aria-hidden="true">
@@ -401,6 +257,7 @@
 
                             <div class="profile-divider"></div>
 
+                            <!-- 统计数据：文章数、总字数、标签数 -->
                             <div class="stats stats--compact">
                                 <div class="stat">
                                     <a class="stat-link" href="archive.html">
@@ -424,6 +281,7 @@
 
                             <div class="profile-divider"></div>
 
+                            <!-- 兴趣爱好 -->
                             <div class="profile-bottom">
                                 <div class="interests-label" data-i18n="label_interests"></div>
                                 <div class="interests-list">
@@ -436,6 +294,7 @@
 
                             <div class="profile-divider"></div>
 
+                            <!-- 联系方式 -->
                             <div class="profile-footer">
                                 <div class="build-title" data-i18n="contact">联系方式</div>
                                 <div class="build-bars contact-bars">
@@ -467,6 +326,7 @@
                                         </div>
                                     </button>
                                 </div>
+                                <!-- 联系方式弹出信息 -->
                                 <div class="contact-popup" id="contact-popup">
                                     <div class="contact-item"><strong data-i18n="contact_wechat">WeChat</strong>: <span
                                             id="contact-wechat" style="display:none">w19979258352</span></div>
@@ -480,27 +340,36 @@
                     <!-- 右侧博客列表 -->
                     <div class="main-content">
                         <div class="blog-grid" id="blogGrid">
-                            <!-- 博客卡片将通过JS动态生成 -->
+                            <!-- 博客卡片由 JavaScript 动态生成 -->
                         </div>
                         <div class="view-more-wrap" id="viewMoreWrap" style="text-align:center; margin: 24px 0;">
                             <button class="view-more-btn" id="viewMoreBtn" data-i18n="view_more">查看更多</button>
                         </div>
                     </div>
+
                 </div>
             </div>
         </section>
     </main>
 
+    <!-- ============================================================
+    页脚
+    ============================================================ -->
     <footer class="site-footer home-footer">
+        <!-- 左侧统计：博客数 / 总字数 -->
         <div class="footer-stats footer-stats-left" aria-hidden="true">
             <span class="footer-stat-item"><span data-i18n="footer_blog_count"></span> <span class="footer-stat-number"
                     id="footer-blog-count">0</span></span>
             <span class="footer-stat-item"><span data-i18n="footer_total_words"></span> <span class="footer-stat-number"
                     id="footer-word-count">0</span></span>
         </div>
+
+        <!-- 备案信息 -->
         <div class="footer-center">
             <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">赣ICP备2026004108号</a>
         </div>
+
+        <!-- 右侧统计：访客数 / 浏览量（由 busuanzi 提供） -->
         <div class="footer-stats footer-stats-right" aria-hidden="true">
             <span class="footer-stat-item" id="busuanzi_container_site_uv"><span
                     data-i18n="footer_site_visitors"></span> <span class="footer-stat-number"
@@ -510,18 +379,28 @@
         </div>
     </footer>
 
+    <!-- ============================================================
+    浮动按钮：设置、音乐控制、公告
+    ============================================================ -->
+
+    <!-- 设置按钮 -->
     <button id="settingsFab" class="settings-fab" aria-label="打开设置弹窗">
         <i class="fas fa-cog" aria-hidden="true"></i>
     </button>
 
+    <!-- 音乐浮动按钮（默认隐藏） -->
     <button id="musicFloatFab" class="music-fab" aria-label="关闭音乐" aria-hidden="true" hidden>
         <i class="fas fa-pause" aria-hidden="true"></i>
     </button>
 
+    <!-- 公告按钮 -->
     <button id="announcementFab" class="announcement-fab" aria-label="打开公告弹窗">
         <i class="fas fa-bullhorn" aria-hidden="true"></i>
     </button>
 
+    <!-- ============================================================
+    公告弹窗
+    ============================================================ -->
     <div id="announcementModal" class="announcement-modal" aria-hidden="true">
         <div class="announcement-modal-card" role="dialog" aria-modal="true" aria-labelledby="announcement-modal-title">
             <button id="announcementModalClose" class="announcement-modal-close" aria-label="关闭公告弹窗">
@@ -531,18 +410,27 @@
         </div>
     </div>
 
+    <!-- ============================================================
+    设置弹窗（语言 / 音乐）
+    ============================================================ -->
     <div id="settingsModal" class="settings-modal" aria-hidden="true">
         <div class="settings-modal-card" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
             <button id="settingsModalClose" class="settings-modal-close" aria-label="关闭设置弹窗">
                 <i class="fas fa-times" aria-hidden="true"></i>
             </button>
             <div class="settings-modal-content">
+
+                <!-- 左侧标签页导航 -->
                 <div class="settings-sidebar">
                     <button class="settings-tab active" data-tab="language"
                         data-i18n="settings_tab_language">语言</button>
                     <button class="settings-tab" data-tab="music" data-i18n="settings_tab_music">音乐</button>
                 </div>
+
+                <!-- 右侧面板 -->
                 <div class="settings-panel">
+
+                    <!-- 语言设置 -->
                     <div class="settings-section active" id="language-section">
                         <h3 data-i18n="settings_language_title">语言设置</h3>
                         <p class="language-note" data-i18n="settings_language_note">语言设置不影响博客内容的语种。</p>
@@ -555,11 +443,15 @@
                                     data-i18n="settings_language_ja">日本語</span></label>
                         </div>
                     </div>
+
+                    <!-- 音乐设置 -->
                     <div class="settings-section" id="music-section">
                         <h3 data-i18n="settings_music_title">音乐设置</h3>
                         <p class="music-hint" data-i18n="settings_music_hint">点击页面或按任意键启用背景音乐</p>
                         <p class="music-original-note" data-i18n="settings_music_original">所有音乐均为原创</p>
+
                         <div class="music-controls">
+                            <!-- 曲目选择 -->
                             <div class="music-track">
                                 <label for="music-select" data-i18n="settings_track_label">选择曲目：</label>
                                 <select id="music-select">
@@ -569,6 +461,8 @@
                                     <option value="谎画.mp3" data-i18n="settings_track_liepaint">谎画</option>
                                 </select>
                             </div>
+
+                            <!-- 播放控制 -->
                             <div class="music-playback">
                                 <button id="play-pause-btn" class="music-btn">
                                     <i class="fas fa-play"></i> <span id="play-pause-text"
@@ -578,11 +472,15 @@
                                     <i class="fas fa-stop"></i> <span id="stop-text" data-i18n="settings_stop">停止</span>
                                 </button>
                             </div>
+
+                            <!-- 进度条 -->
                             <div class="music-progress">
                                 <label for="progress-slider" data-i18n="settings_progress_label">进度：</label>
                                 <input type="range" id="progress-slider" min="0" max="100" step="0.1" value="0">
                                 <span id="progress-value">00:00 / 00:00</span>
                             </div>
+
+                            <!-- 音量控制 -->
                             <div class="music-volume">
                                 <label for="volume-slider" data-i18n="settings_volume_label">音量：</label>
                                 <input type="range" id="volume-slider" min="0.05" max="1" step="0.05" value="0.2">
@@ -590,29 +488,33 @@
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- ============================================================
+    功能脚本（延迟加载）
+    ============================================================ -->
     <script src="js/search.js" defer></script>
     <script src="js/slideshow.js" defer></script>
     <script src="js/main.js" defer></script>
 
-    <!--
-            空闲时预取其它页面与公共 CSS：
-            使用 requestIdleCallback（有回退）在主页面加载完成且浏览器空闲时发起预取，
-            不影响首屏性能。
-        -->
+    <!-- ============================================================
+    空闲时预取其它页面与公共 CSS（不阻塞首屏性能）
+    ============================================================ -->
     <script>
         (function () {
             function idle(cb) {
                 if ('requestIdleCallback' in window) return requestIdleCallback(cb, { timeout: 2000 });
                 return setTimeout(cb, 2000);
             }
+
             window.addEventListener('load', function () {
                 idle(function () {
                     try {
+                        // 预取页面 HTML
                         var pages = ['archive.html', 'categories.html', 'series.html', 'quick-links.html', 'about.html'];
                         pages.forEach(function (p) {
                             var l = document.createElement('link');
@@ -622,6 +524,7 @@
                             document.head.appendChild(l);
                         });
 
+                        // 预取公共样式
                         var commonCss = ['css/style.css', 'css/butterfly.css'];
                         commonCss.forEach(function (h) {
                             var l = document.createElement('link');
@@ -631,11 +534,14 @@
                             l.onload = function () { this.rel = 'stylesheet'; };
                             document.head.appendChild(l);
                         });
-                    } catch (e) {/* 安全降级：出错时不影响页面 */ }
+                    } catch (e) {
+                        // 预取失败不影响页面正常功能
+                    }
                 });
             });
         })();
     </script>
+
 </body>
 
 </html>

@@ -1,12 +1,28 @@
-/* 公告页：居中时间轴（马卡龙色系） */
+/* ============================================
+   公告页 - 居中时间轴（马卡龙色系）
+   ============================================ */
+
+/* ----- 1. 页面容器 & 变量 ----- */
+.announcements-page {
+    --primary-color: #55c8ff;
+    --secondary-color: #a7f3d0;
+    --archive-pink: #ffb6c9;
+    --archive-peach: #ffd2a6;
+    --archive-mint: #a7f3d0;
+    --archive-sky: #9ad7ff;
+    --archive-text: #2b3440;
+    --archive-muted: #5f6b7a;
+    --archive-card-shadow: 0 16px 34px rgba(44, 62, 80, 0.14);
+    --archive-border: linear-gradient(135deg, var(--archive-pink), var(--archive-mint), rgba(199, 182, 255, 0.9));
+}
 
 .announcements-section {
     padding: 44px 0 80px;
 }
 
+/* ----- 2. 页面标题（渐变文字） ----- */
 .announcements-title {
     text-align: center;
-    /* 与归档时间轴顶部大标题完全一致：大字号、渐变文字、强阴影 */
     width: min(1100px, 100%);
     margin: 0 auto;
     font-size: 4.2rem;
@@ -14,7 +30,8 @@
     line-height: 1.02;
     padding: 80px 0 90px 0;
     letter-spacing: 0.5px;
-    /* 马卡龙渐变文字（与归档一致） */
+
+    /* 马卡龙渐变（与归档页一致） */
     background: linear-gradient(90deg, rgba(255, 182, 201, 1), rgba(154, 215, 255, 0.98), rgba(167, 243, 208, 0.98));
     -webkit-background-clip: text;
     background-clip: text;
@@ -24,19 +41,14 @@
     filter: drop-shadow(0 14px 36px rgba(44, 62, 80, 0.14));
 }
 
-@media (max-width: 900px) {
-    .announcements-title {
-        font-size: 2.2rem;
-        padding: 40px 0 44px 0;
-    }
-}
-
+/* ----- 3. 空状态 ----- */
 .announcements-empty {
     text-align: center;
     color: rgba(0, 0, 0, 0.55);
     padding: 30px 0;
 }
 
+/* ----- 4. 时间轴容器 & 中轴线 ----- */
 .announcements-timeline {
     position: relative;
     max-width: 980px;
@@ -44,7 +56,6 @@
     padding: 10px 0 20px;
 }
 
-/* 中轴线 */
 .announcements-timeline::before {
     content: '';
     position: absolute;
@@ -57,6 +68,7 @@
     border-radius: 999px;
 }
 
+/* ----- 5. 时间轴条目（基础网格 & 入场动画） ----- */
 .ann-item {
     position: relative;
     display: grid;
@@ -74,7 +86,7 @@
     transform: translateY(0);
 }
 
-/* 中间轴（点 + 时间） */
+/* ----- 6. 中间列（圆点 + 时间标签） ----- */
 .ann-mid {
     position: relative;
     display: flex;
@@ -106,44 +118,62 @@
     max-width: 140px;
 }
 
-/* 卡片 (styles consolidated later) */
-
-/* 将时间轴项的标题样式与归档时间轴中的 `.timeline-title` 完全对齐 */
-.announcements-page .ann-card .ann-message {
-    font-size: 1rem;
-    font-weight: 700;
-    line-height: 1.6;
-    color: #2b3440;
+/* ----- 7. 公告卡片（玻璃质感 + 消息内容） ----- */
+.ann-card {
+    border: 3px solid transparent;
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.70), rgba(255, 255, 255, 0.70)) padding-box,
+        linear-gradient(135deg, rgba(255, 182, 201, 0.80), rgba(167, 243, 208, 0.78), rgba(154, 215, 255, 0.78)) border-box;
+    backdrop-filter: blur(10px);
+    border-radius: 14px;
+    max-height: 340px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 18px 20px;
 }
 
-.announcements-page .ann-card .ann-message.ann-message--split {
+.ann-card .ann-message {
+    white-space: pre-wrap;
+    word-break: break-word;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    font-size: 1rem;
+    line-height: 1.6;
+    font-weight: 700;
+}
+
+/* 消息内部分割（固定 + 滚动区） */
+.ann-card .ann-message.ann-message--split {
     display: flex;
     flex-direction: column;
     gap: 6px;
     overflow: hidden;
 }
 
-.announcements-page .ann-card .ann-message .ann-message-fixed {
+.ann-card .ann-message .ann-message-fixed {
     flex: 0 0 auto;
 }
 
-.announcements-page .ann-card .ann-message .ann-message-scroll {
+.ann-card .ann-message .ann-message-scroll {
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 }
 
-.announcements-page .ann-card .ann-message .ann-line {
+/* 消息内部行样式（标题、分隔线等） */
+.ann-card .ann-message .ann-line {
     display: block;
 }
 
-.announcements-page .ann-card .ann-message .ann-line--blank {
+.ann-card .ann-message .ann-line--blank {
     line-height: 1;
     min-height: 0.8em;
 }
 
-.announcements-page .ann-card .ann-message .ann-line--headline {
+.ann-card .ann-message .ann-line--headline {
     text-align: center;
     font-size: 1.22em;
     font-weight: 900;
@@ -152,7 +182,7 @@
     margin-bottom: 0.1em;
 }
 
-.announcements-page .ann-card .ann-message .ann-line--section {
+.ann-card .ann-message .ann-line--section {
     color: #ff6f91;
     font-weight: 800;
     display: flex;
@@ -160,7 +190,7 @@
     gap: 0.42em;
 }
 
-.announcements-page .ann-card .ann-message .ann-line--section::after {
+.ann-card .ann-message .ann-line--section::after {
     content: "～～～～～～～～～～～～～～～～～～～～～";
     color: #ff97ad;
     letter-spacing: -0.08em;
@@ -169,62 +199,60 @@
     flex: 1 1 auto;
 }
 
-/* 最新公告：顶部居中，字号更大 */
-.ann-item.ann-item--top {
-    grid-template-columns: 1fr;
-    margin: 8px 0 34px;
+/* 隐藏卡片内滚动条 */
+.ann-card .ann-message::-webkit-scrollbar,
+.ann-card .ann-message .ann-message-scroll::-webkit-scrollbar {
+    width: 0;
+    height: 0;
 }
 
-.ann-item.ann-item--top .ann-mid {
-    margin: 0 auto 12px;
+.ann-card .ann-message,
+.ann-card .ann-message .ann-message-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
-.ann-item.ann-item--top .ann-card {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 18px 20px;
-}
-
-.ann-item.ann-item--top .ann-card .ann-message {
-    font-size: 1.1rem;
-    font-weight: 800;
-    line-height: 1.6;
-}
-
-/* 顶部与底部特殊项始终可见，不参与翻入动画 */
+/* ----- 8. 特殊条目：顶部最新 & 底部固定（居中、无交错） ----- */
 .ann-item.ann-item--top,
 .ann-item.ann-item--bottom {
+    grid-template-columns: 1fr;
     opacity: 1;
     transform: none;
     transition: none;
 }
 
-/* 固定底部的公告卡片（居中） */
+.ann-item.ann-item--top {
+    margin: 8px 0 34px;
+}
+
 .ann-item.ann-item--bottom {
-    grid-template-columns: 1fr;
     margin: 34px 0 8px;
 }
 
+.ann-item.ann-item--top .ann-mid,
 .ann-item.ann-item--bottom .ann-mid {
     margin: 0 auto 12px;
 }
 
+.ann-item.ann-item--top .ann-card,
 .ann-item.ann-item--bottom .ann-card {
     max-width: 720px;
     margin: 0 auto;
     padding: 18px 20px;
+    max-height: 480px;
+    /* 顶部卡片更高 */
 }
 
+.ann-item.ann-item--top .ann-card .ann-message,
 .ann-item.ann-item--bottom .ann-card .ann-message {
     font-size: 1.1rem;
     font-weight: 800;
     line-height: 1.6;
 }
 
-/* 左右交错 */
+/* ----- 9. 左右交错布局（桌面） ----- */
 .ann-item.ann-item--left .ann-card {
     grid-column: 1;
-    /* 左侧卡片左对齐（避免右对齐） */
     justify-self: start;
     text-align: left;
 }
@@ -251,6 +279,64 @@
     text-align: left;
 }
 
+/* ----- 10. 导航栏样式（适配马卡龙主题） ----- */
+.announcements-page .navbar {
+    background: rgba(255, 255, 255, 0.72);
+    background-image: linear-gradient(90deg,
+            rgba(255, 182, 201, 0.16) 0%,
+            rgba(167, 243, 208, 0.12) 45%,
+            rgba(199, 182, 255, 0.14) 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 10px 24px rgba(44, 62, 80, 0.10);
+}
+
+.announcements-page .nav-brand {
+    color: #55c8ff;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6), 0 6px 14px rgba(85, 200, 255, 0.22);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .announcements-page .nav-brand {
+        display: inline-block;
+        background: linear-gradient(90deg,
+                rgba(0, 172, 255, 1) 0%,
+                rgba(72, 219, 187, 0.98) 45%,
+                rgba(255, 110, 155, 0.98) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+        text-shadow: none;
+        filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.60)) drop-shadow(0 10px 18px rgba(0, 172, 255, 0.16));
+    }
+}
+
+.announcements-page .nav-menu a {
+    color: var(--archive-text);
+    background: rgba(255, 255, 255, 0.42);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.announcements-page .nav-menu a:hover,
+.announcements-page .nav-menu a.active {
+    color: var(--archive-text);
+    background: linear-gradient(135deg, rgba(255, 182, 201, 0.30), rgba(154, 215, 255, 0.22), rgba(167, 243, 208, 0.24));
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+/* ============================================
+   响应式设计（全部集中在此）
+   ============================================ */
+
+/* 标题缩放 */
+@media (max-width: 900px) {
+    .announcements-title {
+        font-size: 2.2rem;
+        padding: 40px 0 44px 0;
+    }
+}
+
+/* 窄屏（平板/手机）整体调整：移除中轴线，改为纵向排列 */
 @media (max-width: 880px) {
     .announcements-section {
         padding: 24px 0 44px;
@@ -271,6 +357,7 @@
         display: none;
     }
 
+    /* 所有条目变为单列 */
     .ann-item,
     .ann-item.ann-item--top,
     .ann-item.ann-item--bottom,
@@ -291,6 +378,7 @@
         display: none;
     }
 
+    /* 中间列变为水平排列（点+时间） */
     .ann-mid {
         align-items: center;
         flex-direction: row;
@@ -314,6 +402,7 @@
         border-radius: 999px;
     }
 
+    /* 卡片占满宽度，降低最大高度 */
     .ann-item .ann-card,
     .ann-item.ann-item--top .ann-card,
     .ann-item.ann-item--bottom .ann-card,
@@ -327,6 +416,7 @@
         max-width: none;
         padding: 14px 14px;
         border-radius: 12px;
+        max-height: 320px;
     }
 
     .ann-item .ann-card .ann-message {
@@ -334,145 +424,18 @@
         line-height: 1.64;
     }
 
-    /* 移动端：公告卡片保留 ">>"，去掉后续装饰波浪线 */
+    /* 移动端去除装饰波浪线（保留 >> 即可） */
     .announcements-page .ann-card .ann-message .ann-line--section::after {
         content: none !important;
         display: none !important;
     }
 }
 
+/* 减少动画偏好 */
 @media (prefers-reduced-motion: reduce) {
     .ann-item {
         transition: none;
         opacity: 1;
         transform: none;
     }
-}
-
-/* 保证公告页的导航样式与站点其它页面（如归档）一致 */
-.announcements-page {
-    /* 复用归档页的马卡龙变量，使视觉主题一致 */
-    --primary-color: #55c8ff;
-    --secondary-color: #a7f3d0;
-    --archive-pink: #ffb6c9;
-    --archive-peach: #ffd2a6;
-    --archive-mint: #a7f3d0;
-    --archive-sky: #9ad7ff;
-    --archive-text: #2b3440;
-    --archive-muted: #5f6b7a;
-    --archive-card-shadow: 0 16px 34px rgba(44, 62, 80, 0.14);
-    --archive-border: linear-gradient(135deg, var(--archive-pink), var(--archive-mint), rgba(199, 182, 255, 0.9));
-}
-
-.announcements-page .nav-menu a {
-    color: var(--archive-text);
-    background: rgba(255, 255, 255, 0.42);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.announcements-page .nav-menu a:hover,
-.announcements-page .nav-menu a.active {
-    color: var(--archive-text);
-    background: linear-gradient(135deg, rgba(255, 182, 201, 0.30), rgba(154, 215, 255, 0.22), rgba(167, 243, 208, 0.24));
-    border-color: rgba(0, 0, 0, 0.08);
-}
-
-/* 归档页风格：导航玻璃质感 + 品牌渐变 */
-.announcements-page .navbar {
-    background: rgba(255, 255, 255, 0.72);
-    background-image: linear-gradient(90deg,
-            rgba(255, 182, 201, 0.16) 0%,
-            rgba(167, 243, 208, 0.12) 45%,
-            rgba(199, 182, 255, 0.14) 100%);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-    box-shadow: 0 10px 24px rgba(44, 62, 80, 0.10);
-}
-
-.announcements-page .nav-brand {
-    color: #55c8ff;
-    text-shadow:
-        0 1px 0 rgba(255, 255, 255, 0.6),
-        0 6px 14px rgba(85, 200, 255, 0.22);
-}
-
-@supports ((-webkit-background-clip: text) or (background-clip: text)) {
-    .announcements-page .nav-brand {
-        display: inline-block;
-        background: linear-gradient(90deg,
-                rgba(0, 172, 255, 1) 0%,
-                rgba(72, 219, 187, 0.98) 45%,
-                rgba(255, 110, 155, 0.98) 100%);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-        -webkit-text-fill-color: transparent;
-        text-shadow: none;
-        filter:
-            drop-shadow(0 1px 0 rgba(255, 255, 255, 0.60)) drop-shadow(0 10px 18px rgba(0, 172, 255, 0.16));
-    }
-}
-
-/* 让公告卡片采用归档页的模糊玻璃样式 */
-/* 将高度限制及消息滚动合并到主卡片样式，防止重复/覆盖 */
-.ann-card {
-    border: 3px solid transparent;
-    background:
-        linear-gradient(rgba(255, 255, 255, 0.70), rgba(255, 255, 255, 0.70)) padding-box,
-        linear-gradient(135deg, rgba(255, 182, 201, 0.80), rgba(167, 243, 208, 0.78), rgba(154, 215, 255, 0.78)) border-box;
-    backdrop-filter: blur(10px);
-    border-radius: 14px;
-    max-height: 340px !important;
-    /* 默认最大高度 */
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    /* 增加卡片内间距（文字与边框间隔） */
-    padding: 18px 20px;
-}
-
-.ann-card .ann-message {
-    white-space: pre-wrap;
-    word-break: break-word;
-    flex: 1 1 auto;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    font-size: 1rem;
-    line-height: 1.6;
-    font-weight: 700;
-}
-
-.ann-card .ann-message.ann-message--split {
-    overflow: hidden;
-}
-
-/* 更大的顶部最新公告卡 */
-.ann-item.ann-item--top .ann-card {
-    max-height: 480px !important;
-}
-
-/* 响应式：窄屏时适当降低高度 */
-@media (max-width: 880px) {
-
-    .announcements-page .ann-card,
-    .announcements-section .ann-card {
-        max-height: 320px !important;
-        padding: 14px 16px;
-    }
-}
-
-/* 隐藏滚动条（WebKit / Blink） */
-.announcements-page .ann-card .ann-message::-webkit-scrollbar,
-.announcements-page .ann-card .ann-message .ann-message-scroll::-webkit-scrollbar,
-.announcements-section .ann-card .ann-message::-webkit-scrollbar {
-    width: 0;
-    height: 0;
-}
-
-/* 隐藏滚动条（Firefox / IE/Edge） */
-.announcements-page .ann-card .ann-message,
-.announcements-page .ann-card .ann-message .ann-message-scroll,
-.announcements-section .ann-card .ann-message {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    /* IE/Edge */
 }

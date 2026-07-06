@@ -1,24 +1,50 @@
+/**
+ * 系列（Series）页面模块
+ * 功能：加载并展示文章系列列表，支持按章节分组、展开/折叠交互，
+ * 以及触摸设备适配和横向滚动居中。
+ */
 (function () {
+    'use strict';
+
+    // ==================== 配置常量 ====================
     const SERIES_DATA_URL = 'data/series.json';
     const BLOGS_DATA_URL = 'data/blogs.json';
 
+    /** 章节展开后内容区域高度（px） */
+    const CHAPTER_BODY_HEIGHT = 260;
+    /** 卡片展开后显示完整内容的延迟（ms） */
+    const EXPAND_REVEAL_DELAY = 380;
+    /** 点击恢复动画延迟（ms） */
+    const CLICK_RESTORE_DELAY = 260;
+    /** 章节打开后滚动到顶部的延迟（ms） */
+    const CHAPTER_OPEN_SCROLL_DELAY = 320;
+
     let currentSeries = [];
 
+    // ==================== 工具函数 ====================
+
+    /** HTML 转义 */
     function escapeHtml(value) {
-        return String(value).replace(/[&<>\"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;'
+        };
+        return String(value).replace(/[&<>"]/g, ch => map[ch]);
     }
 
+    /** 获取当前语言 */
     function getLang() {
         try {
             if (window.siteI18n && typeof window.siteI18n.getLang === 'function') {
                 return window.siteI18n.getLang();
             }
-        } catch (e) {
-            // ignore
-        }
+        } catch (_) { /* ignore */ }
         return 'zh';
     }
 
+    /** 获取国际化文本 */
     function t(key, fallback) {
         try {
             const i18n = window.siteI18n;
@@ -27,26 +53,31 @@
             if (Object.prototype.hasOwnProperty.call(map, key) && map[key] != null) {
                 return map[key];
             }
-        } catch (e) {
-            // ignore
-        }
+        } catch (_) { /* ignore */ }
         return fallback;
     }
 
+    /** 格式化系列文章数量 */
     function formatSeriesCount(count) {
         return t('series_post_count', '{n}篇').replace('{n}', String(count));
     }
 
+    // ==================== 数据规范化 ====================
+
+    /** 规范化系列名称 */
     function normalizeSeriesName(value) {
-        if (typeof value === 'string' && value.trim()) return value.trim();
-        return '';
+        return (typeof value === 'string' && value.trim()) ? value.trim() : '';
     }
 
+    /** 规范化章节名称 */
     function normalizeChapter(value) {
-        if (typeof value === 'string' && value.trim()) return value.trim();
-        return '';
+        return (typeof value === 'string' && value.trim()) ? value.trim() : '';
     }
 
+    /**
+     * 解析章节信息
+     * 支持格式："1 - 章节名称" 或纯文本
+     */
     function parseChapter(value) {
         const raw = normalizeChapter(value);
         if (!raw) {
@@ -76,25 +107,29 @@
         };
     }
 
+    /** 规范化排序值 */
     function normalizeOrder(value) {
         if (typeof value === 'number' && Number.isFinite(value)) {
             return Math.trunc(value);
         }
-
         if (typeof value === 'string' && value.trim()) {
             const parsed = Number(value.trim());
             if (Number.isFinite(parsed)) {
                 return Math.trunc(parsed);
             }
         }
-
         return null;
     }
 
+    /**
+     * 系列文章排序比较器
+     * 优先按章节排序，其次按 order 字段，最后按日期
+     */
     function compareSeriesPosts(a, b) {
         const aChapter = parseChapter(a && a.chapter);
         const bChapter = parseChapter(b && b.chapter);
 
+        // 有章节的排在前面
         if (aChapter.hasChapter || bChapter.hasChapter) {
             if (aChapter.hasChapter && !bChapter.hasChapter) return -1;
             if (!aChapter.hasChapter && bChapter.hasChapter) return 1;
@@ -109,13 +144,13 @@
             if (a.order !== b.order) return a.order - b.order;
             return new Date(b.date) - new Date(a.date);
         }
-
         if (aHasOrder && !bHasOrder) return -1;
         if (!aHasOrder && bHasOrder) return 1;
 
         return new Date(b.date) - new Date(a.date);
     }
 
+    /** 按章节分组文章 */
     function groupPostsByChapter(posts) {
         if (!Array.isArray(posts)) return [];
 
@@ -138,7 +173,6 @@
                     posts: []
                 });
             }
-
             chapterMap.get(key).posts.push(post);
         });
 
@@ -161,14 +195,18 @@
             }));
     }
 
+    /** 展平章节列表为文章数组 */
     function flattenChapters(chapters) {
         if (!Array.isArray(chapters)) return [];
         return chapters.reduce((acc, chapter) => {
-            if (chapter && Array.isArray(chapter.posts)) acc.push(...chapter.posts);
+            if (chapter && Array.isArray(chapter.posts)) {
+                acc.push(...chapter.posts);
+            }
             return acc;
         }, []);
     }
 
+    /** 获取系列最新文章时间戳 */
     function getLatestSeriesTimestamp(series) {
         if (!series) return 0;
 
@@ -183,10 +221,10 @@
                 latest = timestamp;
             }
         });
-
         return latest;
     }
 
+    /** 规范化系列文章列表 */
     function normalizeSeriesPosts(posts) {
         if (!Array.isArray(posts)) return [];
 
@@ -197,7 +235,9 @@
                 if (!Number.isFinite(id)) return null;
                 return {
                     id,
-                    title: (typeof post.title === 'string' && post.title.trim()) ? post.title.trim() : t('series_untitled_post', '未命名文章'),
+                    title: (typeof post.title === 'string' && post.title.trim())
+                        ? post.title.trim()
+                        : t('series_untitled_post', '未命名文章'),
                     date: typeof post.date === 'string' ? post.date : '',
                     order: normalizeOrder(post.order),
                     chapter: normalizeChapter(post.chapter),
@@ -207,8 +247,10 @@
             .filter(Boolean);
     }
 
+    /** 规范化单个系列项 */
     function normalizeSeriesItem(item) {
         if (!item || typeof item !== 'object') return null;
+
         const title = normalizeSeriesName(item.title);
         if (!title) return null;
 
@@ -226,6 +268,7 @@
         };
     }
 
+    /** 规范化系列数据（从 series.json） */
     function normalizeSeriesPayload(payload) {
         if (!Array.isArray(payload)) return [];
 
@@ -240,6 +283,7 @@
             });
     }
 
+    /** 从博客数据中按系列分组（作为备用数据源） */
     function groupBlogsToSeries(blogs) {
         if (!Array.isArray(blogs)) return [];
 
@@ -255,7 +299,9 @@
             if (!map.has(name)) map.set(name, []);
             map.get(name).push({
                 id,
-                title: (typeof blog.title === 'string' && blog.title.trim()) ? blog.title.trim() : t('series_untitled_post', '未命名文章'),
+                title: (typeof blog.title === 'string' && blog.title.trim())
+                    ? blog.title.trim()
+                    : t('series_untitled_post', '未命名文章'),
                 date: typeof blog.date === 'string' ? blog.date : '',
                 order: normalizeOrder(blog.order),
                 chapter: normalizeChapter(blog.chapter),
@@ -281,21 +327,27 @@
             });
     }
 
+    // ==================== 交互绑定 ====================
+
+    /**
+     * 绑定系列卡片交互
+     * 包括：展开/折叠、触摸悬停、横向滚动居中、章节切换
+     */
     function bindSeriesInteractions() {
         const cards = Array.from(document.querySelectorAll('.series-card'));
         const listEl = document.getElementById('seriesList');
-        const EXPAND_REVEAL_DELAY = 380;
-        const CLICK_RESTORE_DELAY = 260;
-        const CHAPTER_OPEN_SCROLL_DELAY = 320;
-        const CHAPTER_BODY_HEIGHT = 260;
+
+        // 每个卡片独立的定时器映射
         const revealTimers = new WeakMap();
         const clickRestoreTimers = new WeakMap();
         const touchHoverTimers = new WeakMap();
 
+        /** 判断是否为桌面视图（宽度 > 900px） */
         function isDesktopView() {
             return window.matchMedia('(min-width: 901px)').matches;
         }
 
+        /** 将卡片滚动到列表视口中心（桌面端） */
         function scrollCardIntoCenter(card, smooth = true) {
             if (!listEl || !card || !isDesktopView()) return;
 
@@ -309,16 +361,17 @@
             });
         }
 
+        /** 调度卡片居中（含多次重试以应对过渡动画） */
         function scheduleCentering(card) {
             if (!isDesktopView()) return;
 
-            // Initial centering + follow-up centering after width transition settles.
             scrollCardIntoCenter(card, true);
             requestAnimationFrame(() => scrollCardIntoCenter(card, true));
             setTimeout(() => scrollCardIntoCenter(card, true), 220);
             setTimeout(() => scrollCardIntoCenter(card, true), 420);
         }
 
+        // ===== 定时器清理辅助 =====
         function clearRevealTimer(card) {
             const timer = revealTimers.get(card);
             if (timer) {
@@ -343,6 +396,7 @@
             }
         }
 
+        // ===== 触摸悬停状态 =====
         function setTouchHover(card) {
             if (!card || card.getAttribute('data-open') === 'true') return;
             clearTouchHoverTimer(card);
@@ -361,14 +415,16 @@
                 touchHoverTimers.set(card, timer);
                 return;
             }
-
             card.classList.remove('is-touch-hover');
         }
 
+        /** 关闭单个卡片 */
         function closeCard(card) {
             clearRevealTimer(card);
             clearClickRestoreTimer(card);
             clearTouchHover(card);
+
+            // 关闭所有章节
             Array.from(card.querySelectorAll('.series-chapter')).forEach(chapterEl => {
                 const body = chapterEl.querySelector('.series-chapter-body');
                 if (!body) return;
@@ -376,15 +432,18 @@
                 body.style.maxHeight = '0px';
                 body.style.opacity = '0';
             });
+
             card.setAttribute('data-open', 'false');
             card.setAttribute('aria-expanded', 'false');
             card.setAttribute('data-phase', 'closed');
             card.classList.remove('is-restoring');
         }
 
+        // ===== 水平滚动支持（鼠标滚轮横向滚动） =====
         if (listEl) {
             listEl.addEventListener('wheel', function (event) {
                 if (!isDesktopView()) return;
+                // 只在垂直滚动时拦截（转换为水平滚动）
                 if (!event || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
                 if (event.target && event.target.closest('.series-card-right')) return;
 
@@ -393,10 +452,12 @@
             }, { passive: false });
         }
 
+        // ===== 每个卡片的交互绑定 =====
         cards.forEach(card => {
             const chapterToggles = Array.from(card.querySelectorAll('.series-chapter-toggle'));
             const cardRight = card.querySelector('.series-card-right');
 
+            /** 将章节滚动到可视区域顶部 */
             function scrollChapterToTop(chapterEl) {
                 if (!cardRight || !chapterEl || typeof cardRight.scrollTo !== 'function') return;
 
@@ -407,25 +468,31 @@
                 cardRight.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
             }
 
+            /** 设置章节展开/折叠状态 */
             function setChapterOpen(chapterEl, open) {
                 if (!chapterEl) return;
                 const body = chapterEl.querySelector('.series-chapter-body');
                 if (!body) return;
 
+                // 展开时关闭其他章节
                 if (open) {
                     chapterToggles.forEach(toggle => {
                         const otherChapter = toggle.closest('.series-chapter');
-                        if (otherChapter && otherChapter !== chapterEl) setChapterOpen(otherChapter, false);
+                        if (otherChapter && otherChapter !== chapterEl) {
+                            setChapterOpen(otherChapter, false);
+                        }
                     });
                 }
 
                 chapterEl.setAttribute('data-open', open ? 'true' : 'false');
+
                 if (open) {
                     body.style.overflowY = 'auto';
                     body.style.height = `${CHAPTER_BODY_HEIGHT}px`;
                     body.style.maxHeight = `${CHAPTER_BODY_HEIGHT}px`;
                     body.style.opacity = '1';
                     body.scrollTop = 0;
+
                     if (chapterEl.__seriesOpenTimer) {
                         clearTimeout(chapterEl.__seriesOpenTimer);
                     }
@@ -445,6 +512,7 @@
                 }
             }
 
+            /** 关闭所有章节 */
             function closeAllChapters() {
                 chapterToggles.forEach(toggle => {
                     const chapterEl = toggle.closest('.series-chapter');
@@ -452,6 +520,7 @@
                 });
             }
 
+            // ---- 章节切换按钮 ----
             chapterToggles.forEach(toggle => {
                 toggle.addEventListener('click', function (event) {
                     event.preventDefault();
@@ -459,14 +528,20 @@
 
                     const chapterEl = toggle.closest('.series-chapter');
                     if (!chapterEl) return;
+
                     const isOpen = chapterEl.getAttribute('data-open') === 'true';
-                    if (isOpen) closeAllChapters();
-                    else setChapterOpen(chapterEl, true);
+                    if (isOpen) {
+                        closeAllChapters();
+                    } else {
+                        setChapterOpen(chapterEl, true);
+                    }
                 });
             });
 
+            // ---- 卡片切换（带恢复动画） ----
             function triggerToggleAfterRestore() {
                 clearTouchHover(card);
+
                 const isOpen = card.getAttribute('data-open') === 'true';
                 if (isOpen) {
                     toggleCard();
@@ -475,6 +550,7 @@
 
                 clearClickRestoreTimer(card);
                 card.classList.add('is-restoring');
+
                 const timer = setTimeout(() => {
                     card.classList.remove('is-restoring');
                     toggleCard();
@@ -488,6 +564,7 @@
                 const nextOpen = !isOpen;
 
                 if (nextOpen) {
+                    // 关闭其他卡片
                     cards.forEach(otherCard => {
                         if (otherCard !== card) closeCard(otherCard);
                     });
@@ -496,12 +573,14 @@
                     card.setAttribute('data-open', 'true');
                     card.setAttribute('aria-expanded', 'true');
                     card.setAttribute('data-phase', 'opening');
+
                     const revealTimer = setTimeout(() => {
                         if (card.getAttribute('data-open') === 'true') {
                             card.setAttribute('data-phase', 'revealed');
                         }
                     }, EXPAND_REVEAL_DELAY);
                     revealTimers.set(card, revealTimer);
+
                     scheduleCentering(card);
                 } else {
                     closeAllChapters();
@@ -509,12 +588,16 @@
                 }
             }
 
+            // ---- 事件监听 ----
             card.addEventListener('click', function (event) {
-                // Keep post links clickable without toggling the card.
-                if (event.target && (event.target.closest('.series-post-link') || event.target.closest('.series-chapter-toggle'))) return;
+                // 点击内部链接或章节切换按钮时不触发卡片切换
+                if (event.target && (event.target.closest('.series-post-link') || event.target.closest('.series-chapter-toggle'))) {
+                    return;
+                }
                 triggerToggleAfterRestore();
             });
 
+            // Touch 悬停效果
             card.addEventListener('pointerdown', function (event) {
                 if (!event || event.pointerType !== 'touch') return;
                 setTouchHover(card);
@@ -535,6 +618,7 @@
                 clearTouchHover(card);
             });
 
+            // 键盘可访问性
             card.addEventListener('keydown', function (event) {
                 if (!event) return;
                 if (event.key === 'Enter' || event.key === ' ') {
@@ -545,6 +629,12 @@
         });
     }
 
+    // ==================== 渲染 ====================
+
+    /**
+     * 渲染系列列表
+     * @param {Array} seriesList - 规范化后的系列数据
+     */
     function renderSeries(seriesList) {
         const listEl = document.getElementById('seriesList');
         const emptyEl = document.getElementById('seriesEmpty');
@@ -569,6 +659,9 @@
             card.setAttribute('tabindex', '0');
             card.setAttribute('aria-expanded', 'false');
 
+            const hasChapters = Array.isArray(series.chapters) && series.chapters.length > 0;
+
+            // 无章节时直接渲染文章列表
             const postsHtml = series.posts
                 .map((post, postIndex) => `
                     <li class="series-post-item" style="--series-item-delay:${postIndex * 70}ms">
@@ -577,8 +670,7 @@
                 `)
                 .join('');
 
-            const hasChapters = Array.isArray(series.chapters) && series.chapters.length > 0;
-
+            // 有章节时渲染章节结构
             const chaptersHtml = (hasChapters ? series.chapters : [])
                 .map((chapter, chapterIndex) => {
                     const chapterTitle = (chapter && typeof chapter.title === 'string' && chapter.title.trim())
@@ -586,6 +678,7 @@
                         : (chapter && chapter.hasChapter && typeof chapter.raw === 'string' && chapter.raw.trim())
                             ? chapter.raw.trim()
                             : t('series_no_chapter', '未分章');
+
                     const chapterPostsHtml = (chapter && Array.isArray(chapter.posts) ? chapter.posts : [])
                         .map((post, postIndex) => `
                             <li class="series-post-item" style="--series-item-delay:${postIndex * 70}ms">
@@ -637,7 +730,15 @@
         bindSeriesInteractions();
     }
 
+    // ==================== 数据加载 ====================
+
+    /**
+     * 加载系列数据
+     * 优先从 series.json 加载，失败时从 blogs.json 聚合
+     * @returns {Promise<Array>} 规范化后的系列数据
+     */
     async function loadSeriesData() {
+        // 尝试从 series.json 加载
         try {
             const seriesRes = await fetch(SERIES_DATA_URL, { cache: 'no-store' });
             if (seriesRes.ok) {
@@ -645,27 +746,31 @@
                 const normalized = normalizeSeriesPayload(payload);
                 if (normalized.length > 0) return normalized;
             }
-        } catch (e) {
+        } catch (_) {
             // fallback to blogs.json
         }
 
+        // 备用：从 blogs.json 聚合
         try {
             const blogsRes = await fetch(BLOGS_DATA_URL, { cache: 'no-store' });
             if (blogsRes.ok) {
                 const blogs = await blogsRes.json();
                 return groupBlogsToSeries(blogs);
             }
-        } catch (e) {
+        } catch (_) {
             // ignore
         }
 
         return [];
     }
 
+    // ==================== 初始化 ====================
+
     async function initSeriesPage() {
         currentSeries = await loadSeriesData();
         renderSeries(currentSeries);
 
+        // 语言切换时重新渲染
         document.addEventListener('site:languageChanged', function () {
             renderSeries(currentSeries);
         });

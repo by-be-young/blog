@@ -1,154 +1,46 @@
+/**
+ * 快速链接（Quick Links）模块
+ * 功能：分类展示链接卡片，支持轮播式分类切换、响应式布局、
+ * 移动端浮动按钮弹窗、3D 滚轮视觉效果。
+ */
 (function () {
+    'use strict';
+
+    // ==================== 配置常量 ====================
     const DATA_URL = 'data/quick-links.json';
-    const QUICK_LINKS_STAGGER_BREAKPOINT = 760;
-    const QUICK_LINKS_CARD_STAGGER_MS = 85;
+    /** 启用卡片入场动画的最小宽度阈值 */
+    const STAGGER_BREAKPOINT = 760;
+    /** 卡片入场错峰延迟基数（ms） */
+    const CARD_STAGGER_MS = 85;
+    /** 模态框动画时长（ms） */
+    const MODAL_ANIMATION_MS = 320;
+    /** 滚轮缩放系数（降低灵敏度） */
+    const WHEEL_SCALE = 0.35;
+
+    // ==================== 状态变量 ====================
     let lastGridMinHeight = 0;
     let quickLinksRenderLockedUntil = 0;
 
+    // ==================== 渲染锁 ====================
+
+    /**
+     * 锁定渲染，防止在动画期间频繁切换分类导致闪动
+     * @param {number} ms - 锁定持续时间（毫秒）
+     */
     function lockQuickLinksRender(ms) {
-        const ttl = Number(ms) || 0;
-        const until = Date.now() + Math.max(0, ttl);
+        const until = Date.now() + Math.max(0, Number(ms) || 0);
         if (until > quickLinksRenderLockedUntil) {
             quickLinksRenderLockedUntil = until;
         }
     }
 
-    function initQuickLinksFab() {
-        const fab = document.getElementById('quickLinksFab');
-        const modal = document.getElementById('quickLinksModal');
-        const modalBody = modal ? modal.querySelector('.quick-links-modal-body') : null;
-        const sidebar = document.querySelector('.quick-links-sidebar');
-        const panel = document.querySelector('.quick-links-panel');
-        if (!fab || !modal || !modalBody || !panel) return;
+    // ==================== 导航初始化 ====================
 
-        let isOpen = false;
-        let isAnimating = false;
-        let closeTimer = null;
-        const MODAL_ANIMATION_MS = 320;
-
-        function syncWheelAfterModalOpen() {
-            try {
-                const wheelEl = panel.querySelector('#quickLinksWheel');
-                if (!wheelEl) return;
-                adjustWheelPadding(wheelEl);
-                lockQuickLinksRender(220);
-                if (typeof wheelEl.__recenterToSelected === 'function') {
-                    wheelEl.__recenterToSelected();
-                } else {
-                    const selected = wheelEl.querySelector('.quick-links-wheel-item.is-selected') || wheelEl.querySelector('.quick-links-wheel-item');
-                    if (selected) {
-                        scrollItemIntoCenter(wheelEl, selected, 'auto');
-                    }
-                    applyWheelVisuals(wheelEl);
-                }
-            } catch (e) { /* ignore */ }
-        }
-
-        function restorePanel() {
-            if (!sidebar) return;
-            if (panel.parentNode !== sidebar) {
-                sidebar.appendChild(panel);
-            }
-        }
-
-        function finalizeClose() {
-            restorePanel();
-            modal.classList.remove('closing');
-            modal.setAttribute('aria-hidden', 'true');
-            fab.setAttribute('aria-hidden', 'false');
-            document.body.style.overflow = '';
-            isAnimating = false;
-            closeTimer = null;
-        }
-
-        function openModal() {
-            if (isOpen || isAnimating) return;
-            if (closeTimer) {
-                window.clearTimeout(closeTimer);
-                closeTimer = null;
-            }
-
-            // 弹窗搬运+开启动画期间，临时锁住分类渲染，避免出现“先闪到其他分类再回到选中项”。
-            lockQuickLinksRender(MODAL_ANIMATION_MS + 260);
-
-            modalBody.appendChild(panel);
-
-            modal.classList.remove('open');
-            modal.classList.remove('closing');
-            modal.classList.add('open-prep');
-            modal.setAttribute('aria-hidden', 'false');
-            fab.setAttribute('aria-hidden', 'true');
-            document.body.style.overflow = 'hidden';
-
-            window.requestAnimationFrame(() => {
-                window.requestAnimationFrame(() => {
-                    modal.classList.remove('open-prep');
-                    modal.classList.add('open');
-                    syncWheelAfterModalOpen();
-                    window.setTimeout(syncWheelAfterModalOpen, 120);
-                });
-            });
-
-            isOpen = true;
-        }
-
-        function closeModal(immediate) {
-            if (!isOpen && !isAnimating) return;
-
-            if (closeTimer) {
-                window.clearTimeout(closeTimer);
-                closeTimer = null;
-            }
-
-            isOpen = false;
-
-            if (immediate) {
-                modal.classList.remove('open');
-                modal.classList.remove('open-prep');
-                modal.classList.remove('closing');
-                finalizeClose();
-                return;
-            }
-
-            isAnimating = true;
-            modal.classList.remove('open');
-            modal.classList.remove('open-prep');
-            modal.classList.add('closing');
-
-            closeTimer = window.setTimeout(() => {
-                finalizeClose();
-            }, MODAL_ANIMATION_MS);
-        }
-
-        fab.addEventListener('click', (e) => {
-            e.preventDefault();
-            openModal();
-        });
-
-        modal.addEventListener('click', (e) => {
-            if (e.target && e.target.matches('[data-role="backdrop"]')) closeModal(false);
-        });
-
-        function updateMode() {
-            const narrow = window.innerWidth <= 760;
-            if (!narrow) {
-                if (isOpen || isAnimating) closeModal(true);
-                restorePanel();
-                fab.style.display = 'none';
-                return;
-            }
-            fab.style.display = 'inline-flex';
-        }
-
-        updateMode();
-        window.addEventListener('resize', () => {
-            updateMode();
-        });
-    }
-
+    /**
+     * 初始化导航菜单切换（仅在未全局初始化时执行）
+     */
     function initNavigation() {
-        // If a global navigation initializer exists (from main.js), skip local init
-        // to avoid duplicate event handlers which cause double-toggling.
+        // 若 main.js 已初始化全局导航，则跳过避免重复绑定
         if (typeof window.initNavigation === 'function') return;
 
         const toggle = document.querySelector('.nav-toggle');
@@ -159,7 +51,7 @@
                 menu.classList.toggle('active');
             });
 
-            document.querySelectorAll('.nav-menu a').forEach(link => {
+            document.querySelectorAll('.nav-menu a').forEach((link) => {
                 link.addEventListener('click', () => {
                     menu.classList.remove('active');
                 });
@@ -167,28 +59,185 @@
         }
     }
 
+    // ==================== 移动端浮动按钮 ====================
+
+    /**
+     * 初始化移动端快速链接浮动按钮与弹窗
+     */
+    function initQuickLinksFab() {
+        const fab = document.getElementById('quickLinksFab');
+        const modal = document.getElementById('quickLinksModal');
+        const modalBody = modal ? modal.querySelector('.quick-links-modal-body') : null;
+        const sidebar = document.querySelector('.quick-links-sidebar');
+        const panel = document.querySelector('.quick-links-panel');
+
+        if (!fab || !modal || !modalBody || !panel) return;
+
+        let isOpen = false;
+        let isAnimating = false;
+        let closeTimer = null;
+
+        // ===== 弹窗打开后同步滚轮状态 =====
+        function syncWheelAfterModalOpen() {
+            try {
+                const wheelEl = panel.querySelector('#quickLinksWheel');
+                if (!wheelEl) return;
+                adjustWheelPadding(wheelEl);
+                lockQuickLinksRender(220);
+
+                if (typeof wheelEl.__recenterToSelected === 'function') {
+                    wheelEl.__recenterToSelected();
+                } else {
+                    const selected = wheelEl.querySelector('.quick-links-wheel-item.is-selected') ||
+                        wheelEl.querySelector('.quick-links-wheel-item');
+                    if (selected) {
+                        scrollItemIntoCenter(wheelEl, selected, 'auto');
+                    }
+                    applyWheelVisuals(wheelEl);
+                }
+            } catch (_) { /* ignore */ }
+        }
+
+        /** 将面板恢复到侧边栏 */
+        function restorePanel() {
+            if (!sidebar) return;
+            if (panel.parentNode !== sidebar) {
+                sidebar.appendChild(panel);
+            }
+        }
+
+        /** 最终关闭清理 */
+        function finalizeClose() {
+            restorePanel();
+            modal.classList.remove('closing');
+            modal.setAttribute('aria-hidden', 'true');
+            fab.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = '';
+            isAnimating = false;
+            closeTimer = null;
+        }
+
+        /** 打开弹窗 */
+        function openModal() {
+            if (isOpen || isAnimating) return;
+            if (closeTimer) {
+                clearTimeout(closeTimer);
+                closeTimer = null;
+            }
+
+            // 弹窗搬运+动画期间锁定渲染
+            lockQuickLinksRender(MODAL_ANIMATION_MS + 260);
+
+            // 将面板移动到弹窗体内
+            modalBody.appendChild(panel);
+
+            modal.classList.remove('open', 'closing');
+            modal.classList.add('open-prep');
+            modal.setAttribute('aria-hidden', 'false');
+            fab.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = 'hidden';
+
+            // 双 RAF 确保过渡动画生效
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    modal.classList.remove('open-prep');
+                    modal.classList.add('open');
+                    syncWheelAfterModalOpen();
+                    setTimeout(syncWheelAfterModalOpen, 120);
+                });
+            });
+
+            isOpen = true;
+        }
+
+        /** 关闭弹窗 */
+        function closeModal(immediate) {
+            if (!isOpen && !isAnimating) return;
+
+            if (closeTimer) {
+                clearTimeout(closeTimer);
+                closeTimer = null;
+            }
+
+            isOpen = false;
+
+            if (immediate) {
+                modal.classList.remove('open', 'open-prep', 'closing');
+                finalizeClose();
+                return;
+            }
+
+            isAnimating = true;
+            modal.classList.remove('open', 'open-prep');
+            modal.classList.add('closing');
+
+            closeTimer = setTimeout(() => {
+                finalizeClose();
+            }, MODAL_ANIMATION_MS);
+        }
+
+        // ---- 事件绑定 ----
+        fab.addEventListener('click', (e) => {
+            e.preventDefault();
+            openModal();
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target && e.target.matches('[data-role="backdrop"]')) {
+                closeModal(false);
+            }
+        });
+
+        // ---- 响应式：窄屏显示 FAB，宽屏恢复面板到侧边栏 ----
+        function updateMode() {
+            const isNarrow = window.innerWidth <= STAGGER_BREAKPOINT;
+            if (!isNarrow) {
+                if (isOpen || isAnimating) closeModal(true);
+                restorePanel();
+                fab.style.display = 'none';
+                return;
+            }
+            fab.style.display = 'inline-flex';
+        }
+
+        updateMode();
+        window.addEventListener('resize', updateMode);
+    }
+
+    // ==================== 卡片渲染 ====================
+
+    /**
+     * 渲染链接卡片网格
+     * @param {HTMLElement} gridEl - 网格容器
+     * @param {Array} items - 链接项数组
+     */
     function renderCards(gridEl, items) {
         const reducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-        const enableStagger = window.innerWidth > QUICK_LINKS_STAGGER_BREAKPOINT && !reducedMotion;
+        const enableStagger = window.innerWidth > STAGGER_BREAKPOINT && !reducedMotion;
 
-        // 记录切换前高度，避免切换到更短内容时页面高度骤降造成滚动位置“跳变”
+        // 记录切换前高度，避免内容变短时页面高度骤降
         try {
             const h = gridEl.getBoundingClientRect().height;
-            if (Number.isFinite(h) && h > lastGridMinHeight) lastGridMinHeight = h;
-        } catch (e) {
-            // ignore
-        }
+            if (Number.isFinite(h) && h > lastGridMinHeight) {
+                lastGridMinHeight = h;
+            }
+        } catch (_) { /* ignore */ }
 
         gridEl.innerHTML = '';
 
+        // 空状态
         if (!Array.isArray(items) || items.length === 0) {
             const empty = document.createElement('div');
             empty.className = 'link-empty';
+
             try {
-                const lang = (window.siteI18n && typeof window.siteI18n.getLang === 'function') ? window.siteI18n.getLang() : 'zh';
-                const tr = (window.siteI18n && window.siteI18n.translations) ? (window.siteI18n.translations[lang] || {}) : {};
+                const lang = window.siteI18n?.getLang?.() || 'zh';
+                const tr = window.siteI18n?.translations?.[lang] || {};
                 empty.textContent = tr.quick_no_links || '该分类下暂无链接。';
-            } catch (e) { empty.textContent = '该分类下暂无链接。'; }
+            } catch (_) {
+                empty.textContent = '该分类下暂无链接。';
+            }
+
             gridEl.appendChild(empty);
 
             if (lastGridMinHeight > 0) {
@@ -198,16 +247,19 @@
         }
 
         const createdCards = [];
+
         items.forEach((item, index) => {
-            const title = (item && item.title) ? String(item.title) : ((window.siteI18n && window.siteI18n.translations && window.siteI18n.translations[(window.siteI18n.getLang && window.siteI18n.getLang()) || 'zh'] && window.siteI18n.translations[window.siteI18n.getLang()].link_unnamed) || '未命名链接');
-            const url = (item && item.url) ? String(item.url) : '#';
-            const image = (item && item.image) ? String(item.image) : 'assets/images/background/bg1.png';
+            const title = item?.title
+                ? String(item.title)
+                : (window.siteI18n?.translations?.[window.siteI18n?.getLang?.() || 'zh']?.link_unnamed || '未命名链接');
+            const url = item?.url ? String(item.url) : '#';
+            const image = item?.image ? String(item.image) : 'assets/images/background/bg1.png';
 
             const a = document.createElement('a');
             a.className = 'link-card';
             if (enableStagger) {
                 a.classList.add('link-card-pre-enter');
-                a.style.setProperty('--ql-card-delay', `${index * QUICK_LINKS_CARD_STAGGER_MS}ms`);
+                a.style.setProperty('--ql-card-delay', `${index * CARD_STAGGER_MS}ms`);
             }
             a.href = url;
             a.target = '_blank';
@@ -227,15 +279,16 @@
             if (enableStagger) createdCards.push(a);
         });
 
+        // 入场动画
         if (enableStagger && createdCards.length > 0) {
-            window.requestAnimationFrame(() => {
-                createdCards.forEach(card => {
+            requestAnimationFrame(() => {
+                createdCards.forEach((card) => {
                     card.classList.add('link-card-enter-active');
                 });
             });
         }
 
-        // 渲染后如果内容更短，保持上一次高度，避免页面高度瞬变
+        // 保持最小高度，防止页面跳动
         if (lastGridMinHeight > 0) {
             try {
                 const newH = gridEl.getBoundingClientRect().height;
@@ -245,25 +298,30 @@
                     lastGridMinHeight = newH;
                     gridEl.style.minHeight = '';
                 }
-            } catch (e) {
+            } catch (_) {
                 gridEl.style.minHeight = `${Math.round(lastGridMinHeight)}px`;
             }
         }
     }
 
+    // ==================== 滚轮 3D 视觉 ====================
+
+    /**
+     * 应用滚轮 3D 视觉效果（倾斜、缩放、模糊、透明度）
+     */
     function applyWheelVisuals(wheelEl) {
         const items = Array.from(wheelEl.querySelectorAll('.quick-links-wheel-item'));
         if (items.length === 0) return;
 
-        // 使用滚动坐标系（scrollTop/offsetTop），避免元素 transform 反过来影响测量导致“翻转/压扁”
         const centerY = wheelEl.scrollTop + wheelEl.clientHeight / 2;
 
-        items.forEach(item => {
+        items.forEach((item) => {
             const itemCenter = item.offsetTop + item.offsetHeight / 2;
             const baseH = Math.max(item.offsetHeight, 1);
             const dy = (itemCenter - centerY) / baseH;
             const abs = Math.min(Math.abs(dy), 3);
 
+            // 选中项特殊处理
             if (item.classList.contains('is-selected')) {
                 item.style.opacity = '1';
                 item.style.transform = 'translateZ(0) scale(1.06)';
@@ -282,14 +340,17 @@
         });
     }
 
+    /**
+     * 查找最接近滚轮中心的项索引
+     */
     function findClosestWheelIndex(wheelEl) {
         const items = Array.from(wheelEl.querySelectorAll('.quick-links-wheel-item'));
         if (items.length === 0) return -1;
 
         const centerY = wheelEl.scrollTop + wheelEl.clientHeight / 2;
-
         let bestIdx = 0;
         let bestDist = Infinity;
+
         items.forEach((item, idx) => {
             const itemCenter = item.offsetTop + item.offsetHeight / 2;
             const dist = Math.abs(itemCenter - centerY);
@@ -298,12 +359,18 @@
                 bestIdx = idx;
             }
         });
+
         return bestIdx;
     }
 
+    /**
+     * 设置选中的滚轮项
+     * @returns {HTMLElement|null} 选中的元素
+     */
     function setSelectedWheelIndex(wheelEl, index) {
         const items = Array.from(wheelEl.querySelectorAll('.quick-links-wheel-item'));
         if (items.length === 0) return null;
+
         const safe = Math.max(0, Math.min(index, items.length - 1));
 
         items.forEach((item, idx) => {
@@ -311,25 +378,33 @@
             item.classList.toggle('is-selected', selected);
             item.setAttribute('aria-selected', selected ? 'true' : 'false');
         });
-        applyWheelVisuals(wheelEl);
 
+        applyWheelVisuals(wheelEl);
         return items[safe] || null;
     }
 
+    /**
+     * 将指定项滚动到滚轮容器中心
+     */
     function scrollItemIntoCenter(wheelEl, itemEl, behavior) {
         if (!wheelEl || !itemEl) return;
-        // 用容器 scrollTop 手动居中，避免 scrollIntoView 导致页面级滚动跳动
+
         const target = itemEl.offsetTop + itemEl.offsetHeight / 2 - wheelEl.clientHeight / 2;
         const top = Math.max(0, Math.min(target, wheelEl.scrollHeight - wheelEl.clientHeight));
+
         try {
             wheelEl.scrollTo({ top, behavior: behavior || 'smooth' });
-        } catch (e) {
+        } catch (_) {
             wheelEl.scrollTop = top;
         }
     }
 
+    /**
+     * 调整滚轮内边距，使首尾项可居中
+     */
     function adjustWheelPadding(wheelEl) {
         if (!wheelEl) return;
+
         const firstItem = wheelEl.querySelector('.quick-links-wheel-item');
         if (!firstItem) return;
 
@@ -337,11 +412,39 @@
         if (!itemH) return;
 
         const pad = Math.max(0, Math.round(wheelEl.clientHeight / 2 - itemH / 2));
-        // 用 inline style 覆盖 CSS 固定 padding，避免分类数量/字体/高度变化导致居中异常
         wheelEl.style.paddingTop = `${pad}px`;
         wheelEl.style.paddingBottom = `${pad}px`;
     }
 
+    // ==================== 侧边粘性控制 ====================
+
+    /**
+     * 更新侧边栏粘性：当侧边高度超过可视区域时禁用粘性
+     */
+    function updateQuickLinksSticky() {
+        try {
+            const sidebar = document.querySelector('.quick-links-sidebar');
+            if (!sidebar) return;
+
+            // 仅在窄屏上下结构下启用
+            if (window.innerWidth > STAGGER_BREAKPOINT) {
+                sidebar.classList.remove('no-sticky');
+                return;
+            }
+
+            const topOffset = 60 + 12;
+            const avail = window.innerHeight - topOffset - 24;
+            const sidebarH = sidebar.getBoundingClientRect().height;
+
+            sidebar.classList.toggle('no-sticky', sidebarH > avail);
+        } catch (_) { /* ignore */ }
+    }
+
+    // ==================== 页面主渲染 ====================
+
+    /**
+     * 渲染快速链接页面
+     */
     function renderPage(data) {
         const wheelEl = document.getElementById('quickLinksWheel');
         const gridEl = document.getElementById('quickLinksGrid');
@@ -353,61 +456,57 @@
         const categories = data && Array.isArray(data.categories) ? data.categories : [];
         wheelEl.innerHTML = '';
 
+        // 构建分类数据映射
         const itemsByKey = new Map();
-        categories.forEach(cat => {
-            if (!cat || !cat.key) return;
+        categories.forEach((cat) => {
+            if (!cat?.key) return;
             itemsByKey.set(cat.key, Array.isArray(cat.items) ? cat.items : []);
         });
 
-        const lang = (window.siteI18n && window.siteI18n.getLang) ? window.siteI18n.getLang() : 'zh';
-        const tr = (window.siteI18n && window.siteI18n.translations) ? window.siteI18n.translations[lang] || window.siteI18n.translations['zh'] : {};
-
-        const wheelItems = categories.map(cat => {
+        // 创建滚轮项
+        const wheelItems = categories.map((cat) => {
             const div = document.createElement('div');
             div.className = 'quick-links-wheel-item';
             div.dataset.key = cat.key;
             div.setAttribute('role', 'option');
             div.setAttribute('aria-selected', 'false');
-            // use translation key based on category key: quick_<key>
+
             const keyNorm = String(cat.key || '').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
-            const transKey = `quick_${keyNorm}`;
-            // set data-i18n so siteI18n.applyTo can translate dynamically
-            div.setAttribute('data-i18n', transKey);
-            // fallback content (will be replaced by applyTo if translation exists)
+            div.setAttribute('data-i18n', `quick_${keyNorm}`);
             div.textContent = cat.label || cat.key || 'link';
+
             return div;
         });
 
-        wheelItems.forEach(el => wheelEl.appendChild(el));
+        wheelItems.forEach((el) => wheelEl.appendChild(el));
 
-        // apply i18n to wheel labels immediately
-        if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') {
-            try { window.siteI18n.applyTo(wheelEl); } catch (e) { /* ignore */ }
+        // 应用国际化
+        if (window.siteI18n?.applyTo) {
+            try { window.siteI18n.applyTo(wheelEl); } catch (_) { /* ignore */ }
         }
 
-        // 动态 padding：确保首尾项也能居中到高亮框
         adjustWheelPadding(wheelEl);
 
-        // 默认优先选择 key 为 `personal`（个人）的分类，使页面进入时显示“个人”内容
+        // 默认选中 'personal' 分类
         const preferredKey = 'personal';
-        const found = wheelItems.findIndex(el => el.dataset.key === preferredKey);
-        let activeIndex = -1;
-        if (wheelItems.length > 0) {
-            activeIndex = found !== -1 ? found : 0;
-        }
+        const found = wheelItems.findIndex((el) => el.dataset.key === preferredKey);
+        let activeIndex = wheelItems.length > 0 ? (found !== -1 ? found : 0) : -1;
+
         let snapTimer = null;
         let rafPending = false;
         let lastRenderAt = 0;
         let currentKey = null;
         let programmaticScrollUntil = 0;
 
+        // ---- 核心更新函数 ----
         function updateFromIndex(nextIndex, shouldRender) {
             const selectedEl = setSelectedWheelIndex(wheelEl, nextIndex);
             if (!selectedEl) return;
+
             activeIndex = Array.from(wheelEl.querySelectorAll('.quick-links-wheel-item')).indexOf(selectedEl);
+
             if (shouldRender) {
                 const key = selectedEl.dataset.key;
-                // 防止同一分类重复渲染导致闪动
                 if (key !== currentKey) {
                     currentKey = key;
                     renderCardsWithTransition(itemsByKey.get(key) || []);
@@ -418,7 +517,6 @@
         function renderCardsWithTransition(items) {
             const doRender = () => renderCards(gridEl, items);
 
-            // 无障碍降级：用户偏好减少动效时不做过渡。
             if (prefersReducedMotion || typeof gridEl.animate !== 'function') {
                 doRender();
                 return;
@@ -426,25 +524,15 @@
 
             const token = ++gridSwitchToken;
 
+            // 取消进行中的动画
             try {
-                const animations = gridEl.getAnimations();
-                if (Array.isArray(animations)) {
-                    animations.forEach(anim => anim.cancel());
-                }
-            } catch (e) {
-                // ignore
-            }
+                gridEl.getAnimations().forEach((anim) => anim.cancel());
+            } catch (_) { /* ignore */ }
 
+            // 淡出
             const fadeOut = gridEl.animate(
-                [
-                    { opacity: 1 },
-                    { opacity: 0 }
-                ],
-                {
-                    duration: 200,
-                    easing: 'cubic-bezier(0.4, 0, 1, 1)',
-                    fill: 'forwards'
-                }
+                [{ opacity: 1 }, { opacity: 0 }],
+                { duration: 200, easing: 'cubic-bezier(0.4, 0, 1, 1)', fill: 'forwards' }
             );
 
             fadeOut.onfinish = () => {
@@ -452,16 +540,10 @@
 
                 doRender();
 
+                // 淡入
                 const fadeIn = gridEl.animate(
-                    [
-                        { opacity: 0 },
-                        { opacity: 1 }
-                    ],
-                    {
-                        duration: 320,
-                        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-                        fill: 'both'
-                    }
+                    [{ opacity: 0 }, { opacity: 1 }],
+                    { duration: 320, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'both' }
                 );
 
                 fadeIn.onfinish = () => {
@@ -471,11 +553,15 @@
             };
         }
 
+        // ---- 暴露重新居中方法 ----
         wheelEl.__recenterToSelected = function () {
-            const selectedEl = wheelEl.querySelector('.quick-links-wheel-item.is-selected') || wheelEl.querySelector('.quick-links-wheel-item');
+            const selectedEl = wheelEl.querySelector('.quick-links-wheel-item.is-selected') ||
+                wheelEl.querySelector('.quick-links-wheel-item');
             if (!selectedEl) return;
+
             const idx = Array.from(wheelEl.querySelectorAll('.quick-links-wheel-item')).indexOf(selectedEl);
             if (idx < 0) return;
+
             updateFromIndex(idx, true);
             lockQuickLinksRender(240);
             programmaticScrollUntil = Date.now() + 260;
@@ -483,6 +569,7 @@
             applyWheelVisuals(wheelEl);
         };
 
+        // ---- 视觉更新调度 ----
         function scheduleVisuals() {
             if (rafPending) return;
             rafPending = true;
@@ -492,11 +579,10 @@
             });
         }
 
-        // 初始选中第一项并渲染
+        // ---- 初始渲染 ----
         if (activeIndex >= 0) {
             updateFromIndex(activeIndex, true);
-            // 让初始项居中（避免首次进入时不在高亮框）
-            const initialEl = wheelEl.querySelectorAll('.quick-links-wheel-item')[activeIndex];
+            const initialEl = wheelItems[activeIndex];
             programmaticScrollUntil = Date.now() + 120;
             scrollItemIntoCenter(wheelEl, initialEl, 'auto');
             applyWheelVisuals(wheelEl);
@@ -504,131 +590,123 @@
             renderCards(gridEl, []);
         }
 
-        // 调整侧边粘性（立即）
-        try { updateQuickLinksSticky && updateQuickLinksSticky(); } catch (e) { }
+        try { updateQuickLinksSticky(); } catch (_) { /* ignore */ }
 
-        // 滚动：实时更新视觉；停下后自动吸附并切换分类
+        // ---- 滚轮事件 ----
         wheelEl.addEventListener('scroll', () => {
             scheduleVisuals();
 
-            // 点击/键盘触发的平滑居中期间，避免 scroll 事件重复渲染造成右侧闪动
-            const now0 = Date.now();
-            const allowRender = now0 >= programmaticScrollUntil && now0 >= quickLinksRenderLockedUntil;
+            const now = Date.now();
+            const allowRender = now >= programmaticScrollUntil && now >= quickLinksRenderLockedUntil;
 
             const idx = findClosestWheelIndex(wheelEl);
-            // 滚动过程中也保持“选中项”和“右侧内容”基本同步，但做轻量节流
             if (idx !== -1 && idx !== activeIndex) {
-                const now = Date.now();
                 const shouldRender = allowRender && (now - lastRenderAt) > 120;
                 updateFromIndex(idx, shouldRender);
                 if (shouldRender) lastRenderAt = now;
             }
 
-            if (snapTimer) window.clearTimeout(snapTimer);
-            snapTimer = window.setTimeout(() => {
+            if (snapTimer) clearTimeout(snapTimer);
+            snapTimer = setTimeout(() => {
                 if (Date.now() < quickLinksRenderLockedUntil) return;
+
                 const idx2 = findClosestWheelIndex(wheelEl);
                 if (idx2 === -1) return;
+
                 updateFromIndex(idx2, true);
                 lastRenderAt = Date.now();
-                const el = wheelEl.querySelectorAll('.quick-links-wheel-item')[idx2];
+
+                const el = wheelItems[idx2];
                 programmaticScrollUntil = Date.now() + 240;
                 scrollItemIntoCenter(wheelEl, el, 'smooth');
             }, 120);
         }, { passive: true });
 
-        // Wheel 缩放：降低滚轮灵敏度（同时避免带动整页滚动）
+        // ---- 滚轮缩放（降低灵敏度） ----
         wheelEl.addEventListener('wheel', (e) => {
-            // 仅处理垂直滚动
             if (typeof e.deltaY !== 'number' || e.deltaY === 0) return;
             e.preventDefault();
 
-            // deltaMode: 0=px, 1=line, 2=page
             const base = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
-            const scaled = base * 0.35;
+            const scaled = base * WHEEL_SCALE;
             const clamped = Math.max(-90, Math.min(90, scaled));
             wheelEl.scrollTop += clamped;
         }, { passive: false });
 
-        // 点击：滚到中心并触发选中
+        // ---- 点击选中 ----
         wheelEl.addEventListener('click', (e) => {
             const target = e.target;
             if (!(target instanceof Element)) return;
+
             const itemEl = target.closest('.quick-links-wheel-item');
             if (!itemEl) return;
-            const idx = Array.from(wheelEl.querySelectorAll('.quick-links-wheel-item')).indexOf(itemEl);
+
+            const idx = wheelItems.indexOf(itemEl);
             if (idx === -1) return;
+
             updateFromIndex(idx, true);
             programmaticScrollUntil = Date.now() + 240;
             scrollItemIntoCenter(wheelEl, itemEl, 'smooth');
             wheelEl.focus();
         });
 
-        // 键盘上下键：切换分类
+        // ---- 键盘导航 ----
         wheelEl.addEventListener('keydown', (e) => {
             if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
             if (activeIndex < 0) return;
+
             e.preventDefault();
             const delta = e.key === 'ArrowUp' ? -1 : 1;
             const next = Math.max(0, Math.min(activeIndex + delta, wheelItems.length - 1));
+
             updateFromIndex(next, true);
-            const el = wheelEl.querySelectorAll('.quick-links-wheel-item')[next];
+            const el = wheelItems[next];
             programmaticScrollUntil = Date.now() + 240;
             scrollItemIntoCenter(wheelEl, el, 'smooth');
         });
 
-        // 尺寸变化时更新 3D 视觉
+        // ---- 窗口调整 ----
         window.addEventListener('resize', () => {
             adjustWheelPadding(wheelEl);
             scheduleVisuals();
-            try { updateQuickLinksSticky && updateQuickLinksSticky(); } catch (e) { }
+            try { updateQuickLinksSticky(); } catch (_) { /* ignore */ }
         });
-        // update wheel labels when language changes
-        document.addEventListener('site:languageChanged', function () {
-            if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') {
-                try { window.siteI18n.applyTo(wheelEl); } catch (e) { /* ignore */ }
+
+        // ---- 语言切换 ----
+        document.addEventListener('site:languageChanged', () => {
+            if (window.siteI18n?.applyTo) {
+                try { window.siteI18n.applyTo(wheelEl); } catch (_) { /* ignore */ }
             }
         });
     }
 
-    // 控制侧边粘性：当侧边高度超过可视区域时禁用粘性，避免覆盖卡片
-    function updateQuickLinksSticky() {
-        try {
-            const sidebar = document.querySelector('.quick-links-sidebar');
-            if (!sidebar) return;
-            // 仅在窄屏上下结构下启用粘性逻辑
-            if (window.innerWidth > 760) {
-                sidebar.classList.remove('no-sticky');
-                return;
-            }
-            const topOffset = 60 + 12;
-            const avail = window.innerHeight - topOffset - 24;
-            const sidebarH = sidebar.getBoundingClientRect().height;
-            if (sidebarH > avail) sidebar.classList.add('no-sticky');
-            else sidebar.classList.remove('no-sticky');
-        } catch (e) { /* ignore */ }
-    }
+    // ==================== 数据加载 ====================
 
+    /**
+     * 加载快速链接数据并渲染
+     */
     async function initQuickLinks() {
         try {
             const res = await fetch(DATA_URL, { cache: 'no-store' });
             const data = await res.json();
             renderPage(data);
-        } catch (e) {
+        } catch (_) {
             const gridEl = document.getElementById('quickLinksGrid');
-            if (gridEl) {
-                try {
-                    const lang = (window.siteI18n && typeof window.siteI18n.getLang === 'function') ? window.siteI18n.getLang() : 'zh';
-                    const tr = (window.siteI18n && window.siteI18n.translations) ? (window.siteI18n.translations[lang] || {}) : {};
-                    gridEl.innerHTML = '<div class="link-empty">' + (tr.quick_links_load_failed || '加载失败：请检查 data/quick-links.json') + '</div>';
-                } catch (e) {
-                    gridEl.innerHTML = '<div class="link-empty">加载失败：请检查 data/quick-links.json</div>';
-                }
+            if (!gridEl) return;
+
+            try {
+                const lang = window.siteI18n?.getLang?.() || 'zh';
+                const tr = window.siteI18n?.translations?.[lang] || {};
+                gridEl.innerHTML = `<div class="link-empty">${tr.quick_links_load_failed || '加载失败：请检查 data/quick-links.json'}</div>`;
+            } catch (_) {
+                gridEl.innerHTML = '<div class="link-empty">加载失败：请检查 data/quick-links.json</div>';
             }
         }
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
+    // ==================== 启动 ====================
+
+    document.addEventListener('DOMContentLoaded', () => {
         initNavigation();
         initQuickLinksFab();
         initQuickLinks();

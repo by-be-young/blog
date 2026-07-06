@@ -6,30 +6,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>关于 | 个人资料</title>
     <link rel="icon" href="assets/avatar.png" type="image/png">
+
+    <!-- ==================== 样式表 ==================== -->
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style-home.css">
+    <link rel="stylesheet" href="css/style-profile.css">
     <link rel="stylesheet" href="css/butterfly.css">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/search.css">
     <link rel="stylesheet" href="css/archive.css">
     <link rel="stylesheet" href="css/categories.css">
+    <link rel="stylesheet" href="css/blog-detail.css">
+    <link rel="stylesheet" href="css/blog-detail-macaron.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- ==================== 脚本（按依赖顺序加载） ==================== -->
+
+    <!-- 1. 国际化模块：提供多语言支持 -->
     <script src="js/i18n.js" defer></script>
+
+    <!-- 2. Markdown 解析库：从 CDN 加载 -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="js/markdown.js" defer></script>
+
+    <!-- 3. 关于页面脚本：加载并渲染 Markdown 内容 -->
     <script src="js/about.js" defer></script>
+
+    <!-- 注意：本页面不使用 markdown.js，由 about.js 直接调用 marked 渲染 -->
 </head>
 
 <body class="blog-detail-page about-page">
+    <!-- ==================== 导航栏 ==================== -->
     <nav class="navbar">
         <div class="nav-container">
+            <!-- 品牌标识区 -->
             <div class="nav-brand">
-                <a class="nav-avatar" href="about.html" aria-label="profile">
+                <a class="nav-avatar" href="about.html" aria-label="个人资料">
                     <img src="assets/avatar.png" alt="头像">
                 </a>
-                <a class="nav-brand-link" href="index.html" aria-label="home">
+                <a class="nav-brand-link" href="index.html" aria-label="首页">
                     <span data-i18n="brand"></span>
                 </a>
             </div>
+
+            <!-- 主导航菜单 -->
             <ul class="nav-menu">
                 <li><a href="index.html"><i class="fas fa-home"></i> <span data-i18n="home"></span></a></li>
                 <li><a href="archive.html"><i class="fas fa-archive"></i> <span data-i18n="archive"></span></a></li>
@@ -37,9 +56,13 @@
                 <li><a href="series.html"><i class="fas fa-layer-group"></i> <span data-i18n="series"></span></a></li>
                 <li><a href="quick-links.html"><i class="fas fa-link"></i> <span data-i18n="quicklinks"></span></a></li>
             </ul>
+
+            <!-- 右侧操作区 -->
             <div class="nav-actions">
-                <button class="nav-search-btn" aria-label="search"><i class="fas fa-search"></i> <span
-                        data-i18n="search"></span></button>
+                <button class="nav-search-btn" aria-label="搜索">
+                    <i class="fas fa-search"></i>
+                    <span data-i18n="search"></span>
+                </button>
                 <div class="nav-toggle">
                     <i class="fas fa-bars"></i>
                 </div>
@@ -47,14 +70,23 @@
         </div>
     </nav>
 
+    <!-- ==================== 主内容区 ==================== -->
     <main class="blog-detail">
         <div class="container">
             <div class="content-wrapper">
-                <!-- 左侧资料卡（与首页一致） -->
+
+                <!-- ===== 左侧：个人资料卡 ===== -->
                 <aside class="blog-toc" id="profile-card-aside">
                     <div class="profile-card" id="about-profile-card">
-                        <div class="avatar"><img src="assets/avatar.png" alt="头像"></div>
+                        <!-- 头像 -->
+                        <div class="avatar">
+                            <img src="assets/avatar.png" alt="头像">
+                        </div>
+
+                        <!-- 姓名 -->
                         <h2 class="name" data-i18n="profile_name"></h2>
+
+                        <!-- 资料详情 -->
                         <div class="profile-info">
                             <div class="profile-row">
                                 <span class="profile-label profile-label--school" data-i18n="label_school"></span>
@@ -75,6 +107,7 @@
                             </div>
                         </div>
 
+                        <!-- 兴趣爱好 -->
                         <div class="profile-interests">
                             <div class="interests-label" data-i18n="label_interests"></div>
                             <div class="interests-list">
@@ -85,6 +118,7 @@
                             </div>
                         </div>
 
+                        <!-- 统计信息 -->
                         <div class="stats">
                             <div class="stat">
                                 <a class="stat-link" href="archive.html">
@@ -106,28 +140,35 @@
                             </div>
                         </div>
 
+                        <!-- 社交链接 -->
                         <div class="social-links contact-links">
-                            <a href="#" id="github-link--about" class="contact-btn" aria-label="GitHub"><i
-                                    class="fab fa-github"></i><span class="sr-only"
-                                    data-i18n="contact_github"></span></a>
+                            <a href="#" id="github-link--about" class="contact-btn" aria-label="GitHub">
+                                <i class="fab fa-github"></i>
+                                <span class="sr-only" data-i18n="contact_github"></span>
+                            </a>
                         </div>
                     </div>
                 </aside>
 
+                <!-- ===== 右侧：文章内容区 ===== -->
                 <article class="blog-article">
+                    <!-- 文章标题 -->
                     <header class="article-header">
                         <h1 class="article-title" data-i18n-title="about_title">About</h1>
                     </header>
 
+                    <!-- Markdown 内容容器 -->
+                    <!-- 由 about.js 加载 Markdown 并使用 marked 渲染 -->
                     <div class="article-content" id="markdown-content">
-                        <!-- Markdown 内容将由 js/about.js 按语言加载并渲染 -->
                         Loading...
                     </div>
                 </article>
+
             </div>
         </div>
     </main>
 
+    <!-- ==================== 底部脚本 ==================== -->
     <script src="js/search.js"></script>
     <script src="js/main.js"></script>
 </body>

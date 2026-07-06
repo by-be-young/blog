@@ -1,0 +1,441 @@
+/* ============================================================
+   TABLE OF CONTENTS (TOC) - 目录组件
+   包含：目录容器、列表结构、交互状态、移动端适配
+   ============================================================ */
+
+/* ------------------------------
+   1. 目录容器 (.blog-toc)
+   ------------------------------ */
+.blog-toc {
+    /* 定位与布局 */
+    position: sticky;
+    top: 100px;
+    align-self: flex-start;
+
+    /* 尺寸与盒模型 */
+    width: 300px;
+    flex: 0 0 300px;
+    height: fit-content;
+    padding: 18px 20px;
+
+    /* 视觉样式 */
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.08);
+    font-size: 1.08rem;
+
+    /* Flex 布局 */
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    /* 动画过渡 */
+    transition: width 0.25s;
+}
+
+/* 关于页专用：覆盖目录宽度 */
+.about-page .blog-toc {
+    width: 360px;
+    flex: 0 0 360px;
+}
+
+/* ------------------------------
+   2. 目录标题与进度
+   ------------------------------ */
+.toc-title {
+    /* 尺寸与定位 */
+    padding-right: 52px;
+    margin-bottom: 10px;
+
+    /* 文字样式 */
+    font-weight: bold;
+    font-size: 1.08rem;
+    color: var(--primary-color);
+}
+
+.toc-progress {
+    /* 定位：绝对定位在右上角 */
+    position: absolute;
+    top: 18px;
+    right: 20px;
+
+    /* 文字样式 */
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1;
+    color: #2d8cf0;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------
+   3. 目录列表 (.toc-list)
+   ------------------------------ */
+.toc-list {
+    /* 重置列表样式 */
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    /* Flex 布局：占满剩余高度 */
+    flex: 1 1 auto;
+
+    /* 滚动控制 */
+    max-height: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+
+    /* 定位上下文 */
+    position: relative;
+}
+
+/* 隐藏滚动条 - WebKit 浏览器 */
+.toc-list::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+}
+
+/* 列表项间距 */
+.toc-list li {
+    margin-bottom: 7px;
+}
+
+/* ------------------------------
+   4. 目录层级标题 (H1/H2/H3)
+   ------------------------------ */
+/* 所有层级共用定位上下文 */
+.toc-h1,
+.toc-h2,
+.toc-h3 {
+    position: relative;
+}
+
+/* --- H1 级别 --- */
+.toc-h1>a {
+    font-weight: bold;
+    font-size: 1.08rem;
+    color: #2d8cf0;
+}
+
+/* --- H2 级别 --- */
+.toc-h2 {
+    position: relative;
+}
+
+.toc-h2>a {
+    position: relative;
+    /* 为伪元素高亮提供定位上下文 */
+    z-index: 1;
+    margin-left: 12px;
+    font-size: 1rem;
+    color: #19be6b;
+}
+
+/* H2 的子列表缩进 */
+.toc-h2>.toc-sub-list {
+    padding-left: 10px;
+}
+
+/* H2 激活高亮（通过 a 的伪元素实现） */
+.toc-h2.is-active>a::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    /* 向左延伸对齐 H1 */
+    right: -2px;
+    top: -4px;
+    /* 上下扩展增加高度 */
+    bottom: -4px;
+    z-index: 0;
+    background: rgba(25, 190, 107, 0.08);
+    border-radius: 8px;
+}
+
+/* 当启用动画指示器时，隐藏静态高亮 */
+.toc-list.has-animated-h2-indicator .toc-h2.is-active>a::before {
+    opacity: 0;
+}
+
+/* --- H3 级别 --- */
+.toc-h3 {
+    position: relative;
+}
+
+.toc-h3>a {
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    margin-left: 24px;
+    font-size: 0.95rem;
+    color: var(--h3-heading-color);
+}
+
+.toc-h3>a:hover {
+    color: var(--h3-heading-color);
+}
+
+.toc-h3.is-active>a {
+    padding-left: 0;
+}
+
+.toc-h3.is-active>a::before {
+    display: none;
+}
+
+/* ------------------------------
+   5. 子列表与折叠控制
+   ------------------------------ */
+.toc-sub-list {
+    list-style: none;
+    padding-left: 18px;
+    margin: 0;
+
+    /* 折叠动画 */
+    opacity: 1;
+    will-change: max-height, opacity;
+    transition: max-height 0.22s ease, opacity 0.18s ease;
+}
+
+.toc-toggle {
+    /* 交互与尺寸 */
+    cursor: pointer;
+    margin-right: 6px;
+    user-select: none;
+
+    /* 视觉样式 */
+    color: #aaa;
+    font-size: 0.95em;
+    transition: color 0.2s;
+}
+
+.toc-toggle:hover {
+    color: #2d8cf0;
+}
+
+/* ------------------------------
+   6. 目录链接通用样式
+   ------------------------------ */
+.toc-list a {
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.toc-list a:hover {
+    text-decoration: underline;
+    color: #b620e0;
+}
+
+/* H3 链接悬停不变色（覆盖通用规则） */
+.toc-list .toc-h3>a:hover {
+    color: var(--h3-heading-color);
+}
+
+/* 带星标标记的链接 */
+.toc-list a.has-star-marker {
+    display: inline-block;
+    padding-right: 22px;
+}
+
+.toc-item-label {
+    min-width: 0;
+}
+
+/* ------------------------------
+   7. 星标标记装饰
+   ------------------------------ */
+/* 目录中的星标 */
+.toc-star-marker {
+    position: absolute;
+    right: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+
+    color: #f3b51a;
+    font-size: 0.95em;
+    line-height: 1;
+    text-shadow: 0 0 8px rgba(243, 181, 26, 0.28);
+}
+
+/* 标题中的星标（旋转动画） */
+.heading-star-marker {
+    display: inline-block;
+    margin-left: 0.5em;
+
+    color: #f3b51a;
+    font-size: 1.28em;
+    line-height: 1;
+    vertical-align: -0.08em;
+
+    transform-origin: center;
+    animation: headingStarSpin 8s linear infinite;
+    text-shadow: 0 0 10px rgba(243, 181, 26, 0.28);
+}
+
+@keyframes headingStarSpin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ------------------------------
+   8. 活动高亮指示器（JS 驱动动画）
+   ------------------------------ */
+.toc-h2-active-indicator {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+    z-index: 0;
+
+    background: rgba(25, 190, 107, 0.08);
+    border-radius: 8px;
+    pointer-events: none;
+
+    opacity: 0;
+    transform: translateY(0);
+    transition: transform 220ms ease,
+        left 220ms ease,
+        width 220ms ease,
+        height 220ms ease,
+        opacity 160ms ease;
+}
+
+/* ------------------------------
+   9. 浮动源石虫图标
+   ------------------------------ */
+.toc-bug {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 18px;
+    height: 18px;
+    z-index: 3;
+
+    pointer-events: none;
+    opacity: 0;
+    transform-origin: center center;
+
+    transition: left 260ms cubic-bezier(.2, .9, .2, 1),
+        top 260ms cubic-bezier(.2, .9, .2, 1),
+        opacity 160ms ease,
+        transform 600ms ease;
+}
+
+.toc-bug img {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* 闲置浮动动画 */
+@keyframes toc-bug-float {
+    0% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-4px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+.toc-bug.idle {
+    animation: toc-bug-float 3s ease-in-out infinite;
+}
+
+/* ------------------------------
+   10. 移动端：紧凑模式 (Compact Mode)
+   ------------------------------ */
+/* 在紧凑模式下隐藏原始目录（保留可移动到 overlay 的副本） */
+body.toc-compact-mode .blog-toc:not(.in-overlay) {
+    display: none !important;
+}
+
+/* 目录悬浮按钮 (FAB) */
+.toc-fab {
+    /* 尺寸与显示 */
+    width: 48px;
+    height: 48px;
+    display: none;
+    /* 默认隐藏，由 JS 在紧凑模式显示 */
+
+    /* Flex 居中 */
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+.toc-fab:active {
+    transform: scale(0.98);
+}
+
+/* 移动端弹窗遮罩 */
+.toc-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1098;
+
+    /* Flex 居中 */
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+
+    /* 背景与交互 */
+    background: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.26s ease;
+}
+
+.toc-overlay.is-active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* 弹窗中的目录卡片 */
+.toc-overlay .blog-toc.in-overlay {
+    position: relative;
+    top: auto;
+    align-self: center;
+
+    /* 尺寸限制 */
+    width: min(88vw, 420px);
+    flex: 0 0 auto;
+    max-height: min(78vh, 680px);
+    margin: 0;
+    overflow: hidden;
+
+    /* 弹出动画：从点击位置展开 */
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.28);
+    transform: translate(var(--toc-pop-dx, 0), var(--toc-pop-dy, 0)) scale(0.2);
+    opacity: 0;
+    will-change: transform, opacity;
+    transition: transform 0.32s cubic-bezier(0.2, 0.82, 0.22, 1),
+        opacity 0.24s ease;
+}
+
+.toc-overlay .blog-toc.in-overlay.is-open {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+}
+
+/* 窄屏视口：显示 FAB 按钮 */
+@media (max-width: 880px) {
+    body.toc-compact-mode .toc-fab {
+        display: inline-flex;
+    }
+}
