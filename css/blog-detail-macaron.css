@@ -239,11 +239,6 @@ body.blog-detail-page.immersive-reading-active::after {
     margin-top: 0;
 }
 
-.blog-detail-page .article-content blockquote p:first-child:not(:has(:not(strong))) {
-    text-align: center;
-    text-indent: 0;
-}
-
 .blog-detail-page .article-content blockquote p:last-child {
     margin-bottom: 0;
 }

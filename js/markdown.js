@@ -2076,6 +2076,28 @@
         // ---- 代码块增强 ----
         enhanceCodeBlocks(contentElement);
 
+        // ---- 引用块第一段特殊样式：仅当段落只有一个 strong 子元素时居中 ----
+        (function processQuoteBlocks(root) {
+            if (!root) return;
+
+            root.querySelectorAll('blockquote p:first-child').forEach((p) => {
+                // 检查该段落是否只有一个子节点，且该子节点是 STRONG 元素
+                const children = p.childNodes;
+                const onlyStrong = children.length === 1 &&
+                    children[0].nodeType === 1 &&
+                    children[0].tagName === 'STRONG';
+
+                if (onlyStrong) {
+                    p.style.textAlign = 'center';
+                    p.style.textIndent = '0';
+                } else {
+                    // 确保其他段落不受影响（重置样式）
+                    p.style.textAlign = '';
+                    p.style.textIndent = '';
+                }
+            });
+        })(contentElement);
+
         // ---- 国际化 ----
         try {
             if (window.siteI18n?.applyTo) {
