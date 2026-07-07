@@ -1008,12 +1008,7 @@ body.mermaid-viewer-open {
 
 /* ------------------------------
    15. 返回顶部按钮
-   ------------------------------ */
-#back-to-top {
-    position: fixed;
-    right: 32px;
-    bottom: 32px;
-    z-index: 999;
+   ------------------------------
     background: var(--primary-color);
     color: #fff;
     border: none;
@@ -1024,6 +1019,7 @@ body.mermaid-viewer-open {
     box-shadow: 0 2px 8px rgba(52, 152, 219, 0.18);
     cursor: pointer;
     display: none;
+    flex-shrink: 0;
     transition: background 0.2s, box-shadow 0.2s;
 }
 
