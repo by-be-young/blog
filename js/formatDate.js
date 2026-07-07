@@ -52,7 +52,8 @@
                 month: 'long',
                 day: 'numeric'
             });
-        } catch (_) {
+        } catch (error) {
+            console.error('[date] 格式化日期失败:', error);
             // 回退到浏览器默认格式
             return date.toLocaleDateString();
         }
@@ -72,7 +73,9 @@
                     el.textContent = formatDateImpl(d);
                 }
             });
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[date] 更新日期元素失败:', error);
+        }
     }
 
     // ==================== 暴露 API ====================
@@ -83,11 +86,15 @@
 
     // 语言切换时更新
     document.addEventListener('site:languageChanged', () => {
-        try { updateDates(); } catch (_) { /* ignore */ }
+        try { updateDates(); } catch (error) {
+            console.error('[date] 语言切换时更新日期失败:', error);
+        }
     });
 
     // DOM 加载完成后更新
     document.addEventListener('DOMContentLoaded', () => {
-        try { updateDates(); } catch (_) { /* ignore */ }
+        try { updateDates(); } catch (error) {
+            console.error('[date] DOM 加载完成后更新日期失败:', error);
+        }
     });
 })();

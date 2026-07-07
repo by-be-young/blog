@@ -58,7 +58,9 @@
             if (window.siteI18n && typeof window.siteI18n.getLang === 'function') {
                 return window.siteI18n.getLang();
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[search] 获取当前语言失败:', error);
+        }
         return 'zh';
     }
 
@@ -71,7 +73,9 @@
             if (Object.prototype.hasOwnProperty.call(map, key) && map[key] != null) {
                 return map[key];
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[search] 获取国际化文本失败:', error);
+        }
         return fallback;
     }
 
@@ -94,7 +98,9 @@
             if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') {
                 window.siteI18n.applyTo(resultsEl);
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[search] 应用国际化失败:', error);
+        }
     }
 
     /**
@@ -155,7 +161,9 @@
             if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') {
                 window.siteI18n.applyTo(panel);
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[search] 应用国际化失败:', error);
+        }
 
         // ===== 关闭按钮 =====
         panel.querySelector('#search-close').addEventListener('click', hidePanel);
@@ -236,7 +244,9 @@
                 const content = document.getElementById('markdown-content');
                 if (content) clearHighlights(content);
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[search] 清除高亮失败:', error);
+        }
 
         // ===== 定位样式 =====
         if (panel.classList.contains('right-sidebar')) {
@@ -250,7 +260,9 @@
                         desiredTop = Math.max(desiredTop, Math.round(tocTop));
                     }
                 }
-            } catch (_) { /* ignore */ }
+            } catch (error) {
+                console.error('[search] 获取 TOC 位置失败:', error);
+            }
 
             panel.style.top = desiredTop + 'px';
             panel.style.right = '18px';
@@ -276,7 +288,9 @@
             if (typeof window.__bringToFront === 'function') {
                 window.__bringToFront(panel);
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[search] 提升面板层级失败:', error);
+        }
 
         // 聚焦输入框
         if (input) input.focus();
@@ -299,7 +313,9 @@
                 const content = document.getElementById('markdown-content');
                 if (content) clearHighlights(content);
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[search] 清除高亮失败:', error);
+        }
     }
 
     // ==================== 面板层级管理 ====================
@@ -313,7 +329,9 @@
                 if (typeof window.__bringToFront === 'function') {
                     window.__bringToFront(panel);
                 }
-            } catch (_) { /* ignore */ }
+            } catch (error) {
+                console.error('[search] 提升面板层级失败:', error);
+            }
         }
     });
 
@@ -420,7 +438,8 @@
                     dateSpan.textContent = typeof window.formatDate === 'function'
                         ? window.formatDate(r.blog.date)
                         : (r.blog.date || '');
-                } catch (_) {
+                } catch (error) {
+                    console.error('[search] 格式化日期失败:', error);
                     dateSpan.textContent = r.blog.date || '';
                 }
                 title.appendChild(dateSpan);
@@ -467,7 +486,9 @@
                         const w = window.open(url, '_blank', 'noopener,noreferrer');
                         try {
                             if (w) w.opener = null;
-                        } catch (_) { /* ignore */ }
+                        } catch (error) {
+                            console.error('[search] 打开新标签页失败:', error);
+                        }
                     }
                 });
 
@@ -541,7 +562,8 @@
                     }
                     const text = await resp.text();
                     bodyTextCache.set(key, String(text || '').toLowerCase());
-                } catch (_) {
+                } catch (error) {
+                    console.error('[search] 加载博客正文失败:', error);
                     bodyTextCache.set(key, '');
                 }
             })
@@ -679,7 +701,9 @@
                         if (n.parentNode) {
                             n.parentNode.replaceChild(document.createTextNode('【公式】'), n);
                         }
-                    } catch (_) { /* ignore */ }
+                    } catch (error) {
+                        console.error('[search] 替换数学公式节点失败:', error);
+                    }
                 });
 
                 const recordedParentText = (el.dataset.parentText || (parent.textContent || '')).trim();
@@ -740,7 +764,9 @@
                 if (end < cleaned.length) out += '...';
                 return out;
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[search] 格式化匹配文本失败:', error);
+        }
 
         // 最终备用方案
         const fallbackTxt = (el.textContent || '').trim();
@@ -900,7 +926,8 @@
                 if (!d) return;
                 try {
                     el.textContent = typeof window.formatDate === 'function' ? window.formatDate(d) : d;
-                } catch (_) {
+                } catch (error) {
+                    console.error('[search] 格式化日期失败:', error);
                     el.textContent = d;
                 }
             });
@@ -920,13 +947,17 @@
                         if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') {
                             window.siteI18n.applyTo(first);
                         }
-                    } catch (_) { /* ignore */ }
+                    } catch (error) {
+                        console.error('[search] 应用国际化失败:', error);
+                    }
                 } else if (!first.querySelector('.title')) {
                     const noDetail = t('search_no_results_detail', '未在本文中找到匹配');
                     first.textContent = noDetail;
                 }
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[search] 更新搜索面板国际化内容失败:', error);
+        }
     }
 
     // 绑定语言切换事件
@@ -950,7 +981,9 @@
                         if (typeof window.__bringToFront === 'function') {
                             window.__bringToFront(panel);
                         }
-                    } catch (_) { /* ignore */ }
+                    } catch (error) {
+                        console.error('[search] 提升面板层级失败:', error);
+                    }
                 }
             });
         });

@@ -42,7 +42,9 @@
             if (window.siteI18n?.getLang) {
                 return window.siteI18n.getLang();
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[i18n] 获取当前语言失败:', error);
+        }
         return 'zh';
     }
 
@@ -55,7 +57,10 @@
             if (Object.prototype.hasOwnProperty.call(map, key) && map[key] != null) {
                 return map[key];
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[i18n] 获取国际化文本失败:', error);
+            console.debug('[i18n] 失败时的 key:', key);
+        }
         return fallback;
     }
 
@@ -85,7 +90,9 @@
                 await navigator.clipboard.writeText(t);
                 return true;
             }
-        } catch (_) { /* fallback */ }
+        } catch (error) {
+            console.error('[clipboard] 复制文本到剪贴板失败:', error);
+        }
 
         try {
             const ta = document.createElement('textarea');
@@ -97,7 +104,8 @@
             const ok = document.execCommand('copy');
             document.body.removeChild(ta);
             return !!ok;
-        } catch (_) {
+        } catch (error) {
+            console.error('[clipboard] 复制文本到剪贴板失败:', error);
             return false;
         }
     }
@@ -181,8 +189,8 @@
 
                 // 相对路径解析到 Markdown 文件所在目录
                 img.setAttribute('src', new URL(src, mdBase).href);
-            } catch (_) {
-                /* ignore malformed URLs */
+            } catch (error) {
+                console.error('[markdown] 重写资源 URL 失败:', error);
             }
         });
     }
@@ -850,7 +858,8 @@
                     copied: map.image_copied || '已复制',
                     copyFailed: map.image_copy_failed || '复制失败'
                 };
-            } catch (_) {
+            } catch (error) {
+                console.error('[markdown] 获取图片查看器国际化文本失败:', error);
                 return { download: '下载', copy: '复制', copied: '已复制', copyFailed: '复制失败' };
             }
         }
@@ -891,7 +900,8 @@
             try {
                 const clean = String(item.src).split('#')[0].split('?')[0];
                 return clean.split('/').pop() || 'image';
-            } catch (_) {
+            } catch (error) {
+                console.error('[markdown] 获取下载文件名失败:', error);
                 return 'image';
             }
         }
@@ -965,7 +975,8 @@
                 const mime = blob.type || 'image/png';
                 await navigator.clipboard.write([new ClipboardItem({ [mime]: blob })]);
                 setCopyText(t.copied);
-            } catch (_) {
+            } catch (error) {
+                console.error('[markdown] 复制图片到剪贴板失败:', error);
                 setCopyText(t.copyFailed);
             }
 
@@ -1311,7 +1322,9 @@
                         }
                     }
                 });
-            } catch (_) { /* ignore */ }
+            } catch (error) {
+                console.error('[i18n] 更新代码块国际化文本失败:', error);
+            }
         }
 
         if (!window.__codeblockI18nBound) {
@@ -1881,7 +1894,9 @@
                     map.set(cleanText, id);
                     map.set(slugify(rawText), id);
                     map.set(slugify(cleanText), id);
-                } catch (_) { /* ignore */ }
+                } catch (error) {
+                    console.error('[heading] 处理标题失败:', error);
+                }
             });
 
             // 替换内部引用
@@ -1945,7 +1960,8 @@
                         return document.querySelector('#toc-list a[href="#' + CSS.escape(id) + '"]');
                     }
                     return document.querySelector('#toc-list a[href="#' + id.replace(/"/g, '\\"') + '"]');
-                } catch (_) {
+                } catch (error) {
+                    console.error('[markdown] 定位到 TOC 锚点失败:', error);
                     return null;
                 }
             }
@@ -1982,8 +1998,12 @@
                     const lockMs = Math.max(650, Math.min(2200, Math.round(distance * 0.9)));
                     window.scrollTo({ top: y, behavior: 'smooth' });
                     setTimeout(() => { window.__scrollingToTOC = false; }, lockMs);
-                    try { history.replaceState(null, '', '#' + id); } catch (_) { /* ignore */ }
-                } catch (_) { /* ignore */ }
+                    try { history.replaceState(null, '', '#' + id); } catch (error) {
+                        console.error('[navigation] 更新历史记录失败:', error);
+                    }
+                } catch (error) {
+                    console.error('[navigation] 处理内部链接失败:', error);
+                }
             }, true);
         })();
 
@@ -1996,7 +2016,8 @@
                     try {
                         window.katex.render(src, span, { displayMode: true, throwOnError: false });
                         el.parentNode.replaceChild(span, el);
-                    } catch (_) {
+                    } catch (error) {
+                        console.error('[math] 渲染块级数学公式失败:', error);
                         el.textContent = `$$${src}$$`;
                     }
                 });
@@ -2007,7 +2028,8 @@
                     try {
                         window.katex.render(src, span, { displayMode: false, throwOnError: false });
                         el.parentNode.replaceChild(span, el);
-                    } catch (_) {
+                    } catch (error) {
+                        console.error('[math] 渲染行内数学公式失败:', error);
                         el.textContent = `$${src}$`;
                     }
                 });
@@ -2019,7 +2041,9 @@
                     ]
                 });
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[math] 渲染数学公式失败:', error);
+        }
 
         // ---- 资源重写 ----
         rewriteMarkdownAssetUrls(contentElement);
@@ -2057,7 +2081,9 @@
             if (window.siteI18n?.applyTo) {
                 window.siteI18n.applyTo(contentElement);
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[i18n] 应用国际化文本失败:', error);
+        }
 
         // ==================== 答案折叠交互 ====================
 
@@ -2090,7 +2116,9 @@
                 if (task) {
                     task.querySelectorAll('.md-options').forEach((g) => setOptionsLocked(g, true));
                 }
-            } catch (_) { /* ignore */ }
+            } catch (error) {
+                console.error('[answer] 锁定选项组失败:', error);
+            }
         }
 
         function collapseAnswerBlock(answerBlock) {
@@ -2125,7 +2153,9 @@
                         task.querySelectorAll('.md-options').forEach((g) => setOptionsLocked(g, false));
                     }
                 }
-            } catch (_) { /* ignore */ }
+            } catch (error) {
+                console.error('[answer] 解锁选项组失败:', error);
+            }
         }
 
         function setOptionsLocked(optionsGroup, locked) {
@@ -2375,7 +2405,9 @@
 
                 try {
                     if (window.siteI18n?.applyTo) window.siteI18n.applyTo(statsEl);
-                } catch (_) { /* ignore */ }
+                } catch (error) {
+                    console.error('[i18n] 更新任务统计国际化文本失败:', error);
+                }
             });
         }
 
@@ -2387,7 +2419,9 @@
                 refreshExerciseLabels(contentElement);
                 if (window.siteI18n?.applyTo) window.siteI18n.applyTo(contentElement);
                 updateTaskStatsSummary();
-            } catch (_) { /* ignore */ }
+            } catch (error) {
+                console.error('[i18n] 更新内容国际化文本失败:', error);
+            }
         });
     }
 
@@ -2401,6 +2435,6 @@
         }
     }
 
-    // 暴露渲染函数供外部调用（例如 about.js 和 blog-detail.html 中的内联脚本）
+    // 暴露渲染函数供外部调用
     window.renderMarkdownContent = renderMarkdownContent;
 })();

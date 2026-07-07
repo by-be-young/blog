@@ -116,7 +116,9 @@
 
             toc.style.setProperty('--toc-pop-dx', Math.round(fabX - tocX) + 'px');
             toc.style.setProperty('--toc-pop-dy', Math.round(fabY - tocY) + 'px');
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[toc] 更新弹出动画位移向量失败:', error);
+        }
     }
 
     /**
@@ -230,7 +232,9 @@
             const avail = container.clientWidth || 0;
             // 文章最大宽度 900 + 目录 300 + 间距 32 ≈ 1232
             if (avail < COMPACT_CONTAINER_THRESHOLD) return true;
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[toc] 判断紧凑模式失败:', error);
+        }
         return false;
     }
 
@@ -285,6 +289,8 @@
                 });
                 mo.observe(tocList, { childList: true, subtree: true });
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[toc] 初始化 MutationObserver 失败:', error);
+        }
     });
 })();

@@ -53,7 +53,8 @@
     function getLang() {
         try {
             return window.siteI18n?.getLang?.() || 'zh';
-        } catch (_) {
+        } catch (error) {
+            console.error('[i18n] 获取当前语言失败:', error);
             return 'zh';
         }
     }
@@ -64,7 +65,8 @@
             const lang = getLang();
             const map = window.siteI18n?.translations?.[lang] || {};
             return map[key] ?? fallback;
-        } catch (_) {
+        } catch (error) {
+            console.error('[i18n] 获取国际化文本失败:', error);
             return fallback;
         }
     }
@@ -195,7 +197,9 @@
                     wheel.scrollTop = targetTop;
                     applyWheelVisuals(wheel);
                 });
-            } catch (_) { /* ignore */ }
+            } catch (error) {
+                console.error('[categories] 调整轮播视图失败:', error);
+            }
         }
 
         function restoreToSidebar() {
@@ -372,7 +376,9 @@
                 const px = parseInt(val.trim(), 10);
                 if (!Number.isNaN(px)) overlayH = px;
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[categories] 调整轮播视图失败:', error);
+        }
 
         const basePad = Math.round(wheelH / 2 - itemH / 2);
         const pad = Math.max(0, Math.max(basePad, overlayH));
@@ -470,7 +476,9 @@
                     });
                 }
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[categories] 更新选中框失败:', error);
+        }
     }
 
     function scrollItemIntoCenter(wheelEl, index, behavior = 'smooth') {
@@ -542,7 +550,8 @@
 
             try {
                 wheelEl.focus({ preventScroll: true });
-            } catch (_) {
+            } catch (error) {
+                console.error('[categories] 聚焦轮播元素失败:', error);
                 wheelEl.focus();
             }
         });
@@ -672,9 +681,13 @@
         // 应用国际化
         try {
             if (window.siteI18n?.applyTo) window.siteI18n.applyTo(container);
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[categories] 应用国际化失败:', error);
+        }
 
-        try { updateSidebarSticky(); } catch (_) { /* ignore */ }
+        try { updateSidebarSticky(); } catch (error) {
+            console.error('[categories] 更新侧边栏粘性失败:', error);
+        }
     }
 
     // ==================== 侧边栏粘性控制 ====================
@@ -694,7 +707,9 @@
             const sidebarH = sidebar.getBoundingClientRect().height;
 
             sidebar.classList.toggle('no-sticky', sidebarH > avail);
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[categories] 更新侧边栏粘性失败:', error);
+        }
     }
 
     // ==================== 响应式重绘 ====================
@@ -709,11 +724,15 @@
                     (last > DESKTOP_ENTRANCE_BREAKPOINT && curr <= DESKTOP_ENTRANCE_BREAKPOINT);
                 window.__categories_last_width = curr;
                 if (crossed) {
-                    try { renderCategories(); } catch (_) { /* ignore */ }
+                    try { renderCategories(); } catch (error) {
+                        console.error('[categories] 响应式重绘失败:', error);
+                    }
                 }
             });
         })();
-    } catch (_) { /* ignore */ }
+    } catch (error) {
+        console.error('[categories] 初始化响应式重绘失败:', error);
+    }
 
     // ==================== 博客列表渲染 ====================
 
@@ -795,7 +814,9 @@
         }
 
         // 标签可见性调整
-        try { adjustTagsVisibility(); } catch (_) { /* ignore */ }
+        try { adjustTagsVisibility(); } catch (error) {
+            console.error('[categories] 调整标签可见性失败:', error);
+        }
     }
 
     // ==================== 标签可见性自适应 ====================
@@ -813,7 +834,9 @@
                     const n = parseInt(v, 10);
                     if (!Number.isNaN(n) && n > 0) tagW = n;
                 }
-            } catch (_) { /* ignore */ }
+            } catch (error) {
+                console.error('[categories] 获取标签宽度失败:', error);
+            }
 
             const threshold = Math.max(defaultThreshold, tagW * 3 + 160);
 
@@ -823,13 +846,17 @@
                 const w = it.getBoundingClientRect().width;
                 it.classList.toggle('tags-hidden', w <= threshold);
             });
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[categories] 调整标签可见性失败:', error);
+        }
     }
 
     function initItemsResizeObserver() {
         try {
             if (window.__cat_ro) {
-                try { window.__cat_ro.disconnect(); } catch (_) { /* ignore */ }
+                try { window.__cat_ro.disconnect(); } catch (error) {
+                    console.error('[categories] 断开 ResizeObserver 失败:', error);
+                }
                 window.__cat_ro = null;
             }
 
@@ -837,20 +864,28 @@
             if (!items.length) return;
 
             const onResize = throttle(() => {
-                try { adjustTagsVisibility(); } catch (_) { /* ignore */ }
+                try { adjustTagsVisibility(); } catch (error) {
+                    console.error('[categories] 响应式重绘失败:', error);
+                }
             }, 120);
 
             const ro = new ResizeObserver(() => onResize());
             items.forEach((it) => {
-                try { ro.observe(it); } catch (_) { /* ignore */ }
+                try { ro.observe(it); } catch (error) {
+                    console.error('[categories] 观察元素尺寸变化失败:', error);
+                }
             });
             window.__cat_ro = ro;
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[categories] 初始化 ResizeObserver 失败:', error);
+        }
     }
 
     // 窗口缩放时更新
     window.addEventListener('resize', throttle(() => {
-        try { adjustTagsVisibility(); } catch (_) { /* ignore */ }
+        try { adjustTagsVisibility(); } catch (error) {
+            console.error('[categories] 响应式重绘失败:', error);
+        }
     }, 150));
 
     // ==================== 初始化 ====================
@@ -871,7 +906,9 @@
                         selectedTags = parsed.slice(0, MAX_LEVELS).map((v) => (v === null ? null : v));
                     }
                 }
-            } catch (_) { /* ignore */ }
+            } catch (error) {
+                console.error('[categories] 解析 URL 参数失败:', error);
+            }
 
             const typeFilterController = initCategoriesTypeFilterUI((mode) => {
                 selectedTypeFilter = mode || 'all';
@@ -881,19 +918,33 @@
                 renderBlogList();
             });
 
-            try { initCategoriesFab(typeFilterController); } catch (_) { /* ignore */ }
+            try { initCategoriesFab(typeFilterController); } catch (error) {
+                console.error('[categories] 初始化分类 Fab 失败:', error);
+            }
 
             renderCategories();
             renderBlogList();
 
             // ResizeObserver 监听卡片尺寸变化
-            try { initItemsResizeObserver(); } catch (_) { /* ignore */ }
+            try { initItemsResizeObserver(); } catch (error) {
+                console.error('[categories] 初始化 ResizeObserver 失败:', error);
+            }
 
             // 粘性控制
             try {
-                window.addEventListener('load', () => { try { updateSidebarSticky(); } catch (_) { /* ignore */ } });
-                window.addEventListener('resize', throttle(() => { try { updateSidebarSticky(); } catch (_) { /* ignore */ } }, 160));
-            } catch (_) { /* ignore */ }
+                window.addEventListener('load', () => {
+                    try { updateSidebarSticky(); } catch (error) {
+                        console.error('[categories] 更新侧边栏粘性失败:', error);
+                    }
+                });
+                window.addEventListener('resize', throttle(() => {
+                    try { updateSidebarSticky(); } catch (error) {
+                        console.error('[categories] 更新侧边栏粘性失败:', error);
+                    }
+                }, 160));
+            } catch (error) {
+                console.error('[categories] 初始化粘性控制失败:', error);
+            }
         })
         .catch(() => {
             const listDiv = document.getElementById('blogList');
@@ -909,6 +960,8 @@
             if (container && window.siteI18n?.applyTo) {
                 window.siteI18n.applyTo(container);
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[categories] 语言切换时更新失败:', error);
+        }
     });
 })();

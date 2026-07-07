@@ -19,7 +19,8 @@
     function isMobileTimeline() {
         try {
             return window.matchMedia(MOBILE_TIMELINE_QUERY).matches;
-        } catch (_) {
+        } catch (error) {
+            console.error('[announcements] 判断移动端布局失败:', error);
             return window.innerWidth <= 880;
         }
     }
@@ -40,7 +41,8 @@
     function getLang() {
         try {
             return window.siteI18n?.getLang?.() || 'zh';
-        } catch (_) {
+        } catch (error) {
+            console.error('[announcements] 获取当前语言失败:', error);
             return 'zh';
         }
     }
@@ -60,7 +62,8 @@
                 return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
             }
             return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
-        } catch (_) {
+        } catch (error) {
+            console.error('[announcements] 格式化日期失败:', error);
             return dateString || '';
         }
     }
@@ -143,7 +146,9 @@
                         } else {
                             el.classList.remove('is-visible');
                         }
-                    } catch (_) { /* ignore */ }
+                    } catch (error) {
+                        console.error('[announcements] 处理交集观察失败:', error);
+                    }
                 });
             },
             { threshold: INTERSECTION_THRESHOLD }
@@ -271,7 +276,9 @@
             if (window.siteI18n?.applyTo) {
                 window.siteI18n.applyTo(timeline);
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[announcements] 应用国际化失败:', error);
+        }
 
         // 格式化日期
         try {
@@ -279,7 +286,9 @@
                 const d = el.getAttribute('data-date');
                 if (d) el.textContent = formatDate(d);
             });
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[announcements] 格式化日期失败:', error);
+        }
 
         // 触发进入动画
         ensureVisibleAnimations(timeline);

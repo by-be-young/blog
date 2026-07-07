@@ -40,13 +40,14 @@
             if (window.siteI18n && typeof window.siteI18n.getLang === 'function') {
                 return window.siteI18n.getLang();
             }
-        } catch (_) {
-            /* 忽略异常 */
+        } catch (error) {
+            console.error('[about] 获取当前网站语言失败:', error);
         }
 
         try {
             return localStorage.getItem('site_language') || 'zh';
-        } catch (_) {
+        } catch (error) {
+            console.error('[about] 获取本地存储的网站语言失败:', error);
             return 'zh';
         }
     }
@@ -227,8 +228,8 @@
                 if (window.siteI18n && typeof window.siteI18n.applyTo === 'function') {
                     window.siteI18n.applyTo(container);
                 }
-            } catch (_) {
-                /* 忽略国际化应用失败 */
+            } catch (error) {
+                console.error('[about] 应用国际化失败:', error);
             }
         } catch (err) {
             console.error('Markdown 渲染失败:', err);
@@ -330,8 +331,8 @@
                     });
 
                     refreshWordCountDisplay();
-                } catch (_) {
-                    /* 忽略统计更新中的异常 */
+                } catch (error) {
+                    console.error('[about] 更新统计信息失败:', error);
                 }
             })
             .catch(function () {

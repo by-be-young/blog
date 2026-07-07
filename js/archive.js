@@ -70,7 +70,8 @@
   function getLang() {
     try {
       return window.siteI18n?.getLang?.() || 'zh';
-    } catch (_) {
+    } catch (error) {
+      console.error('[archive] 获取当前语言失败:', error);
       return 'zh';
     }
   }
@@ -81,7 +82,8 @@
       const lang = getLang();
       const map = window.siteI18n?.translations?.[lang] || {};
       return map[key] ?? fallback;
-    } catch (_) {
+    } catch (error) {
+      console.error('[archive] 获取国际化文本失败:', error);
       return fallback;
     }
   }
@@ -316,7 +318,8 @@
       if (lang === 'en') {
         try {
           return new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long' }).format(d);
-        } catch (_) {
+        } catch (error) {
+          console.error('[archive] 格式化日期失败:', error);
           return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}`;
         }
       }
@@ -347,7 +350,9 @@
     timeline.appendChild(headerItem);
 
     if (window.siteI18n?.applyTo) {
-      try { window.siteI18n.applyTo(timeline); } catch (_) { /* ignore */ }
+      try { window.siteI18n.applyTo(timeline); } catch (error) {
+        console.error('[archive] 应用国际化失败:', error);
+      }
     }
 
     let lastYearKey = '';
@@ -476,7 +481,8 @@
         return `${main} ${eraHtml}`;
       }
       return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
-    } catch (_) {
+    } catch (error) {
+      console.error('[archive] 格式化日期失败:', error);
       return date.toLocaleDateString();
     }
   }
@@ -493,7 +499,9 @@
           }
         }
       });
-    } catch (_) { /* ignore */ }
+    } catch (error) {
+      console.error('[archive] 更新时间戳失败:', error);
+    }
   }
 
   // ==================== 滚筒效果 ====================
@@ -678,7 +686,8 @@
                 lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : 'zh-CN',
                 { year: 'numeric', month: 'long' }
               ).format(new Date(y, m, 1));
-            } catch (_) {
+            } catch (error) {
+              console.error('[archive] 格式化日期失败:', error);
               calLabelEl.textContent = `${y}年${m + 1}月`;
             }
           } else {
@@ -693,17 +702,23 @@
                   lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : 'zh-CN',
                   { year: 'numeric' }
                 ).format(new Date(y, 0, 1));
-              } catch (_) {
+              } catch (error) {
+                console.error('[archive] 格式化日期失败:', error);
                 calLabelEl.textContent = `${y}年`;
               }
             }
           }
         }
-      } catch (_) { /* ignore */ }
+      } catch (error) {
+        console.error('[archive] 更新日历国际化失败:', error);
+      }
     }
 
     document.addEventListener('site:languageChanged', () => {
-      try { render(); } catch (_) { updateCalendarI18n(); }
+      try { render(); } catch (error) {
+        console.error('[archive] 渲染失败:', error);
+      }
+      updateCalendarI18n();
       updateToggleBackground();
     });
 
@@ -756,7 +771,8 @@
 
       try {
         calLabel.textContent = new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'long' }).format(new Date(y, m, 1));
-      } catch (_) {
+      } catch (error) {
+        console.error('[archive] 格式化日期失败:', error);
         calLabel.textContent = `${y}年${m + 1}月`;
       }
 
@@ -797,7 +813,9 @@
       parts.push('</div>');
       calendarBody.innerHTML = parts.join('');
 
-      if (window.siteI18n?.applyTo) try { window.siteI18n.applyTo(calendarBody); } catch (_) { /* ignore */ }
+      if (window.siteI18n?.applyTo) try { window.siteI18n.applyTo(calendarBody); } catch (error) {
+        console.error('[archive] 应用国际化失败:', error);
+      }
       updateCalendarI18n();
     }
 
@@ -813,7 +831,8 @@
       } else {
         try {
           calLabel.textContent = new Intl.DateTimeFormat(locale, { year: 'numeric' }).format(new Date(y, 0, 1));
-        } catch (_) {
+        } catch (error) {
+          console.error('[archive] 格式化年份失败:', error);
           calLabel.textContent = `${y}年`;
         }
       }
@@ -835,7 +854,10 @@
 
         let monthLabel = '';
         if (lang === 'en') {
-          try { monthLabel = new Intl.DateTimeFormat(locale, { month: 'short' }).format(new Date(y, month, 1)); } catch (_) { monthLabel = String(month + 1); }
+          try { monthLabel = new Intl.DateTimeFormat(locale, { month: 'short' }).format(new Date(y, month, 1)); } catch (error) {
+            console.error('[archive] 格式化月份失败:', error);
+            monthLabel = String(month + 1);
+          }
         } else {
           monthLabel = `${month + 1}月`;
         }
@@ -846,14 +868,18 @@
       parts.push('</div>');
       calendarBody.innerHTML = parts.join('');
 
-      if (window.siteI18n?.applyTo) try { window.siteI18n.applyTo(calendarBody); } catch (_) { /* ignore */ }
+      if (window.siteI18n?.applyTo) try { window.siteI18n.applyTo(calendarBody); } catch (error) {
+        console.error('[archive] 应用国际化失败:', error);
+      }
       updateCalendarI18n();
     }
 
     function render() {
       if (view === 'year') renderYear();
       else renderMonth();
-      if (window.siteI18n?.applyTo) try { window.siteI18n.applyTo(calendarBody); } catch (_) { /* ignore */ }
+      if (window.siteI18n?.applyTo) try { window.siteI18n.applyTo(calendarBody); } catch (error) {
+        console.error('[archive] 应用国际化失败:', error);
+      }
       updateCalendarI18n();
     }
 
@@ -934,7 +960,9 @@
       if (dateCount.has(todayYmd)) {
         setTimeout(() => jumpTimelineToDate(todayYmd), 80);
       }
-    } catch (_) { /* ignore */ }
+    } catch (error) {
+      console.error('[archive] 定位到今天失败:', error);
+    }
 
     return {
       setBlogs(nextBlogs) {
@@ -989,7 +1017,9 @@
       }
 
       const filterController = initArchiveFilterUI(applyArchiveFilter);
-      try { initCalendarFab(filterController); } catch (_) { /* ignore */ }
+      try { initCalendarFab(filterController); } catch (error) {
+        console.error('[archive] 初始化日历Fab失败:', error);
+      }
 
       // 默认滚动到最新文章
       setTimeout(() => {

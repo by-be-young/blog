@@ -40,7 +40,9 @@
             if (window.siteI18n && typeof window.siteI18n.getLang === 'function') {
                 return window.siteI18n.getLang();
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[series] 获取当前语言失败:', error);
+        }
         return 'zh';
     }
 
@@ -53,7 +55,9 @@
             if (Object.prototype.hasOwnProperty.call(map, key) && map[key] != null) {
                 return map[key];
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[series] 获取国际化文本失败:', error);
+        }
         return fallback;
     }
 
@@ -746,7 +750,8 @@
                 const normalized = normalizeSeriesPayload(payload);
                 if (normalized.length > 0) return normalized;
             }
-        } catch (_) {
+        } catch (error) {
+            console.error('[series] 加载系列数据失败:', error);
             // fallback to blogs.json
         }
 
@@ -757,7 +762,8 @@
                 const blogs = await blogsRes.json();
                 return groupBlogsToSeries(blogs);
             }
-        } catch (_) {
+        } catch (error) {
+            console.error('[series] 聚合博客数据失败:', error);
             // ignore
         }
 

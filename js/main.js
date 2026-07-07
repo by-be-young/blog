@@ -63,10 +63,14 @@
             if (window.siteI18n?.getLang) {
                 return window.siteI18n.getLang();
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[i18n] 获取当前语言失败:', error);
+        }
         try {
             return localStorage.getItem('site_language') || 'zh';
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[i18n] 获取本地存储语言失败:', error);
+        }
         return 'zh';
     }
 
@@ -78,7 +82,8 @@
             const lang = i18n.getLang();
             const map = i18n.translations[lang] || i18n.translations.zh || {};
             return map[key] ?? fallback;
-        } catch (_) {
+        } catch (error) {
+            console.error('[i18n] 获取国际化文本失败:', error);
             return fallback;
         }
     }
@@ -103,7 +108,8 @@
                 return `${y}年${m}月${d}日 ${era}`;
             }
             return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
-        } catch (_) {
+        } catch (error) {
+            console.error('[date] 格式化日期失败:', error);
             return date.toLocaleDateString();
         }
     }
@@ -169,7 +175,9 @@
                 updateProfileStats();
                 if (typeof callback === 'function') callback();
             })
-            .catch(() => { /* ignore */ });
+            .catch((error) => {
+                console.error('[blogs] 加载博客数据失败:', error);
+            });
     }
 
     /** 获取所有博客的总字数（用于页脚统计） */
@@ -240,7 +248,8 @@
             // 同页锚点不拦截
             if (url.pathname === current.pathname && url.search === current.search) return false;
             return true;
-        } catch (_) {
+        } catch (error) {
+            console.error('[smoothNav] 判断平滑导航目标 URL 失败:', error);
             return false;
         }
     }
@@ -264,7 +273,8 @@
             setTimeout(() => {
                 window.location.href = url.href;
             }, SMOOTH_NAV_DURATION_MS);
-        } catch (_) {
+        } catch (error) {
+            console.error('[smoothNav] 页面跳转失败:', error);
             window.location.href = href;
         }
     }
@@ -314,7 +324,9 @@
                 body.classList.remove('page-transition-leaving');
                 smoothNavNavigating = false;
             });
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[smoothNav] 初始化平滑页面过渡失败:', error);
+        }
     }
 
     // ==================== 点击涟漪效果 ====================
@@ -424,7 +436,9 @@
                     menu.classList.remove('offcanvas', 'active');
                     document.body.classList.remove('offcanvas-open');
                 }
-            } catch (_) { /* ignore */ }
+            } catch (error) {
+                console.error('[navigation] 更新菜单模式失败:', error);
+            }
         }
 
         updateMenuMode();
@@ -467,7 +481,8 @@
                 try {
                     const u = new URL(href, window.location.href);
                     isInternal = u.origin === window.location.origin;
-                } catch (_) {
+                } catch (error) {
+                    console.error('[home] 检查链接内部状态失败:', error);
                     isInternal = false;
                 }
 
@@ -475,7 +490,9 @@
                     link.removeAttribute('target');
                 }
             });
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[home] 强制首页链接在新标签页打开失败:', error);
+        }
     }
 
     // ==================== 打字机欢迎语 ====================
@@ -571,7 +588,9 @@
             };
 
             welcomeTypewriterState.timerId = setTimeout(tick, WELCOME_TYPING_START_DELAY_MS);
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[welcome] 启动打字机效果失败:', error);
+        }
     }
 
     /** 小屏时调整欢迎语换行 */
@@ -589,7 +608,9 @@
             } else {
                 renderWelcomeText(el, el.dataset.originalText || '');
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[welcome] 适配欢迎语失败:', error);
+        }
     }
 
     // ==================== 博客卡片渲染 ====================
@@ -796,7 +817,9 @@
         // 国际化
         try {
             if (window.siteI18n?.applyTo) window.siteI18n.applyTo(blogGrid);
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[blogGrid] 应用国际化失败:', error);
+        }
     }
 
     /**
@@ -933,7 +956,9 @@
                 enforceHomeLinksOpenInNewTab(host);
                 try {
                     if (window.siteI18n?.applyTo) window.siteI18n.applyTo(host);
-                } catch (_) { /* ignore */ }
+                } catch (error) {
+                    console.error('[announcement] 应用国际化失败:', error);
+                }
 
                 // 弹窗打开时调度自动滚动
                 try {
@@ -941,7 +966,9 @@
                     if (modal?.classList.contains('is-open') && typeof host.__scheduleAnnouncementAutoScroll === 'function') {
                         host.__scheduleAnnouncementAutoScroll();
                     }
-                } catch (_) { /* ignore */ }
+                } catch (error) {
+                    console.error('[announcement] 安排自动滚动失败:', error);
+                }
             })
             .catch(() => {
                 announcementFab?.classList.remove('announcement-fab--recent-attention');
@@ -958,7 +985,9 @@
 
         if (!trigger || !modal || !closeBtn) return;
 
-        try { modal.inert = true; } catch (_) { /* ignore */ }
+        try { modal.inert = true; } catch (error) {
+            console.error('[modal] 设置模态框 inert 失败:', error);
+        }
 
         let scrollStartTimer = null;
         let modalOpenAt = 0;
@@ -967,10 +996,14 @@
             try {
                 const navEntry = performance.getEntriesByType?.('navigation');
                 if (navEntry?.[0]?.type) return navEntry[0].type === 'reload';
-            } catch (_) { /* ignore */ }
+            } catch (error) {
+                console.error('[modal] 检查重载导航失败:', error);
+            }
             try {
                 return performance?.navigation?.type === 1;
-            } catch (_) { /* ignore */ }
+            } catch (error) {
+                console.error('[modal] 检查导航类型失败:', error);
+            }
             return false;
         }
 
@@ -980,7 +1013,8 @@
                 if (!ref) return false;
                 const refUrl = new URL(ref, window.location.href);
                 return refUrl.origin === window.location.origin;
-            } catch (_) {
+            } catch (error) {
+                console.error('[modal] 检查来源页面失败:', error);
                 return false;
             }
         }
@@ -998,14 +1032,20 @@
                 scrollStartTimer = setTimeout(() => {
                     if (!modal.classList.contains('is-open')) return;
                     requestAnimationFrame(() => {
-                        try { startAnnouncementAutoScroll(host); } catch (_) { /* ignore */ }
+                        try { startAnnouncementAutoScroll(host); } catch (error) {
+                            console.error('[announcement] 开始自动滚动失败:', error);
+                        }
                     });
                 }, remaining);
-            } catch (_) { /* ignore */ }
+            } catch (error) {
+                console.error('[announcement] 安排自动滚动失败:', error);
+            }
         }
 
         function openModal() {
-            try { modal.inert = false; } catch (_) { /* ignore */ }
+            try { modal.inert = false; } catch (error) {
+                console.error('[modal] 设置模态框 inert 失败:', error);
+            }
             modal.classList.add('is-open');
             modal.setAttribute('aria-hidden', 'false');
             document.body.classList.add('announcement-modal-open');
@@ -1021,10 +1061,14 @@
             try {
                 const host = document.getElementById('announcementModalContent');
                 stopAnnouncementAutoScroll(host);
-            } catch (_) { /* ignore */ }
+            } catch (error) {
+                console.error('[announcement] 停止自动滚动失败:', error);
+            }
             modal.classList.remove('is-open');
             modal.setAttribute('aria-hidden', 'true');
-            try { modal.inert = true; } catch (_) { /* ignore */ }
+            try { modal.inert = true; } catch (error) {
+                console.error('[modal] 设置模态框 inert 失败:', error);
+            }
             document.body.classList.remove('announcement-modal-open');
         }
 
@@ -1063,11 +1107,17 @@
             if (carriedFromUnload) {
                 sessionStorage.removeItem(reloadCarryKey);
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[modal] 处理公告显示状态失败:', error);
+        }
 
         window.addEventListener('beforeunload', () => {
-            try { sessionStorage.setItem(reloadCarryKey, '1'); } catch (_) { /* ignore */ }
-            try { localStorage.removeItem(noticeShownKey); } catch (_) { /* ignore */ }
+            try { sessionStorage.setItem(reloadCarryKey, '1'); } catch (error) {
+                console.error('[modal] 设置重载携带状态失败:', error);
+            }
+            try { localStorage.removeItem(noticeShownKey); } catch (error) {
+                console.error('[modal] 移除公告显示状态失败:', error);
+            }
         });
     }
 
@@ -1149,7 +1199,9 @@
             if (typeof state.originalHtml === 'string') msg.innerHTML = state.originalHtml;
             msg.classList.remove('announcement-message--split');
             msg.__autoScroll = null;
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[announcement] 停止自动滚动失败:', error);
+        }
     }
 
     // ==================== 设置面板（含音乐播放器） ====================
@@ -1164,7 +1216,9 @@
         const settingsPanel = document.querySelector('.settings-panel');
 
         if (!trigger || !modal || !closeBtn) return;
-        try { modal.inert = true; } catch (_) { /* ignore */ }
+        try { modal.inert = true; } catch (error) {
+            console.error('[modal] 设置模态框 inert 失败:', error);
+        }
 
         // ---- 音乐播放器 ----
         window.backgroundAudio = new Audio('music/澎湃.mp3');
@@ -1192,11 +1246,21 @@
         }
 
         function stopAndClearSelectedTrack() {
-            try { window.backgroundAudio.pause(); } catch (_) { /* ignore */ }
-            try { window.backgroundAudio.currentTime = 0; } catch (_) { /* ignore */ }
-            try { window.backgroundAudio.removeAttribute('src'); } catch (_) { /* ignore */ }
-            try { window.backgroundAudio.src = ''; } catch (_) { /* ignore */ }
-            try { window.backgroundAudio.load(); } catch (_) { /* ignore */ }
+            try { window.backgroundAudio.pause(); } catch (error) {
+                console.error('[music] 暂停音频失败:', error);
+            }
+            try { window.backgroundAudio.currentTime = 0; } catch (error) {
+                console.error('[music] 设置音频当前时间失败:', error);
+            }
+            try { window.backgroundAudio.removeAttribute('src'); } catch (error) {
+                console.error('[music] 移除音频源失败:', error);
+            }
+            try { window.backgroundAudio.src = ''; } catch (error) {
+                console.error('[music] 设置音频源失败:', error);
+            }
+            try { window.backgroundAudio.load(); } catch (error) {
+                console.error('[music] 加载音频失败:', error);
+            }
             hideMusicFloatFab();
         }
 
@@ -1295,7 +1359,9 @@
                         setTimeout(() => {
                             if (!window.musicEnabled) {
                                 window.backgroundAudio.load();
-                                window.backgroundAudio.play().catch(() => { /* ignore */ });
+                                window.backgroundAudio.play().catch((error) => {
+                                    console.error('[music] 播放音频失败:', error);
+                                });
                             }
                         }, 100);
                     });
@@ -1319,7 +1385,8 @@
                 if (targetEl.matches('#viewMoreBtn, #home-profile-card')) return true;
                 if (targetEl.closest?.('.blog-card, .recent-item')) return true;
                 return false;
-            } catch (_) {
+            } catch (error) {
+                console.error('[home] 检查导航意图事件失败:', error);
                 return false;
             }
         }
@@ -1357,7 +1424,9 @@
                 return;
             }
             if (window.backgroundAudio.paused) {
-                window.backgroundAudio.play().catch(() => { /* ignore */ });
+                window.backgroundAudio.play().catch((error) => {
+                    console.error('[music] 播放音频失败:', error);
+                });
                 return;
             }
             window.backgroundAudio.pause();
@@ -1369,7 +1438,9 @@
             musicSelect.addEventListener('change', () => {
                 if (musicSelect.value) {
                     window.backgroundAudio.src = 'music/' + musicSelect.value;
-                    window.backgroundAudio.play().catch(() => { /* ignore */ });
+                    window.backgroundAudio.play().catch((error) => {
+                        console.error('[music] 播放音频失败:', error);
+                    });
                 } else {
                     stopAndClearSelectedTrack();
                 }
@@ -1399,7 +1470,9 @@
             if (!window.musicEnabled) {
                 enableMusic();
             } else if (window.backgroundAudio.paused) {
-                window.backgroundAudio.play().catch(() => { /* ignore */ });
+                window.backgroundAudio.play().catch((error) => {
+                    console.error('[music] 播放音频失败:', error);
+                });
             } else {
                 window.backgroundAudio.pause();
             }
@@ -1468,7 +1541,9 @@
 
         // ---- 弹窗控制 ----
         function openModal() {
-            try { modal.inert = false; } catch (_) { /* ignore */ }
+            try { modal.inert = false; } catch (error) {
+                console.error('[modal] 设置模态框 inert 失败:', error);
+            }
             modal.classList.add('is-open');
             modal.setAttribute('aria-hidden', 'false');
             document.body.classList.add('settings-modal-open');
@@ -1478,10 +1553,14 @@
         function closeModal() {
             modal.classList.remove('is-open');
             modal.setAttribute('aria-hidden', 'true');
-            try { modal.inert = true; } catch (_) { /* ignore */ }
+            try { modal.inert = true; } catch (error) {
+                console.error('[modal] 设置模态框 inert 失败:', error);
+            }
             document.body.classList.remove('settings-modal-open');
             setLanguageInputsEnabled(false);
-            try { trigger.focus(); } catch (_) { /* ignore */ }
+            try { trigger.focus(); } catch (error) {
+                console.error('[modal] 恢复触发元素焦点失败:', error);
+            }
         }
 
         function updateSettingsPanelHeight(targetSection, immediate) {
@@ -1657,7 +1736,9 @@
                     await navigator.clipboard.writeText(value);
                     return true;
                 }
-            } catch (_) { /* fallback */ }
+            } catch (error) {
+                console.error('[clipboard] 写入剪贴板失败:', error);
+            }
 
             try {
                 const textarea = document.createElement('textarea');
@@ -1669,7 +1750,8 @@
                 const ok = document.execCommand('copy');
                 textarea.remove();
                 return !!ok;
-            } catch (_) {
+            } catch (error) {
+                console.error('[clipboard] 复制到剪贴板失败:', error);
                 return false;
             }
         }
@@ -1743,7 +1825,9 @@
                 const d = el.getAttribute('data-date');
                 if (d) el.textContent = formatDate(d);
             });
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[date] 更新日期显示失败:', error);
+        }
     }
 
     // ==================== 延迟加载背景图片 ====================
@@ -1760,7 +1844,9 @@
                 };
                 img.src = src;
             });
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[background] 延迟加载背景图片失败:', error);
+        }
     });
 
     // ==================== Busuanzi 统计 ====================
@@ -1833,7 +1919,9 @@
             }
 
             loadWithFallback(0);
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[busuanzi] 初始化失败:', error);
+        }
     })();
 
     // ==================== DOMContentLoaded 入口 ====================
@@ -1850,7 +1938,9 @@
                 document.documentElement.classList.add('hide-scrollbar');
                 document.body.classList.add('hide-scrollbar');
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[home] 隐藏滚动条失败:', error);
+        }
 
         // ---- GitHub 链接 ----
         const githubLink = document.getElementById('github-link');
@@ -1878,7 +1968,9 @@
                 initSettingsModal();
                 renderAnnouncementBanner();
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[home] 初始化首页特有功能失败:', error);
+        }
 
         // ---- 导航栏 ----
         initNavigation();
@@ -1887,12 +1979,18 @@
         initScroll();
 
         // ---- 联系方式 ----
-        try { initProfileContacts(); } catch (_) { /* ignore */ }
+        try { initProfileContacts(); } catch (error) {
+            console.error('[profile] 初始化个人资料卡片失败:', error);
+        }
 
         // ---- 打字机欢迎语 ----
-        try { startWelcomeTypewriter(); } catch (_) { /* ignore */ }
+        try { startWelcomeTypewriter(); } catch (error) {
+            console.error('[welcome] 初始化欢迎语失败:', error);
+        }
         window.addEventListener('resize', throttle(() => {
-            try { adaptWelcomeText(); } catch (_) { /* ignore */ }
+            try { adaptWelcomeText(); } catch (error) {
+                console.error('[welcome] 适应欢迎文本失败:', error);
+            }
         }, 150));
 
         // ---- 个人资料卡片点击跳转关于页 ----
@@ -1905,7 +2003,9 @@
                     navigateWithTransition('about.html');
                 });
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[profile] 初始化个人资料卡片失败:', error);
+        }
     });
 
     // ---- 语言切换时更新日期和欢迎语 ----
@@ -1919,7 +2019,9 @@
                 el.dataset.originalText = normalizeWelcomeTextFromHtml(el.dataset.originalHtml || '');
                 startWelcomeTypewriter();
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[welcome] 更新欢迎语失败:', error);
+        }
     });
 
     // ---- 暴露全局函数 ----

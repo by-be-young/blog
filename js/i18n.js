@@ -681,25 +681,34 @@
             const text = map[key];
             if (text === undefined) return;
 
-            try { el.title = text; } catch (_) { /* ignore */ }
-            try { el.setAttribute('data-tooltip', text); } catch (_) { /* ignore */ }
+            try { el.title = text; } catch (error) {
+                console.error('[i18n] 设置元素 title 失败:', error);
+            }
+            try { el.setAttribute('data-tooltip', text); } catch (error) {
+                console.error('[i18n] 设置元素 data-tooltip 失败:', error);
+            }
             try {
                 if (el.getAttribute('aria-label') === null) {
                     el.setAttribute('aria-label', text);
                 }
-            } catch (_) { /* ignore */ }
+            } catch (error) {
+                console.error('[i18n] 设置元素 aria-label 失败:', error);
+            }
         });
 
         // ---- 触发事件 ----
         try {
             document.dispatchEvent(new CustomEvent('site:languageChanged', { detail: { lang } }));
-        } catch (_) {
+        } catch (error) {
+            console.error('[i18n] 触发语言更改事件失败:', error);
             try {
                 const evt = document.createEvent('Event');
                 evt.initEvent('site:languageChanged', true, true);
                 evt.detail = { lang };
                 document.dispatchEvent(evt);
-            } catch (_) { /* ignore */ }
+            } catch (error) {
+                console.error('[i18n] 创建并分发语言更改事件失败:', error);
+            }
         }
     }
 
@@ -747,14 +756,17 @@
                         if (!Number.isNaN(n) && n > max) max = n;
                     }
                 }
-            } catch (_) {
+            } catch (error) {
+                console.error('[i18n] 获取最大 z-index 失败:', error);
                 max = window.__uiZIndexCounter || 1200;
             }
 
             const next = Math.max(max + 1, (window.__uiZIndexCounter || 1201));
             window.__uiZIndexCounter = next;
             el.style.zIndex = String(next);
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[i18n] 将元素提升到最上层失败:', error);
+        }
     }
 
     // ==================== 初始化 ====================
@@ -775,9 +787,13 @@
                 if (window.siteI18n?.applyTo) {
                     window.siteI18n.applyTo();
                 }
-            } catch (_) { /* ignore */ }
+            } catch (error) {
+                console.error('[i18n] 语言更改事件处理失败:', error);
+            }
         });
-    } catch (_) { /* ignore */ }
+    } catch (error) {
+        console.error('[i18n] 注册语言更改事件失败:', error);
+    }
 
     // ==================== 暴露 API ====================
 

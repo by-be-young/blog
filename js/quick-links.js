@@ -95,7 +95,9 @@
                     }
                     applyWheelVisuals(wheelEl);
                 }
-            } catch (_) { /* ignore */ }
+            } catch (error) {
+                console.error('[quick-links] 同步滚轮状态失败:', error);
+            }
         }
 
         /** 将面板恢复到侧边栏 */
@@ -221,7 +223,9 @@
             if (Number.isFinite(h) && h > lastGridMinHeight) {
                 lastGridMinHeight = h;
             }
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[quick-links] 记录网格高度失败:', error);
+        }
 
         gridEl.innerHTML = '';
 
@@ -234,7 +238,8 @@
                 const lang = window.siteI18n?.getLang?.() || 'zh';
                 const tr = window.siteI18n?.translations?.[lang] || {};
                 empty.textContent = tr.quick_no_links || '该分类下暂无链接。';
-            } catch (_) {
+            } catch (error) {
+                console.error('[quick-links] 获取空状态文本失败:', error);
                 empty.textContent = '该分类下暂无链接。';
             }
 
@@ -298,7 +303,8 @@
                     lastGridMinHeight = newH;
                     gridEl.style.minHeight = '';
                 }
-            } catch (_) {
+            } catch (error) {
+                console.error('[quick-links] 记录网格高度失败:', error);
                 gridEl.style.minHeight = `${Math.round(lastGridMinHeight)}px`;
             }
         }
@@ -394,7 +400,8 @@
 
         try {
             wheelEl.scrollTo({ top, behavior: behavior || 'smooth' });
-        } catch (_) {
+        } catch (error) {
+            console.error('[quick-links] 滚动到项失败:', error);
             wheelEl.scrollTop = top;
         }
     }
@@ -437,7 +444,9 @@
             const sidebarH = sidebar.getBoundingClientRect().height;
 
             sidebar.classList.toggle('no-sticky', sidebarH > avail);
-        } catch (_) { /* ignore */ }
+        } catch (error) {
+            console.error('[quick-links] 更新侧边栏粘性失败:', error);
+        }
     }
 
     // ==================== 页面主渲染 ====================
@@ -482,7 +491,9 @@
 
         // 应用国际化
         if (window.siteI18n?.applyTo) {
-            try { window.siteI18n.applyTo(wheelEl); } catch (_) { /* ignore */ }
+            try { window.siteI18n.applyTo(wheelEl); } catch (error) {
+                console.error('[quick-links] 应用国际化失败:', error);
+            }
         }
 
         adjustWheelPadding(wheelEl);
@@ -527,7 +538,9 @@
             // 取消进行中的动画
             try {
                 gridEl.getAnimations().forEach((anim) => anim.cancel());
-            } catch (_) { /* ignore */ }
+            } catch (error) {
+                console.error('[quick-links] 取消动画失败:', error);
+            }
 
             // 淡出
             const fadeOut = gridEl.animate(
@@ -590,7 +603,9 @@
             renderCards(gridEl, []);
         }
 
-        try { updateQuickLinksSticky(); } catch (_) { /* ignore */ }
+        try { updateQuickLinksSticky(); } catch (error) {
+            console.error('[quick-links] 更新侧边栏粘性失败:', error);
+        }
 
         // ---- 滚轮事件 ----
         wheelEl.addEventListener('scroll', () => {
@@ -669,13 +684,17 @@
         window.addEventListener('resize', () => {
             adjustWheelPadding(wheelEl);
             scheduleVisuals();
-            try { updateQuickLinksSticky(); } catch (_) { /* ignore */ }
+            try { updateQuickLinksSticky(); } catch (error) {
+                console.error('[quick-links] 更新侧边栏粘性失败:', error);
+            }
         });
 
         // ---- 语言切换 ----
         document.addEventListener('site:languageChanged', () => {
             if (window.siteI18n?.applyTo) {
-                try { window.siteI18n.applyTo(wheelEl); } catch (_) { /* ignore */ }
+                try { window.siteI18n.applyTo(wheelEl); } catch (error) {
+                    console.error('[quick-links] 应用国际化失败:', error);
+                }
             }
         });
     }
@@ -690,7 +709,8 @@
             const res = await fetch(DATA_URL, { cache: 'no-store' });
             const data = await res.json();
             renderPage(data);
-        } catch (_) {
+        } catch (error) {
+            console.error('[quick-links] 加载快速链接数据失败:', error);
             const gridEl = document.getElementById('quickLinksGrid');
             if (!gridEl) return;
 
@@ -698,7 +718,8 @@
                 const lang = window.siteI18n?.getLang?.() || 'zh';
                 const tr = window.siteI18n?.translations?.[lang] || {};
                 gridEl.innerHTML = `<div class="link-empty">${tr.quick_links_load_failed || '加载失败：请检查 data/quick-links.json'}</div>`;
-            } catch (_) {
+            } catch (error) {
+                console.error('[quick-links] 获取空状态文本失败:', error);
                 gridEl.innerHTML = '<div class="link-empty">加载失败：请检查 data/quick-links.json</div>';
             }
         }
