@@ -37,6 +37,17 @@
     grid-column: 2;
 }
 
+/* --- 例题内部段落间距 --- */
+.article-content .md-question p {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.article-content .md-question p:first-child {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
 /* --- 例题图标 (::before) --- */
 .article-content .md-question::before {
     content: "";
