@@ -42,10 +42,18 @@
   }
 
   /** 热力值计算 */
-  function heat(count, max) {
-    if (!count || !max) return 0;
-    const ratio = Math.min(1, Math.max(0, count / max));
-    return 0.18 + ratio * 0.72;
+  function heatLevel(count) {
+    if (count <= 0) return 0;
+    if (count <= 2) return 1;
+    if (count <= 4) return 2;
+    return 3;
+  }
+
+  function monthHeatLevel(count) {
+    if (count <= 0) return 0;
+    if (count <= 10) return 1;
+    if (count <= 20) return 2;
+    return 3;
   }
 
   /** HTML 转义 */
@@ -801,13 +809,12 @@
         const key = toYMD(d);
         const count = dateCount.get(key) ?? 0;
         const has = count > 0;
-        const h = heat(count, maxDay);
-        const style = has ? ` style="--heat:${h.toFixed(3)}"` : '';
-        const cls = has ? 'cal-cell has-posts' : 'cal-cell';
+        const level = heatLevel(count);
+        const cls = has ? `cal-cell has-posts heat-${level}` : 'cal-cell';
         const postsTemplate = tr.cal_posts_tip || (lang === 'en' ? '{n} posts' : lang === 'ja' ? '{n} 件' : '该日共 {n} 篇');
         const tip = has ? ` data-tip="${postsTemplate.replace('{n}', String(count))}"` : '';
         const target = has ? ` data-target-date="${key}"` : '';
-        parts.push(`<div class="${cls}"${style}${tip}${target}><span>${dayNum}</span></div>`);
+        parts.push(`<div class="${cls}"${tip}${target}><span>${dayNum}</span></div>`);
       }
 
       parts.push('</div>');
@@ -845,9 +852,8 @@
         const key = toYM(d);
         const count = monthCount.get(key) ?? 0;
         const has = count > 0;
-        const h = heat(count, maxMonth);
-        const style = has ? ` style="--heat:${h.toFixed(3)}"` : '';
-        const cls = has ? 'cal-month has-posts' : 'cal-month';
+        const level = monthHeatLevel(count);
+        const cls = has ? `cal-month has-posts heat-${level}` : 'cal-month';
         const monthTipTemplate = tr.cal_month_tip || (lang === 'en' ? '{n} posts' : lang === 'ja' ? '{n} 件' : '本月共 {n} 篇');
         const tip = has ? ` data-tip="${monthTipTemplate.replace('{n}', String(count))}"` : '';
         const target = has ? ` data-target-month="${key}"` : '';
@@ -862,7 +868,7 @@
           monthLabel = `${month + 1}月`;
         }
 
-        parts.push(`<div class="${cls}"${style}${tip}${target}><span>${monthLabel}</span></div>`);
+        parts.push(`<div class="${cls}"${tip}${target}><span>${monthLabel}</span></div>`);
       }
 
       parts.push('</div>');
