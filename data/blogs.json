@@ -1,5 +1,24 @@
 [
     {
+        "id": 3296026673,
+        "title": "二上考试情况总结",
+        "excerpt": "> 我发现最难的科目总是最早在期末周之前就考……",
+        "date": "2026-07-07",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "二下",
+            "二下总结",
+            "考试总结"
+        ],
+        "category": "学习",
+        "type": null,
+        "series": null,
+        "order": null,
+        "chapter": null,
+        "contentFile": "blogs/二下/二下总结/考试总结/二上考试情况总结.md",
+        "recommended": false
+    },
+    {
         "id": 24465226,
         "title": "挑战性任务-文件管理-实验报告",
         "excerpt": "2421操作系统挑战性任务-文件系统实验报告",
@@ -16,7 +35,8 @@
         "order": 8,
         "chapter": "4-实验报告",
         "contentFile": "blogs/二下/操作系统/文件管理/挑战性任务-文件管理-实验报告.md",
-        "recommended": false
+        "recommended": false,
+        "lastEditedDate": "2026-07-07"
     },
     {
         "id": 2408489894,
@@ -35,8 +55,7 @@
         "order": null,
         "chapter": null,
         "contentFile": "blogs/二下/军事理论/总复习/军事理论重点.md",
-        "recommended": false,
-        "lastEditedDate": "2026-06-29"
+        "recommended": false
     },
     {
         "id": 359085758,
@@ -435,8 +454,7 @@
         "order": 7,
         "chapter": "4-实验报告",
         "contentFile": "blogs/二下/操作系统/设备管理/OS-Lab6-实验报告.md",
-        "recommended": false,
-        "lastEditedDate": "2026-06-29"
+        "recommended": false
     },
     {
         "id": 2542583234,
@@ -455,8 +473,7 @@
         "order": 6,
         "chapter": "4-实验报告",
         "contentFile": "blogs/二下/操作系统/文件管理/OS-Lab5-实验报告.md",
-        "recommended": false,
-        "lastEditedDate": "2026-06-29"
+        "recommended": false
     },
     {
         "id": 3639231539,
@@ -641,12 +658,13 @@
             "进程管理"
         ],
         "category": "学习",
-        "type": "待完善",
+        "type": "系统笔记",
         "series": "操作系统",
         "order": 4,
         "chapter": "2-理论",
         "contentFile": "blogs/二下/操作系统/进程管理/进程管理.md",
-        "recommended": false
+        "recommended": false,
+        "lastEditedDate": "2026-07-07"
     },
     {
         "id": 3111316559,
@@ -703,7 +721,8 @@
         "order": 3,
         "chapter": "2-理论",
         "contentFile": "blogs/二下/操作系统/内存管理/内存管理.md",
-        "recommended": false
+        "recommended": false,
+        "lastEditedDate": "2026-07-07"
     },
     {
         "id": 3927684149,
@@ -817,7 +836,8 @@
         "order": 1,
         "chapter": "2-理论",
         "contentFile": "blogs/二下/操作系统/启动/计算机的启动过程.md",
-        "recommended": true
+        "recommended": true,
+        "lastEditedDate": "2026-07-07"
     },
     {
         "id": 2069020613,
@@ -1140,7 +1160,8 @@
         "order": null,
         "chapter": null,
         "contentFile": "blogs/二上/二上总结/考试总结/二上考试情况总结.md",
-        "recommended": false
+        "recommended": false,
+        "lastEditedDate": "2026-07-07"
     },
     {
         "id": 1050316623,
