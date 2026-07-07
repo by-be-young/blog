@@ -369,12 +369,12 @@
             const label = btn.querySelector('.mermaid-view-label');
             if (isCodeMode) {
                 if (icon) icon.className = 'far fa-image';
-                if (label) label.textContent = '图片';
-                btn.setAttribute('aria-label', '显示图片');
+                if (label) label.textContent = t('mermaid_view_diagram', '图片');
+                btn.setAttribute('aria-label', t('mermaid_view_diagram_aria', '显示图片'));
             } else {
                 if (icon) icon.className = 'fas fa-code';
-                if (label) label.textContent = '代码';
-                btn.setAttribute('aria-label', '显示代码');
+                if (label) label.textContent = t('mermaid_view_code', '代码');
+                btn.setAttribute('aria-label', t('mermaid_view_code_aria', '显示代码'));
             }
         }
 
@@ -406,24 +406,24 @@
             const btnCopy = document.createElement('button');
             btnCopy.type = 'button';
             btnCopy.className = 'codeblock__btn mermaid-copy-btn';
-            btnCopy.innerHTML = '<i class="far fa-copy"></i><span class="code-copy-label">复制</span>';
+            btnCopy.innerHTML = '<i class="far fa-copy"></i><span class="code-copy-label">' + t('code_copy', '复制') + '</span>';
 
             const btnView = document.createElement('button');
             btnView.type = 'button';
             btnView.className = 'codeblock__btn mermaid-view-btn';
-            btnView.innerHTML = '<i class="fas fa-code"></i><span class="mermaid-view-label">代码</span>';
+            btnView.innerHTML = '<i class="fas fa-code"></i><span class="mermaid-view-label">' + t('mermaid_view_code', '代码') + '</span>';
             updateViewButton(btnView, false);
 
             const btnFullscreen = document.createElement('button');
             btnFullscreen.type = 'button';
             btnFullscreen.className = 'codeblock__btn mermaid-full-btn';
-            btnFullscreen.setAttribute('aria-label', '全屏');
-            btnFullscreen.innerHTML = '<i class="fas fa-expand"></i><span class="mermaid-full-label">全屏</span>';
+            btnFullscreen.setAttribute('aria-label', t('mermaid_fullscreen_aria', '全屏'));
+            btnFullscreen.innerHTML = '<i class="fas fa-expand"></i><span class="mermaid-full-label">' + t('mermaid_fullscreen', '全屏') + '</span>';
 
             const btnToggle = document.createElement('button');
             btnToggle.type = 'button';
             btnToggle.className = 'codeblock__btn mermaid-toggle-btn';
-            btnToggle.innerHTML = '<i class="fas fa-chevron-up"></i><span class="code-toggle-label">收起</span>';
+            btnToggle.innerHTML = '<i class="fas fa-chevron-up"></i><span class="code-toggle-label">' + t('code_collapse', '收起') + '</span>';
 
             actions.append(btnCopy, btnView, btnFullscreen, btnToggle);
             header.append(langEl, actions);
@@ -462,12 +462,12 @@
 
                 btnCopy.classList.add('is-copied');
                 const label = btnCopy.querySelector('.code-copy-label');
-                if (label) label.textContent = '已复制';
+                if (label) label.textContent = t('code_copied', '已复制');
 
                 setTimeout(() => {
                     btnCopy.classList.remove('is-copied');
                     const s = btnCopy.querySelector('.code-copy-label');
-                    if (s) s.textContent = '复制';
+                    if (s) s.textContent = t('code_copy', '复制');
                 }, 900);
             });
 
@@ -511,12 +511,12 @@
                 const label = btnToggle.querySelector('.code-toggle-label');
                 if (willCollapse) {
                     if (icon) icon.className = 'fas fa-chevron-down';
-                    if (label) label.textContent = '展开';
-                    btnToggle.setAttribute('aria-label', '展开');
+                    if (label) label.textContent = t('code_expand', '展开');
+                    btnToggle.setAttribute('aria-label', t('code_expand', '展开'));
                 } else {
                     if (icon) icon.className = 'fas fa-chevron-up';
-                    if (label) label.textContent = '收起';
-                    btnToggle.setAttribute('aria-label', '收起');
+                    if (label) label.textContent = t('code_collapse', '收起');
+                    btnToggle.setAttribute('aria-label', t('code_collapse', '收起'));
                 }
             });
         });
@@ -574,6 +574,54 @@
             mermaidNodes.forEach((node) => node.removeAttribute('data-mermaid-rendering'));
             console.warn('mermaid render error', e);
         }
+
+        // ---- Mermaid 国际化更新 ----
+        function updateMermaidI18n() {
+            try {
+                document.querySelectorAll('.mermaid-block').forEach((block) => {
+                    const btns = block.querySelectorAll('.codeblock__btn');
+                    const btnCopy = btns[0];
+                    const btnView = btns[1];
+                    const btnFullscreen = btns[2];
+                    const btnToggle = btns[3];
+
+                    if (btnCopy) {
+                        const span = btnCopy.querySelector('.code-copy-label');
+                        if (span) span.textContent = t('code_copy', '复制');
+                    }
+
+                    if (btnView) {
+                        const span = btnView.querySelector('.mermaid-view-label');
+                        if (!span) return;
+                        const isCodeMode = block.classList.contains('is-source-mode');
+                        span.textContent = isCodeMode ? t('mermaid_view_diagram', '图片') : t('mermaid_view_code', '代码');
+                        btnView.setAttribute('aria-label', isCodeMode ? t('mermaid_view_diagram_aria', '显示图片') : t('mermaid_view_code_aria', '显示代码'));
+                    }
+
+                    if (btnFullscreen) {
+                        const span = btnFullscreen.querySelector('.mermaid-full-label');
+                        if (span) span.textContent = t('mermaid_fullscreen', '全屏');
+                        btnFullscreen.setAttribute('aria-label', t('mermaid_fullscreen_aria', '全屏'));
+                    }
+
+                    if (btnToggle) {
+                        const span = btnToggle.querySelector('.code-toggle-label');
+                        const collapsed = block.classList.contains('is-collapsed');
+                        if (span) span.textContent = collapsed ? t('code_expand', '展开') : t('code_collapse', '收起');
+                        btnToggle.setAttribute('aria-label', collapsed ? t('code_expand', '展开') : t('code_collapse', '收起'));
+                    }
+                });
+            } catch (error) {
+                console.error('[i18n] 更新 Mermaid 代码块国际化文本失败:', error);
+            }
+        }
+
+        if (!window.__mermaidI18nBound) {
+            window.__mermaidI18nBound = true;
+            document.addEventListener('site:languageChanged', updateMermaidI18n);
+        }
+
+        updateMermaidI18n();
     }
 
     /**
@@ -589,9 +637,9 @@
             overlay.className = 'mermaid-viewer-overlay';
             overlay.setAttribute('aria-hidden', 'true');
             overlay.innerHTML = `
-                <div class="mermaid-viewer-stage" role="dialog" aria-modal="true" aria-label="Mermaid 全屏预览">
+                <div class="mermaid-viewer-stage" role="dialog" aria-modal="true" aria-label="${t('mermaid_viewer_aria', 'Mermaid 全屏预览')}">
                     <div class="mermaid-viewer-toolbar">
-                        <button class="mermaid-viewer-close" type="button" aria-label="关闭全屏预览">&times;</button>
+                        <button class="mermaid-viewer-close" type="button" aria-label="${t('mermaid_viewer_close_aria', '关闭全屏预览')}">&times;</button>
                     </div>
                     <div class="mermaid-viewer-content"></div>
                 </div>
@@ -2090,6 +2138,7 @@
                 if (onlyStrong) {
                     p.style.textAlign = 'center';
                     p.style.textIndent = '0';
+                    p.style.color = '#b57b00';
                 } else {
                     // 确保其他段落不受影响（重置样式）
                     p.style.textAlign = '';

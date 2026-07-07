@@ -218,7 +218,17 @@
             image_download: '下载',
             image_copy: '复制',
             image_copied: '已复制',
-            image_copy_failed: '复制失败'
+            image_copy_failed: '复制失败',
+
+            // ---- Mermaid 图表 ----
+            mermaid_view_code: '代码',
+            mermaid_view_diagram: '图片',
+            mermaid_fullscreen: '全屏',
+            mermaid_view_code_aria: '显示代码',
+            mermaid_view_diagram_aria: '显示图片',
+            mermaid_fullscreen_aria: '全屏',
+            mermaid_viewer_aria: 'Mermaid 全屏预览',
+            mermaid_viewer_close_aria: '关闭全屏预览'
         },
 
         en: {
@@ -426,7 +436,17 @@
             image_download: 'Download',
             image_copy: 'Copy',
             image_copied: 'Copied',
-            image_copy_failed: 'Copy failed'
+            image_copy_failed: 'Copy failed',
+
+            // ---- Mermaid ----
+            mermaid_view_code: 'Source',
+            mermaid_view_diagram: 'Diagram',
+            mermaid_fullscreen: 'Fullscreen',
+            mermaid_view_code_aria: 'Show Source',
+            mermaid_view_diagram_aria: 'Show Diagram',
+            mermaid_fullscreen_aria: 'Fullscreen',
+            mermaid_viewer_aria: 'Mermaid Fullscreen Preview',
+            mermaid_viewer_close_aria: 'Close Fullscreen Preview'
         },
 
         ja: {
@@ -634,7 +654,17 @@
             image_download: 'ダウンロード',
             image_copy: 'コピー',
             image_copied: 'コピー済み',
-            image_copy_failed: 'コピー失敗'
+            image_copy_failed: 'コピー失敗',
+
+            // ---- Mermaid ----
+            mermaid_view_code: 'コード',
+            mermaid_view_diagram: '図',
+            mermaid_fullscreen: '全画面',
+            mermaid_view_code_aria: 'コードを表示',
+            mermaid_view_diagram_aria: '図を表示',
+            mermaid_fullscreen_aria: '全画面',
+            mermaid_viewer_aria: 'Mermaid 全画面プレビュー',
+            mermaid_viewer_close_aria: '全画面プレビューを閉じる'
         }
     };
 

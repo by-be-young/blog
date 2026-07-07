@@ -247,12 +247,11 @@
    ------------------------------ */
 .blog-detail .article-content p {
     color: #222;
-    font-size: 1.13rem;
     margin: 0.7em 0;
     line-height: 2.2;
     font-family: 'Times New Roman', 'KaiTi', '楷体', STKaiti, serif;
     margin: 1em 0 1em 0;
-    font-size: 1.08rem;
+    font-size: 1.18rem;
     color: #444;
     line-height: 2.1;
 }
@@ -277,7 +276,7 @@
 .blog-detail .article-content ol li {
     margin-bottom: 0.35em;
     font-family: 'Times New Roman', 'KaiTi', '楷体', STKaiti, serif;
-    font-size: 1.08rem;
+    font-size: 1.18rem;
     line-height: 2.1;
 }
 
@@ -1284,4 +1283,29 @@ body.mermaid-viewer-open {
     .post-nav-title {
         font-size: 0.92rem;
     }
+}
+
+/* ------------------------------
+   19. 沉浸式阅读加大字号
+   ------------------------------ */
+
+/* 沉浸式阅读模式 - 加大所有文本 */
+.blog-detail-page.immersive-reading-active .article-content p,
+.blog-detail-page.immersive-reading-active .article-content li,
+.blog-detail-page.immersive-reading-active .article-content blockquote,
+.blog-detail-page.immersive-reading-active .article-content h4 {
+    font-size: 1.5rem;
+    line-height: 2.4;
+}
+
+.blog-detail-page.immersive-reading-active .article-content h1 {
+    font-size: 2.8rem;
+}
+
+.blog-detail-page.immersive-reading-active .article-content h2 {
+    font-size: 2.2rem;
+}
+
+.blog-detail-page.immersive-reading-active .article-content h3 {
+    font-size: 1.8rem;
 }

@@ -152,7 +152,7 @@ body.blog-detail-page.immersive-reading-active::after {
 .blog-detail-page .article-content blockquote {
     position: relative;
     border: none;
-    background: linear-gradient(90deg, rgba(255, 225, 120, 0.22) 0%, rgba(255, 249, 220, 0.80) 50%, rgba(255, 225, 120, 0.22) 100%);
+    background: #fffbe6;
     color: var(--detail-text);
     padding: 14px 18px;
     margin: 1.2em 0;
@@ -289,15 +289,4 @@ body.blog-detail-page.immersive-reading-active::after {
 .blog-detail-page .blog-detail .tag {
     color: #18313a;
     font-weight: 600;
-}
-
-/* ------------------------------
-   2. TOC 相关（主题覆盖，非组件实现）
-   ------------------------------ */
-.blog-detail-page .toc-h1>a {
-    color: #00acff;
-}
-
-.blog-detail-page .toc-h2>a {
-    color: #13d18a;
 }
