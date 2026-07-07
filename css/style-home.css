@@ -1,7 +1,10 @@
 /* ==================================================
-   SECTION: 基础变量 & 全局样式
+   SECTION: 首页专属样式
+   包含：英雄区域、内容区布局、博客卡片、推荐/最近更新、
+   公告横幅、页脚、涟漪效果等
    ================================================== */
 
+/* ========== 1. 首页专属变量 ========== */
 :root {
     --webfont-name: '仓耳今楷01';
     --primary-color: #7bc7ff;
@@ -47,78 +50,6 @@
     --home-border: rgba(0, 0, 0, 0.08);
     --home-welcome-bg-opacity: 0.9;
 }
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-::selection {
-    background: var(--selection-bg-color);
-    color: var(--selection-text-color);
-}
-
-::-moz-selection {
-    background: var(--selection-bg-color);
-    color: var(--selection-text-color);
-}
-
-@font-face {
-    font-family: '仓耳今楷01';
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-    src: local('仓耳今楷01'),
-        url('../fonts/仓耳今楷01-W04.ttf') format('truetype');
-}
-
-body {
-    font-family: '仓耳今楷01', 'CangErJinKai01', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    line-height: 1.6;
-    color: #333;
-    background-color: #f8f9fa;
-}
-
-
-/* ==================================================
-   SECTION: 页面过渡 & 无障碍偏好
-   ================================================== */
-
-body.page-transition-enter {
-    opacity: 0;
-    will-change: opacity;
-}
-
-body.page-transition-enter.page-transition-ready {
-    opacity: 1;
-    transition: opacity 0.32s ease;
-}
-
-body.page-transition-leaving {
-    opacity: 0;
-    transition: opacity 0.22s ease;
-    pointer-events: none;
-    will-change: opacity;
-}
-
-@media (prefers-reduced-motion: reduce) {
-
-    body.page-transition-enter,
-    body.page-transition-enter.page-transition-ready,
-    body.page-transition-leaving {
-        opacity: 1;
-        transition: none;
-        pointer-events: auto;
-    }
-
-    .navbar::after {
-        animation: none !important;
-        opacity: 0 !important;
-        transform: scaleX(0) !important;
-    }
-}
-
 
 /* ==================================================
    SECTION: 英雄区域 (Hero)
@@ -294,12 +225,6 @@ body.page-transition-leaving {
         radial-gradient(circle at 12% 12%, rgba(255, 255, 255, 0.2), transparent 42%),
         radial-gradient(circle at 86% 20%, rgba(255, 255, 255, 0.14), transparent 38%),
         linear-gradient(120deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.1));
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 40px 20px;
 }
 
 .content-wrapper {
@@ -673,14 +598,16 @@ body.page-transition-leaving {
 /* 博客类型标签 */
 .blog-type {
     display: inline-block;
-    margin-left: 10px;
-    padding-left: 10px;
+    margin-left: 0;
+    padding-left: 0;
     border-left: 1px solid rgba(0, 0, 0, 0.06);
-    color: inherit;
-    font-size: inherit;
-    font-weight: inherit;
+    color: #FFB6C1;
+    font-size: 1.3em;
+    font-weight: 500;
     font-style: italic;
     opacity: 0.95;
+    -webkit-text-stroke: 0.01px #c29898;
+    text-shadow: 0.4px 0.4px 0 #fff, -0.4px 0.4px 0 #fff, 0.4px -0.4px 0 #fff, -0.4px -0.4px 0 #fff;
 }
 
 .blog-type-overlay {
@@ -688,19 +615,6 @@ body.page-transition-leaving {
     top: 10px;
     left: 25px;
     z-index: 2;
-}
-
-/* 首页样式覆盖（直接使用 .blog-type） */
-.blog-type {
-    font-style: normal;
-    color: #FFB6C1;
-    border: none;
-    margin-left: 0;
-    padding-left: 0;
-    font-size: 1.3em;
-    font-weight: 500;
-    -webkit-text-stroke: 0.01px #c29898;
-    text-shadow: 0.4px 0.4px 0 #fff, -0.4px 0.4px 0 #fff, 0.4px -0.4px 0 #fff, -0.4px -0.4px 0 #fff;
 }
 
 
@@ -1263,63 +1177,8 @@ body.page-transition-leaving {
 
 
 /* ==================================================
-   SECTION: 浮动控件 (Floating Controls)
+   SECTION: 返回顶部按钮
    ================================================== */
-
-#floating-controls {
-    position: fixed;
-    right: 32px;
-    bottom: 32px;
-    z-index: 1001;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    flex-direction: column;
-}
-
-.floating-btn {
-    border: none;
-    cursor: pointer;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 10px 22px rgba(44, 62, 80, 0.14);
-    color: #fff;
-    background: linear-gradient(135deg, rgba(0, 172, 255, 1), rgba(72, 219, 187, 0.98), rgba(255, 110, 155, 0.98));
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
-}
-
-.floating-btn svg {
-    width: 20px;
-    height: 20px;
-    display: block;
-}
-
-.floating-btn:active {
-    transform: translateY(1px);
-}
-
-.sub-btn {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    padding: 0;
-    background: linear-gradient(135deg, rgba(0, 172, 255, 1), rgba(72, 219, 187, 0.98), rgba(255, 110, 155, 0.98));
-    color: #fff;
-    box-shadow: 0 10px 22px rgba(44, 62, 80, 0.14);
-    transform: translateX(8px);
-    opacity: 0;
-    transition: transform 0.18s ease, opacity 0.18s ease;
-    display: none;
-}
-
-.sub-btn.is-visible {
-    opacity: 1;
-    transform: translateX(0);
-}
 
 #back-to-top {
     position: relative !important;
@@ -1545,6 +1404,7 @@ body.offcanvas-open {
     touch-action: none;
 }
 
+
 /* ==================================================
    SECTION: 页脚 (Footer)
    ================================================== */
@@ -1632,6 +1492,7 @@ body.offcanvas-open {
     gap: 24px;
     flex-wrap: wrap;
 }
+
 
 /* ==================================================
    SECTION: 页脚响应式
