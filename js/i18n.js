@@ -206,6 +206,8 @@
             home_recommended_blogs: '推荐博客',
             home_category_learning: '学习',
             home_category_entertainment: '娱乐',
+            home_placeholder_title: '更多内容准备中…',
+            home_placeholder_subtitle: '敬请期待',
 
             // ---- 页脚 ----
             total_words: '总字数',
@@ -424,6 +426,8 @@
             home_recommended_blogs: 'Recommended Blogs',
             home_category_learning: 'Study',
             home_category_entertainment: 'Fun',
+            home_placeholder_title: 'More coming soon…',
+            home_placeholder_subtitle: 'Stay tuned',
 
             // ---- Footer ----
             total_words: 'Total Characters',
@@ -642,6 +646,8 @@
             home_recommended_blogs: 'おすすめブログ',
             home_category_learning: '学習',
             home_category_entertainment: '娯楽',
+            home_placeholder_title: '準備中…',
+            home_placeholder_subtitle: 'お楽しみに',
 
             // ---- フッター ----
             total_words: '総文字数',

@@ -787,6 +787,32 @@
     }
 
     /**
+     * 创建占位卡片（当推荐博客数量为奇数时填充网格空白）
+     */
+    function createPlaceholderCard() {
+        const card = document.createElement('div');
+        card.className = 'blog-card-placeholder';
+        card.setAttribute('aria-hidden', 'true');
+        card.innerHTML = `
+            <div class="placeholder-content">
+                <div class="placeholder-icon">✦</div>
+                <div class="placeholder-title" data-i18n="home_placeholder_title">更多内容准备中…</div>
+                <div class="placeholder-subtitle" data-i18n="home_placeholder_subtitle">敬请期待</div>
+                <div class="placeholder-dots">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+        `;
+        // 应用国际化
+        try {
+            if (window.siteI18n?.applyTo) window.siteI18n.applyTo(card);
+        } catch (error) {
+            console.error('[placeholder] 应用国际化失败:', error);
+        }
+        return card;
+    }
+
+    /**
      * 初始化博客网格
      */
     function initBlogGrid() {
@@ -810,6 +836,12 @@
         recommendedBlogs.forEach((blog) => {
             blogGrid.appendChild(createBlogCard(blog));
         });
+
+        // 两列布局下，奇数个推荐博客时补充占位卡片
+        if (recommendedBlogs.length % 2 !== 0) {
+            const placeholder = createPlaceholderCard();
+            blogGrid.appendChild(placeholder);
+        }
 
         // 查看更多按钮
         initViewMore(all.length, recommendedBlogs.length);
