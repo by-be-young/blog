@@ -548,7 +548,7 @@
     font-size: 1.02rem;
     border-radius: 0;
     background: none;
-    color: #18313a;
+    color: #563a00;
     border: none;
     padding: 0;
     box-shadow: none;
@@ -562,6 +562,7 @@
     border-radius: 0;
     padding: 0;
     box-shadow: none;
+    font-family: 'Comic Mono', 'Comic Sans MS', 'Comic Neue', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 @media (max-width: 720px) {

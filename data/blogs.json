@@ -1,5 +1,23 @@
 [
     {
+        "id": 3982506533,
+        "title": "干员分类学与干员特质",
+        "excerpt": "新手向干员分类与特质教程",
+        "date": "2026-07-21",
+        "image": "assets/images/blog_bg.png",
+        "tags": [
+            "明日方舟",
+            "新手入门"
+        ],
+        "category": "娱乐",
+        "type": "纸上行舟",
+        "series": null,
+        "order": null,
+        "chapter": null,
+        "contentFile": "blogs/明日方舟/新手入门/干员分类学与干员特质.md",
+        "recommended": false
+    },
+    {
         "id": 3296026673,
         "title": "二上考试情况总结",
         "excerpt": "大二下学期各门较为重要的课程的考试情况，包括范围、注意事项以及本届的难度等",
@@ -16,8 +34,7 @@
         "order": null,
         "chapter": null,
         "contentFile": "blogs/二下/二下总结/考试总结/二上考试情况总结.md",
-        "recommended": false,
-        "lastEditedDate": "2026-07-07"
+        "recommended": false
     },
     {
         "id": 24465226,
@@ -435,7 +452,8 @@
         "order": 0,
         "chapter": "2-理论",
         "contentFile": "blogs/二下/操作系统/概述/操作系统概述.md",
-        "recommended": false
+        "recommended": false,
+        "lastEditedDate": "2026-07-21"
     },
     {
         "id": 2460752249,
@@ -568,7 +586,8 @@
         "order": 4,
         "chapter": "3-实验",
         "contentFile": "blogs/二下/操作系统/系统调用/系统调用-MOS实验.md",
-        "recommended": true
+        "recommended": true,
+        "lastEditedDate": "2026-07-21"
     },
     {
         "id": 650786542,

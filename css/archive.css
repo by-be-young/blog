@@ -239,7 +239,7 @@
 .archive-timeline .timeline-title {
     font-size: 1.45rem;
     font-weight: 800;
-    color: #222;
+    color: #ff5f8a;
     margin: 0 0 6px 0;
     line-height: 1.15;
     overflow: hidden;
@@ -1071,10 +1071,6 @@
 
 .archive-page .archive-timeline .timeline-date {
     color: rgba(85, 200, 255, 0.95);
-}
-
-.archive-page .archive-timeline .timeline-title {
-    color: #ff5f8a;
 }
 
 .archive-page .archive-timeline .timeline-excerpt {

@@ -38,7 +38,7 @@ int syscall_env_destroy(u_int envid) {
 
 再来看 `msyscall` 函数的定义（`user/lib/syscall_wrap.S`）：
 
-```asm
+```assembly
 // Exercise 4.1
 LEAF(msyscall)
 	syscall
